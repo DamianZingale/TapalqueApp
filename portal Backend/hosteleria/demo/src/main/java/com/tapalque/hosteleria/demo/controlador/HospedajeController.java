@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -55,43 +56,54 @@ public class HospedajeController {
         return ResponseEntity.ok(new HospedajeDTO(guardado));
     }
 
-    
     // 🔄 Actualizar hospedaje existente
-@PutMapping("/{id}")
-public ResponseEntity<HospedajeDTO> actualizarHospedaje(
-        @PathVariable Long id,
-        @Valid @RequestBody HospedajeRequestDTO dto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<HospedajeDTO> actualizarHospedaje(
+            @PathVariable Long id,
+            @Valid @RequestBody HospedajeRequestDTO dto) {
 
-    Optional<Hospedaje> existente = hospedajeService.obtenerPorId(id);
-    if (existente.isEmpty()) {
-        return ResponseEntity.notFound().build();
+        Optional<Hospedaje> existente = hospedajeService.obtenerPorId(id);
+        if (existente.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Hospedaje hospedaje = existente.get();
+
+        // Actualizá los campos
+        hospedaje.setTitulo(dto.getTitulo());
+        hospedaje.setDescription(dto.getDescription());
+        hospedaje.setUbicacion(dto.getUbicacion());
+        hospedaje.setGoogleMapsUrl(dto.getGoogleMapsUrl());
+        hospedaje.setNumWhatsapp(dto.getNumWhatsapp());
+        hospedaje.setTipoHospedaje(dto.getTipoHospedaje());
+
+        // Limpiar y actualizar las imágenes
+        hospedaje.getImagenes().clear();
+        if (dto.getImagenes() != null) {
+            List<HospedajeImagen> nuevasImagenes = dto.getImagenes().stream().map(url -> {
+                HospedajeImagen img = new HospedajeImagen();
+                img.setImagenUrl(url);
+                img.setHospedaje(hospedaje);
+                return img;
+            }).collect(Collectors.toList());
+            hospedaje.getImagenes().addAll(nuevasImagenes);
+        }
+
+        Hospedaje actualizado = hospedajeService.guardar(hospedaje);
+        return ResponseEntity.ok(new HospedajeDTO(actualizado));
     }
 
-    Hospedaje hospedaje = existente.get();
+    // 🔹 Eliminar hospedaje por ID
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminarHospedaje(@PathVariable Long id) {
+        Optional<Hospedaje> existente = hospedajeService.obtenerPorId(id);
+        if (existente.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
 
-    // Actualizá los campos
-    hospedaje.setTitulo(dto.getTitulo());
-    hospedaje.setDescription(dto.getDescription());
-    hospedaje.setUbicacion(dto.getUbicacion());
-    hospedaje.setGoogleMapsUrl(dto.getGoogleMapsUrl());
-    hospedaje.setNumWhatsapp(dto.getNumWhatsapp());
-    hospedaje.setTipoHospedaje(dto.getTipoHospedaje());
-
-    // Limpiar y actualizar las imágenes
-    hospedaje.getImagenes().clear();
-    if (dto.getImagenes() != null) {
-        List<HospedajeImagen> nuevasImagenes = dto.getImagenes().stream().map(url -> {
-            HospedajeImagen img = new HospedajeImagen();
-            img.setImagenUrl(url);
-            img.setHospedaje(hospedaje);
-            return img;
-        }).collect(Collectors.toList());
-        hospedaje.getImagenes().addAll(nuevasImagenes);
+        hospedajeService.eliminarPorId(id);
+        return ResponseEntity.noContent().build(); // 204
     }
-
-    Hospedaje actualizado = hospedajeService.guardar(hospedaje);
-    return ResponseEntity.ok(new HospedajeDTO(actualizado));
-}
 
     // Método para mapear de DTO a Entidad
     private Hospedaje mapToEntity(HospedajeRequestDTO dto) {
