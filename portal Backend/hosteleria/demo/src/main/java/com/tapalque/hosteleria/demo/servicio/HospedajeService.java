@@ -27,4 +27,7 @@ public class HospedajeService {
         return hospedajeRepository.save(hospedaje);
     }
 
+    public void eliminarPorId(Long id) {
+        hospedajeRepository.deleteById(id);
+    }
 }
