@@ -36,17 +36,48 @@
 <body>
     <div class="layout">
         <header class="layout__header">
-            <img class="header__logo" src="/portalFrontend/assets/img/Logo/TapalqueGo.png" alt="Logo de TapalqueGo">
+            <a href="/portalFrontend/index.html"><img class="header__logo" src="/portalFrontend/assets/img/Logo/TapalqueGo.png" alt="Logo de TapalqueGo"></a>
                 <div class="header__description">
                     <a href="#" class="description__ancor">Hoteleria y Hospedajes</a>
                     <a href="#" class="description__ancor">Gastronomía</a>
                     <a href="#" class="description__ancor">Turismo y actividades</a>
                     <a href="#" class="description__ancor">Servicios Locales</a>
                 </div>
-            <button class="header__btn"><i class="fa-regular fa-circle-user"></i></button>
+            <a class="header__btn"><i class="fa-regular fa-circle-user"></i></a>
         </header>
-        <section class="layout__section">
+        <main class="layout__main">
 
+        <aside class="layout__aside">
+            <form class="aside__form">
+                <h3 class="form__title">Filtrar por</h3>
+
+
+                <legend class="form__legend">Tipo de hospedaje</legend>
+                <div class="legend__option">
+                <label><input type="checkbox" name="tipo" value="hotel"> Hotel</label>
+                </div>
+                <div class="legend__option">
+                <label><input type="checkbox" name="tipo" value="hospedaje"> Hospedaje</label>
+                </div>
+                <div class="legend__option">
+                <label><input type="checkbox" name="tipo" value="camping"> Camping</label>
+                </div>
+
+                <legend class="form__legend">Puntuación mínima</legend>
+                <select name="puntuacion" class="form__select">
+                    <option value="">Cualquiera</option>
+                    <option value="1">1 totora o más</option>
+                    <option value="2">2 o más</option>
+                    <option value="3">3 o más</option>
+                    <option value="4">4 o más</option>
+                </select>
+
+
+                <button type="submit" class="form__btn">Aplicar filtros</button>
+            </form>
+        </aside>
+        
+        <section class="layout__section">
             <ul class="layout__unorden">
                 <li class="unorden__list">
                 <div class="list__view">
@@ -162,33 +193,9 @@
                 </li>
             </ul>
         </section>
+    
 
-        <aside class="layout__aside">
-            <form class="aside__form">
-                <h3 class="form__title">Filtrar por</h3>
-
-                <fieldset class="form__group">
-                <legend>Tipo de hospedaje</legend>
-                <label><input type="checkbox" name="tipo" value="hotel"> Hotel</label>
-                <label><input type="checkbox" name="tipo" value="hospedaje"> Hospedaje</label>
-                <label><input type="checkbox" name="tipo" value="camping"> Camping</label>
-                </fieldset>
-
-                <fieldset class="form__group">
-                <legend>Puntuación mínima</legend>
-                <select name="puntuacion" class="form__select">
-                    <option value="">Cualquiera</option>
-                    <option value="1">1 totora o más</option>
-                    <option value="2">2 o más</option>
-                    <option value="3">3 o más</option>
-                    <option value="4">4 o más</option>
-                </select>
-                </fieldset>
-
-                <button type="submit" class="form__btn">Aplicar filtros</button>
-            </form>
-        </aside>
-
+        </main>
         <footer class="layout__footer">
             <div class="footer__info">
                 <p class="info__parrafo">© 2025 TapalquéGo - Una producción de DNScode</p>
