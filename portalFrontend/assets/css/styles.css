@@ -119,11 +119,13 @@ body{
 
 .layout__section{
     display: flex;
-    flex-wrap: column wrap;
-    width: 75rem;
+    flex-direction: column;
+    width: 100rem;
+    margin: 0 auto;
 }
 
 .layout__unorden{
+    
     display: flex;
     flex-direction: column;
     justify-content: space-between;
