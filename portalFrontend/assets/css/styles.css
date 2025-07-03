@@ -250,9 +250,3 @@ body{
     color: var(--colorLetras);
     margin-bottom: 1rem;
 }
-
-.legend__option{
-    display: flex;
-    flex-direction: row;
-    
-}
