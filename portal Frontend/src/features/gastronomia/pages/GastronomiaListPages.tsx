@@ -1,4 +1,5 @@
 import { Card } from "../../../shared/components/Card";
+import { SECCION_TYPE } from "../../../shared/constants/constSecciones";
 
 export default function GastronomiaListPage() {
     return (
@@ -8,8 +9,9 @@ export default function GastronomiaListPage() {
                 <Card
                     id="cordoba-123"
                     titulo="Hospedaje en Córdoba"
-                    imagenUrl="https://ejemplo.com/img/cordoba.jpg" />
-
+                    imagenUrl="https://ejemplo.com/img/cordoba.jpg" 
+                    tipo= {SECCION_TYPE.GASTRONOMIA}
+                    />
             </div>
         </div>
     );
