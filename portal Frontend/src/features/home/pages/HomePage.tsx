@@ -1,5 +1,11 @@
+import { CardGridResponsive } from "../components/CardsResponsives"
+import { CardTermas } from "../components/CardTermas"
+
 export const HomePage = () => {
   return (
-    <h1>Página principal</h1>
+    <>
+    <CardTermas/>
+    <CardGridResponsive/>
+    </>
   )
 }
