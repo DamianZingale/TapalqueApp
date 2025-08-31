@@ -1,6 +1,7 @@
-import { useParams } from "react-router-dom";
-
 export default function TermasDetailPage() {
-    const { id } = useParams();
-    return <h1>Detalle de termas {id}</h1>;
+    return (
+        <div className="container">
+            <h1 className="text-center my-4">Bienvenido a Termas Tapalqué</h1>
+        </div>
+    );
 }
