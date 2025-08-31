@@ -1,11 +1,26 @@
+import { useEffect, useState } from "react";
 import { Container, Nav, Navbar } from "react-bootstrap";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 export default function NavBar() {
+    const [expanded, setExpanded] = useState(false);
+    const location = useLocation();
+
+    // Cierra el menú cuando cambia la ruta
+    useEffect(() => {
+        setExpanded(false);
+    }, [location]);
     return (
-        <Navbar bg="dark" variant="dark" expand="lg" sticky="top">
+
+        <Navbar
+            bg="dark"
+            variant="dark"
+            expand="lg"
+            sticky="top"
+            expanded={expanded}
+            onToggle={() => setExpanded(!expanded)}>
             <Container>
-                <Navbar.Brand as={Link} to="/">
+                <Navbar.Brand as={Link} to="/" onClick={() => setExpanded(false)}>
                     Tapalqué App
                 </Navbar.Brand>
                 <Navbar.Toggle aria-controls="main-navbar" />
