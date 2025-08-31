@@ -6,16 +6,15 @@ export const CardGridResponsive = () => {
         { titulo: "Gastronomia", imagenUrl: "https://media.istockphoto.com/id/1350197620/es/foto/comida-espa%C3%B1ola.jpg?s=612x612&w=0&k=20&c=xuhPNhV56luoGi61mDiFMk1Syp_LZ6WJIkcTuI5Et9U=" , destino: "/gastronomia" },
         { titulo: "Hospedajes", imagenUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS-XaKNy61DeD4q2ft5nl4Gs3q88NYnubCksxa0WMCFrtUoG7aM-p1QcoPQA770S_c2Kds&usqp=CAU" , destino: "/hospedaje" },
         { titulo: "Servicios", imagenUrl: "https://media.istockphoto.com/id/513445601/es/foto/grupo-multi%C3%A9tnico-diversas-personas-con-diferentes-puestos-de-trabajo.jpg?s=612x612&w=0&k=20&c=3QV_HokhvMlIRDmxHI7SRe2C3MW-MosPbMzNpKcN1zM=" , destino: "/servicios" },
-        { titulo: "Espacios Publicos", imagenUrl: "https://termastapalque.com.ar/wp-content/uploads/2023/09/088.webp" , destino: "/lugaresPublicos" },
+        { titulo: "Espacios Publicos", imagenUrl: "https://termastapalque.com.ar/wp-content/uploads/2023/09/088.webp" , destino: "/espublicos" },
     ];
 
     return (
-        <div className="container">
             <div className="row justify-content-center g-4 ">
                 {cards.map((card, index) => (
                     <div
                         key={index}
-                        className="col-12 col-sm-6 col-md-5 col-lg-4"
+                        className="col-12 col-sm-6 col-md-5 col-lg-4 "
                     >
                         <CardSecciones
                             titulo={card.titulo}
@@ -25,6 +24,5 @@ export const CardGridResponsive = () => {
                     </div>
                 ))}
             </div>
-        </div>
     );
 };
