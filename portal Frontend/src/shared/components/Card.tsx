@@ -1,4 +1,4 @@
-import type { CardProps } from "../types/ICardProps"
+import type { CardProps } from "../types/ui/ICardProps"
 
 export const Card: React.FC<CardProps> = ({ id, titulo, direccion_local, imagenUrl, tipo }) => {
     return (
