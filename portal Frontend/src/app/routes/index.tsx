@@ -1,4 +1,4 @@
-import { createBrowserRouter, Navigate, ServerRouter } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 
 // Importá las páginas que quieras usar en cada ruta
 import MainLayout from "../../shared/layouts/MainLayouts";
@@ -9,6 +9,8 @@ import HospedajeRoutes from "../../features/hospedaje/routes";
 import EsPublicosRoutes from "../../features/espacios publicos/routes";
 import ServiciosRoutes from "../../features/servicios/routes";
 import TermasRoutes from "../../features/termas/routes";
+import LoginPage from "../../features/LoginRegister/pages/LoginPage";
+import RegisterPage from "../../features/LoginRegister/pages/RegisterPage";
 
 export const router = createBrowserRouter([
     {
@@ -26,4 +28,7 @@ export const router = createBrowserRouter([
             { path: "*", element: <Navigate to="/" /> },
         ],
     },
+    // Rutas fuera del layout principal
+    { path: "/login", element: <LoginPage /> },
+    { path: "/register", element: <RegisterPage /> },
 ]);
