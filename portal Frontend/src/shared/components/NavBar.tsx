@@ -30,6 +30,13 @@ export default function NavBar() {
                         <Nav.Link as={Link} to="/gastronomia">Gastronomía</Nav.Link>
                         <Nav.Link as={Link} to="/hospedaje">Hospedajes</Nav.Link>
                         <Nav.Link as={Link} to="/comercio">Comercios</Nav.Link>
+                        <Nav.Link
+                            as={Link}
+                            to="/login"
+                            className="border border-light rounded-3 px-3 text-white"
+                        >
+                            Iniciar Sesión
+                        </Nav.Link>
                     </Nav>
                 </Navbar.Collapse>
             </Container>
