@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Card } from "../../../shared/components/Card";
+import { Loading } from "../../../shared/components/Loading";
 
 
 interface LocalGastronomicoDTO {
@@ -8,7 +9,7 @@ interface LocalGastronomicoDTO {
   direccion_local: string;
   url_mapa: string;
   estado?: boolean;
- 
+
 }
 
 
@@ -32,7 +33,7 @@ export default function GastronomiaListPage() {
   }, []);
 
   if (loading) {
-    return <p className="text-center">Cargando locales...</p>;
+    return <Loading text= "Cargando locales..."/>
   }
 
   return (
@@ -42,11 +43,11 @@ export default function GastronomiaListPage() {
         {locales.length > 0 ? (
           locales.map((local) => (
             <Card
-                  key={local.id_local}
-                  id={local.id_local.toString()}
-                  titulo={local.nombre_local}
-                  direccion_local={local.direccion_local}
-                  imagenUrl="https://via.placeholder.com/300x200.png?text=Local+Gastronomico" tipo={"comercio"}            />
+              key={local.id_local}
+              id={local.id_local.toString()}
+              titulo={local.nombre_local}
+              direccion_local={local.direccion_local}
+              imagenUrl="https://via.placeholder.com/300x200.png?text=Local+Gastronomico" tipo={"comercio"} />
 
           ))
         ) : (
