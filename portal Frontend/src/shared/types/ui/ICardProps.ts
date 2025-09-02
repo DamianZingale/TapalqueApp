@@ -1,4 +1,4 @@
-import { type SECCION_TYPE } from "../constants/constSecciones";
+import { type SECCION_TYPE } from "../../constants/constSecciones";
 
 export interface CardProps {
     id: string;
