@@ -11,7 +11,7 @@ import jakarta.persistence.ManyToOne;
 
 
 @Entity
-public class Resenias {
+public class Review {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -23,11 +23,11 @@ public class Resenias {
 
     @ManyToOne
     @JoinColumn(name = "pkLocal", referencedColumnName = "Id_local", nullable=false)
-    private LocalGastronomico reseniaLocal;
+    private Restaurant reseniaLocal;
 
-    public Resenias(){};
+    public Review(){};
 
-    public Resenias(String comentario, int puntaje, LocalDate fecha, LocalGastronomico reseniaLocal) {
+    public Review(String comentario, int puntaje, LocalDate fecha, Restaurant reseniaLocal) {
         
         this.comentario = comentario;
         this.puntaje = puntaje;
@@ -67,11 +67,11 @@ public class Resenias {
         this.fecha = fecha;
     }
 
-    public LocalGastronomico getReseniaLocal() {
+    public Restaurant getReseniaLocal() {
         return reseniaLocal;
     }
 
-    public void setReseniaLocal(LocalGastronomico reseniaLocal) {
+    public void setReseniaLocal(Restaurant reseniaLocal) {
         this.reseniaLocal = reseniaLocal;
     }
 

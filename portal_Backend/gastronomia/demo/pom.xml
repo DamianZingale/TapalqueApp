@@ -67,6 +67,8 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+
+		
 	</dependencies>
 
 	<build>
@@ -74,6 +76,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
+				
 			</plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>

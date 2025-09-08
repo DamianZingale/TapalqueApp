@@ -5,34 +5,35 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.tapalque.gastronomia.demo.Entity.LocalGastronomico;
+import com.tapalque.gastronomia.demo.Entity.Restaurant;
 import com.tapalque.gastronomia.demo.Repository.LocalRepositoryInterface;
 
 import jakarta.persistence.EntityNotFoundException;
 
 @Service
-public class LocalGastronomicoService implements I_localGastronomicoService {
+public class RestaurantService implements I_RestaurantService {
 
     @Autowired
     private LocalRepositoryInterface localGastronomicoRepository;
 
     @Override
-    public void addLocalGastronomico(LocalGastronomico localGastronomico) {
-        if (localGastronomico.getNombreLocal() == null || localGastronomico.getNombreLocal().isBlank()) {
+    public void addLocalGastronomico(Restaurant localGastronomico) {
+        if (localGastronomico.getName() == null || localGastronomico
+        .getName().isBlank()) {
             throw new IllegalArgumentException("El nombre del local no puede estar vacío");
         }
         localGastronomicoRepository.save(localGastronomico);
     }
 
     @Override
-    public LocalGastronomico getLocalGastronomicoById(Long id) {
+    public Restaurant getLocalGastronomicoById(Long id) {
         return localGastronomicoRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("No se encontró el local con id " + id));
     }
 
     @Override
-    public List<LocalGastronomico> getAllLocalGastronomicos() {
-        List<LocalGastronomico> locales = localGastronomicoRepository.findAll();
+    public List<Restaurant> getAllLocalGastronomicos() {
+        List<Restaurant> locales = localGastronomicoRepository.findAll();
         if (locales.isEmpty()) {
             throw new EntityNotFoundException("No hay locales gastronómicos registrados");
         }
@@ -40,9 +41,9 @@ public class LocalGastronomicoService implements I_localGastronomicoService {
     }
 
     @Override
-    public void updateLocalGastronomico(LocalGastronomico localGastronomico) {
-        if (!localGastronomicoRepository.existsById(localGastronomico.getId_local())) {
-            throw new EntityNotFoundException("No existe el local con id " + localGastronomico.getId_local());
+    public void updateLocalGastronomico(Restaurant localGastronomico) {
+        if (!localGastronomicoRepository.existsById(localGastronomico.getIdRestaurant())) {
+            throw new EntityNotFoundException("No existe el local con id " + localGastronomico.getIdRestaurant());
         }
         localGastronomicoRepository.save(localGastronomico);
     }
@@ -61,10 +62,12 @@ public class LocalGastronomicoService implements I_localGastronomicoService {
     }*/
 
     @Override
-    public List<LocalGastronomico> findByRubro(String rubro) {
+    public List<Restaurant> findBycategory(String category) {
         // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'findByRubro'");
+        throw new UnsupportedOperationException("Unimplemented method 'findBycategory'");
     }
+    
+   
 
    
 
