@@ -1,4 +1,4 @@
-import type { HorariosProps } from "../types/ui/ComercioProps"
+import type { HorariosProps } from "../types/ui/PropsGeneralesVerMas"
 
 export const Horarios : React.FC<HorariosProps>= ({horarios}) => {
     return (
