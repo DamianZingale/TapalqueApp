@@ -4,6 +4,7 @@ import { Carrusel } from "../../../shared/components/Carrusel";
 import { Description } from "../../../shared/components/Description";
 import { GMaps } from "../../../shared/components/GMaps";
 import { Horarios } from "../../../shared/components/Horarios";
+import { WhatsAppButton } from "../../../shared/components/WhatsAppButton";
 
 export default function ComercioDetailPage() {
     const { id } = useParams();
@@ -15,7 +16,8 @@ export default function ComercioDetailPage() {
         ],
         descripcion: "Tapalqué es un lugar único.\nAquí podés disfrutar de la naturaleza,\nlos deportes y la tranquilidad.\n\nIdeal para escapadas de fin de semana.",
         urlMaps: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d200.82788778722778!2d-60.025677620491216!3d-36.35481487873783!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9595dd3c51921f95%3A0xe615d6e6f38db6f9!2sMinimercado%20Yesi!5e0!3m2!1ses-419!2sar!4v1757358563713!5m2!1ses-419!2sar",
-        horarios: "Lunes a Sabados\nde 08:00hs a 20:00hs."
+        horarios: "Lunes a Sabados\nde 08:00hs a 20:00hs.",
+        num: "2281683888"
     }
 
     return (
@@ -25,6 +27,7 @@ export default function ComercioDetailPage() {
             <Description description={data.descripcion}/>
             <Horarios horarios={data.horarios}/>
             <GMaps url={data.urlMaps}/>
+            <WhatsAppButton num={data.num}/>
         </div>
     )
 }
