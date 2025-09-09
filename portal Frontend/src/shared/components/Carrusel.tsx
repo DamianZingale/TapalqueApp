@@ -1,5 +1,5 @@
 import React from "react";
-import type { CarruselProps } from "../types/ui/PropsGeneralesVerMas";
+import type { CarruselProps } from "../types/PropsGeneralesVerMas";
 
 export const Carrusel: React.FC<CarruselProps> = ({ images }) => {
     const carouselId = "carouselTapalque"; // puede ser dinámico si querés
