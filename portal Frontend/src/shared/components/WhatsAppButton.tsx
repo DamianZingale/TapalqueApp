@@ -1,5 +1,5 @@
 import { FaWhatsapp } from "react-icons/fa";
-import type { WhatsAppButtonProps } from "../types/ui/PropsGeneralesVerMas";
+import type { WhatsAppButtonProps } from "../types/PropsGeneralesVerMas";
 
 export const WhatsAppButton: React.FC<WhatsAppButtonProps> = ({ num }) => {
     const url = `https://wa.me/549${num}`;
