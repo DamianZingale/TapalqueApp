@@ -9,71 +9,68 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 
-
 @Entity
 public class Review {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id_resenia;
+    private Long idReview;
 
-    private String comentario;
-    private int puntaje; //del 1 al 5
-    private LocalDate fecha;
+    private String comment;
+    private int rating; // from 1 to 5
+    private LocalDate date;
 
     @ManyToOne
-    @JoinColumn(name = "pkLocal", referencedColumnName = "Id_local", nullable=false)
-    private Restaurant reseniaLocal;
+    @JoinColumn(name = "pkRestaurant", referencedColumnName = "idRestaurant", nullable = false)
+    private Restaurant restaurant;
 
-    public Review(){};
-
-    public Review(String comentario, int puntaje, LocalDate fecha, Restaurant reseniaLocal) {
-        
-        this.comentario = comentario;
-        this.puntaje = puntaje;
-        this.fecha = fecha;
-        this.reseniaLocal = reseniaLocal;
+    public Review() {
     }
 
-    public Long getId_resenia() {
-        return id_resenia;
+    public Review(String comment, int rating, LocalDate date, Restaurant restaurant) {
+        this.comment = comment;
+        this.rating = rating;
+        this.date = date;
+        this.restaurant = restaurant;
     }
 
-    public void setId_resenia(Long id_resenia) {
-        this.id_resenia = id_resenia;
+    public Long getIdReview() {
+        return idReview;
     }
 
-    public String getComentario() {
-        return comentario;
+    public void setIdReview(Long idReview) {
+        this.idReview = idReview;
     }
 
-    public void setComentario(String comentario) {
-        this.comentario = comentario;
+    public String getComment() {
+        return comment;
     }
 
-    public int getPuntaje() {
-        return puntaje;
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 
-    public void setPuntaje(int puntaje) {
-        this.puntaje = puntaje;
+    public int getRating() {
+        return rating;
     }
 
-    public LocalDate getFecha() {
-        return fecha;
+    public void setRating(int rating) {
+        this.rating = rating;
     }
 
-    public void setFecha(LocalDate fecha) {
-        this.fecha = fecha;
+    public LocalDate getDate() {
+        return date;
     }
 
-    public Restaurant getReseniaLocal() {
-        return reseniaLocal;
+    public void setDate(LocalDate date) {
+        this.date = date;
     }
 
-    public void setReseniaLocal(Restaurant reseniaLocal) {
-        this.reseniaLocal = reseniaLocal;
+    public Restaurant getRestaurant() {
+        return restaurant;
     }
 
-    
+    public void setRestaurant(Restaurant restaurant) {
+        this.restaurant = restaurant;
+    }
 }

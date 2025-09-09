@@ -12,6 +12,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -49,8 +50,8 @@ public class Restaurant {
     private List<Category> categories;
 
     
-    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Dish> dishes;
+    @OneToOne(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Menu menus;
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Schedule> schedules;
@@ -66,11 +67,11 @@ public class Restaurant {
     
     public Restaurant(){}
   
-    public Restaurant(String address, List<Category> categories, Boolean delivery, List<Dish> dishes, String email, Long idRestaurant, List<RestaurantImage> images, String name, String phone, List<PhoneNumber> phoneNumbers, List<Schedule> schedules) {
+    public Restaurant(String address, List<Category> categories, Boolean delivery, Menu menu, String email, Long idRestaurant, List<RestaurantImage> images, String name, String phone, List<PhoneNumber> phoneNumbers, List<Schedule> schedules) {
         this.address = address;
         this.categories = categories;
         this.delivery = delivery;
-        this.dishes = dishes;
+        this.menus = menu;
         this.email = email;
         this.idRestaurant = idRestaurant;
         this.images = images;
@@ -112,9 +113,7 @@ public class Restaurant {
         this.categories = categories;
     }
 
-    public void setDishes(List<Dish> dishes) {
-        this.dishes = dishes;
-    }
+    
 
     public void setSchedules(List<Schedule> schedules) {
         this.schedules = schedules;
@@ -152,8 +151,12 @@ public class Restaurant {
         return categories;
     }
 
-    public List<Dish> getDishes() {
-        return dishes;
+    public Menu getMenus() {
+        return menus;
+    }
+
+    public void setMenus(Menu menus) {
+        this.menus = menus;
     }
 
     public List<Schedule> getSchedules() {

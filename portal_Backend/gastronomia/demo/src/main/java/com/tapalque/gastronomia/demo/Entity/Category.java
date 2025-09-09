@@ -15,6 +15,16 @@ import jakarta.persistence.Table;
 
 public class Category {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long idCategory;
+
+    @Column(nullable = false, unique = true)
+    private String name;
+
+    public Category() {
+    }
+    
     public Category(Long idCategory, String name) {
         this.idCategory = idCategory;
         this.name = name;
@@ -36,13 +46,5 @@ public class Category {
         this.name = name;
     }
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idCategory;
-
-    @Column(nullable = false, unique = true)
-    private String name;
-
-    public Category() {
-    }
+    
 }

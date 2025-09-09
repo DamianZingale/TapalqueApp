@@ -55,7 +55,7 @@ public class RestaurantImage {
     private String imageUrl;
 
     @ManyToOne
-    @JoinColumn(name = "restaurant_id", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "restaurant_id", referencedColumnName = "idRestaurant", nullable = false)
     private Restaurant restaurant;
 
     

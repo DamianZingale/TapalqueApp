@@ -13,7 +13,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "ingredient")
-class Ingredient {
+public class Ingredient {
 
     public Ingredient() {
     }

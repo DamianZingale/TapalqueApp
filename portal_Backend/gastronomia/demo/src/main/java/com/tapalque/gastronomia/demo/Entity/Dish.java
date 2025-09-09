@@ -28,13 +28,13 @@ public class Dish {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idDish;
 
-    public Dish(Long idDish, String name, Double price, DishType type, Restaurant restaurant,
+    public Dish(Long idDish, String name, Double price, DishType type, Menu menu,
             List<Ingredient> ingredients) {
         this.idDish = idDish;
         this.name = name;
         this.price = price;
         this.type = type;
-        this.restaurant = restaurant;
+        this.menu = menu;
         this.ingredients = ingredients;
     }
 
@@ -49,8 +49,10 @@ public class Dish {
     private DishType type;  // FOOD or DRINK
 
     @ManyToOne
-    @JoinColumn(name = "idRestaurant", nullable = false)
-    private Restaurant restaurant;
+@JoinColumn(name = "idMenu", nullable = false)
+private Menu menu;
+
+
 
     @ManyToMany
     @JoinTable(
@@ -92,12 +94,12 @@ public class Dish {
         this.type = type;
     }
 
-    public Restaurant getRestaurant() {
-        return restaurant;
+    public Menu getMenu() {
+    return menu;
     }
 
-    public void setRestaurant(Restaurant restaurant) {
-        this.restaurant = restaurant;
+    public void setMenu(Menu menu) {
+    this.menu = menu;
     }
 
     public List<Ingredient> getIngredients() {
