@@ -1,4 +1,4 @@
-import type { TittleProps } from "../types/ui/PropsGeneralesVerMas"
+import type { TittleProps } from "../types/PropsGeneralesVerMas"
 
 export const Title : React.FC<TittleProps>= ({text}) => {
     return (

@@ -1,4 +1,4 @@
-import type { GMapsProps } from "../types/ui/PropsGeneralesVerMas"
+import type { GMapsProps } from "../types/PropsGeneralesVerMas"
 
 export const GMaps: React.FC<GMapsProps> = ({ url }) => {
     return (
