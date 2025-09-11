@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { type CurrentWeather, type DailyWeather, type WeatherResponse } from "../../../shared/types/ui/typesClima";
+import { type CurrentWeather, type DailyWeather, type WeatherResponse } from "../../../shared/types/typesClima";
 
 export const useWeather = () => {
     const [current, setCurrent] = useState<CurrentWeather | null>(null);
