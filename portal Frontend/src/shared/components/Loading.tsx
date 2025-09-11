@@ -1,4 +1,4 @@
-import { type LoadingProps } from "../types/ui/LoadingProps"
+import { type LoadingProps } from "../types/LoadingProps"
 
 export const Loading :React.FC<LoadingProps>= ({text}) => {
     return (
