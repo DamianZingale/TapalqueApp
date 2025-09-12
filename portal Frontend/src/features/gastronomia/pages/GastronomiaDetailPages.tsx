@@ -1,6 +1,13 @@
 import { useParams } from "react-router-dom";
+import { Info, InfoTest } from "../components/Info";
+
 
 export default function GastronomiaDetailPage() {
-    const { id } = useParams();
-    return <h1>Detalle de la gastronomia {id}</h1>;
+  const { id = "1" } = useParams();
+
+  return (
+    <div className="container my-4">
+      <InfoTest/>
+    </div>
+  );
 }
