@@ -1,36 +1,26 @@
-import React from 'react';
-import type { IRestaurantInfo } from '../types/IrestaurantInfo';
-import { WhatsAppButton } from '../../../shared/components/WhatsAppButton';
+
+import type { IRestaurantInfo } from "../types/IrestaurantInfo";
+import { ButtonComoLlegar } from "../../../shared/components/ButtonComoLlegar";
 
 
-const mockData: IRestaurantInfo = {
-  id: "1",
-  name: "Pizzería Giuseppe",
-  address: "Av 9 de Julio 500",
-  phone: "1234567890",
-  email: "giusseppe@gmail.com",
-  delivery: true,
-  imageUrl: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
-};
 
-export const InfoTest = () => (
-  <Info {...mockData} />
-);
-
+// --- Card del restaurante ---
 export const Info: React.FC<IRestaurantInfo> = ({
   name,
   address,
   phone,
   email,
   delivery,
-  imageUrl
+  imageUrl,
+  destination, 
 }) => {
-  return (
+  
+return (
     <div className="container my-4">
       <div className="card p-3">
         <div className="row align-items-center">
           
-          {/* Columna izquierda: datos */}
+          {/* Columna izquierda - datos*/}
           <div className="col-md-4">
             <h2>{name}</h2>
             <p>
@@ -41,7 +31,7 @@ export const Info: React.FC<IRestaurantInfo> = ({
             </p>
           </div>
 
-          {/* Columna central: imagen */}
+          {/* Columna central - imagen */}
           <div className="col-md-6 text-center">
             <img
               src={imageUrl}
@@ -51,19 +41,18 @@ export const Info: React.FC<IRestaurantInfo> = ({
             />
           </div>
 
-          {/* Columna derecha: botones*/}
-
-          <div className="col-md-2 d-flex flex-column gap-2">
-            <button type="button" className="btn btn-primary">
-              📍 Como Llegar
-            </button>
-            <button type="button" className="btn btn-secondary">
-              🍽 Ver Menú
-            </button>
-            <WhatsAppButton num={phone ?? ''} /> 
+          {/* Columna derecha - botones*/}
+          <div className="col-md-2 text-center">
+           <ButtonComoLlegar
+            destination={
+              destination?.lat && destination?.lng
+                ? { lat: String(destination.lat), lng: String(destination.lng) }
+                : { lat: "0", lng: "0" }}
+             
+              />
           </div>
         </div>
-      </div>
+      </div>  
     </div>
   );
 };
