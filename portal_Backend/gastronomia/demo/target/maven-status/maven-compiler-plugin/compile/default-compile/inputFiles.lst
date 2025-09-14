@@ -1,5 +1,5 @@
-/home/damian/TapalqueApp/portal_Backend/gastronomia/demo/src/main/java/com/tapalque/gastronomia/demo/Controller/LocalGastronomicoController.java
-/home/damian/TapalqueApp/portal_Backend/gastronomia/demo/src/main/java/com/tapalque/gastronomia/demo/DTO/RestaurantDTO.java
+/home/damian/TapalqueApp/portal_Backend/gastronomia/demo/src/main/java/com/tapalque/gastronomia/demo/Controller/RestaurantGastronomicoController.java
+/home/damian/TapalqueApp/portal_Backend/gastronomia/demo/src/main/java/com/tapalque/gastronomia/demo/DTO/BasicRestaurantDTO.java
 /home/damian/TapalqueApp/portal_Backend/gastronomia/demo/src/main/java/com/tapalque/gastronomia/demo/DemoApplication.java
 /home/damian/TapalqueApp/portal_Backend/gastronomia/demo/src/main/java/com/tapalque/gastronomia/demo/Entity/Category.java
 /home/damian/TapalqueApp/portal_Backend/gastronomia/demo/src/main/java/com/tapalque/gastronomia/demo/Entity/Dish.java
