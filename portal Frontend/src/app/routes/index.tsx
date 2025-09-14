@@ -11,6 +11,7 @@ import ServiciosRoutes from "../../features/servicios/routes";
 import TermasRoutes from "../../features/termas/routes";
 import LoginPage from "../../features/LoginRegister/pages/LoginPage";
 import RegisterPage from "../../features/LoginRegister/pages/RegisterPage";
+import PerfilRoutes from "../../features/perfil/routes";
 
 export const router = createBrowserRouter([
     {
@@ -24,6 +25,7 @@ export const router = createBrowserRouter([
             { path: "/hospedaje/*", element: <HospedajeRoutes /> },
             { path: "/servicios/*", element: < ServiciosRoutes/> },
             { path: "/espublicos/*", element: <EsPublicosRoutes /> },
+            { path: "/perfil/*", element: <PerfilRoutes /> },
             // Ruta comodín: si no existe redirige al inicio
             { path: "*", element: <Navigate to="/" /> },
         ],
