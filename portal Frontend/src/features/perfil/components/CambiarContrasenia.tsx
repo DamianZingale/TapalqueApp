@@ -13,10 +13,6 @@ export const CambiarContraseña = () => {
             alert("Las contraseñas nuevas no coinciden");
             return;
         }
-
-        console.log("Contraseña actual:", actual);
-        console.log("Nueva contraseña:", nueva);
-        // Acá iría la lógica para enviar al backend
     };
 
     return (
