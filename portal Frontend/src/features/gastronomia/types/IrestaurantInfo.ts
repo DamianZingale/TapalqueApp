@@ -7,4 +7,5 @@ export interface IRestaurantInfo {
   email?: string;
   delivery?: boolean;
   imageUrl?: string;
+  destination?: { lat: string; lng: string }; // Nueva propiedad para la dirección de destino
 }
