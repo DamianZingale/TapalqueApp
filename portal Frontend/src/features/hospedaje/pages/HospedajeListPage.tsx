@@ -9,9 +9,8 @@ export default function HospedajeListPage() {
                 <Card
                     id="cordoba-123"
                     titulo="Hospedaje en Córdoba"
-                    imagenUrl="https://ejemplo.com/img/cordoba.jpg" 
-                    tipo= {SECCION_TYPE.HOSPEDAJES}
-                    />
+                    imagenUrl="https://ejemplo.com/img/cordoba.jpg"
+                    tipo={SECCION_TYPE.HOSPEDAJES} direccion_local={""}                    />
             </div>
         </div>
     );
