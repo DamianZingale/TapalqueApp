@@ -2,6 +2,7 @@ import { useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { es } from "date-fns/locale";
+import { useNavigate, useParams } from "react-router-dom";
 
 const fechasDisponibles = [
     new Date(2025, 8, 2),  // 8 = septiembre (mes empieza en 0)
@@ -14,17 +15,29 @@ const fechasDisponibles = [
 ];
 
 export const Calendario = () => {
+    const { id } = useParams(); // ID del hospedaje
+    const navigate = useNavigate();
 
-    const [fechaSeleccionada, setFechaSeleccionada] = useState<Date | null>(null);
+    const handleChange = (date: Date | null) => {
+        if (!date) return; // evitás errores si el usuario borra la fecha
+        const esDisponible = fechasDisponibles.some(
+            (d) => d.toDateString() === date.toDateString()
+        );
+
+        if (!esDisponible) {
+            alert("No hay disponibilidad para la fecha seleccionada.");
+            return;
+        }
+        const iso = date.toISOString().split("T")[0];
+        navigate(`/hospedaje/${id}/reserva/${iso}`);
+    };
+
     return (
         <div className="p-4 bg-light rounded text-center">
             <DatePicker
-                selected={fechaSeleccionada}
-                onChange={(date) => setFechaSeleccionada(date)}
+                onChange={handleChange}
                 dayClassName={(date) =>
-                    fechasDisponibles.some(
-                        (d) => d.toDateString() === date.toDateString()
-                    )
+                    fechasDisponibles.some((d) => d.toDateString() === date.toDateString())
                         ? "bg-success text-white rounded-circle"
                         : ""
                 }
