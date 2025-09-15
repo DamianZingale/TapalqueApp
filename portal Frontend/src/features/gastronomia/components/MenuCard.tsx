@@ -1,18 +1,23 @@
 import React from 'react'
 import type { Imenu } from '../types/Imenu'
 import { Button, Card } from 'react-bootstrap';
-import { quantityMenuButtons} from './quantityMenuButtons';
+import { QuantityMenuButtons } from '../components/QuantityMenuButtons';
 
+export const MenuCard: React.FC<{ menu: Imenu[] }> = ({ menu }) => {
 
-export const menuCard = (
-     {id,
-     dish_name, 
-     price, 
-     ingredients, 
-     restrictions,
-     picture} :Imenu) => {
- 
-    const [menu, setmenu] = React.useState<Imenu[]>([])
+  const agregarPedido = (plato: Imenu) => {
+    console.log("Agregado:", plato);
+  };
+
+  const [cantidades, setCantidades] = React.useState<{ [key: number]: number }>({});
+
+  const aumentar = (id: number) => {
+    setCantidades((prev) => ({ ...prev, [id]: (prev[id] || 0) + 1 }));
+  };
+
+  const disminuir = (id: number) => {
+    setCantidades((prev) => ({ ...prev, [id]: Math.max((prev[id] || 0) - 1, 0) }));
+  };
 
   return (
     <div className="container my-4">
@@ -31,9 +36,12 @@ export const menuCard = (
                   <strong>Restricción:</strong> {plato.restrictions}
                 </Card.Text>
 
-                <div >
-                    <quantityMenuButtons />
-                </div>
+                <QuantityMenuButtons
+                  platoId={plato.id}
+                  cantidades={cantidades}
+                  aumentar={aumentar}
+                  disminuir={disminuir}
+                />
 
                 <Button variant="primary" onClick={() => agregarPedido(plato)}>
                   Agregar al pedido
@@ -45,4 +53,4 @@ export const menuCard = (
       </div>
     </div>
   );
-}
+};
