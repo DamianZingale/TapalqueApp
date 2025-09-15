@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import { Calendario } from "../components/calendario";
+import { Calendario } from "../components/Calendario";
 import { Title } from "../../../shared/components/Title";
 
 export default function HospedajeDetailPage() {
