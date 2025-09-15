@@ -1,6 +1,14 @@
 import { useParams } from "react-router-dom";
+import { Calendario } from "../components/calendario";
+import { Title } from "../../../shared/components/Title";
 
 export default function HospedajeDetailPage() {
     const { id } = useParams();
-    return <h1>Detalle del hospedaje {id}</h1>;
+    return (
+        <>
+            <Title text={`Detalle del hospedaje ${id}`} />
+            <Calendario />
+        </>
+    )
+
 }
