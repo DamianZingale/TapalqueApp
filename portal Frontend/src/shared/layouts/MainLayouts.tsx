@@ -4,12 +4,12 @@ import Footer from "../components/Footer";
 
 export default function MainLayout() {
     return (
-        <>
+        <div className="d-flex flex-column min-vh-100">
             <NavBar />
-            <main className="container mt-4">
+            <main className="container mt-4 flex-grow-1">
                 <Outlet />
             </main>
-            <Footer/>
-        </>
+            <Footer />
+        </div>
     );
 }
