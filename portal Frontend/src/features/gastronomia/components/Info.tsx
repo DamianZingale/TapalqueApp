@@ -50,6 +50,11 @@ return (
                 : { lat: "0", lng: "0" }}
              
               />
+              <div className="btn btn-primary" >
+                <button>
+                  Ver Menú
+                </button>
+                </div>
           </div>
         </div>
       </div>  
