@@ -1,10 +1,10 @@
-import { useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { es } from "date-fns/locale";
 import { useNavigate, useParams } from "react-router-dom";
 
 const fechasDisponibles = [
+    //Aca hay que ir a buscar al backend fechas disponibles del hospedaje
     new Date(2025, 8, 2),  // 8 = septiembre (mes empieza en 0)
     new Date(2025, 8, 5),
     new Date(2025, 8, 9),
@@ -19,7 +19,7 @@ export const Calendario = () => {
     const navigate = useNavigate();
 
     const handleChange = (date: Date | null) => {
-        if (!date) return; // evitás errores si el usuario borra la fecha
+        if (!date) return; // si el usuario borra la fecha
         const esDisponible = fechasDisponibles.some(
             (d) => d.toDateString() === date.toDateString()
         );
@@ -29,7 +29,12 @@ export const Calendario = () => {
             return;
         }
         const iso = date.toISOString().split("T")[0];
-        navigate(`/hospedaje/${id}/reserva/${iso}`);
+        navigate("/hospedaje/opciones", {
+            state: {
+                id: id,
+                fecha: iso
+            }
+        });
     };
 
     return (
