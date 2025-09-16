@@ -14,7 +14,7 @@ export const ButtonMercadoPago: React.FC<MercadoPagoButtonProps> = ({ preference
             style={{
                 display: "flex",
                 justifyContent: "center",
-                marginTop: "20px"
+                margin: "20px"
             }}
         >
             <button
