@@ -38,7 +38,7 @@ export const Calendario = () => {
     };
 
     return (
-        <div className="p-4 bg-light rounded text-center">
+        <div className="p-2 bg-light rounded text-center">
             <DatePicker
                 onChange={handleChange}
                 dayClassName={(date) =>
