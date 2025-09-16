@@ -1,9 +1,9 @@
-import type { TittleProps } from "../types/PropsGeneralesVerMas"
+import type { TitleProps } from "../types/PropsGeneralesVerMas"
 
-export const Title : React.FC<TittleProps>= ({text}) => {
+export const Title : React.FC<TitleProps>= ({text}) => {
     return (
-        <h2 className="text-center my-4">
+        <h1 className="text-center my-4">
             {text}
-        </h2>
+        </h1>
     )
 }

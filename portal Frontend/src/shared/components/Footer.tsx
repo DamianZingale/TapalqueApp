@@ -6,13 +6,9 @@ export default function Footer() {
     return (
         <footer 
             className="bg-dark text-light py-4"
-            style={{
-                position: 'fixed',
-                bottom: 0,
-                left: 0,
-                right: 0,
-                zIndex: 1030  // z-index alto para estar encima del botón WhatsApp
-            }}
+            
+
+            //aca hay que buscar una solucion si saco los styles el footer se va para arriba y si los dejo come parte del body
         >
             <Container>
                 <Row className="align-items-center">

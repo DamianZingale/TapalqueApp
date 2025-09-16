@@ -1,5 +1,6 @@
 import { Title } from "../../../shared/components/Title"
-import { Listado } from "../components/Listado"
+import { Listado } from "../../../shared/components/Listado"
+import { useNavigate } from "react-router-dom";
 
 const data = [{
     "id": "g1",
@@ -40,18 +41,24 @@ const data = [{
 ]
 
 export const MisPedidosPage = () => {
+    const navigate = useNavigate();
+
+    const handleVerPedido = (id: string) => {
+        navigate(`/opcion/${id}`); // o cualquier ruta que uses
+    };
+
     return (
-        <div className="container min-vh-100 d-flex flex-column mb-3">
+        <div className="container">
             <Title text="Mis Pedidos" />
             {data.map((data) => (
-                <div key={data.id} className="mb-3">
-                    <Listado
-                        id={data.id}
-                        estado={data.estado}
-                        titulo={data.titulo}
-                        fecha={data.fecha}
-                    />
-                </div>
+                <Listado
+                    id={data.id}
+                    encabezado={data.estado}
+                    titulo={data.titulo}
+                    pie={data.fecha}
+                    textButton="Ver pedido"
+                    handleButton={handleVerPedido}
+                />
             ))}
         </div>
     )
