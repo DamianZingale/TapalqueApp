@@ -4,7 +4,7 @@ import { Listado } from '../../../shared/components/Listado';
 
 export const HospedajeListsOptions = () => {
     const location = useLocation();
-    const { id, fecha } = location.state || {};
+    const { id, fechas } = location.state || {};
     const [opciones, setOpciones] = useState<any[]>([]);
 
     useEffect(() => {
@@ -31,7 +31,7 @@ export const HospedajeListsOptions = () => {
             },
         ];
         setOpciones(data);
-    }, [id, fecha]);
+    }, [id, fechas]);
 
     const navigate = useNavigate();
 
@@ -40,14 +40,14 @@ export const HospedajeListsOptions = () => {
             state: {
                 id: id ,
                 idOpcion: idOpcion,
-                fecha:fecha
+                fecha:fechas
             }
         });
     };
     return (
         <div className="p-4">
             <h3>Reserva para el hospedaje {id}</h3>
-            <p>Fecha seleccionada: {fecha}</p>
+            <p>Fecha seleccionada: {fechas}</p>
             {
                 opciones.map((opcion) => (
                     <Listado
