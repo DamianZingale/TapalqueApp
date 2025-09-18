@@ -6,6 +6,7 @@ import { GMaps } from "../../../shared/components/GMaps";
 import { Horarios } from "../../../shared/components/Horarios";
 import { WhatsAppButton } from "../../../shared/components/WhatsAppButton";
 import { comerciosMock } from './mocks/mockComercios';
+import { ButtonComoLlegar } from "../../../shared/components/ButtonComoLlegar";
 
 export default function ComercioDetailPage() {
     const { id } = useParams();
@@ -19,8 +20,18 @@ export default function ComercioDetailPage() {
         <Carrusel images={data.imagenes} />
         <Description description={data.descripcion} />
         <Horarios horarios={data.horarios} />
+        <ButtonComoLlegar
+            destination={
+            data.lat && data.lng
+                ? { lat: String(data.lat), lng: String(data.lng) }
+                : { lat: "0", lng: "0" }
+            }
+        />
         <GMaps url={data.urlMaps} />
         <WhatsAppButton num={data.num} />
+        <div className="text-center my-3">
+</div>
+
         </div>
     );
 }

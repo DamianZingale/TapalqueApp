@@ -8,6 +8,8 @@ export interface Comercio {
     num: string;
     imagenes: string[];
     urlMaps: string;
+    lat: number;
+    lng: number;
 }
 
 export const comerciosMock: Comercio[] = [ 
@@ -17,6 +19,8 @@ export const comerciosMock: Comercio[] = [
         imagenUrl: "https://i.pinimg.com/originals/0e/b3/bb/0eb3bb977428d9433ca07741706e83ae.jpg",
         descripcion: "Minimercado con productos de almacén, bebidas y artículos de limpieza.",
         direccion: "Av. Belgrano 123, Tapalqué",
+        lat: -36.354814,
+        lng: -60.025678,
         horarios: "Lunes a Sábados de 08:00 a 20:00hs",
         num: "2281683888",
         imagenes: [
@@ -31,6 +35,9 @@ export const comerciosMock: Comercio[] = [
         imagenUrl: "https://st2.depositphotos.com/1003697/8297/i/450/depositphotos_82978822-stock-photo-supermarket-store-with-vegetables.jpg",
         descripcion: "Kiosco con golosinas, bebidas frías y recargas virtuales.",
         direccion: "San Martín 456, Tapalqué",
+        lat: -36.354814,
+        lng: -60.025678,
+
         horarios: "Todos los días de 09:00 a 23:00hs",
         num: "2281555777",
         imagenes: [
@@ -45,6 +52,8 @@ export const comerciosMock: Comercio[] = [
         imagenUrl: "https://via.placeholder.com/400x200.png?text=Ferreteria",
         descripcion: "Todo para el hogar, herramientas, pinturas y materiales de construcción.",
         direccion: "Calle Mitre 789, Tapalqué",
+        lat: -36.354814,
+        lng: -60.025678,
         horarios: "Lunes a Viernes de 08:30 a 18:30hs",
         num: "2281444999",
         imagenes: [
@@ -59,6 +68,8 @@ export const comerciosMock: Comercio[] = [
         imagenUrl: "https://via.placeholder.com/400x200.png?text=Vinoteca+La+Abadía",
         descripcion: "Selección de vinos, licores y bebidas premium.",
         direccion: "Av. 9 de Julio 321, Tapalqué",
+        lat: -36.354814,
+        lng: -60.025678,
         horarios: "Lunes a Sábados de 10:00 a 21:00hs",
         num: "2281333444",
         imagenes: [
@@ -73,6 +84,9 @@ export const comerciosMock: Comercio[] = [
         imagenUrl: "https://via.placeholder.com/400x200.png?text=Calzados+Soulier",
         descripcion: "Zapatería con calzado urbano, deportivo y escolar.",
         direccion: "Calle Rivadavia 210, Tapalqué",
+        lat: -36.354814,
+        lng: -60.025678,
+
         horarios: "Lunes a Sábados de 09:30 a 19:30hs",
         num: "2281222333",
         imagenes: [
@@ -87,6 +101,9 @@ export const comerciosMock: Comercio[] = [
         imagenUrl: "https://via.placeholder.com/400x200.png?text=Panadería+Fulco",
         descripcion: "Panadería tradicional con facturas, pan casero y tortas.",
         direccion: "Calle Sarmiento 98, Tapalqué",
+        lat: -36.354814,
+        lng: -60.025678,
+
         horarios: "Todos los días de 07:00 a 20:00hs",
         num: "2281999888",
         imagenes: [
