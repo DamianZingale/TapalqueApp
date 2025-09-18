@@ -1,4 +1,4 @@
-import type { ButtonComoLlegarProps } from "../types/MapProps";
+import type { ButtonComoLlegarProps } from "../types/ButtonComoLlegarProps";
 
 
 

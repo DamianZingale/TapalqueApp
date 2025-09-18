@@ -1,25 +1,28 @@
-
 import type { IRestaurantInfo } from "../types/IrestaurantInfo";
 import { ButtonComoLlegar } from "../../../shared/components/ButtonComoLlegar";
 
+interface InfoProps extends IRestaurantInfo {
+  onVerMenu: () => void;
+  showMenu: boolean; 
+}
 
 
 // --- Card del restaurante ---
-export const Info: React.FC<IRestaurantInfo> = ({
+export const Info: React.FC<InfoProps> = ({
   name,
   address,
   phone,
   email,
   delivery,
   imageUrl,
-  destination, 
+  destination,
+  onVerMenu,
+  showMenu
 }) => {
-  
-return (
+  return (
     <div className="container my-4">
       <div className="card p-3">
         <div className="row align-items-center">
-          
           {/* Columna izquierda - datos*/}
           <div className="col-md-4">
             <h2>{name}</h2>
@@ -43,21 +46,19 @@ return (
 
           {/* Columna derecha - botones*/}
           <div className="col-md-2 text-center">
-           <ButtonComoLlegar
-            destination={
-              destination?.lat && destination?.lng
-                ? { lat: String(destination.lat), lng: String(destination.lng) }
-                : { lat: "0", lng: "0" }}
-             
-              />
-              <div className="btn btn-primary" >
-                <button>
-                  Ver Menú
-                </button>
-                </div>
+            <ButtonComoLlegar
+              destination={
+                destination?.lat && destination?.lng
+                  ? { lat: String(destination.lat), lng: String(destination.lng) }
+                  : { lat: "0", lng: "0" }
+              }
+            />
+            <button className="btn btn-primary mt-2" onClick={onVerMenu}>
+              {showMenu ? "Ocultar Menú" : "Ver Menú"}
+            </button>
           </div>
         </div>
-      </div>  
+      </div>
     </div>
   );
 };
