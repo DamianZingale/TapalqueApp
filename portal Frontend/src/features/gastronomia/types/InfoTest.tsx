@@ -13,4 +13,6 @@ export const mockData: IRestaurantInfo = {
   destination: { lat: "-36.357295", lng: "-60.025322" }, // strings
 };
 
-export const InfoTest = () => <Info {...mockData} />;
+export const InfoTest = () => <Info onVerMenu={function (): void {
+  throw new Error("Function not implemented.");
+} } showMenu={false} {...mockData} />;
