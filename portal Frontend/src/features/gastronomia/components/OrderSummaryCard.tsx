@@ -3,8 +3,12 @@ import type { Imenu } from "../types/Imenu";
 
 interface OrderSummaryProps {
   pedido: (Imenu & { cantidad: number })[];
-  setPedido: React.Dispatch<React.SetStateAction<(Imenu & { cantidad: number })[]>>;
+  setPedido: React.Dispatch<
+    React.SetStateAction<(Imenu & { cantidad: number })[]>
+  >;
   localDelivery: boolean;
+  onAceptar: () => void;   
+  onCancelar: () => void;  
 }
 
 export const OrderSummaryCard: React.FC<OrderSummaryProps> = ({ pedido, setPedido, localDelivery }) => {
