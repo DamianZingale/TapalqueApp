@@ -1,98 +1,49 @@
-import React from "react";
-import type { Imenu } from "../types/Imenu";
+import { useState, type FC } from "react";
+import { Button, Form } from "react-bootstrap";
 
-interface OrderSummaryProps {
-  pedido: (Imenu & { cantidad: number })[];
-  setPedido: React.Dispatch<
-    React.SetStateAction<(Imenu & { cantidad: number })[]>
-  >;
-  localDelivery: boolean;
-  onAceptar: () => void;   
-  onCancelar: () => void;  
+import { ItemCounter } from "./ItemCounter";
+import type { PedidoItem } from "../types/Imenu";
+
+interface Props {
+  initialPedido: PedidoItem[];
+  onConfirm: (data: { items: PedidoItem[]; total: number; delivery: boolean }) => void;
+  onCancel: () => void;
 }
 
-export const OrderSummaryCard: React.FC<OrderSummaryProps> = ({ pedido, setPedido, localDelivery }) => {
+export const OrderSummaryCard: FC<Props> = ({ initialPedido, onConfirm, onCancel }) => {
+  const [pedido, setPedido] = useState(initialPedido);
+  const [delivery, setDelivery] = useState(false);
 
-  const aumentar = (id: number) => {
-    setPedido(prev =>
-      prev.map(item => (item.id === id ? { ...item, cantidad: item.cantidad + 1 } : item))
-    );
-  };
+  const handleQuantityChange = (id: number, cantidad: number) =>
+    setPedido((prev) => prev.map((i) => (i.id === id ? { ...i, cantidad } : i)));
 
-  const disminuir = (id: number) => {
-    setPedido(prev =>
-      prev.map(item =>
-        item.id === id ? { ...item, cantidad: Math.max(item.cantidad - 1, 0) } : item
-      )
-    );
-  };
-
-  if (!pedido.length) return null;
+  const subtotal = pedido.reduce((acc, i) => acc + i.price * i.cantidad, 0);
+  const total = subtotal + (delivery ? 500 : 0);
 
   return (
-    <div
-      style={{
-        border: "1px solid #dee2e6",
-        borderRadius: "6px",
-        padding: "16px",
-        marginTop: "16px",
-        backgroundColor: "#f8f9fa",
-      }}
-    >
-      <h4>Resumen de Pedido</h4>
-      {pedido.map(item => (
-        <div
-          key={item.id}
-          style={{ display: "flex", alignItems: "center", marginBottom: "8px" }}
-        >
-          {/* Imagen */}
-          <img
-            src={item.picture}
-            alt={item.dish_name}
-            style={{ width: "50px", height: "50px", objectFit: "cover", borderRadius: "4px" }}
-          />
-
-          {/* Info */}
-          <div style={{ flexGrow: 1, marginLeft: "12px" }}>
-            <strong>{item.dish_name}</strong> <br />
-            <small>${item.price.toFixed(2)} | {item.restrictions.join(", ") || "-"}</small>
-          </div>
-
-          {/* Botones de cantidad */}
-          <div style={{ display: "flex", alignItems: "center" }}>
-            <button
-              style={{
-                border: "1px solid #6c757d",
-                backgroundColor: "white",
-                color: "#6c757d",
-                padding: "2px 8px",
-                cursor: "pointer",
-              }}
-              onClick={() => disminuir(item.id)}
-            >
-              -
-            </button>
-            <span style={{ margin: "0 8px" }}>{item.cantidad}</span>
-            <button
-              style={{
-                border: "1px solid #6c757d",
-                backgroundColor: "white",
-                color: "#6c757d",
-                padding: "2px 8px",
-                cursor: "pointer",
-              }}
-              onClick={() => aumentar(item.id)}
-            >
-              +
-            </button>
-          </div>
-
-          {/* Delivery */}
-          {localDelivery && (
-            <input type="checkbox" checked readOnly style={{ marginLeft: "8px" }} title="Delivery" />
-          )}
+    <div className="p-3 border rounded bg-light">
+      <h5>Pedido final:</h5>
+      {pedido.map((i) => (
+        <div key={i.id} className="d-flex justify-content-between align-items-center mb-2">
+          <div>{i.dish_name} (${i.price.toFixed(2)})</div>
+          <ItemCounter quantity={i.cantidad} onChange={(q) => handleQuantityChange(i.id, q)} />
         </div>
       ))}
+
+      <Form.Check
+        type="checkbox"
+        label="Delivery ($500)"
+        checked={delivery}
+        onChange={(e) => setDelivery(e.target.checked)}
+        className="my-3"
+      />
+
+      <div className="mb-3"><strong>Total: ${total.toFixed(2)}</strong></div>
+
+      <div className="d-flex justify-content-end gap-2">
+        <Button variant="secondary" onClick={onCancel}>Cancelar</Button>
+        <Button variant="primary" onClick={() => onConfirm({ items: pedido, total, delivery })}>Aceptar</Button>
+      </div>
     </div>
   );
 };
