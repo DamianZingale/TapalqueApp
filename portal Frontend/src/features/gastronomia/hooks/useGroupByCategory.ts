@@ -1,4 +1,3 @@
-// src/hooks/useGroupByCategory.ts
 import { useMemo } from "react";
 import type { Imenu } from "../types/Imenu";
 
