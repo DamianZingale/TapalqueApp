@@ -1,4 +1,4 @@
-import type { Imenu } from "./Imenu";
+import type { Imenu } from "../types/Imenu";
 
 export const menuTest: Imenu[] = [
   {

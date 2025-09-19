@@ -5,5 +5,5 @@ export interface Imenu {
   ingredients: string[];
   picture: string;
   category: string;      // "Pizza", "Empanadas", "Bebidas"
-  restrictions: string[]; // ["Vegano", "Celiaco", "Sin Lactosa"]
+  restrictions: string[]; // "Vegano", "Celiaco", "Sin Lactosa"
 }

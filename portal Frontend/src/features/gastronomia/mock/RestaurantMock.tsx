@@ -1,5 +1,5 @@
 
-import { Info } from "../components/Info";
+import { Info } from "../components/RestaurantCard";
 import type { IRestaurantInfo } from "../types/IrestaurantInfo";
 
 export const mockData: IRestaurantInfo = {
