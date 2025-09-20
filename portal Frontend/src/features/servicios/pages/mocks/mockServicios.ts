@@ -1,3 +1,19 @@
+export interface Servicio {
+    id: string;
+    titulo: string;
+    imagenUrl: string;
+    descripcion: string;
+    direccion: string;
+    horarios: string;
+    num: string;
+    imagenes: string[];
+    facebook?: string;
+    instagram?: string;
+    twitter?: string;
+    tiktok?: string;
+}
+
+
 export const serviciosMock: Servicio[] = [
     {
         id: "servicio-1",
@@ -11,7 +27,7 @@ export const serviciosMock: Servicio[] = [
         "https://via.placeholder.com/400x200.png?text=Grifería",
         "https://via.placeholder.com/400x200.png?text=Sanitarios"
         ],
-        urlMaps: "https://www.google.com/maps/embed?..."
+        facebook: "https://plomero.net.ar/buenos-aires/tapalque.html"
     },
     {
         id: "servicio-2",
@@ -25,7 +41,7 @@ export const serviciosMock: Servicio[] = [
         "https://via.placeholder.com/400x200.png?text=Tablero",
         "https://via.placeholder.com/400x200.png?text=Cableado"
         ],
-        urlMaps: "https://www.google.com/maps/embed?..."
+        facebook: "https://www.facebook.com/ElectricistaELRAYO/photos/"
     },
     {
         id: "servicio-3",
@@ -39,7 +55,8 @@ export const serviciosMock: Servicio[] = [
         "https://via.placeholder.com/400x200.png?text=Jardín",
         "https://via.placeholder.com/400x200.png?text=Poda"
         ],
-        urlMaps: "https://www.google.com/maps/embed?..."
+        instagram: "https://www.instagram.com/verdevida.jardineria",
+        facebook: "https://www.facebook.com/103397735647477/posts/119143930739524/"
     },
     {
         id: "servicio-4",
@@ -53,7 +70,7 @@ export const serviciosMock: Servicio[] = [
         "https://via.placeholder.com/400x200.png?text=Masajes",
         "https://via.placeholder.com/400x200.png?text=Relax"
         ],
-        urlMaps: "https://www.google.com/maps/embed?..."
+        instagram: "https://www.instagram.com/tapalque.enamora"
     },
     {
         id: "servicio-5",
@@ -66,7 +83,6 @@ export const serviciosMock: Servicio[] = [
         imagenes: [
         "https://via.placeholder.com/400x200.png?text=Motor",
         "https://via.placeholder.com/400x200.png?text=Suspensión"
-        ],
-        urlMaps: "https://www.google.com/maps/embed?..."
+        ]
     }
 ];
