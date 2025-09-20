@@ -8,9 +8,12 @@ export interface Termas {
     servicios: string[];
     imagenes: string[];
     urlMaps: string;
-    lat: number;
-    lng: number;
     urlWeb?: string;
+    num: string;
+    facebook?: string;
+    instagram?: string;
+    twitter?: string;
+    tiktok?: string;
 }
 
 export const termasMock: Termas[] = [
@@ -35,9 +38,10 @@ export const termasMock: Termas[] = [
         "https://media.urgente24.com/p/0ddc5ff4c5061f0fd86e729a66ef63eb/adjuntos/319/imagenes/002/890/0002890817/1jpg.jpg",
         "https://www.tiempoar.com.ar/wp-content/uploads/2023/07/tapalque-complejo-termal-paseo-comercial-2-scaled.jpg"
         ],
-        urlMaps: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d200.82788778722778!2d-60.027677620491216!3d-36.35681487873783!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9595dd3c51921f95%3A0xe615d6e6f38db6f9!2sTermas+Tapalqué!5e0!3m2!1ses-419!2sar!4v1757358563713!5m2!1ses-419!2sar",
-        lat: -36.356814,
-        lng: -60.027678,
+        urlMaps: `https://www.google.com/maps?q=${-36.348803},${-60.007554}`,
         urlWeb: "https://www.tapalque.gob.ar/termas",
+        num: "2281656585",
+        facebook: "https://www.facebook.com/municipalidadtapalque",
+        instagram: "https://www.instagram.com/tapalque.enamora"
     }
 ];
