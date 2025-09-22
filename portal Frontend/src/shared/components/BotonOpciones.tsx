@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import type { IBotonOpciones } from "../../../shared/types/PropsPerfil"
+import type { IBotonOpciones } from '../types/PropsPerfil';
 
 export const BotonOpciones: React.FC<IBotonOpciones> = ({texto, redireccion}) => {
   const navigate = useNavigate();

@@ -1,4 +1,4 @@
-export interface TittleProps {
+export interface TitleProps {
     text: string;
 }
 

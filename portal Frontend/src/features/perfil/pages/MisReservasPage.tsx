@@ -1,5 +1,5 @@
 import { Title } from "../../../shared/components/Title"
-import { Listado } from "../components/Listado"
+import { Listado } from "../../../shared/components/Listado"
 const data = [
     {
         "id": "1",

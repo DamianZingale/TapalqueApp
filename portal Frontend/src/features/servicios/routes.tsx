@@ -5,8 +5,8 @@ import ServiciosDetailPage from "./pages/ServiciosDetailPages";
 export default function ServiciosRoutes() {
     return (
         <Routes>
-            <Route path="/" element={<ServiciosListPage />} />
-            <Route path=":id" element={<ServiciosDetailPage />} />
+        <Route path="/" element={<ServiciosListPage />} />
+        <Route path=":id" element={<ServiciosDetailPage />} />
         </Routes>
     );
 }

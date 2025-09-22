@@ -12,9 +12,11 @@ export interface PropsNotificacion {
 
 export interface PropsListado {
     id: string;
-    estado: string;
+    encabezado: string;
     titulo: string;
-    fecha: string;
+    pie: string;
+    textButton: string;
+    handleButton:(id:string) => void;
 }
 
 export interface PropsDatosPersonales {
