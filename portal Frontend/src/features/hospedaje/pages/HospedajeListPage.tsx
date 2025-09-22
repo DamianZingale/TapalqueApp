@@ -7,11 +7,11 @@ export default function HospedajeListPage() {
             <h1 className="text-center my-4">Hospedajes</h1>
             <div className="row justify-content-center">
                 <Card
-                    id="cordoba-123"
+                    id="123"
                     titulo="Hospedaje en Córdoba"
-                    imagenUrl="https://ejemplo.com/img/cordoba.jpg" 
-                    tipo= {SECCION_TYPE.HOSPEDAJES}
-                    />
+                    imagenUrl="https://ejemplo.com/img/cordoba.jpg"
+                    tipo={SECCION_TYPE.HOSPEDAJES} 
+                    direccion_local={""}/>
             </div>
         </div>
     );
