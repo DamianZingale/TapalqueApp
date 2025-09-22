@@ -6,13 +6,14 @@ import type { PedidoItem } from "../types/Imenu";
 
 interface Props {
   initialPedido: PedidoItem[];
-  onConfirm: (data: { items: PedidoItem[]; total: number; delivery: boolean }) => void;
+  onConfirm: (data: { items: PedidoItem[]; total: number; delivery: boolean; address: string }) => void;
   onCancel: () => void;
 }
 
 export const OrderSummaryCard: FC<Props> = ({ initialPedido, onConfirm, onCancel }) => {
   const [pedido, setPedido] = useState(initialPedido);
   const [delivery, setDelivery] = useState(false);
+  const [address, setAddress] = useState("");
 
   const handleQuantityChange = (id: number, cantidad: number) =>
     setPedido((prev) => prev.map((i) => (i.id === id ? { ...i, cantidad } : i)));
@@ -37,12 +38,31 @@ export const OrderSummaryCard: FC<Props> = ({ initialPedido, onConfirm, onCancel
         onChange={(e) => setDelivery(e.target.checked)}
         className="my-3"
       />
+      {delivery && (
+        <div>
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Dirección de entrega"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+          />
+        </div>
+      )}
 
       <div className="mb-3"><strong>Total: ${total.toFixed(2)}</strong></div>
 
       <div className="d-flex justify-content-end gap-2">
         <Button variant="secondary" onClick={onCancel}>Cancelar</Button>
-        <Button variant="primary" onClick={() => onConfirm({ items: pedido, total, delivery })}>Aceptar</Button>
+          <Button
+          variant="primary"
+          onClick={() =>
+            onConfirm({ items: pedido, total, delivery, address })
+          }
+          disabled={delivery && !address.trim()} // evita confirmar sin dirección
+        >
+          Aceptar
+        </Button>
       </div>
     </div>
   );

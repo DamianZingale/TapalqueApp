@@ -6,6 +6,7 @@ export interface Imenu {
   picture: string;
   category: string;      // "Pizza", "Empanadas", "Bebidas"
   restrictions: string[]; // "Vegano", "Celiaco", "Sin Lactosa"
+  address?: string;
 }
 
 export interface PedidoItem extends Imenu {
