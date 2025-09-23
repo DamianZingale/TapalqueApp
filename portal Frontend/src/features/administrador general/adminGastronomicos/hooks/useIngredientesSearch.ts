@@ -1,38 +1,29 @@
 import { useEffect, useState } from "react";
 
-//mock DB
+//mock
 const ingredientesDB = [
-  "Tomate",
-  "Lechuga",
-  "Cebolla",
-  "Queso",
-  "Pollo",
-  "Carne",
-  "Pescado",
-  "Arroz",
-  "Frijoles",
-  "Aceitunas",
-  "Champiñones",
-  "Pimiento",
-  "Ajo",
-  "Cilantro",
-  "Albahaca",
+  "Tomate", "Lechuga", "Cebolla", "Queso", "Pollo",
+  "Carne", "Pescado", "Arroz", "Frijoles", "Aceitunas",
+  "Champiñones", "Pimiento", "Ajo", "Cilantro", "Albahaca",
 ];
 
-export const useIngredientesSearch = (query: string) => {
-  const [result, setResult] = useState<string | null>(null);
+export const useIngredientSearch = (searchTerm: string, selected: string[]) => {
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [highlightIndex, setHighlightIndex] = useState<number>(-1);
 
   useEffect(() => {
-    if (!query) {
-      setResult(null);
-      return;
+    if (searchTerm) {
+      const results = ingredientesDB.filter((i) =>
+        i.toLowerCase().startsWith(searchTerm.toLowerCase()) && 
+        !selected.includes(i)
+      );
+      setSuggestions(results);
+      setHighlightIndex(results.length > 0 ? 0 : -1);
+    } else {
+      setSuggestions([]);
+      setHighlightIndex(-1);
     }
+  }, [searchTerm, selected]);
 
-    const encontrado = ingredientesDB.find(
-      (i) => i.toLowerCase() === query.toLowerCase()
-    );
-    setResult(encontrado || null);
-  }, [query]);
-
-  return result;
+  return { suggestions, highlightIndex, setHighlightIndex };
 };
