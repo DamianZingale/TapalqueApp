@@ -12,6 +12,7 @@ import TermasRoutes from "../../features/termas/routes";
 import LoginPage from "../../features/LoginRegister/pages/LoginPage";
 import RegisterPage from "../../features/LoginRegister/pages/RegisterPage";
 import PerfilRoutes from "../../features/perfil/routes";
+import HospedajeAdmin from "../../features/hospedajeAdmin/routes"
 
 export const router = createBrowserRouter([
     {
@@ -26,6 +27,7 @@ export const router = createBrowserRouter([
             { path: "/servicios/*", element: < ServiciosRoutes/> },
             { path: "/espublicos/*", element: <EsPublicosRoutes /> },
             { path: "/perfil/*", element: <PerfilRoutes /> },
+            
             // Ruta comodín: si no existe redirige al inicio
             { path: "*", element: <Navigate to="/" /> },
         ],
@@ -33,4 +35,5 @@ export const router = createBrowserRouter([
     // Rutas fuera del layout principal
     { path: "/login", element: <LoginPage /> },
     { path: "/register", element: <RegisterPage /> },
+    { path: "/admin/*", element: <HospedajeAdmin/> },
 ]);
