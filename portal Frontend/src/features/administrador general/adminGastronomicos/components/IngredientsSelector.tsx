@@ -1,47 +1,34 @@
-import { useEffect, useState } from "react";
-import { Badge, Button, Form, ListGroup, Row, Col } from "react-bootstrap";
+import React, { useState } from "react";
+import { Col, Row } from "react-bootstrap";
+import { useDebounce } from "../hooks/useDebounce";
+import { useIngredientSearch } from "../hooks/useIngredientesSearch";
 
-// mock de ingredientes
-const ingredientesDB = [
-  "Tomate", "Lechuga", "Cebolla", "Queso", "Pollo",
-  "Carne", "Pescado", "Arroz", "Frijoles", "Aceitunas",
-  "Champiñones", "Pimiento", "Ajo", "Cilantro", "Albahaca",
-];
+import { SuggestionsList } from "./SuggestionList";
+import { AddButton } from "./AddButton";
+import { SelectedIngredients } from "./SelectedIngredients";
+import { AddAllButton } from "./AddAllButton";
+import { SearchInput } from "./SearchInput";
 
-export const IngredientesSelector = ({ onAgregar }: { onAgregar: (ingredientes: string[]) => void }) => {
+
+interface IngredientesSelectorProps {
+  onAgregar: (ingredientes: string[]) => void;
+}
+
+export const IngredientesSelector = ({ onAgregar }: IngredientesSelectorProps) => {
   const [input, setInput] = useState("");
-  const [debouncedValue, setDebouncedValue] = useState("");
   const [selected, setSelected] = useState<string[]>([]);
-  const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [highlightIndex, setHighlightIndex] = useState<number>(-1);
-
-  // debounce de medio segundo
-  useEffect(() => {
-    const timer = setTimeout(() => setDebouncedValue(input), 500);
-    return () => clearTimeout(timer);
-  }, [input]);
-
-  // buscar coincidencias
-  useEffect(() => {
-    if (debouncedValue) {
-      const results = ingredientesDB.filter((i) =>
-        i.toLowerCase().includes(debouncedValue.toLowerCase())
-      );
-      setSuggestions(results);
-      setHighlightIndex(results.length > 0 ? 0 : -1);
-    } else {
-      setSuggestions([]);
-      setHighlightIndex(-1);
-    }
-  }, [debouncedValue]);
+  
+  const debouncedValue = useDebounce(input, 500);
+  const { suggestions, highlightIndex, setHighlightIndex } = useIngredientSearch(
+    debouncedValue, 
+    selected
+  );
 
   const agregarIngrediente = (ingrediente?: string) => {
     const toAdd = ingrediente || input;
     if (toAdd && !selected.includes(toAdd)) {
       setSelected([...selected, toAdd]);
       setInput("");
-      setSuggestions([]);
-      setHighlightIndex(-1);
     }
   };
 
@@ -85,84 +72,34 @@ export const IngredientesSelector = ({ onAgregar }: { onAgregar: (ingredientes: 
 
   return (
     <>
-      {/* 🔹 Input + botón "Agregar" en la misma fila */}
       <Row className="align-items-center mb-3">
-        <Col xs={9} style={{ position: "relative" }}>
-          <Form.Control
-            type="text"
-            placeholder="Buscar ingrediente"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-          />
-          {/* Dropdown de sugerencias */}
-          {suggestions.length > 0 && (
-            <ListGroup
-              style={{
-                position: "absolute",
-                top: "100%",
-                left: 0,
-                right: 0,
-                zIndex: 1000,
-                maxHeight: "200px",
-                overflowY: "auto",
-              }}
-            >
-              {suggestions.map((s, idx) => (
-                <ListGroup.Item
-                  action
-                  key={s}
-                  active={idx === highlightIndex}
-                  onClick={() => agregarIngrediente(s)}
-                >
-                  {s}
-                </ListGroup.Item>
-              ))}
-            </ListGroup>
-          )}
-        </Col>
-        <Col xs={3}>
-          <Button
-            variant="primary"
-            className="w-100"
-            onClick={() => agregarIngrediente()}
-            disabled={!debouncedValue}
-          >
-            Agregar
-          </Button>
-        </Col>
-      </Row>
+  <Col xs={9} style={{ position: "relative" }}>
+    <SearchInput
+      value={input}
+      onChange={setInput}
+      onKeyDown={handleKeyDown}
+    />
+    <SuggestionsList
+      suggestions={suggestions}
+      highlightIndex={highlightIndex}
+      onSelect={agregarIngrediente}
+    />
+  </Col>
+  <AddButton
+    onClick={() => agregarIngrediente()}
+    disabled={!debouncedValue}
+  />
+</Row>
 
-      {/* 🔹 Tags seleccionados grandes */}
-      <div className="mt-3 d-flex flex-wrap gap-2">
-        {selected.map((i) => (
-          <Badge
-            pill
-            bg="secondary"
-            key={i}
-            style={{
-              cursor: "pointer",
-              fontSize: "1rem",
-              padding: "0.6em 0.9em",
-            }}
-            onClick={() => eliminarIngrediente(i)}
-          >
-            {i} ×
-          </Badge>
-        ))}
-      </div>
+      <SelectedIngredients
+        ingredients={selected}
+        onRemove={eliminarIngrediente}
+      />
 
-      {/* 🔹 Botón agregar todos */}
-      <div className="mt-3">
-        <Button
-          variant="success"
-          size="sm"
-          onClick={agregarTodos}
-          disabled={selected.length === 0}
-        >
-          Agregar todos
-        </Button>
-      </div>
+      <AddAllButton
+        onClick={agregarTodos}
+        disabled={selected.length === 0}
+      />
     </>
   );
 };
