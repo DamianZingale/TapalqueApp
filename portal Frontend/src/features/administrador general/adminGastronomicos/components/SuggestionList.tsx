@@ -13,7 +13,7 @@ export const SuggestionsList = ({
   highlightIndex, 
   onSelect 
 }: SuggestionsListProps) => {
-  console.log("SuggestionsList render:", { suggestions, highlightIndex }); // DEBUG
+  console.log("SuggestionsList render:", { suggestions, highlightIndex }); 
   
   if (suggestions.length === 0) return null;
 
