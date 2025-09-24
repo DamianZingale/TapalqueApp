@@ -6,3 +6,7 @@ export interface PropsListadoLocales {
     onSelect?: (id: string) => void;
     selectedId?: string | null;
 }
+
+export interface BotonesAccionProps {
+    estado: string;
+}
