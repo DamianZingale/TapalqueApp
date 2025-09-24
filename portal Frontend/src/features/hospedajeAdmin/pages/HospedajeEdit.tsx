@@ -169,7 +169,7 @@ export const HospedajeEdit = () => {
                 {op.foto && (
                 <img
                     src={op.foto}
-                    alt={op.titulo}
+                    alt=""
                     className="w-10 h-10 object-cover rounded"
                 />
                 )}
