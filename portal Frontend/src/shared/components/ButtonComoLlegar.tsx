@@ -1,4 +1,4 @@
-import type { ButtonComoLlegarProps } from "../types/MapProps";
+import type { ButtonComoLlegarProps } from "../types/ButtonComoLlegarProps";
 
 
 
@@ -23,7 +23,7 @@ export const ButtonComoLlegar: React.FC<ButtonComoLlegarProps> = ({ destination 
   };
 
   return (
-    <button className="btn btn-primary" onClick={handleClick}>
+    <button className="btn btn-secondary" onClick={handleClick}>
       📍 Cómo Llegar
     </button>
   );

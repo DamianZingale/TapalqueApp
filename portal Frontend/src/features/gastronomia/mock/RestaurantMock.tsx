@@ -1,5 +1,5 @@
 
-import { Info } from "../components/Info";
+import { Info } from "../components/RestaurantCard";
 import type { IRestaurantInfo } from "../types/IrestaurantInfo";
 
 export const mockData: IRestaurantInfo = {
@@ -14,4 +14,6 @@ export const mockData: IRestaurantInfo = {
   
 };
 
-export const InfoTest = () => <Info {...mockData} />;
+export const InfoTest = () => <Info onVerMenu={function (): void {
+  throw new Error("Function not implemented.");
+} } showMenu={false} {...mockData} />;
