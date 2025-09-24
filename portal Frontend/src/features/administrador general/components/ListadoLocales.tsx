@@ -1,4 +1,4 @@
-import type { PropsListadoLocales } from "../../../shared/types/PropsListadoLocales";
+import type { PropsListadoLocales } from "../../../shared/types/PropsAdminGeneral";
 
 export const ListadoLocales: React.FC<PropsListadoLocales> = ({ id, estado, nombre, direccion, onSelect, selectedId }) => {
     return (
