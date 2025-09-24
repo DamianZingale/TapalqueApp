@@ -12,7 +12,7 @@ export default function AdministradorGeneralRoutes(){
             <Route path="/" element={<AdministradorGeneralPage />} />
             <Route path="gastronomicos" element={<AdminGralGastronomicosPage />} />
             <Route path="hospedajes" element={<AdminGralHospedajesPage />} />
-            <Route path="comercio" element={<AdminGralComerciosPage />} />
+            <Route path="comercios" element={<AdminGralComerciosPage />} />
             <Route path="servicios" element={<AdminGralServiciosPage />} />
             <Route path="usuarios" element={<AdminGralUsuariosPage />} />
         </Routes>
