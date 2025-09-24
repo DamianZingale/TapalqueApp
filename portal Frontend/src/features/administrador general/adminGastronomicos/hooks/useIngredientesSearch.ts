@@ -1,19 +1,14 @@
 import { useEffect, useState } from "react";
 
-//mock
-const ingredientesDB = [
-  "Tomate", "Lechuga", "Cebolla", "Queso", "Pollo",
-  "Carne", "Pescado", "Arroz", "Frijoles", "Aceitunas",
-  "Champiñones", "Pimiento", "Ajo", "Cilantro", "Albahaca",
-];
 
-export const useIngredientSearch = (searchTerm: string, selected: string[]) => {
+
+export const useIngredientSearch = (searchTerm: string, selected: string[], data: string[]) => {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [highlightIndex, setHighlightIndex] = useState<number>(-1);
 
   useEffect(() => {
     if (searchTerm) {
-      const results = ingredientesDB.filter((i) =>
+      const results = data.filter((i) =>
         i.toLowerCase().startsWith(searchTerm.toLowerCase()) && 
         !selected.includes(i)
       );
