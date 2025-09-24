@@ -1,5 +1,7 @@
+import { Title } from "../../../shared/components/Title"
+
 export const AdminGralGastronomicosPage = () => {
   return (
-    <div>AdminGralGastronomicos</div>
+    <Title text="Gastronomicos" />
   )
 }
