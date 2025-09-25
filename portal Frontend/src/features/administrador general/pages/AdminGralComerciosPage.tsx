@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Title } from "../../../shared/components/Title"
 import { ListadoLocales } from "../components/ListadoLocales"
 import { BotonesAccionAdmin } from "../components/BotonesAccionAdmin";
+import { BotonAgregar } from "../components/BotonAgregar";
 
 export const AdminGralComerciosPage = () => {
     const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -9,14 +10,14 @@ export const AdminGralComerciosPage = () => {
         {
             id: "1",
             estado: "Activo",
-            nombre: "La Clandestina",
-            direccion: "Complejo termal de Tapalqué",
+            nombre: "Libreria Sarmiento",
+            direccion: "Sarmiento 570",
         },
         {
             id: "2",
             estado: "Inactivo",
-            nombre: "La Clandestina",
-            direccion: "Av. Hipolito Yrigoyen N°123",
+            nombre: "Kiosko La Plaza",
+            direccion: "San Martin 150",
         },
     ]);
 
@@ -25,7 +26,7 @@ export const AdminGralComerciosPage = () => {
     return (
         <>
             <Title text="Comercios" />
-
+            <BotonAgregar />
             {selectedLocal && (
                 <BotonesAccionAdmin estado={selectedLocal.estado} />)}
 
