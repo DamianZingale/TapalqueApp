@@ -11,6 +11,7 @@ const fechasDisponibles = [
     new Date(2025, 8, 21),
 ];
 
+
 export const Calendario = () => {
     const { id } = useParams(); // ID del hospedaje
     const navigate = useNavigate();

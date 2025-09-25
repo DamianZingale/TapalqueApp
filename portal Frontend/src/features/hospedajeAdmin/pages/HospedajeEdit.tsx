@@ -1,7 +1,11 @@
 import { useState } from "react";
+import { useParams } from "react-router-dom";
+import { Calendario } from "../../hospedaje/components/Calendario";
+import { mockHospedajes } from "../mock/MockHospedajeEdit";
+
 
 interface OpcionHospedaje {
-    id: string;
+    id?: string;
     maxPersonas: number;
     foto: string;
     titulo: number;
@@ -10,11 +14,15 @@ interface OpcionHospedaje {
     cantidad: number;
 }
 
-export const HospedajeEdit = () => {
+    export const HospedajeEdit = () => {
+    const { id } = useParams();
+    const hospedaje = mockHospedajes.find((h) => h.id === id);
+    const fechasReservadas = hospedaje?.reservas || [];
+
     const [opciones, setOpciones] = useState<OpcionHospedaje[]>([]);
     const [form, setForm] = useState<OpcionHospedaje>({
         id: "",
-        maxPersonas: 1,       
+        maxPersonas: 1,
         foto: "",
         titulo: 0,
         precio: 0,
@@ -22,40 +30,37 @@ export const HospedajeEdit = () => {
         cantidad: 0,
     });
 
-
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
+        const { name, value } = e.target;
 
-    if (name === "titulo") {
-        // Buscar un número en el texto
+        if (name === "titulo") {
         const match = value.match(/\d+/);
         if (match) {
-        const personasEnTitulo = parseInt(match[0], 10);
-        if (personasEnTitulo > form.maxPersonas) {
+            const personasEnTitulo = parseInt(match[0], 10);
+            if (personasEnTitulo > form.maxPersonas) {
             alert(`⚠️ Esta habitación es para ${form.maxPersonas} personas como máximo.`);
+            }
         }
         }
-    }
 
-    setForm({
+        setForm({
         ...form,
         [name]: name === "maxPersonas" || name === "precio" || name === "cantidad"
-        ? Number(value)
-        : value,
-    });
-};
+            ? Number(value)
+            : value,
+        });
+    };
 
     const handleAdd = () => {
-            if (!form.titulo || !form.precio || !form.cantidad) {
+        if (!form.titulo || !form.precio || !form.cantidad) {
         alert("Por favor, completá todos los campos obligatorios");
         return;
-    }
+        }
 
         setOpciones([...opciones, { ...form, id: Date.now().toString() }]);
         setForm({
         id: "",
         maxPersonas: 1,
-        
         foto: "",
         titulo: 0,
         precio: 0,
@@ -66,9 +71,7 @@ export const HospedajeEdit = () => {
 
     const handleDelete = (id: string) => {
         setOpciones(opciones.filter((op) => op.id !== id));
-};
-
-
+    };
 
     return (
         <div className="p-6 bg-gray-50 min-h-screen">
@@ -78,48 +81,47 @@ export const HospedajeEdit = () => {
         <div className="bg-white p-4 rounded shadow mb-6">
             <h2 className="text-xl font-semibold mb-2">Nueva opción</h2>
             <div className="grid grid-cols-2 gap-4">
-            
-            <label htmlFor="">Tipo Habitacion:</label>
+            <label>Tipo Habitación:</label>
             <select
                 name="maxPersonas"
                 value={form.maxPersonas}
                 onChange={handleChange}
                 className="border p-2 rounded"
-                >
+            >
                 <option value={1}>Individual</option>
                 <option value={2}>Doble</option>
                 <option value={3}>Triple</option>
                 <option value={4}>Cuádruple</option>
                 <option value={5}>Quíntuple</option>
             </select>
-            <label htmlFor="Numerp de personas en Habitacion"></label>
+
+            <label>Número de personas en habitación</label>
             <input
                 name="titulo"
                 value={form.titulo}
                 onChange={handleChange}
-                placeholder="Numerp de personas en H"
+                placeholder="Ej: 2 personas"
                 className="border p-2 rounded"
             />
 
+            <label>Foto</label>
             <input
                 type="file"
                 accept="image/*"
                 onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
+                const file = e.target.files?.[0];
+                if (file) {
                     const reader = new FileReader();
                     reader.onloadend = () => {
-                        setForm({ ...form, foto: reader.result as string }); // guarda la imagen como Base64
+                    setForm({ ...form, foto: reader.result as string });
                     };
                     reader.readAsDataURL(file);
-                    }
+                }
                 }}
                 className="border p-2 rounded"
             />
 
-            
-
-            <label htmlFor="">Precio</label>
+            <label>Precio</label>
             <input
                 type="number"
                 name="precio"
@@ -129,6 +131,7 @@ export const HospedajeEdit = () => {
                 className="border p-2 rounded"
             />
 
+            <label>Tipo de Precio</label>
             <select
                 name="tipoPrecio"
                 value={form.tipoPrecio}
@@ -138,7 +141,8 @@ export const HospedajeEdit = () => {
                 <option value="por_habitacion">Por habitación</option>
                 <option value="por_persona">Por persona</option>
             </select>
-                <label htmlFor="cantidad">Cant. Personas por habitación</label>
+
+            <label>Cantidad disponible</label>
             <input
                 type="number"
                 name="cantidad"
@@ -148,7 +152,7 @@ export const HospedajeEdit = () => {
                 className="border p-2 rounded"
             />
             </div>
-            
+
             <button
             onClick={handleAdd}
             className="mt-4 bg-blue-600 text-white px-4 py-2 rounded"
@@ -165,14 +169,13 @@ export const HospedajeEdit = () => {
                 <div>
                 <p className="font-bold">{op.titulo}</p>
                 <div className="flex items-center gap-4">
-                {/* Mostrar foto si existe */}
-                {op.foto && (
-                <img
-                    src={op.foto}
-                    alt=""
-                    className="w-10 h-10 object-cover rounded"
-                />
-                )}
+                    {op.foto && (
+                    <img
+                        src={op.foto}
+                        alt=""
+                        className="w-10 h-10 object-cover rounded"
+                    />
+                    )}
                 </div>
                 <p>Capacidad: {op.maxPersonas} personas</p>
                 <p>Precio: ${op.precio} ({op.tipoPrecio})</p>
@@ -187,6 +190,14 @@ export const HospedajeEdit = () => {
             </li>
             ))}
         </ul>
+
+        {/* Calendario de disponibilidad */}
+        <h2 className="text-xl font-semibold mb-2 mt-10">Calendario de disponibilidad</h2>
+        <Calendario
+            idHospedaje={id}
+            fechasReservadas={fechasReservadas}
+            modoAdmin={true}
+        />
         </div>
     );
 };
