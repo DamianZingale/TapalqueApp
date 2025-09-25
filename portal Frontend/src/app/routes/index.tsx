@@ -45,4 +45,5 @@ export const router = createBrowserRouter([
   // Rutas de administración
     { path: "/admin/hospedaje/*", element: <HospedajeAdmin /> },
     { path: "/admin/general/*", element: <AdministradorGeneralRoutes /> },
+    
 ]);

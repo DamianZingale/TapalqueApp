@@ -1,27 +1,39 @@
+export const mockHospedajes = [
+    {
+        id: "1",
+        nombre: "Hotel Tapalqué",
+        descripcion: "Hotel céntrico con pileta y desayuno incluido.",
+        maxPersonas: 4,
+        precio: 22000,
+        tipoPrecio: "por_habitacion",
+        cantidad: 10,
+        foto: "https://via.placeholder.com/200x120.png?text=Hotel+Tapalque",
+        reservas: [
+            "2025-09-28",
+            "2025-10-20",
+            "2025-10-22"
+        ]
+    },
+    {
+        id: "2",
+        nombre: "Cabañas El Río",
+        descripcion: "Cabañas equipadas frente al río, ideales para familia.",
+        maxPersonas: 6,
+        precio: 30000,
+        tipoPrecio: "por_persona",
+        cantidad: 5,
+        foto: "https://via.placeholder.com/200x120.png?text=Cabanas+El+Rio",
+    },
+    {
+        id: "3",
+        nombre: "Posada La Plaza",
+        descripcion: "Posada boutique en la plaza central.",
+        maxPersonas: 2,
+        precio: 18000,
+        tipoPrecio: "por_habitacion",
+        cantidad: 8,
+        foto: "https://via.placeholder.com/200x120.png?text=Posada+La+Plaza",
+    },
 
-
-export interface Hospedaje {
-    id: string;
-    nombre: string;
-    descripcion: string;
-    fotos: string[]; // fotos generales
-    opciones: OpcionHospedaje[];
-}
-
-export interface OpcionHospedaje {
-    id: string;
-    titulo: string; // "Habitación doble", "Cabaña 4 personas"
-    foto: string; // foto principal de esa opción
-    maxPersonas: number;
-    precio: number;
-    tipoPrecio: "por_habitacion" | "por_persona"; // para calcular
-    cantidad: number; // stock (ej: 4 habitaciones dobles)
-    reservas: Reserva[]; // reservas ya hechas
-}
-
-export interface Reserva {
-    id: string;
-    fechaInicio: string; // "2025-09-23"
-    fechaFin: string;    // "2025-09-25"
-    cantidad: number;    // cuántas unidades de esta opción reservaron
-}
+    ];
+    
