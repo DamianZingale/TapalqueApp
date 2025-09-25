@@ -1,5 +1,11 @@
+import { Title } from "../../../shared/components/Title"
+import { BotonAgregar } from "../components/BotonAgregar"
+
 export const AdminGralUsuariosPage = () => {
     return (
-        <div>AdminGralUsuarios</div>
+        <>
+            <Title text="Usuarios" />
+            <BotonAgregar />
+        </>
     )
 }
