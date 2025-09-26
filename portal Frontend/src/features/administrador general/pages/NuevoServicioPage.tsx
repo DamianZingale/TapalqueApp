@@ -1,5 +1,17 @@
+import { Title } from "../../../shared/components/Title"
+import FormIngresoAdminGeneral from "../components/FormIngresoAdminGeneral"
+import { CampoServicio } from "../types/PropsIngresosNuevosAdminGeneral"
+import type { FormData } from "../types/PropsIngresosNuevosAdminGeneral"
 export const NuevoServicioPage = () => {
+    const handleSave = async (data: FormData) => {
+        //aca van los envios de datos al backend!
+        alert(JSON.stringify(data, null, 2));
+    };
+
     return (
-        <div>NuevoServicioPage</div>
+        <>
+            <Title text="Nuevo Servicio" />
+            <FormIngresoAdminGeneral tipoCampos={CampoServicio} onSubmit={handleSave} />
+        </>
     )
 }
