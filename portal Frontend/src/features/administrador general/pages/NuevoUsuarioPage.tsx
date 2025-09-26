@@ -1,5 +1,5 @@
 import { Title } from "../../../shared/components/Title"
-import FormIngresoAdminGeneral from "../components/FormIngresoAdminGeneral"
+import {FormIngresoEditar} from "../components/FormIngresoEditar"
 import { CampoUsuario } from "../types/PropsIngresosNuevosAdminGeneral"
 import { type FormData } from "../types/PropsIngresosNuevosAdminGeneral"
 
@@ -11,7 +11,7 @@ export const NuevoUsuarioPage = () => {
     return (
         <>
             <Title text="Nuevo Usuario" />
-            <FormIngresoAdminGeneral tipoCampos={CampoUsuario} onSubmit={handleSave} />
+            <FormIngresoEditar tipoCampos={CampoUsuario} onSubmit={handleSave} />
         </>
     )
 }

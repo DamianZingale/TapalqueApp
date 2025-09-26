@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import type { FormData, PropsFormIngresoAdminGeneral } from '../types/PropsIngresosNuevosAdminGeneral';
 
 
-const FormIngresoAdminGeneral: React.FC<PropsFormIngresoAdminGeneral> = ({ tipoCampos, initialData = {}, onSubmit }) => {
+export const FormIngresoEditar: React.FC<PropsFormIngresoAdminGeneral> = ({ tipoCampos, initialData = {}, onSubmit }) => {
     const [formData, setFormData] = useState<FormData>(initialData);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -90,5 +90,3 @@ const FormIngresoAdminGeneral: React.FC<PropsFormIngresoAdminGeneral> = ({ tipoC
         </form>
     );
 };
-
-export default FormIngresoAdminGeneral;
