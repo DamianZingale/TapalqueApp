@@ -8,7 +8,7 @@ export interface ConfiguracionDeCampos {
     options?: { value: string; label: string }[]; //est para los ddl
 }
 
-export type FormData = Record<string, string | number | boolean | File | File[]>;
+export type FormData = Record<string, string | number | boolean | File | File[]| string[]>;
 
 export interface PropsFormIngresoAdminGeneral {
     tipoCampos: ConfiguracionDeCampos[];
@@ -47,7 +47,7 @@ export const CampoServicio: ConfiguracionDeCampos[] = [
     { name: 'name', label: 'Nombre del servicio', type: 'text' },
     { name: 'descripcion', label: 'Descripcion', type: 'textarea' },
     { name: 'horario', label: 'Horarios', type: 'textarea' },
-    { name: 'whatapp', label: 'Whatsapp', type: 'text' },
+    { name: 'whatsapp', label: 'Whatsapp', type: 'text' },
     { name: 'images', label: 'Fotos del lugar', type: 'file', multiple: true },
 ];
 

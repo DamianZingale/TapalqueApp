@@ -27,7 +27,7 @@ export const AdminGralGastronomicosPage = () => {
       <Title text="Gastronomicos" />
       <BotonAgregar />
       {selectedLocal && (
-        <BotonesAccionAdmin estado={selectedLocal.estado} />)}
+        <BotonesAccionAdmin id={selectedLocal.id} estado={selectedLocal.estado} />)}
 
       {locales.map((local) => (
         <ListadoLocalesUsuarios

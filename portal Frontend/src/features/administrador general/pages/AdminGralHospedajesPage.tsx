@@ -27,7 +27,7 @@ export const AdminGralHospedajesPage = () => {
             <Title text="Hospedajes"/>
             <BotonAgregar />
             {selectedLocal && (
-                <BotonesAccionAdmin estado={selectedLocal.estado} />)}
+                <BotonesAccionAdmin id={selectedLocal.id} estado={selectedLocal.estado} />)}
 
             {locales.map((local) => (
                 <ListadoLocalesUsuarios

@@ -8,5 +8,6 @@ export interface PropsListadoLocalesUsuarios {
 }
 
 export interface BotonesAccionProps {
+    id: string;
     estado: string;
 }
