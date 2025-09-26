@@ -1,6 +1,6 @@
 import { Title } from "../../../shared/components/Title"
 import { CamposGastronomico, type FormData } from "../types/PropsIngresosNuevosAdminGeneral"
-import FormIngresoAdminGeneral from "../components/FormIngresoEditar"
+import {FormIngresoEditar} from "../components/FormIngresoEditar"
 
 const handleSave = async (data: FormData) => {
     //aca van los envios de datos al backend!
@@ -11,7 +11,7 @@ export const NuevoGastronomicoPage = () => {
     return (
         <>
             <Title text="Nuevo local gastronomico" />
-            <FormIngresoAdminGeneral tipoCampos={CamposGastronomico} onSubmit={handleSave} />
+            <FormIngresoEditar tipoCampos={CamposGastronomico} onSubmit={handleSave} />
         </>
     )
 }

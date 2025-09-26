@@ -27,7 +27,7 @@ export const AdminGralUsuariosPage = () => {
             <Title text="Usuarios" />
             <BotonAgregar />
             {selectedLocal && (
-                            <BotonesAccionAdmin estado={selectedLocal.estado} />)}
+                            <BotonesAccionAdmin id={selectedLocal.id} estado={selectedLocal.estado} />)}
                         {locales.map((local) => (
                             <ListadoLocalesUsuarios
                                 key={local.id}
