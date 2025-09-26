@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { BotonAgregar } from "../components/BotonAgregar";
 import { BotonesAccionAdmin } from "../components/BotonesAccionAdmin";
-import { ListadoLocales } from "../components/ListadoLocales";
+import { ListadoLocalesUsuarios } from "../components/ListadoLocales";
 import { Title } from "../../../shared/components/Title";
 
 export const AdminGralHospedajesPage = () => {
@@ -11,13 +11,13 @@ export const AdminGralHospedajesPage = () => {
             id: "1",
             estado: "Activo",
             nombre: "Hotel Coope",
-            direccion: "9 de Julio 999",
+            direccionOtipo: "9 de Julio 999",
         },
         {
             id: "2",
             estado: "Inactivo",
             nombre: "Hospedaje YPF",
-            direccion: "Ruta 51 km 260",
+            direccionOtipo: "Ruta 51 km 260",
         },
     ]);
     const selectedLocal = locales.find((local) => local.id === selectedId);
@@ -30,7 +30,7 @@ export const AdminGralHospedajesPage = () => {
                 <BotonesAccionAdmin estado={selectedLocal.estado} />)}
 
             {locales.map((local) => (
-                <ListadoLocales
+                <ListadoLocalesUsuarios
                     key={local.id}
                     {...local}
                     onSelect={(id) => setSelectedId(id)}
