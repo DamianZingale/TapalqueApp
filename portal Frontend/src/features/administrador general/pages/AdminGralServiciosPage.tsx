@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { BotonAgregar } from "../components/BotonAgregar";
-import { ListadoLocales } from "../components/ListadoLocales";
+import { ListadoLocalesUsuarios } from "../components/ListadoLocales";
 import { Title } from "../../../shared/components/Title";
 import { BotonesAccionAdmin } from "../components/BotonesAccionAdmin";
 
@@ -11,13 +11,13 @@ export const AdminGralServiciosPage = () => {
             id: "1",
             estado: "Activo",
             nombre: "Plomero",
-            direccion: "",
+            direccionOtipo: "",
         },
         {
             id: "2",
             estado: "Inactivo",
             nombre: "Electricista",
-            direccion: "",
+            direccionOtipo: "",
         },
     ]);
     const selectedLocal = locales.find((local) => local.id === selectedId);
@@ -32,7 +32,7 @@ export const AdminGralServiciosPage = () => {
                 <BotonesAccionAdmin estado={selectedLocal.estado} />)}
 
             {locales.map((local) => (
-                <ListadoLocales
+                <ListadoLocalesUsuarios
                     key={local.id}
                     {...local}
                     onSelect={(id) => setSelectedId(id)}
