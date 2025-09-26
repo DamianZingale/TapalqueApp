@@ -3,52 +3,44 @@ import { useParams } from "react-router-dom";
 import { Calendario } from "../../hospedaje/components/Calendario";
 import { mockHospedajes } from "../mock/MockHospedajeEdit";
 
-
-interface OpcionHospedaje {
-    id?: string;
+interface OpcionHabitacion {
+    id: string;
+    titulo: string;
     maxPersonas: number;
-    foto: string;
-    titulo: number;
     precio: number;
     tipoPrecio: "por_habitacion" | "por_persona";
     cantidad: number;
+    reservas: string[];
+    foto: string;
 }
 
-    export const HospedajeEdit = () => {
+export const HospedajeEdit = () => {
     const { id } = useParams();
     const hospedaje = mockHospedajes.find((h) => h.id === id);
-    const fechasReservadas = hospedaje?.reservas || [];
 
-    const [opciones, setOpciones] = useState<OpcionHospedaje[]>([]);
-    const [form, setForm] = useState<OpcionHospedaje>({
+    const [opciones, setOpciones] = useState<OpcionHabitacion[]>(hospedaje?.opciones || []);
+    const [form, setForm] = useState<OpcionHabitacion>({
         id: "",
+        titulo: "",
         maxPersonas: 1,
-        foto: "",
-        titulo: 0,
         precio: 0,
         tipoPrecio: "por_habitacion",
-        cantidad: 0,
+        cantidad: 1,
+        reservas: [],
+        foto: ""
     });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
-
-        if (name === "titulo") {
-        const match = value.match(/\d+/);
-        if (match) {
-            const personasEnTitulo = parseInt(match[0], 10);
-            if (personasEnTitulo > form.maxPersonas) {
-            alert(`⚠️ Esta habitación es para ${form.maxPersonas} personas como máximo.`);
-            }
-        }
-        }
+        const key = name === "nHab" ? "id" : name;
 
         setForm({
-        ...form,
-        [name]: name === "maxPersonas" || name === "precio" || name === "cantidad"
-            ? Number(value)
-            : value,
-        });
+    ...form,
+    [key]: key === "maxPersonas" || key === "precio" || key === "cantidad"
+        ? Number(value)
+        : value,
+    });
+
     };
 
     const handleAdd = () => {
@@ -57,15 +49,17 @@ interface OpcionHospedaje {
         return;
         }
 
-        setOpciones([...opciones, { ...form, id: Date.now().toString() }]);
+        setOpciones([...opciones, { ...form }]);
+
         setForm({
         id: "",
+        titulo: "",
         maxPersonas: 1,
-        foto: "",
-        titulo: 0,
         precio: 0,
         tipoPrecio: "por_habitacion",
         cantidad: 1,
+        reservas: [],
+        foto: ""
         });
     };
 
@@ -73,15 +67,35 @@ interface OpcionHospedaje {
         setOpciones(opciones.filter((op) => op.id !== id));
     };
 
+    if (!hospedaje) return <p className="p-6">Hospedaje no encontrado</p>;
+
     return (
         <div className="p-6 bg-gray-50 min-h-screen">
-        <h1 className="text-2xl font-bold mb-4">Editar Hospedaje</h1>
+        <h1 className="text-2xl font-bold mb-4">Editar: {hospedaje.nombre}</h1>
+        <p className="mb-6 text-gray-600">{hospedaje.descripcion}</p>
 
         {/* Formulario */}
         <div className="bg-white p-4 rounded shadow mb-6">
-            <h2 className="text-xl font-semibold mb-2">Nueva opción</h2>
+            <h2 className="text-xl font-semibold mb-2">Agregar habitación</h2>
             <div className="grid grid-cols-2 gap-4">
-            <label>Tipo Habitación:</label>
+                <label>N de Habitacion</label>
+            <input
+                name="nHab"
+                value={form.id}
+                onChange={handleChange}
+                placeholder="Ej. 105"
+                className="border p-2 rounded"
+            />
+            <label>Título</label>
+            <input
+                name="titulo"
+                value={form.titulo}
+                onChange={handleChange}
+                placeholder="Ej: Doble, Triple..."
+                className="border p-2 rounded"
+            />
+
+            <label>Capacidad máxima</label>
             <select
                 name="maxPersonas"
                 value={form.maxPersonas}
@@ -94,15 +108,6 @@ interface OpcionHospedaje {
                 <option value={4}>Cuádruple</option>
                 <option value={5}>Quíntuple</option>
             </select>
-
-            <label>Número de personas en habitación</label>
-            <input
-                name="titulo"
-                value={form.titulo}
-                onChange={handleChange}
-                placeholder="Ej: 2 personas"
-                className="border p-2 rounded"
-            />
 
             <label>Foto</label>
             <input
@@ -131,7 +136,7 @@ interface OpcionHospedaje {
                 className="border p-2 rounded"
             />
 
-            <label>Tipo de Precio</label>
+            <label>Tipo de precio</label>
             <select
                 name="tipoPrecio"
                 value={form.tipoPrecio}
@@ -148,7 +153,7 @@ interface OpcionHospedaje {
                 name="cantidad"
                 value={form.cantidad}
                 onChange={handleChange}
-                placeholder="Cantidad disponible"
+                placeholder="Cantidad"
                 className="border p-2 rounded"
             />
             </div>
@@ -157,47 +162,48 @@ interface OpcionHospedaje {
             onClick={handleAdd}
             className="mt-4 bg-blue-600 text-white px-4 py-2 rounded"
             >
-            Agregar opción
+            Agregar habitación
             </button>
         </div>
 
-        {/* Listado de opciones */}
-        <h2 className="text-xl font-semibold mb-2">Opciones creadas</h2>
-        <ul className="space-y-2">
+        {/* Listado de habitaciones */}
+        <h2 className="text-xl font-semibold mb-4">Habitaciones creadas</h2>
+        <ul className="space-y-6">
             {opciones.map((op) => (
-            <li key={op.id} className="bg-white p-4 rounded shadow flex justify-between items-center">
+            <li key={op.id} className="bg-white p-4 rounded shadow">
+                <div className="flex justify-between items-center mb-2">
                 <div>
-                <p className="font-bold">{op.titulo}</p>
-                <div className="flex items-center gap-4">
-                    {op.foto && (
+                    <p className="font-bold text-lg">{op.titulo}</p>
+                    <p>Capacidad: {op.maxPersonas} personas</p>
+                    <p>Precio: ${op.precio} ({op.tipoPrecio})</p>
+                    <p>Cantidad disponible: {op.cantidad}</p>
+                </div>
+                {op.foto && (
                     <img
-                        src={op.foto}
-                        alt=""
-                        className="w-10 h-10 object-cover rounded"
+                    src={op.foto}
+                    alt={op.titulo}
+                    className="w-20 h-12 object-cover rounded"
                     />
-                    )}
+                )}
                 </div>
-                <p>Capacidad: {op.maxPersonas} personas</p>
-                <p>Precio: ${op.precio} ({op.tipoPrecio})</p>
-                <p>Cantidad: {op.cantidad}</p>
-                </div>
+
+                {/* Calendario por habitación */}
+                <h3 className="text-md font-semibold mb-2">Calendario de disponibilidad</h3>
+                <Calendario
+                idHospedaje={op.id}
+                fechasReservadas={op.reservas}
+                modoAdmin={true}
+                />
+
                 <button
                 onClick={() => handleDelete(op.id)}
-                className="bg-red-500 text-white px-3 py-1 rounded"
+                className="mt-4 bg-red-500 text-white px-3 py-1 rounded"
                 >
-                Eliminar
+                Eliminar habitación
                 </button>
             </li>
             ))}
         </ul>
-
-        {/* Calendario de disponibilidad */}
-        <h2 className="text-xl font-semibold mb-2 mt-10">Calendario de disponibilidad</h2>
-        <Calendario
-            idHospedaje={id}
-            fechasReservadas={fechasReservadas}
-            modoAdmin={true}
-        />
         </div>
     );
-};
+    };

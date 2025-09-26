@@ -1,84 +1,91 @@
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { es } from "date-fns/locale";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
-const fechasDisponibles = [
-    //Aca hay que ir a buscar al backend fechas disponibles del hospedaje
-    new Date(2025, 8, 19),  // 8 = septiembre (mes empieza en 0)
-    new Date(2025, 8, 20),
-    new Date(2025, 8, 21),
-];
+interface CalendarioProps {
+    idHospedaje?: string;
+    fechasReservadas?: string[];
+    modoAdmin?: boolean;
+}
 
-
-export const Calendario = () => {
-    const { id } = useParams(); // ID del hospedaje
+export const Calendario = ({
+    idHospedaje,
+    fechasReservadas = [],
+    modoAdmin = false
+}: CalendarioProps) => {
     const navigate = useNavigate();
     const [selectedDates, setSelectedDates] = useState<Date[]>([]);
+
+    const fechasBloqueadas = fechasReservadas.map((f) => new Date(f));
 
     const toggleDate = (date: Date | null) => {
         if (!date) return;
 
-        const isAvailable = fechasDisponibles.some(
-            (d) => d.toDateString() === date.toDateString()
+        const isReserved = fechasBloqueadas.some(
+        (d) => d.toDateString() === date.toDateString()
         );
-        if (!isAvailable) return;
+        if (isReserved) return;
 
         const alreadySelected = selectedDates.some(
-            (d) => d.toDateString() === date.toDateString()
+        (d) => d.toDateString() === date.toDateString()
         );
 
         if (alreadySelected) {
-            setSelectedDates(selectedDates.filter(
-                (d) => d.toDateString() !== date.toDateString()
-            ));
+        setSelectedDates(selectedDates.filter(
+            (d) => d.toDateString() !== date.toDateString()
+        ));
         } else {
-            setSelectedDates([...selectedDates, date]);
+        setSelectedDates([...selectedDates, date]);
         }
     };
+
     const handleReservar = () => {
         const fechasISO = selectedDates.map((d) =>
-            d.toISOString().split("T")[0]
+        d.toISOString().split("T")[0]
         );
         navigate("/hospedaje/opciones", {
-            state: {
-                id,
-                fechas: fechasISO
-            }
+        state: {
+            id: idHospedaje,
+            fechas: fechasISO
+        }
         });
     };
 
-
     return (
-        <div className="p-2 bg-light rounded text-center">
-            <DatePicker
-                onChange={toggleDate}
-                dayClassName={(date) => {
-                    const isAvailable = fechasDisponibles.some(
-                        (d) => d.toDateString() === date.toDateString()
-                    );
-                    const isSelected = selectedDates.some(
-                        (d) => d.toDateString() === date.toDateString()
-                    );
-                    if (isAvailable && isSelected) return "bg-primary text-white rounded-circle";
-                    if (isAvailable) return "bg-success text-white rounded-circle";
-                    return "";
-                }}
-                inline
-                locale={es}
-            />
-            {selectedDates.length > 0 && (
-                <div className="d-flex justify-content-center mt-3">
-                    <button
-                        className="btn btn-secondary mt-3 "
-                        onClick={handleReservar}
-                    >
-                        Reservar 
-                    </button>
-                </div>
-            )}
+        <div className="p-4 bg-white rounded shadow text-center">
+        <DatePicker
+            onChange={toggleDate}
+            dayClassName={(date) => {
+            const isReserved = fechasBloqueadas.some(
+                (d) => d.toDateString() === date.toDateString()
+            );
+            const isSelected = selectedDates.some(
+                (d) => d.toDateString() === date.toDateString()
+            );
+            if (isReserved) return "bg-red-500 text-white rounded-full";
+            if (isSelected) return "bg-blue-500 text-white rounded-full";
+            return "";
+            }}
+            inline
+            locale={es}
+        />
+
+        {!modoAdmin && selectedDates.length > 0 && (
+            <button
+            className="mt-4 bg-blue-600 text-white px-4 py-2 rounded"
+            onClick={handleReservar}
+            >
+            Reservar
+            </button>
+        )}
+
+        {modoAdmin && (
+            <p className="mt-2 text-sm text-gray-600">
+            Fechas bloqueadas para habitación <strong>{idHospedaje}</strong>
+            </p>
+        )}
         </div>
     );
-}
-//hice npm install react-datepicker
+};
