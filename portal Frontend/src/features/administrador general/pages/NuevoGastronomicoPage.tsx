@@ -1,6 +1,6 @@
 import { Title } from "../../../shared/components/Title"
 import { CamposGastronomico, type FormData } from "../types/PropsIngresosNuevosAdminGeneral"
-import FormIngresoAdminGeneral from "../components/FormIngresoAdminGeneral"
+import FormIngresoAdminGeneral from "../components/FormIngresoEditar"
 
 const handleSave = async (data: FormData) => {
     //aca van los envios de datos al backend!
