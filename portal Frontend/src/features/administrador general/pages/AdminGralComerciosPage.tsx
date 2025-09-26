@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Title } from "../../../shared/components/Title"
-import { ListadoLocales } from "../components/ListadoLocales"
+import { ListadoLocalesUsuarios } from "../components/ListadoLocales"
 import { BotonesAccionAdmin } from "../components/BotonesAccionAdmin";
 import { BotonAgregar } from "../components/BotonAgregar";
 
@@ -11,13 +11,13 @@ export const AdminGralComerciosPage = () => {
             id: "1",
             estado: "Activo",
             nombre: "Libreria Sarmiento",
-            direccion: "Sarmiento 570",
+            direccionOtipo: "Sarmiento 570",
         },
         {
             id: "2",
             estado: "Inactivo",
             nombre: "Kiosko La Plaza",
-            direccion: "San Martin 150",
+            direccionOtipo: "San Martin 150",
         },
     ]);
 
@@ -31,7 +31,7 @@ export const AdminGralComerciosPage = () => {
                 <BotonesAccionAdmin estado={selectedLocal.estado} />)}
 
             {locales.map((local) => (
-                <ListadoLocales
+                <ListadoLocalesUsuarios
                     key={local.id}
                     {...local}
                     onSelect={(id) => setSelectedId(id)}
