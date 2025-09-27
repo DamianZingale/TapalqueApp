@@ -47,10 +47,12 @@ export const MisReservasPage = () => {
                 <div key={data.id} className="mb-3">
                     <Listado
                         id={data.id}
-                        estado={data.estado}
+                        encabezado={data.estado}
                         titulo={data.titulo}
-                        fecha={data.fecha}
-                    />
+                        pie={data.fecha} textButton={""} 
+                        handleButton={function (id: string): void {
+                            alert("Implementar vista cuando se clickea")
+                        } }                    />
                 </div>
             ))}
         </div>
