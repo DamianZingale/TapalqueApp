@@ -11,3 +11,13 @@ export interface BotonesAccionProps {
     id: string;
     estado: string;
 }
+export interface PropLocal {
+    id: string;
+    nombre: string;
+    direccion: string;
+}
+
+export interface PropsAsignarLocalesAdmin {
+    idAdmin: string;
+    onAsignar: (localId: string) => void;
+}
