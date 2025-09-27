@@ -83,7 +83,7 @@ export const FormIngresoEditar: React.FC<PropsFormIngresoAdminGeneral> = ({ tipo
                 </div>
             ))}
             <div className='text-center'>
-                <button type="submit" className="btn btn-secondary">
+                <button type="submit" className="btn btn-secondary btn-lg">
                     Guardar
                 </button>
             </div>

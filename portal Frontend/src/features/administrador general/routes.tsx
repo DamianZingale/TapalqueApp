@@ -14,6 +14,7 @@ import { EditarHospedajePage } from "./pages/EditarHospedajePage";
 import { NuevoServicioPage } from "./pages/NuevoServicioPage";
 import { EditarServicioPage } from "./pages/EditarServicioPage";
 import { NuevoUsuarioPage } from "./pages/NuevoUsuarioPage";
+import { EditarUsuarioPage } from "./pages/EditarUsuarioPage";
 
 export default function AdministradorGeneralRoutes(){
     return(
@@ -37,6 +38,7 @@ export default function AdministradorGeneralRoutes(){
 
             <Route path="usuarios" element={<AdminGralUsuariosPage />} />
             <Route path="usuarios/nuevo" element={<NuevoUsuarioPage />} />
+            <Route path="usuarios/editar" element={<EditarUsuarioPage />} />
         </Routes>
     )
 }
