@@ -27,7 +27,7 @@ export const OrderSummaryCard: FC<Props> = ({ initialPedido, onConfirm, onCancel
       {pedido.map((i) => (
         <div key={i.id} className="d-flex justify-content-between align-items-center mb-2">
           <div>{i.dish_name} (${i.price.toFixed(2)})</div>
-          <ItemCounter quantity={i.cantidad} onChange={(q) => handleQuantityChange(i.id, q)} />
+          <ItemCounter quantity={i.cantidad} onChange={(q) => handleQuantityChange(i.cantidad, q)} />
         </div>
       ))}
 

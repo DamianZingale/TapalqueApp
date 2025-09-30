@@ -36,8 +36,7 @@ export const IngredientesSelector = ({ selected, onChange, data, placeholder }: 
   const eliminarIngrediente = (item: string) => {
     onChange(selected.filter((i) => i !== item));
   };
-  
-  //MANEJADOR DE FLECHAS Y ENTER PARA SELECCIONAR INGREDIENTES
+//MANEJADOR DE FLECHAS Y ENTER PARA SELECCIONAR INGREDIENTES
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (suggestions.length === 0) return;
 
