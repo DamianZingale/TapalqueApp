@@ -1,0 +1,143 @@
+{
+	"info": {
+		"_postman_id": "bb1809aa-70ca-40df-a9ba-1acc2f07a475",
+		"name": "Hospedaje API Tests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "42410477"
+	},
+	"item": [
+		{
+			"name": "InsertHospedaje",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"titulo\": \"Hotel Tapalqué\",\r\n  \"description\": \"Alojamiento cómodo en el centro del pueblo\",\r\n  \"ubicacion\": \"Av. Belgrano 456\",\r\n  \"googleMapsUrl\": \"https://goo.gl/maps/abc123\",\r\n  \"numWhatsapp\": \"+5491122334455\",\r\n  \"tipoHospedaje\": \"HOTEL\",\r\n  \"imagenes\": [\r\n    \"https://miweb.com/img/hotel1.jpg\",\r\n    \"https://miweb.com/img/hotel2.jpg\"\r\n  ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/hospedajes",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"hospedajes"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetAllHospedajes",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/hospedajes",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"hospedajes"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetHospedajeId",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/hospedajes/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"hospedajes",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DeleteHospedaje",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/hospedajes/2",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"hospedajes",
+						"2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "UpdateHospedaje",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"titulo\": \"Hotel Actualizado\",\r\n  \"description\": \"Descripción modificada del hotel\",\r\n  \"ubicacion\": \"Nueva dirección 789\",\r\n  \"googleMapsUrl\": \"https://goo.gl/maps/nueva123\",\r\n  \"numWhatsapp\": \"+5491199887766\",\r\n  \"tipoHospedaje\": \"HOTEL\",\r\n  \"imagenes\": [\r\n    \"https://miweb.com/img/nueva1.jpg\",\r\n    \"https://miweb.com/img/nueva2.jpg\"\r\n  ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/hospedajes/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"hospedajes",
+						"1"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
