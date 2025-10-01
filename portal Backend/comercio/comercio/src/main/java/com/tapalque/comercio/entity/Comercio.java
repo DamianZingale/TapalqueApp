@@ -38,9 +38,9 @@ public class Comercio {
 
     private String urlMap;
 
-    private String Facebook;
+    private String facebook;
 
-    private String Instagram;
+    private String instagram;
 
     @OneToMany(mappedBy = "comercio", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ComercioImagen> imagenes = new ArrayList<>();
