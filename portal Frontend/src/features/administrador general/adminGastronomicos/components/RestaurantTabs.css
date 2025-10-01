@@ -1,0 +1,13 @@
+/* Scroll horizontal solo en mobile/tablet */
+.scroll-cards {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+  scroll-snap-type: x mandatory;
+}
+
+.scroll-card {
+  flex: 0 0 80%; /* ocupa 80% del ancho de pantalla */
+  scroll-snap-align: start;
+}
