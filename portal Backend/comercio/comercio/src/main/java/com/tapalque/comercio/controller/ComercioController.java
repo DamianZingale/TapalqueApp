@@ -55,7 +55,7 @@ public class ComercioController {
     @PatchMapping("/{id}")
     public ResponseEntity<ComercioResponseDTO> actualizarParcial(@PathVariable Long id,
             @RequestBody ComercioRequestDTO dto) {
-        return ResponseEntity.ok(comercioService.actualizarParcial(id, dto));
+        return ResponseEntity.ok(comercioService.actualizar(id, dto));
     }
 
     // Eliminar comercio

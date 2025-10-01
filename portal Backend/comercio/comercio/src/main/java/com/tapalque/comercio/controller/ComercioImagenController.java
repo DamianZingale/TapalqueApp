@@ -30,20 +30,20 @@ public class ComercioImagenController {
     @PostMapping
     public ResponseEntity<ImagenResponseDTO> agregarImagen(@PathVariable Long comercioId,
             @RequestParam("file") MultipartFile file) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(imagenService.agregarImagen(comercioId, file));
+        return ResponseEntity.status(HttpStatus.CREATED).body(cImagenService.agregarImagen(comercioId, file));
     }
 
     // Listar imágenes de un comercio
     @GetMapping
     public ResponseEntity<List<ImagenResponseDTO>> listarImagenes(@PathVariable Long comercioId) {
-        return ResponseEntity.ok(imagenService.listarImagenes(comercioId));
+        return ResponseEntity.ok(cImagenService.listarImagenes(comercioId));
     }
 
     // Eliminar imagen (pasando la URL en el body)
     @DeleteMapping
     public ResponseEntity<Void> eliminarImagen(@PathVariable Long comercioId,
             @RequestBody ComercioImagenRequestDTO dto) {
-        imagenService.eliminarImagen(comercioId, dto);
+        cImagenService.eliminarImagen(comercioId, dto);
         return ResponseEntity.noContent().build();
     }
 }
