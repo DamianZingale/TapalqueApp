@@ -8,6 +8,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ComercioImagenRequestDTO {
-    private Long id;
     private String imagenUrl;
 }
