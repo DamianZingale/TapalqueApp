@@ -4,7 +4,6 @@ export interface OpcionHabitacion {
     maxPersonas: number;
     precio: number;
     tipoPrecio: "por_habitacion" | "por_persona";
-    cantidad: number;
     reservas: string[];
 }
 export interface Hospedaje {
@@ -29,7 +28,6 @@ export const mockHospedajes: Hospedaje[] = [
             maxPersonas: 2,
             precio: 22000,
             tipoPrecio: "por_habitacion",
-            cantidad: 5,
             reservas: ["2025-09-28", "2025-10-20"]
         },
         {
@@ -38,7 +36,6 @@ export const mockHospedajes: Hospedaje[] = [
             maxPersonas: 3,
             precio: 28000,
             tipoPrecio: "por_habitacion",
-            cantidad: 5,
             reservas: ["2025-10-22", "2025-10-26"]
         }
         ]
@@ -55,7 +52,6 @@ export const mockHospedajes: Hospedaje[] = [
             maxPersonas: 6,
             precio: 30000,
             tipoPrecio: "por_persona",
-            cantidad: 3,
             reservas: []
         }
         ]
@@ -72,7 +68,6 @@ export const mockHospedajes: Hospedaje[] = [
             maxPersonas: 2,
             precio: 18000,
             tipoPrecio: "por_habitacion",
-            cantidad: 2,
             reservas: []
         }
         ]

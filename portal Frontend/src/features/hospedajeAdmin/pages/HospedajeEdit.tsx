@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { Calendario } from "../../hospedaje/components/Calendario";
 import { mockHospedajes } from "../mock/MockHospedajeEdit";
 
 interface OpcionHabitacion {
@@ -9,7 +8,6 @@ interface OpcionHabitacion {
     maxPersonas: number;
     precio: number;
     tipoPrecio: "por_habitacion" | "por_persona";
-    cantidad: number;
     reservas: string[];
     foto: string;
 }
@@ -25,7 +23,6 @@ export const HospedajeEdit = () => {
         maxPersonas: 1,
         precio: 0,
         tipoPrecio: "por_habitacion",
-        cantidad: 1,
         reservas: [],
         foto: ""
     });
@@ -44,7 +41,7 @@ export const HospedajeEdit = () => {
     };
 
     const handleAdd = () => {
-        if (!form.titulo || !form.precio || !form.cantidad) {
+        if (!form.titulo || !form.precio) {
         alert("Por favor, completá todos los campos obligatorios");
         return;
         }
@@ -57,7 +54,6 @@ export const HospedajeEdit = () => {
         maxPersonas: 1,
         precio: 0,
         tipoPrecio: "por_habitacion",
-        cantidad: 1,
         reservas: [],
         foto: ""
         });
@@ -147,15 +143,7 @@ export const HospedajeEdit = () => {
                 <option value="por_persona">Por persona</option>
             </select>
 
-            <label>Cantidad disponible</label>
-            <input
-                type="number"
-                name="cantidad"
-                value={form.cantidad}
-                onChange={handleChange}
-                placeholder="Cantidad"
-                className="border p-2 rounded"
-            />
+
             </div>
 
             <button
@@ -176,7 +164,6 @@ export const HospedajeEdit = () => {
                     <p className="font-bold text-lg">{op.titulo}</p>
                     <p>Capacidad: {op.maxPersonas} personas</p>
                     <p>Precio: ${op.precio} ({op.tipoPrecio})</p>
-                    <p>Cantidad disponible: {op.cantidad}</p>
                 </div>
                 {op.foto && (
                     <img
@@ -187,14 +174,7 @@ export const HospedajeEdit = () => {
                 )}
                 </div>
 
-                {/* Calendario por habitación */}
-                <h3 className="text-md font-semibold mb-2">Calendario de disponibilidad</h3>
-                <Calendario
-                idHospedaje={op.id}
-                fechasReservadas={op.reservas}
-                modoAdmin={true}
-                />
-
+                
                 <button
                 onClick={() => handleDelete(op.id)}
                 className="mt-4 bg-red-500 text-white px-3 py-1 rounded"
