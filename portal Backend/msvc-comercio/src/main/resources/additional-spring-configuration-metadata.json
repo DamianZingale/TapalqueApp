@@ -1,0 +1,39 @@
+{
+  "properties": [
+    {
+      "name": "spring.application.name",
+      "type": "java.lang.String",
+      "description": "Nombre de la aplicación Spring Boot."
+    },
+    {
+      "name": "server.port",
+      "type": "java.lang.Integer",
+      "description": "Puerto en el que el servicio escuchará."
+    },
+    {
+      "name": "eureka.client.register-with-eureka",
+      "type": "java.lang.Boolean",
+      "description": "Indica si el cliente se registra con Eureka."
+    },
+    {
+      "name": "eureka.client.fetch-registry",
+      "type": "java.lang.Boolean",
+      "description": "Indica si el cliente obtiene el registro de Eureka."
+    },
+    {
+      "name": "eureka.client.service-url.defaultZone",
+      "type": "java.lang.String",
+      "description": "URL del servidor Eureka al que se conecta este cliente."
+    },
+    {
+      "name": "spring.cloud.discovery.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Habilita el descubrimiento de servicios (Eureka/Consul)."
+    },
+    {
+      "name": "config.baseurl.endpoint.msvc-comercio",
+      "type": "java.lang.String",
+      "description": "URL base para el microservicio comercio."
+    }
+  ]
+}
