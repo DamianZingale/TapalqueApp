@@ -48,14 +48,14 @@ public class ComercioController {
     @PutMapping("/{id}")
     public ResponseEntity<ComercioResponseDTO> actualizar(@PathVariable Long id,
             @RequestBody ComercioRequestDTO dto) {
-        return ResponseEntity.ok(comercioService.actualizar(id, dto));
+        return ResponseEntity.ok(comercioService.actualizarCompleto(id, dto));
     }
 
     // Actualizar parcial (PATCH)
     @PatchMapping("/{id}")
     public ResponseEntity<ComercioResponseDTO> actualizarParcial(@PathVariable Long id,
             @RequestBody ComercioRequestDTO dto) {
-        return ResponseEntity.ok(comercioService.actualizar(id, dto));
+        return ResponseEntity.ok(comercioService.actualizarParcial(id, dto));
     }
 
     // Eliminar comercio
