@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,31 +20,48 @@ import com.tapalque.comercio.dto.ComercioImagenRequestDTO;
 import com.tapalque.comercio.dto.ImagenResponseDTO;
 import com.tapalque.comercio.service.ComercioImagenService;
 
+import jakarta.annotation.PostConstruct;
+
 @RestController
-@RequestMapping("/api/comercio/{comercioId}/imagenes")
+@RequestMapping("/api/comercio")
 public class ComercioImagenController {
 
     @Autowired
     private ComercioImagenService cImagenService;
 
-    // Agregar imagen (subida de archivo)
-    @PostMapping
-    public ResponseEntity<ImagenResponseDTO> agregarImagen(@PathVariable Long comercioId,
+    @GetMapping("/test")
+    public ResponseEntity<String> eliminarImagen() {
+        return ResponseEntity.ok("EL TEST ANDA");
+    }
+    // Agregar imagen
+    @PostMapping(value = "/{comercioId}/imagenes", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ImagenResponseDTO> agregarImagen(
+            @PathVariable Long comercioId,
             @RequestParam("file") MultipartFile file) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(cImagenService.agregarImagen(comercioId, file));
+        System.out.println("📸 Imagen recibida para comercio ID: " + comercioId);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(cImagenService.agregarImagen(comercioId, file));
     }
 
-    // Listar imágenes de un comercio
-    @GetMapping
+    // Listar imágenes
+    @GetMapping("/{comercioId}/imagenes")
     public ResponseEntity<List<ImagenResponseDTO>> listarImagenes(@PathVariable Long comercioId) {
         return ResponseEntity.ok(cImagenService.listarImagenes(comercioId));
     }
+    
 
-    // Eliminar imagen (pasando la URL en el body)
-    @DeleteMapping
+    // Eliminar imagen
+    @DeleteMapping("/{comercioId}/imagenes")
     public ResponseEntity<Void> eliminarImagen(@PathVariable Long comercioId,
             @RequestBody ComercioImagenRequestDTO dto) {
+
+        System.out.println("LLega a endpoint");
         cImagenService.eliminarImagen(comercioId, dto);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostConstruct
+    public void init() {
+        System.out.println("✅ ComercioImagenController inicializado");
     }
 }

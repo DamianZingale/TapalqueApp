@@ -18,7 +18,13 @@ public class ComercioService {
     private ComercioRepository comercioRepository;
 
     public ComercioResponseDTO crear(ComercioRequestDTO dto) {
-        throw new UnsupportedOperationException("Unimplemented method 'crear'");
+        if (dto.getTitulo() == null || dto.getTitulo().isBlank()) {
+            throw new IllegalArgumentException("El título del comercio es obligatorio");
+        }
+
+        Comercio comercio = new Comercio(dto);
+        comercioRepository.save(comercio);
+        return new ComercioResponseDTO(comercio);
     }
 
     public List<ComercioResponseDTO> obtenerTodos() {

@@ -37,7 +37,7 @@ public class ComercioResponseDTO {
         this.instagram = c.getInstagram();
         this.imagenes = c.getImagenes()
                 .stream()
-                .map(img -> new ImagenResponseDTO(img.getId(), img.getImagenUrl()))
+                .map(img -> new ImagenResponseDTO(img.getImagenUrl()))
                 .collect(Collectors.toList());
     }
 }
