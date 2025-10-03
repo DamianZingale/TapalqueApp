@@ -1,0 +1,24 @@
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: msvc-comercio
+          uri: lb://msvc-gateway-service
+          predicates:
+            - Path=/api/comercio/**
+          filters:
+            - StripPrefix=2
+
+        - id: msvc-hodspedajes-route
+          uri: lb://msvc-hospedajes-service
+          predicates:
+            - Path=/api/hospedajes/**
+          filters:
+            - StripPrefix=2
+        
+        - id: msvc-gastronomia
+          uri: lb://msvc-gastronomia
+          predicates:
+            - Path=/api/gastronomia/**
+          filters:
+            - StripPrefix=2

@@ -1,0 +1,17 @@
+{
+    "Configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-EurekaServerApplication<eureka-server>",
+            "request": "launch",
+            "mainClass": "com.tapalque.eureka.server.eureka_server.EurekaServerApplication",
+            "projectName": "eureka-server",
+            "cwd": "${workspaceFolder}",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env",
+            
+
+        }
+    ]
+
+}
