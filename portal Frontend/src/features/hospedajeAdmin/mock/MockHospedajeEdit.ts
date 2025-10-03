@@ -37,6 +37,15 @@ export const mockHospedajes: Hospedaje[] = [
             precio: 28000,
             tipoPrecio: "por_habitacion",
             reservas: ["2025-10-22", "2025-10-26"]
+        },
+
+        {
+            id: "103",
+            titulo: "Triple",
+            maxPersonas: 3,
+            precio: 28000,
+            tipoPrecio: "por_habitacion",
+            reservas: ["2025-11-3", "2025-11-26"]
         }
         ]
     },
