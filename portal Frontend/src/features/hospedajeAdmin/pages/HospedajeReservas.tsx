@@ -52,9 +52,97 @@ export const HospedajeReservas = () => {
 
     if (!hospedaje) return <div className="p-4">Hospedaje no encontrado</div>;
 
+
+        // dentro de HospedajeReservas
+    const [fechaDesde, setFechaDesde] = useState("");
+    const [fechaHasta, setFechaHasta] = useState("");
+
+    // función auxiliar: expande rango en array YYYY-MM-DD
+    const expandRange = (start: Date, end: Date) => {
+        const out: string[] = [];
+        const cur = new Date(start);
+        cur.setHours(0,0,0,0);
+        const last = new Date(end);
+        last.setHours(0,0,0,0);
+        while (cur <= last) {
+            out.push(cur.toISOString().split("T")[0]);
+            cur.setDate(cur.getDate() + 1);
+        }
+        return out;
+        
+    };
+
     return (
         <div className="p-6">
         <h1 className="text-2xl font-bold mb-4">Reservas de {hospedaje.nombre}</h1>
+
+        {/*Habitacion disponible hoy? */}
+        <button
+            className="mb-6 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+            onClick={() => {
+                const hoy = new Date().toISOString().split("T")[0]; 
+                const disponibles = opciones.filter(
+                (op) => !op.reservas.includes(hoy)
+                );
+
+                if (disponibles.length === 0) {
+                alert("Hoy no hay habitaciones disponibles 😞");
+                } else {
+                const listado = disponibles.map((d) => `- [${d.id}] ${d.titulo}`).join("\n");
+                alert(`Habitaciones disponibles hoy (${hoy}):\n${listado}`);
+                }
+            }}
+            >
+            Ver habitaciones disponibles hoy
+        </button>
+
+        {/* 🔽 UI para búsqueda de rango */}
+        <div className="my-6 p-4 border rounded bg-gray-50">
+        <h2 className="font-semibold mb-2">Buscar disponibilidad por rango</h2>
+        <div className="flex gap-4 items-center">
+            <input
+            type="date"
+            value={fechaDesde}
+            onChange={(e) => setFechaDesde(e.target.value)}
+            className="border p-2 rounded"
+            />
+            <span>a</span>
+            <input
+            type="date"
+            value={fechaHasta}
+            onChange={(e) => setFechaHasta(e.target.value)}
+            className="border p-2 rounded"
+            />
+
+            <button
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            onClick={() => {
+                if (!fechaDesde || !fechaHasta) {
+                alert("⚠️ Debes seleccionar ambas fechas");
+                return;
+                }
+                const rango = expandRange(new Date(fechaDesde), new Date(fechaHasta));
+
+                const disponibles = opciones.filter(
+                (op) => !op.reservas.some((r) => rango.includes(r))
+                );
+
+                if (disponibles.length === 0) {
+                alert(`No hay habitaciones disponibles entre ${fechaDesde} y ${fechaHasta}`);
+                } else {
+                const listado = disponibles
+                    .map((d) => `- [${d.id}] ${d.titulo}`)
+                    .join("\n");
+                alert(
+                    `Habitaciones disponibles del ${fechaDesde} al ${fechaHasta}:\n${listado}`
+                );
+                }
+            }}
+            >
+            Buscar
+            </button>
+        </div>
+        </div>
 
         <div className="grid gap-6">
             {opciones.map((op) => (
