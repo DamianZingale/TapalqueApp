@@ -31,9 +31,9 @@
       "description": "Habilita el descubrimiento de servicios (Eureka/Consul)."
     },
     {
-      "name": "config.baseurl.endpoint.msvc-comercio",
+      "name": "eureka.instance.prefer-ip-address",
       "type": "java.lang.String",
-      "description": "URL base para el microservicio comercio."
+      "description": "Eureka registra la instancia con la ip de la maquina en lugar del hostname"
     }
   ]
 }
