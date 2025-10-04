@@ -1,0 +1,56 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-EurekaServerAppication<com.eureka-demo>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.eureka.demo.EurekaServerAppication",
+            "projectName": "com.eureka-demo",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-DemoApplication<com.tapalque.gastronomia-demo>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.tapalque.gastronomia.demo.DemoApplication",
+            "projectName": "com.tapalque.gastronomia-demo",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-ComercioApplication<com.tapalque-comercio>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.tapalque.comercio.ComercioApplication",
+            "projectName": "com.tapalque-comercio",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env",
+            "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=45651 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=com.tapalque-comercio"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-DemoApplication<com.tapalque.hosteleria-demo>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.tapalque.hosteleria.demo.DemoApplication",
+            "projectName": "com.tapalque.hosteleria-demo",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env",
+            "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=38429 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=com.tapalque.hosteleria-demo"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-DemoApplication<com.tapalque-demo>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.tapalque.demo.DemoApplication",
+            "projectName": "com.tapalque-demo",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}
