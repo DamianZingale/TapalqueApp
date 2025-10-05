@@ -1,6 +1,5 @@
 /home/damian/Escritorio/TapalqueApp/portal Backend/msvc-gastronomia/src/main/java/com/tapalque/gastronomia/demo/Controller/LocalGastronomicoController.java
 /home/damian/Escritorio/TapalqueApp/portal Backend/msvc-gastronomia/src/main/java/com/tapalque/gastronomia/demo/DTO/RestaurantDTO.java
-/home/damian/Escritorio/TapalqueApp/portal Backend/msvc-gastronomia/src/main/java/com/tapalque/gastronomia/demo/DemoApplication.java
 /home/damian/Escritorio/TapalqueApp/portal Backend/msvc-gastronomia/src/main/java/com/tapalque/gastronomia/demo/Entity/Category.java
 /home/damian/Escritorio/TapalqueApp/portal Backend/msvc-gastronomia/src/main/java/com/tapalque/gastronomia/demo/Entity/Dish.java
 /home/damian/Escritorio/TapalqueApp/portal Backend/msvc-gastronomia/src/main/java/com/tapalque/gastronomia/demo/Entity/DishType.java
@@ -14,6 +13,7 @@
 /home/damian/Escritorio/TapalqueApp/portal Backend/msvc-gastronomia/src/main/java/com/tapalque/gastronomia/demo/Entity/Schedule.java
 /home/damian/Escritorio/TapalqueApp/portal Backend/msvc-gastronomia/src/main/java/com/tapalque/gastronomia/demo/Exceptions/ErrorDTO.java
 /home/damian/Escritorio/TapalqueApp/portal Backend/msvc-gastronomia/src/main/java/com/tapalque/gastronomia/demo/Exceptions/GlobalExceptionHandler.java
+/home/damian/Escritorio/TapalqueApp/portal Backend/msvc-gastronomia/src/main/java/com/tapalque/gastronomia/demo/GastronomiaApplication.java
 /home/damian/Escritorio/TapalqueApp/portal Backend/msvc-gastronomia/src/main/java/com/tapalque/gastronomia/demo/Repository/LocalRepositoryInterface.java
 /home/damian/Escritorio/TapalqueApp/portal Backend/msvc-gastronomia/src/main/java/com/tapalque/gastronomia/demo/Service/I_RestaurantService.java
 /home/damian/Escritorio/TapalqueApp/portal Backend/msvc-gastronomia/src/main/java/com/tapalque/gastronomia/demo/Service/RestaurantService.java
