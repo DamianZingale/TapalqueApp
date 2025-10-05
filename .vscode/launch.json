@@ -2,88 +2,58 @@
     "configurations": [
         {
             "type": "java",
-            "name": "Spring Boot-EurekaServerAppication<eureka-server>",
+            "name": "Spring Boot - EurekaServerApplication <eureka-server>",
             "request": "launch",
             "cwd": "${workspaceFolder}",
-            "mainClass": "com.eureka.demo.EurekaServerAppication",
+            "mainClass": "com.eureka.demo.EurekaServerApplication",
             "projectName": "com.eureka-server",
-            "args": "",
-            "envFile": "${workspaceFolder}/.env",
-            "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=40607 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=com.eureka-demo"
-        },
-        {
-            "type": "java",
-            "name": "Spring Boot-GastronomiaApplication<msvc-gastronomia>",
-            "request": "launch",
-            "cwd": "${workspaceFolder}",
-            "mainClass": "com.tapalque.gastronomia.demo.GastronomiaApplication",
-            "projectName": "com.tapalque.gastronomia",
-            "args": "",
             "envFile": "${workspaceFolder}/.env"
         },
         {
             "type": "java",
-            "name": "Spring Boot-ComercioApplication<msvc-comercio>",
-            "request": "launch",
-            "cwd": "${workspaceFolder}",
-            "mainClass": "com.tapalque.comercio.ComercioApplication",
-            "projectName": "com.tapalque.comercio",
-            "args": "",
-            "envFile": "${workspaceFolder}/.env",
-            "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=45651 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=com.tapalque-comercio"
-        },
-        {
-            "type": "java",
-            "name": "Spring Boot-HosteleriaApplication<msvc-hosteleria>",
-            "request": "launch",
-            "cwd": "${workspaceFolder}",
-            "mainClass": "com.tapalque.hosteleria.demo.HosteleriaApplication",
-            "projectName": "com.tapalque.hosteleria",
-            "args": "",
-            "envFile": "${workspaceFolder}/.env",
-            "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=38429 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=com.tapalque.hosteleria-demo"
-        },
-        {
-            "type": "java",
-            "name": "Spring Boot-GatewayServerApplication<msvc-gateway-server>",
+            "name": "Spring Boot - GatewayServerApplication <msvc-gateway-server>",
             "request": "launch",
             "cwd": "${workspaceFolder}",
             "mainClass": "com.tapalque.demo.GatewayServerApplication",
             "projectName": "com.tapalque.gateway-server",
-            "args": "",
             "envFile": "${workspaceFolder}/.env"
         },
-        /*{
+        {
             "type": "java",
-            "name": "Spring Boot-DemoApplication<com.tapalque.gastronomia-demo>",
+            "name": "Spring Boot - GastronomiaApplication <msvc-gastronomia>",
             "request": "launch",
             "cwd": "${workspaceFolder}",
-            "mainClass": "com.tapalque.gastronomia.demo.DemoApplication",
+            "mainClass": "com.tapalque.gastronomia.demo.GastronomiaApplication",
             "projectName": "com.tapalque.gastronomia",
-            "args": "",
-            "envFile": "${workspaceFolder}/.env",
-            "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=41737 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=com.tapalque.gastronomia-demo"
+            "envFile": "${workspaceFolder}/.env"
         },
         {
             "type": "java",
-            "name": "Spring Boot-DemoApplication<com.tapalque.hosteleria-demo>",
+            "name": "Spring Boot - ComercioApplication <msvc-comercio>",
             "request": "launch",
             "cwd": "${workspaceFolder}",
-            "mainClass": "com.tapalque.hosteleria.demo.DemoApplication",
+            "mainClass": "com.tapalque.comercio.ComercioApplication",
+            "projectName": "com.tapalque.comercio",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot - HosteleriaApplication <msvc-hosteleria>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.tapalque.hosteleria.demo.HosteleriaApplication",
             "projectName": "com.tapalque.hosteleria",
-            "args": "",
-            "envFile": "${workspaceFolder}/.env",
-            "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=41745 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=com.tapalque.hosteleria-demo"
+            "envFile": "${workspaceFolder}/.env"
         },
         {
             "type": "java",
-            "name": "Spring Boot-MsvcGatewayServerApplication<com.tapalque-demo>",
+            "name": "Spring Boot-GastronomiaApplication<com.tapalque.gastronomia-demo>",
             "request": "launch",
             "cwd": "${workspaceFolder}",
-            "mainClass": "com.tapalque.demo.MsvcGatewayServerApplication",
-            "projectName": "com.tapalque.gateway-server",
+            "mainClass": "com.tapalque.gastronomia.demo.GastronomiaApplication",
+            "projectName": "com.tapalque.gastronomia-demo",
             "args": "",
             "envFile": "${workspaceFolder}/.env"
-        }*/
+        }
     ]
 }

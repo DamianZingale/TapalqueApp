@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tapalque.gastronomia.demo.DTO.RestaurantDTO;
@@ -21,7 +20,7 @@ import com.tapalque.gastronomia.demo.Service.I_RestaurantService;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/gastronomia/local")
+//@RequestMapping("/api/gastronomia/local")
 @CrossOrigin("*")
 public class LocalGastronomicoController {
 
