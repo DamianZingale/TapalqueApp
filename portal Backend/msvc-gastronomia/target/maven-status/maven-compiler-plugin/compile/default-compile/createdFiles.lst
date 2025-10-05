@@ -3,12 +3,12 @@ com/tapalque/gastronomia/demo/DTO/RestaurantDTO.class
 com/tapalque/gastronomia/demo/Exceptions/GlobalExceptionHandler.class
 com/tapalque/gastronomia/demo/Entity/Ingredient.class
 com/tapalque/gastronomia/demo/Entity/PhoneNumber.class
-com/tapalque/gastronomia/demo/DemoApplication.class
 com/tapalque/gastronomia/demo/Repository/LocalRepositoryInterface.class
 com/tapalque/gastronomia/demo/Controller/LocalGastronomicoController.class
 com/tapalque/gastronomia/demo/Entity/Dish.class
 com/tapalque/gastronomia/demo/Entity/Menu.class
 com/tapalque/gastronomia/demo/Entity/PhoneType.class
+com/tapalque/gastronomia/demo/GastronomiaApplication.class
 com/tapalque/gastronomia/demo/Entity/Review.class
 com/tapalque/gastronomia/demo/Entity/Schedule.class
 com/tapalque/gastronomia/demo/Service/RestaurantService.class
