@@ -34,6 +34,11 @@
       "name": "eureka.instance.prefer-ip-address",
       "type": "java.lang.String",
       "description": "Eureka registra la instancia con la ip de la maquina en lugar del hostname"
-    }
+    },
+   {
+      "name": "upload.dir",
+      "type": "java.lang.String",
+      "description": "A description for 'upload.dir'"
+   }
   ]
 }

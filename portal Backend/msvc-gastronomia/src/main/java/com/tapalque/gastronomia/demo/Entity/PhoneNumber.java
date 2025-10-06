@@ -17,15 +17,7 @@ import jakarta.persistence.Table;
 
 public class PhoneNumber {
 
-    public PhoneNumber() {
-    }
-
-    public PhoneNumber(Long idPhoneNumber, String number, PhoneType type, Restaurant restaurant) {
-        this.idPhoneNumber = idPhoneNumber;
-        this.number = number;
-        this.type = type;
-        this.restaurant = restaurant;
-    }
+    
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,6 +34,15 @@ public class PhoneNumber {
     @JoinColumn(name = "idRestaurant", nullable = false)
     private Restaurant restaurant;
 
+    public PhoneNumber() {
+    }
+
+    public PhoneNumber(Long idPhoneNumber, String number, PhoneType type, Restaurant restaurant) {
+        this.idPhoneNumber = idPhoneNumber;
+        this.number = number;
+        this.type = type;
+        this.restaurant = restaurant;
+    }
     public Long getIdPhoneNumber() {
         return idPhoneNumber;
     }

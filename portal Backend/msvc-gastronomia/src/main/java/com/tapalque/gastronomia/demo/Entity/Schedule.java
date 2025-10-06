@@ -11,9 +11,24 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "schedule")
-
 public class Schedule {
 
+     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long idSchedule;
+
+    @Column(nullable = false)
+    private Integer dayOfWeek; // 1 = Monday ... 7 = Sunday
+
+    @Column(nullable = false)
+    private String openingTime;
+
+    @Column(nullable = false)
+    private String closingTime;
+
+    @ManyToOne
+    @JoinColumn(name = "idRestaurant", nullable = false)
+    private Restaurant restaurant;
     public Long getIdSchedule() {
         return idSchedule;
     }
@@ -65,20 +80,5 @@ public class Schedule {
         this.restaurant = restaurant;
     }
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idSchedule;
-
-    @Column(nullable = false)
-    private Integer dayOfWeek; // 1 = Monday ... 7 = Sunday
-
-    @Column(nullable = false)
-    private String openingTime;
-
-    @Column(nullable = false)
-    private String closingTime;
-
-    @ManyToOne
-    @JoinColumn(name = "idRestaurant", nullable = false)
-    private Restaurant restaurant;
+   
 }
