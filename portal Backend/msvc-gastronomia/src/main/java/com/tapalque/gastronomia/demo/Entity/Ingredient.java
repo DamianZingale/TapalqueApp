@@ -15,6 +15,16 @@ import jakarta.persistence.Table;
 @Table(name = "ingredient")
 public class Ingredient {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long idIngredient;
+
+    @Column(nullable = false, unique = true)
+    private String name;
+
+    @ManyToMany(mappedBy = "ingredients")
+    private List<Dish> dishes;
+    
     public Ingredient() {
     }
 
@@ -48,13 +58,5 @@ public class Ingredient {
         this.dishes = dishes;
     }
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idIngredient;
-
-    @Column(nullable = false, unique = true)
-    private String name;
-
-    @ManyToMany(mappedBy = "ingredients")
-    private List<Dish> dishes;
+    
 }

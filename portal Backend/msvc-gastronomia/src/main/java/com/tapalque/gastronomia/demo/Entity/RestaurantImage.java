@@ -14,6 +14,16 @@ import jakarta.persistence.Table;
 @Table(name = "restaurant_images")
 public class RestaurantImage {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "photo")
+    private String imageUrl;
+
+    @ManyToOne
+    @JoinColumn(name = "restaurant_id", referencedColumnName = "idRestaurant", nullable = false)
+    private Restaurant restaurant;
     public RestaurantImage() {
     }
 
@@ -47,16 +57,7 @@ public class RestaurantImage {
         this.restaurant = restaurant;
     }
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(name = "photo")
-    private String imageUrl;
-
-    @ManyToOne
-    @JoinColumn(name = "restaurant_id", referencedColumnName = "idRestaurant", nullable = false)
-    private Restaurant restaurant;
+    
 
     
  

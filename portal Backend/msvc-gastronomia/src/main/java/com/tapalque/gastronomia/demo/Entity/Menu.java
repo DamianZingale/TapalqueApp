@@ -5,6 +5,7 @@ import java.util.List;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -21,9 +22,7 @@ public class Menu {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idMenu;
 
-    @Column(nullable = false)
-    private String name; // ej: "Menú Principal", "Menú Vegano"
-
+   
     @Column(nullable = true)
     private String description;
 
@@ -33,13 +32,13 @@ public class Menu {
     private Restaurant restaurant;
 
     // Relación con Dish
-    @OneToMany(mappedBy = "menu", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "menu", cascade = CascadeType.ALL, orphanRemoval = true, fetch=FetchType.EAGER)
     private List<Dish> dishes;
 
     public Menu() {}
 
-    public Menu(String name, String description, Restaurant restaurant, List<Dish> dishes) {
-        this.name = name;
+    public Menu( String description, Restaurant restaurant, List<Dish> dishes) {
+      
         this.description = description;
         this.restaurant = restaurant;
         this.dishes = dishes;
@@ -53,13 +52,7 @@ public class Menu {
         this.idMenu = idMenu;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
+    
 
     public String getDescription() {
         return description;

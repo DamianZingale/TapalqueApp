@@ -4,8 +4,6 @@ import java.util.List;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -15,28 +13,13 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
-
 @Entity
 @Table(name = "dish")
-
 public class Dish {
-
-    public Dish() {
-    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idDish;
-
-    public Dish(Long idDish, String name, Double price, DishType type, Menu menu,
-            List<Ingredient> ingredients) {
-        this.idDish = idDish;
-        this.name = name;
-        this.price = price;
-        this.type = type;
-        this.menu = menu;
-        this.ingredients = ingredients;
-    }
 
     @Column(nullable = false)
     private String name;
@@ -44,15 +27,14 @@ public class Dish {
     @Column(nullable = false)
     private Double price;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private DishType type;  // FOOD or DRINK
+    // 🔹 Relación con Category
+    @ManyToOne
+    @JoinColumn(name = "idCategory", nullable = false)
+    private Category category;
 
     @ManyToOne
-@JoinColumn(name = "idMenu", nullable = false)
-private Menu menu;
-
-
+    @JoinColumn(name = "idMenu", nullable = false)
+    private Menu menu;
 
     @ManyToMany
     @JoinTable(
@@ -61,6 +43,19 @@ private Menu menu;
         inverseJoinColumns = @JoinColumn(name = "idIngredient")
     )
     private List<Ingredient> ingredients;
+
+    public Dish() {}
+
+    public Dish(Long idDish, String name, Double price, Category category, Menu menu, List<Ingredient> ingredients) {
+        this.idDish = idDish;
+        this.name = name;
+        this.price = price;
+        this.category = category;
+        this.menu = menu;
+        this.ingredients = ingredients;
+    }
+
+    // 🔹 Getters y Setters
 
     public Long getIdDish() {
         return idDish;
@@ -86,20 +81,20 @@ private Menu menu;
         this.price = price;
     }
 
-    public DishType getType() {
-        return type;
+    public Category getCategory() {
+        return category;
     }
 
-    public void setType(DishType type) {
-        this.type = type;
+    public void setCategory(Category category) {
+        this.category = category;
     }
 
     public Menu getMenu() {
-    return menu;
+        return menu;
     }
 
     public void setMenu(Menu menu) {
-    this.menu = menu;
+        this.menu = menu;
     }
 
     public List<Ingredient> getIngredients() {
