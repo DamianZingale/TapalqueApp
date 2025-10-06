@@ -6,23 +6,30 @@ import java.util.stream.Collectors;
 import com.tapalque.gastronomia.demo.Entity.Dish;
 
 public class DishDTO {
+
     private Long idDish;
     private String name;
     private Double price;
-    private CategoryDTO category;
+    private List<DishCategoryDTO> categories;  
     private List<IngredientDTO> ingredients;
+    private List<DishRestrictionDTO> restrictions;
 
     public DishDTO() {}
 
+    // 🔹 Factory method: entidad → DTO
     public static DishDTO fromEntity(Dish dish) {
         DishDTO dto = new DishDTO();
         dto.setIdDish(dish.getIdDish());
         dto.setName(dish.getName());
         dto.setPrice(dish.getPrice());
 
-        // La categoría puede ser null, chequeamos
-        if (dish.getCategory() != null) {
-            dto.setCategory(CategoryDTO.fromEntity(dish.getCategory()));
+        if (dish.getCategories() != null) {
+            dto.setCategories(
+                dish.getCategories()
+                    .stream()
+                    .map(DishCategoryDTO::fromEntity)
+                    .collect(Collectors.toList())
+            );
         }
 
         if (dish.getIngredients() != null) {
@@ -34,10 +41,19 @@ public class DishDTO {
             );
         }
 
+        if (dish.getRestrictions() != null) {
+            dto.setRestrictions(
+                dish.getRestrictions()
+                    .stream()
+                    .map(DishRestrictionDTO::fromEntity)
+                    .collect(Collectors.toList())
+            );
+        }
+
         return dto;
     }
 
-    // Getters y Setters
+    // 🔹 Getters y Setters
     public Long getIdDish() { return idDish; }
     public void setIdDish(Long idDish) { this.idDish = idDish; }
 
@@ -47,9 +63,12 @@ public class DishDTO {
     public Double getPrice() { return price; }
     public void setPrice(Double price) { this.price = price; }
 
-    public CategoryDTO getCategory() { return category; }
-    public void setCategory(CategoryDTO category) { this.category = category; }
+    public List<DishCategoryDTO> getCategories() { return categories; }
+    public void setCategories(List<DishCategoryDTO> categories) { this.categories = categories; }
 
     public List<IngredientDTO> getIngredients() { return ingredients; }
     public void setIngredients(List<IngredientDTO> ingredients) { this.ingredients = ingredients; }
+
+    public List<DishRestrictionDTO> getRestrictions() { return restrictions; }
+    public void setRestrictions(List<DishRestrictionDTO> restrictions) { this.restrictions = restrictions; }
 }

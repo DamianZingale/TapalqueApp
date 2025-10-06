@@ -2,25 +2,16 @@ package com.tapalque.gastronomia.demo.Controller;
 
 import java.util.List;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tapalque.gastronomia.demo.DTO.RestaurantDTO;
-import com.tapalque.gastronomia.demo.Entity.Restaurant;
 import com.tapalque.gastronomia.demo.Service.I_RestaurantService;
 
-import jakarta.validation.Valid;
-
 @RestController
-//@RequestMapping("/api/gastronomia/local")
+
 @CrossOrigin("*")
 public class LocalGastronomicoController {
 
@@ -31,15 +22,11 @@ public class LocalGastronomicoController {
     }
 
 
-    @GetMapping("/findAll") // obtener todos
-    public ResponseEntity<List<RestaurantDTO>> findAllLocalController() {
-        List<RestaurantDTO> locales = localGastronomicoService.getAllLocalGastronomicos()
-                .stream()
-                .map(RestaurantDTO::new)
-                .toList();
-        return ResponseEntity.ok(locales);
-    }
-
+    @GetMapping("/findAll")
+public ResponseEntity<List<RestaurantDTO>> findAllLocalController() {
+    return ResponseEntity.ok(localGastronomicoService.getAllLocalGastronomicos());
+}
+    /* 
     @GetMapping("/findById/{id}") // obtener por id
     public ResponseEntity<RestaurantDTO> findByIdLocalController(@PathVariable Long id) {
         Restaurant local = localGastronomicoService.getLocalGastronomicoById(id);
@@ -87,5 +74,5 @@ public class LocalGastronomicoController {
     @GetMapping("/saludo")
     public String getMethodName() {
         return "Hola Mundo!!";
-    }
+    }*/
 }

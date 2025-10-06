@@ -1,7 +1,9 @@
 /home/damian/Escritorio/TapalqueApp/portal Backend/msvc-gastronomia/src/main/java/com/tapalque/gastronomia/demo/Controller/LocalGastronomicoController.java
 /home/damian/Escritorio/TapalqueApp/portal Backend/msvc-gastronomia/src/main/java/com/tapalque/gastronomia/demo/Controller/MenuController.java
 /home/damian/Escritorio/TapalqueApp/portal Backend/msvc-gastronomia/src/main/java/com/tapalque/gastronomia/demo/DTO/CategoryDTO.java
+/home/damian/Escritorio/TapalqueApp/portal Backend/msvc-gastronomia/src/main/java/com/tapalque/gastronomia/demo/DTO/DishCategoryDTO.java
 /home/damian/Escritorio/TapalqueApp/portal Backend/msvc-gastronomia/src/main/java/com/tapalque/gastronomia/demo/DTO/DishDTO.java
+/home/damian/Escritorio/TapalqueApp/portal Backend/msvc-gastronomia/src/main/java/com/tapalque/gastronomia/demo/DTO/DishRestrictionDTO.java
 /home/damian/Escritorio/TapalqueApp/portal Backend/msvc-gastronomia/src/main/java/com/tapalque/gastronomia/demo/DTO/IngredientDTO.java
 /home/damian/Escritorio/TapalqueApp/portal Backend/msvc-gastronomia/src/main/java/com/tapalque/gastronomia/demo/DTO/MenuDTO.java
 /home/damian/Escritorio/TapalqueApp/portal Backend/msvc-gastronomia/src/main/java/com/tapalque/gastronomia/demo/DTO/PhoneNumberDTO.java
@@ -9,6 +11,8 @@
 /home/damian/Escritorio/TapalqueApp/portal Backend/msvc-gastronomia/src/main/java/com/tapalque/gastronomia/demo/DTO/ScheduleDTO.java
 /home/damian/Escritorio/TapalqueApp/portal Backend/msvc-gastronomia/src/main/java/com/tapalque/gastronomia/demo/Entity/Category.java
 /home/damian/Escritorio/TapalqueApp/portal Backend/msvc-gastronomia/src/main/java/com/tapalque/gastronomia/demo/Entity/Dish.java
+/home/damian/Escritorio/TapalqueApp/portal Backend/msvc-gastronomia/src/main/java/com/tapalque/gastronomia/demo/Entity/DishCategory.java
+/home/damian/Escritorio/TapalqueApp/portal Backend/msvc-gastronomia/src/main/java/com/tapalque/gastronomia/demo/Entity/DishRestriction.java
 /home/damian/Escritorio/TapalqueApp/portal Backend/msvc-gastronomia/src/main/java/com/tapalque/gastronomia/demo/Entity/Ingredient.java
 /home/damian/Escritorio/TapalqueApp/portal Backend/msvc-gastronomia/src/main/java/com/tapalque/gastronomia/demo/Entity/Menu.java
 /home/damian/Escritorio/TapalqueApp/portal Backend/msvc-gastronomia/src/main/java/com/tapalque/gastronomia/demo/Entity/PhoneNumber.java
