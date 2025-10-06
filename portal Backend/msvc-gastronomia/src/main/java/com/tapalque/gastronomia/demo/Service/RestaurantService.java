@@ -1,5 +1,6 @@
 package com.tapalque.gastronomia.demo.Service;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,21 +19,29 @@ public class RestaurantService implements I_RestaurantService {
     @Autowired
     private LocalRepositoryInterface localGastronomicoRepository;
 
-    @Override
-    public void addLocalGastronomico(Restaurant localGastronomico) {
-        if (localGastronomico.getName() == null || localGastronomico.getName().isBlank()) {
-            throw new IllegalArgumentException("El nombre del local no puede estar vacío");
-        }
-        localGastronomicoRepository.save(localGastronomico);
+   
+    @Override // Implementación del método para obtener un local gastronómico por su ID
+public RestaurantDTO getLocalGastronomicoById(Long id) {
+    Object resultObj = localGastronomicoRepository.selectRestaurantById(id);
+    if (resultObj == null) {
+        throw new EntityNotFoundException("No existe el local con id " + id);
     }
 
-    @Override
-    public Restaurant getLocalGastronomicoById(Long id) {
-        return localGastronomicoRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("No se encontró el local con id " + id));
-    }
+    Object[] result = (Object[]) resultObj; 
+    System.out.println("Resultado de la consulta: " + Arrays.toString(result));
+    return new RestaurantDTO(
+        ((Number) result[0]).longValue(), // id_restaurant
+        (String) result[1],               // name
+        (String) result[2],               // address
+        (String) result[3],               // email
+        (String) result[4],               // map_url
+        (String) result[5],               // categories
+        (String) result[6],               // phones
+        (String) result[7]                // schedule
+    );
+}
 
-    @Override
+    @Override // Implementación del método para obtener todos los locales gastronómicos
     public List<RestaurantDTO> getAllLocalGastronomicos() {
         List<Object[]> results = localGastronomicoRepository.selectAllRestaurant();
         List<RestaurantDTO> dtos = results.stream()
@@ -67,10 +76,14 @@ public class RestaurantService implements I_RestaurantService {
         }
         localGastronomicoRepository.deleteById(idLong);
     }
-    
-    @Override
-    public List<Restaurant> findByCategories(String category) {
-        return localGastronomicoRepository.findByCategoryName(category);
+   
+     @Override
+    public void addLocalGastronomico(Restaurant localGastronomico) {
+        if (localGastronomico.getName() == null || localGastronomico.getName().isBlank()) {
+            throw new IllegalArgumentException("El nombre del local no puede estar vacío");
+        }
+        localGastronomicoRepository.save(localGastronomico);
     }
+
 
 }

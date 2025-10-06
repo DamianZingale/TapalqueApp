@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tapalque.gastronomia.demo.DTO.RestaurantDTO;
@@ -24,15 +25,17 @@ public class LocalGastronomicoController {
 
     @GetMapping("/findAll")
 public ResponseEntity<List<RestaurantDTO>> findAllLocalController() {
-    return ResponseEntity.ok(localGastronomicoService.getAllLocalGastronomicos());
+    if( localGastronomicoService.getAllLocalGastronomicos().isEmpty()){
+        return ResponseEntity.noContent().build();
+    }
+    else return ResponseEntity.ok(localGastronomicoService.getAllLocalGastronomicos());
 }
-    /* 
+    
     @GetMapping("/findById/{id}") // obtener por id
     public ResponseEntity<RestaurantDTO> findByIdLocalController(@PathVariable Long id) {
-        Restaurant local = localGastronomicoService.getLocalGastronomicoById(id);
-        return ResponseEntity.ok(new RestaurantDTO(local));
+        return ResponseEntity.ok(localGastronomicoService.getLocalGastronomicoById(id));
     }
-
+/* 
     @PostMapping("/save") // crear nuevo local gastronomico
     public ResponseEntity<RestaurantDTO> saveLocalController(@Valid @RequestBody RestaurantDTO nuevo_local) {
         Restaurant localEntity = nuevo_local.toEntity(); // asumimos que DTO tiene método paraEntity()

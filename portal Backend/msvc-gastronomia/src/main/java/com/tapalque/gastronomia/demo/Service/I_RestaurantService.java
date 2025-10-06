@@ -9,11 +9,11 @@ public interface I_RestaurantService {
 
     
     List<RestaurantDTO> getAllLocalGastronomicos();
+    RestaurantDTO getLocalGastronomicoById(Long id);
     void addLocalGastronomico(Restaurant restaurant);
-    Restaurant getLocalGastronomicoById(Long id);
     void updateRestaurant (Restaurant restaurant);
     void deleteRestaurant (Long id);
-    List<Restaurant> findByCategories(String category);
+    
     
 
    
