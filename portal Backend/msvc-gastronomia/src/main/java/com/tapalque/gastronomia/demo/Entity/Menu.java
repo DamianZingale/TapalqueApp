@@ -2,6 +2,8 @@ package com.tapalque.gastronomia.demo.Entity;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -27,12 +29,13 @@ public class Menu {
     private String description;
 
     // Relación con Restaurant
+    @JsonBackReference
     @OneToOne
     @JoinColumn(name = "idRestaurant", nullable = false)
     private Restaurant restaurant;
 
     // Relación con Dish
-    @OneToMany(mappedBy = "menu", cascade = CascadeType.ALL, orphanRemoval = true, fetch=FetchType.EAGER)
+    @OneToMany(mappedBy = "menu", cascade = CascadeType.ALL, orphanRemoval = true, fetch=FetchType.LAZY)
     private List<Dish> dishes;
 
     public Menu() {}

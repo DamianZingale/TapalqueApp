@@ -1,6 +1,8 @@
 package com.tapalque.gastronomia.demo.Entity;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -30,6 +32,7 @@ public class PhoneNumber {
     @Column(nullable = false)
     private PhoneType type; // MOBILE, LANDLINE, WHATSAPP, etc.
 
+    @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "idRestaurant", nullable = false)
     private Restaurant restaurant;

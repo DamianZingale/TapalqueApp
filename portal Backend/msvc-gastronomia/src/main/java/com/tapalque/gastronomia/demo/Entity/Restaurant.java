@@ -2,6 +2,7 @@ package com.tapalque.gastronomia.demo.Entity;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
@@ -51,16 +52,17 @@ public class Restaurant {
     )
     private List<Category> categories;
 
-    
+    @JsonIgnore
     @OneToOne(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
     private Menu menus;
-
+    @JsonManagedReference
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Schedule> schedules;
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PhoneNumber> phoneNumbers;
-
+    @JsonManagedReference
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RestaurantImage> images;
 
