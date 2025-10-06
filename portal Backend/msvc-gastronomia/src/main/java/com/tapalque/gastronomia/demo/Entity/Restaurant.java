@@ -32,8 +32,7 @@ public class Restaurant {
     @Column(nullable = false)
     private String address;
 
-    @Column(nullable = false)
-    private String phone;
+   
 
     @Column(nullable = false)
     private String email;
@@ -72,7 +71,7 @@ public class Restaurant {
     
     public Restaurant(){}
   
-    public Restaurant(String address, List<Category> categories, Boolean delivery, Menu menu, String email, Long idRestaurant, List<RestaurantImage> images, String name, String phone, List<PhoneNumber> phoneNumbers, List<Schedule> schedules) {
+    public Restaurant(String address, List<Category> categories, Boolean delivery, Menu menu, String email, Long idRestaurant, List<RestaurantImage> images, String name, List<PhoneNumber> phone, List<PhoneNumber> phoneNumbers, List<Schedule> schedules) {
         this.address = address;
         this.categories = categories;
         this.delivery = delivery;
@@ -81,7 +80,7 @@ public class Restaurant {
         this.idRestaurant = idRestaurant;
         this.images = images;
         this.name = name;
-        this.phone = phone;
+        this.phoneNumbers = phone;
         this.phoneNumbers = phoneNumbers;
         this.schedules = schedules;
     }
@@ -102,10 +101,7 @@ public class Restaurant {
         this.address = address;
     }
 
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
+    
     public void setEmail(String email) {
         this.email = email;
     }
@@ -140,10 +136,7 @@ public class Restaurant {
         return address;
     }
 
-    public String getPhone() {
-        return phone;
-    }
-
+    
     public String getEmail() {
         return email;
     }

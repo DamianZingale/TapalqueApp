@@ -27,15 +27,30 @@ public class Dish {
     @Column(nullable = false)
     private Double price;
 
-    // 🔹 Relación con Category
-    @ManyToOne
-    @JoinColumn(name = "idCategory", nullable = false)
-    private Category category;
+    // 🔹 Relación ManyToMany con DishCategory
+    @ManyToMany
+    @JoinTable(
+        name = "dish_category_relation",
+        joinColumns = @JoinColumn(name = "idDish"),
+        inverseJoinColumns = @JoinColumn(name = "idDishCategory")
+    )
+    private List<DishCategory> categories;
 
+    // 🔹 Restricciones del plato (Vegano, Sin gluten, etc.)
+    @ManyToMany
+    @JoinTable(
+        name = "dish_restriction",
+        joinColumns = @JoinColumn(name = "idDish"),
+        inverseJoinColumns = @JoinColumn(name = "idRestriction")
+    )
+    private List<DishRestriction> restrictions;
+
+    // 🔹 Menú al que pertenece
     @ManyToOne
     @JoinColumn(name = "idMenu", nullable = false)
     private Menu menu;
 
+    // 🔹 Ingredientes
     @ManyToMany
     @JoinTable(
         name = "dish_ingredient",
@@ -46,16 +61,15 @@ public class Dish {
 
     public Dish() {}
 
-    public Dish(Long idDish, String name, Double price, Category category, Menu menu, List<Ingredient> ingredients) {
+    public Dish(Long idDish, String name, Double price, List<DishCategory> categories, Menu menu, List<Ingredient> ingredients, List<DishRestriction> restrictions) {
         this.idDish = idDish;
         this.name = name;
         this.price = price;
-        this.category = category;
+        this.categories = categories;
         this.menu = menu;
         this.ingredients = ingredients;
+        this.restrictions = restrictions;
     }
-
-    // 🔹 Getters y Setters
 
     public Long getIdDish() {
         return idDish;
@@ -81,12 +95,20 @@ public class Dish {
         this.price = price;
     }
 
-    public Category getCategory() {
-        return category;
+    public List<DishCategory> getCategories() {
+        return categories;
     }
 
-    public void setCategory(Category category) {
-        this.category = category;
+    public void setCategories(List<DishCategory> categories) {
+        this.categories = categories;
+    }
+
+    public List<DishRestriction> getRestrictions() {
+        return restrictions;
+    }
+
+    public void setRestrictions(List<DishRestriction> restrictions) {
+        this.restrictions = restrictions;
     }
 
     public Menu getMenu() {

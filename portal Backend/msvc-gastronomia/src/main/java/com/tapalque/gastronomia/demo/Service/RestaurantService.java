@@ -1,10 +1,12 @@
 package com.tapalque.gastronomia.demo.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.tapalque.gastronomia.demo.DTO.RestaurantDTO;
 import com.tapalque.gastronomia.demo.Entity.Restaurant;
 import com.tapalque.gastronomia.demo.Repository.LocalRepositoryInterface;
 
@@ -31,12 +33,22 @@ public class RestaurantService implements I_RestaurantService {
     }
 
     @Override
-    public List<Restaurant> getAllLocalGastronomicos() {
-        List<Restaurant> locales = localGastronomicoRepository.findAll();
-        if (locales.isEmpty()) {
-            throw new EntityNotFoundException("No hay locales gastronómicos registrados");
-        }
-        return locales;
+    public List<RestaurantDTO> getAllLocalGastronomicos() {
+        List<Object[]> results = localGastronomicoRepository.selectAllRestaurant();
+        List<RestaurantDTO> dtos = results.stream()
+            .map(r -> new RestaurantDTO(
+                ((Number) r[0]).longValue(), // id_restaurant
+                (String) r[1],               // name
+                (String) r[2],               // address
+                (String) r[3],               // email
+                (String) r[4],               // map_url
+                (String) r[5],               // categories concatenadas
+                (String) r[6],               // phones concatenados
+                (String) r[7]                // schedule concatenado
+            ))
+            .collect(Collectors.toList());
+
+    return dtos;
     }
 
     @Override
@@ -58,7 +70,7 @@ public class RestaurantService implements I_RestaurantService {
     
     @Override
     public List<Restaurant> findByCategories(String category) {
-        return localGastronomicoRepository.findByCategories_Name(category);
+        return localGastronomicoRepository.findByCategoryName(category);
     }
 
 }
