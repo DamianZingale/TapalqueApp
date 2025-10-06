@@ -1,5 +1,7 @@
 package com.tapalque.gastronomia.demo.Entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -26,6 +28,7 @@ public class Schedule {
     @Column(nullable = false)
     private String closingTime;
 
+    @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "idRestaurant", nullable = false)
     private Restaurant restaurant;
