@@ -2,14 +2,20 @@ package com.tapalque.gastronomia.demo.Controller;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.tapalque.gastronomia.demo.GastronomiaApplication;
 import com.tapalque.gastronomia.demo.DTO.RestaurantDTO;
 import com.tapalque.gastronomia.demo.Service.I_RestaurantService;
+
+import jakarta.validation.Valid;
 
 @RestController
 
@@ -18,8 +24,9 @@ public class LocalGastronomicoController {
 
    private final I_RestaurantService localGastronomicoService;
 
-    public LocalGastronomicoController(I_RestaurantService localGastronomicoService) {
+    public LocalGastronomicoController(I_RestaurantService localGastronomicoService, GastronomiaApplication gastronomiaApplication) {
         this.localGastronomicoService = localGastronomicoService;
+        
     }
 
 
@@ -33,18 +40,22 @@ public ResponseEntity<List<RestaurantDTO>> findAllLocalController() {
     
     @GetMapping("/findById/{id}") // obtener por id
     public ResponseEntity<RestaurantDTO> findByIdLocalController(@PathVariable Long id) {
-        return ResponseEntity.ok(localGastronomicoService.getLocalGastronomicoById(id));
-    }
-/* 
-    @PostMapping("/save") // crear nuevo local gastronomico
-    public ResponseEntity<RestaurantDTO> saveLocalController(@Valid @RequestBody RestaurantDTO nuevo_local) {
-        Restaurant localEntity = nuevo_local.toEntity(); // asumimos que DTO tiene método paraEntity()
-        localGastronomicoService.addLocalGastronomico(localEntity);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new RestaurantDTO(localEntity));
+        if(localGastronomicoService.getLocalGastronomicoById(id) == null){
+            return ResponseEntity.noContent().build();
+        }
+        else return ResponseEntity.ok(localGastronomicoService.getLocalGastronomicoById(id));
     }
 
+    @PostMapping("/save")
+public ResponseEntity<RestaurantDTO> saveLocalController(@Valid @RequestBody RestaurantDTO nuevo_local) {
+    RestaurantDTO savedEntity = localGastronomicoService.addRestaurant(nuevo_local);
+    if(savedEntity == null){
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+    }
+    return ResponseEntity.status(HttpStatus.CREATED).body(savedEntity);
+}
   
-
+    /* 
     @PutMapping("/reload/{id}") // actualizar
     public ResponseEntity<RestaurantDTO> reloadLocalController(@Valid @PathVariable Long id,
             @RequestBody RestaurantDTO actualizar_local) {

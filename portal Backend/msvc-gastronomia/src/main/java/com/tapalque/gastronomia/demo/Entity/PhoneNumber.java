@@ -29,7 +29,7 @@ public class PhoneNumber {
     private String number;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = true)
     private PhoneType type; // MOBILE, LANDLINE, WHATSAPP, etc.
 
     @JsonBackReference

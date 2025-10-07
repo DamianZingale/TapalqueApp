@@ -24,6 +24,7 @@
 /home/damian/Escritorio/TapalqueApp/portal Backend/msvc-gastronomia/src/main/java/com/tapalque/gastronomia/demo/Exceptions/ErrorDTO.java
 /home/damian/Escritorio/TapalqueApp/portal Backend/msvc-gastronomia/src/main/java/com/tapalque/gastronomia/demo/Exceptions/GlobalExceptionHandler.java
 /home/damian/Escritorio/TapalqueApp/portal Backend/msvc-gastronomia/src/main/java/com/tapalque/gastronomia/demo/GastronomiaApplication.java
+/home/damian/Escritorio/TapalqueApp/portal Backend/msvc-gastronomia/src/main/java/com/tapalque/gastronomia/demo/Repository/CategoryRepositoriInterface.java
 /home/damian/Escritorio/TapalqueApp/portal Backend/msvc-gastronomia/src/main/java/com/tapalque/gastronomia/demo/Repository/LocalRepositoryInterface.java
 /home/damian/Escritorio/TapalqueApp/portal Backend/msvc-gastronomia/src/main/java/com/tapalque/gastronomia/demo/Repository/MenuRepositoryInterface.java
 /home/damian/Escritorio/TapalqueApp/portal Backend/msvc-gastronomia/src/main/java/com/tapalque/gastronomia/demo/Service/I_RestaurantService.java
