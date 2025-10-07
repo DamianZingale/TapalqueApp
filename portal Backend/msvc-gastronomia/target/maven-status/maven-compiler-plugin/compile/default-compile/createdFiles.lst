@@ -8,6 +8,7 @@ com/tapalque/gastronomia/demo/DTO/CategoryDTO.class
 com/tapalque/gastronomia/demo/Entity/DishCategory.class
 com/tapalque/gastronomia/demo/Entity/Menu.class
 com/tapalque/gastronomia/demo/Service/MenuServiceInterface.class
+com/tapalque/gastronomia/demo/Repository/CategoryRepositoriInterface.class
 com/tapalque/gastronomia/demo/GastronomiaApplication.class
 com/tapalque/gastronomia/demo/DTO/ScheduleDTO.class
 com/tapalque/gastronomia/demo/Service/MenuService.class

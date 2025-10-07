@@ -3,11 +3,13 @@ package com.tapalque.gastronomia.demo.Repository;
 
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import com.tapalque.gastronomia.demo.Entity.Category;
 import com.tapalque.gastronomia.demo.Entity.Restaurant;
 
 
@@ -57,6 +59,7 @@ List<Object[]> selectAllRestaurant();
     """, nativeQuery = true)
     Object selectRestaurantById(Long id);
 
+    Optional<Category> findByName(String name);
 }
     
 

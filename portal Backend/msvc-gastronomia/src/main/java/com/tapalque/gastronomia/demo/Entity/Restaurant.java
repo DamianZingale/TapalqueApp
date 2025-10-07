@@ -161,10 +161,9 @@ public class Restaurant {
         return schedules;
     }
 
-    public List<PhoneNumber> getPhoneNumbers() {
+    public List<PhoneNumber> getPhoneNumbers(){
         return phoneNumbers;
     }
-
     public List<RestaurantImage> getImages() {
         return images;
     }

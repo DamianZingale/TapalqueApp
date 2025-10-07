@@ -1,6 +1,5 @@
 package com.tapalque.gastronomia.demo.Service;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -8,7 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.tapalque.gastronomia.demo.DTO.RestaurantDTO;
+import com.tapalque.gastronomia.demo.Entity.Category;
 import com.tapalque.gastronomia.demo.Entity.Restaurant;
+import com.tapalque.gastronomia.demo.Repository.CategoryRepositoriInterface;
 import com.tapalque.gastronomia.demo.Repository.LocalRepositoryInterface;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -18,8 +19,10 @@ public class RestaurantService implements I_RestaurantService {
 
     @Autowired
     private LocalRepositoryInterface localGastronomicoRepository;
-
-   
+    
+    @Autowired
+    private CategoryRepositoriInterface categoryRepository;
+    
     @Override // Implementación del método para obtener un local gastronómico por su ID
 public RestaurantDTO getLocalGastronomicoById(Long id) {
     Object resultObj = localGastronomicoRepository.selectRestaurantById(id);
@@ -28,7 +31,7 @@ public RestaurantDTO getLocalGastronomicoById(Long id) {
     }
 
     Object[] result = (Object[]) resultObj; 
-    System.out.println("Resultado de la consulta: " + Arrays.toString(result));
+    
     return new RestaurantDTO(
         ((Number) result[0]).longValue(), // id_restaurant
         (String) result[1],               // name
@@ -59,6 +62,33 @@ public RestaurantDTO getLocalGastronomicoById(Long id) {
 
     return dtos;
     }
+   @Override
+public RestaurantDTO addRestaurant(RestaurantDTO dto) {
+
+    // Convertís el DTO a entidad
+    Restaurant entity = dto.toEntity();
+
+    // ✅ Buscar categorías existentes por nombre y reemplazarlas
+    if (entity.getCategories() != null && !entity.getCategories().isEmpty()) {
+        List<Category> existingCategories = entity.getCategories().stream()
+                .map(c -> categoryRepository.findByName(c.getName())
+                        .orElseThrow(() -> new RuntimeException("Categoría no encontrada: " + c.getName())))
+                .toList();
+        entity.setCategories(existingCategories);
+    }
+
+    // ✅ Setear relación inversa en PhoneNumber y Schedule
+    if (entity.getPhoneNumbers() != null) {
+        entity.getPhoneNumbers().forEach(p -> p.setRestaurant(entity));
+    }
+    if (entity.getSchedules() != null) {
+        entity.getSchedules().forEach(s -> s.setRestaurant(entity));
+    }
+
+    // ✅ Guardar restaurante con todo vinculado correctamente
+    Restaurant savedEntity = localGastronomicoRepository.save(entity);
+    return new RestaurantDTO(savedEntity);
+}
 
     @Override
     public void updateRestaurant(Restaurant restaurant) {
@@ -77,13 +107,6 @@ public RestaurantDTO getLocalGastronomicoById(Long id) {
         localGastronomicoRepository.deleteById(idLong);
     }
    
-     @Override
-    public void addLocalGastronomico(Restaurant localGastronomico) {
-        if (localGastronomico.getName() == null || localGastronomico.getName().isBlank()) {
-            throw new IllegalArgumentException("El nombre del local no puede estar vacío");
-        }
-        localGastronomicoRepository.save(localGastronomico);
-    }
 
 
 }
