@@ -1,0 +1,37 @@
+spring:
+  main:
+    web-application-type: reactive
+
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: msvc-comercio
+              uri: lb://msvc-comercio
+              predicates:
+                - Path=/api/comercio/**
+              filters:
+                - StripPrefix=2
+
+            - id: msvc-hospedajes
+              uri: lb://msvc-hospedajes
+              predicates:
+                - Path=/api/hospedajes/**
+              filters:
+                - StripPrefix=2
+
+            - id: msvc-gastronomia
+              uri: lb://msvc-gastronomia
+              predicates:
+                - Path=/api/gastronomia/**
+              filters:
+                - StripPrefix=2
+
+  application:
+    name: msvc-gateway-server
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka

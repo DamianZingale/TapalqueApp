@@ -1,0 +1,80 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot - EurekaServerApplication <eureka-server>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.eureka.demo.EurekaServerApplication",
+            "projectName": "com.eureka-server",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot - GatewayServerApplication <msvc-gateway-server>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.tapalque.demo.GatewayServerApplication",
+            "projectName": "com.tapalque.gateway-server",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot - GastronomiaApplication <msvc-gastronomia>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.tapalque.gastronomia.demo.GastronomiaApplication",
+            "projectName": "com.tapalque.gastronomia",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot - ComercioApplication <msvc-comercio>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.tapalque.comercio.ComercioApplication",
+            "projectName": "com.tapalque.comercio",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot - HosteleriaApplication <msvc-hosteleria>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.tapalque.hosteleria.demo.HosteleriaApplication",
+            "projectName": "com.tapalque.hosteleria",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-GastronomiaApplication<com.tapalque.gastronomia-demo>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.tapalque.gastronomia.demo.GastronomiaApplication",
+            "projectName": "com.tapalque.gastronomia-demo",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env",
+            "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=39095 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=com.tapalque.gastronomia-demo"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-EurekaServerAppication<com.eureka-demo>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.eureka.demo.EurekaServerAppication",
+            "projectName": "com.eureka-demo",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-GatewayServerApplication<com.tapalque-demo>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.tapalque.demo.GatewayServerApplication",
+            "projectName": "com.tapalque-demo",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}

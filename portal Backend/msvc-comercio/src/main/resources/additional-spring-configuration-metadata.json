@@ -1,0 +1,44 @@
+{
+  "properties": [
+    {
+      "name": "spring.application.name",
+      "type": "java.lang.String",
+      "description": "Nombre de la aplicación Spring Boot."
+    },
+    {
+      "name": "server.port",
+      "type": "java.lang.Integer",
+      "description": "Puerto en el que el servicio escuchará."
+    },
+    {
+      "name": "eureka.client.register-with-eureka",
+      "type": "java.lang.Boolean",
+      "description": "Indica si el cliente se registra con Eureka."
+    },
+    {
+      "name": "eureka.client.fetch-registry",
+      "type": "java.lang.Boolean",
+      "description": "Indica si el cliente obtiene el registro de Eureka."
+    },
+    {
+      "name": "eureka.client.service-url.defaultZone",
+      "type": "java.lang.String",
+      "description": "URL del servidor Eureka al que se conecta este cliente."
+    },
+    {
+      "name": "spring.cloud.discovery.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Habilita el descubrimiento de servicios (Eureka/Consul)."
+    },
+    {
+      "name": "eureka.instance.prefer-ip-address",
+      "type": "java.lang.String",
+      "description": "Eureka registra la instancia con la ip de la maquina en lugar del hostname"
+    },
+   {
+      "name": "upload.dir",
+      "type": "java.lang.String",
+      "description": "A description for 'upload.dir'"
+   }
+  ]
+}

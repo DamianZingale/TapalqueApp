@@ -1,0 +1,15 @@
+{
+    "Configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-msvcHosteleriaApplication<msvc-hosteleria>",
+            "request": "launch",
+            "mainClass": "com.tapalque.msvc.hosteleria.MsvcHosteleriaApplication",
+            "cwd": "${workspaceFolder}",
+            "projectName": "msvc-hosteleria",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]   
+
+}
