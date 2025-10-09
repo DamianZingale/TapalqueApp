@@ -17,6 +17,9 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "restaurant")
@@ -27,21 +30,29 @@ public class Restaurant {
     private Long idRestaurant;
 
     @Column(nullable = false)
+    @NotNull(message = "El nombre es obligarorio")
     private String name;
 
     @Column(nullable = false)
+    @NotNull (message = "Direccion obligaria")
     private String address;
-
-   
 
     @Column(nullable = false)
     private String email;
 
     @Column(nullable = false)
+    @NotNull (message = "Por favor informar existencia de delivery")
     private Boolean delivery;
 
-    @Column(name = "map_url",  nullable= true)
-    private String mapUrl;
+    @Min(value = -90, message = "La latitud debe estar entre -90 y 90")
+    @Max(value = 90, message = "La latitud debe estar entre -90 y 90")
+    @Column (name="latitude" ,nullable= false)
+    private Double coordinate_lat; 
+
+    @Min(value = -180, message = "La longitud debe estar entre -180 y 180")
+    @Max(value = 180, message = "La longitud debe estar entre -180 y 180")
+    @Column (name = "longitude", nullable = false)
+    private Double coordinate_lon; 
 
     @ManyToMany
     @JoinTable(
@@ -71,7 +82,7 @@ public class Restaurant {
     
     public Restaurant(){}
   
-    public Restaurant(String address, List<Category> categories, Boolean delivery, Menu menu, String email, Long idRestaurant, List<RestaurantImage> images, String name, List<PhoneNumber> phone, List<PhoneNumber> phoneNumbers, List<Schedule> schedules) {
+    public Restaurant(double lat, double lon, String address, List<Category> categories, Boolean delivery, Menu menu, String email, Long idRestaurant, List<RestaurantImage> images, String name, List<PhoneNumber> phone, List<PhoneNumber> phoneNumbers, List<Schedule> schedules) {
         this.address = address;
         this.categories = categories;
         this.delivery = delivery;
@@ -83,6 +94,8 @@ public class Restaurant {
         this.phoneNumbers = phone;
         this.phoneNumbers = phoneNumbers;
         this.schedules = schedules;
+        this.coordinate_lat = (coordinate_lat == null) ? lat : 0;
+        this.coordinate_lon = (coordinate_lon == null) ?  lon : 0;
     }
 
     public Long getIdRestaurant() {
@@ -174,12 +187,20 @@ public class Restaurant {
     public void setReviews(List<Review> reviews) {
         this.reviews = reviews;
     }
-    public String getMapUrl() {
-        return mapUrl;
+
+    public Double getcoordinate_lat(){
+        return coordinate_lat;
     }
 
-    public void setMapUrl(String mapUrl) {
-        this.mapUrl = mapUrl;
+    public void setCoordinate_lat(Double lat){
+        coordinate_lat = (lat != null) ? lat : 0.0;
     }
 
+    public Double getCoordinate_lon(){
+        return coordinate_lon;
+    }
+
+    public void setCoordinate_lon(Double lon){
+        coordinate_lon = (lon != null) ? lon : 0;
+    }
 }

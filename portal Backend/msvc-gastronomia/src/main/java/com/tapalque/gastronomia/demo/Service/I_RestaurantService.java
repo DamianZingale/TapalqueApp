@@ -9,7 +9,7 @@ public interface I_RestaurantService {
 
     
     List<RestaurantDTO> getAllLocalGastronomicos();
-    RestaurantDTO getLocalGastronomicoById(Long id);
+    RestaurantDTO getRestaurantById(Long id);
     RestaurantDTO addRestaurant(RestaurantDTO dto);
     void updateRestaurant (Restaurant restaurant);
     void deleteRestaurant (Long id);
@@ -18,3 +18,5 @@ public interface I_RestaurantService {
 
    
 }
+
+
