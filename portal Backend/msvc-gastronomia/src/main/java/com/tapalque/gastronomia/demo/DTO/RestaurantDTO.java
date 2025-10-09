@@ -34,8 +34,8 @@ public class RestaurantDTO {
         this.name = name;
         this.address = address;
         this.email = email;
-        this.latitude = (latitude == null) ? latitude : 0;
-        this.longitude = (longitude == null) ? longitude : 0;
+        this.latitude = (latitude != null) ? latitude : 0.0;
+        this.longitude = (longitude != null) ? longitude : 0.0;
         this.categories = categories;
         this.phones = phones;
         this.schedule = schedule;

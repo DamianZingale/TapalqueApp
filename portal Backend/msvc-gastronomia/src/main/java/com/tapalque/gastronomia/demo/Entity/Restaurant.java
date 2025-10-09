@@ -94,8 +94,8 @@ public class Restaurant {
         this.phoneNumbers = phone;
         this.phoneNumbers = phoneNumbers;
         this.schedules = schedules;
-        this.coordinate_lat = (coordinate_lat == null) ? lat : 0;
-        this.coordinate_lon = (coordinate_lon == null) ?  lon : 0;
+        this.coordinate_lat = (coordinate_lat != null) ? lat : 0.0;
+        this.coordinate_lon = (coordinate_lon != null) ?  lon : 0.0;
     }
 
     public Long getIdRestaurant() {
@@ -201,6 +201,6 @@ public class Restaurant {
     }
 
     public void setCoordinate_lon(Double lon){
-        coordinate_lon = (lon != null) ? lon : 0;
+        coordinate_lon = (lon != null) ? lon : 0.0;
     }
 }
