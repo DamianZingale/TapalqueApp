@@ -15,6 +15,7 @@ import com.tapalque.gastronomia.demo.GastronomiaApplication;
 import com.tapalque.gastronomia.demo.DTO.RestaurantDTO;
 import com.tapalque.gastronomia.demo.Service.I_RestaurantService;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 
 @RestController
@@ -31,30 +32,32 @@ public class LocalGastronomicoController {
 
 
     @GetMapping("/findAll")
-public ResponseEntity<List<RestaurantDTO>> findAllLocalController() {
-    if( localGastronomicoService.getAllLocalGastronomicos().isEmpty()){
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<List<RestaurantDTO>> findAllLocalController() {
+    List<RestaurantDTO> restaurants = localGastronomicoService.getAllLocalGastronomicos();
+    return restaurants.isEmpty() 
+        ? ResponseEntity.noContent().build() 
+        : ResponseEntity.ok(restaurants);
     }
-    else return ResponseEntity.ok(localGastronomicoService.getAllLocalGastronomicos());
-}
     
-    @GetMapping("/findById/{id}") // obtener por id
+   @GetMapping("/findById/{id}")
     public ResponseEntity<RestaurantDTO> findByIdLocalController(@PathVariable Long id) {
-        if(localGastronomicoService.getLocalGastronomicoById(id) == null){
-            return ResponseEntity.noContent().build();
-        }
-        else return ResponseEntity.ok(localGastronomicoService.getLocalGastronomicoById(id));
+    try {
+        RestaurantDTO restaurant = localGastronomicoService.getRestaurantById(id);
+        return ResponseEntity.ok(restaurant);
+    } catch (EntityNotFoundException ex) {
+        return ResponseEntity.notFound().build(); 
+    }
     }
 
     @PostMapping("/save")
-public ResponseEntity<RestaurantDTO> saveLocalController(@Valid @RequestBody RestaurantDTO nuevo_local) {
-    RestaurantDTO savedEntity = localGastronomicoService.addRestaurant(nuevo_local);
-    if(savedEntity == null){
+    public ResponseEntity<RestaurantDTO> saveLocalController(@Valid @RequestBody RestaurantDTO nuevo_local) {
+    RestaurantDTO restaurant = localGastronomicoService.addRestaurant(nuevo_local);
+    if(restaurant == null){
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
-    return ResponseEntity.status(HttpStatus.CREATED).body(savedEntity);
-}
-  
+    return ResponseEntity.status(HttpStatus.CREATED).body(restaurant);
+    }
+    
     /* 
     @PutMapping("/reload/{id}") // actualizar
     public ResponseEntity<RestaurantDTO> reloadLocalController(@Valid @PathVariable Long id,

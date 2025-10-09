@@ -1,7 +1,5 @@
 package com.tapalque.gastronomia.demo.Repository;
 
-
-
 import java.util.List;
 import java.util.Optional;
 
@@ -9,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import com.tapalque.gastronomia.demo.Entity.Category;
+import com.tapalque.gastronomia.demo.DTO.RestaurantDTO;
 import com.tapalque.gastronomia.demo.Entity.Restaurant;
 
 
@@ -24,19 +22,21 @@ public interface LocalRepositoryInterface extends JpaRepository<Restaurant, Long
         r.name,
         r.address,
         r.email,
-        r.map_url AS mapUrl,
+        r.latitude AS latitud,
+        r.longitude AS longitud,
         GROUP_CONCAT(DISTINCT c.name SEPARATOR ', ') AS categories,
         GROUP_CONCAT(DISTINCT p.number SEPARATOR ', ') AS phones,
-        GROUP_CONCAT(DISTINCT CONCAT(s.day_of_week, ':', s.opening_time, '-', s.closing_time) SEPARATOR '; ') AS schedule
+        GROUP_CONCAT(DISTINCT CONCAT(s.day_of_week, ':', s.opening_time, '-', s.closing_time) SEPARATOR '; ') AS schedule,
+        r.delivery
     FROM restaurant r
     LEFT JOIN restaurant_category rc ON rc.id_restaurant = r.id_restaurant
     LEFT JOIN category c ON c.id_category = rc.id_category
     LEFT JOIN phone_number p ON p.id_restaurant = r.id_restaurant
     LEFT JOIN schedule s ON s.id_restaurant = r.id_restaurant
-    GROUP BY r.id_restaurant, r.name, r.address, r.email, r.map_url
+    GROUP BY r.id_restaurant, r.name, r.address, r.email, r.latitude, r.longitude, r.delivery
     ORDER BY r.id_restaurant
     """, nativeQuery = true)
-List<Object[]> selectAllRestaurant();
+List<RestaurantDTO> selectAllRestaurant();
 
 //seleccionar restaurant por id con sus categorias, telefonos y horarios concatenados
     @Query(value = """
@@ -45,21 +45,23 @@ List<Object[]> selectAllRestaurant();
         r.name,
         r.address,
         r.email,
-        r.map_url AS mapUrl,
+        r.latitude AS latitud,
+        r.longitude AS longitud,
         GROUP_CONCAT(DISTINCT c.name SEPARATOR ', ') AS categories,
         GROUP_CONCAT(DISTINCT p.number SEPARATOR ', ') AS phones,
-        GROUP_CONCAT(DISTINCT CONCAT(s.day_of_week, ':', s.opening_time, '-', s.closing_time) SEPARATOR '; ') AS schedule
+        GROUP_CONCAT(DISTINCT CONCAT(s.day_of_week, ':', s.opening_time, '-', s.closing_time) SEPARATOR '; ') AS schedule,
+        r.delivery
     FROM restaurant r
     LEFT JOIN restaurant_category rc ON rc.id_restaurant = r.id_restaurant
     LEFT JOIN category c ON c.id_category = rc.id_category
     LEFT JOIN phone_number p ON p.id_restaurant = r.id_restaurant
     LEFT JOIN schedule s ON s.id_restaurant = r.id_restaurant
     WHERE r.id_restaurant = ?1
-    GROUP BY r.id_restaurant, r.name, r.address, r.email, r.map_url
+    GROUP BY r.id_restaurant, r.name, r.address, r.email, r.latitude, r.longitude, r.delivery
     """, nativeQuery = true)
-    Object selectRestaurantById(Long id);
+    Optional<RestaurantDTO> selectRestaurantById(Long id);
 
-    Optional<Category> findByName(String name);
+    
 }
     
 

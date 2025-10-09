@@ -2,6 +2,7 @@ package com.tapalque.gastronomia.demo.DTO;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.tapalque.gastronomia.demo.Entity.Category;
@@ -16,7 +17,8 @@ public class RestaurantDTO {
     private String name;
     private String address;
     private String email;
-    private String mapUrl;
+    private Double latitude;
+    private Double longitude; 
     private String categories; // concatenadas con ', '
     private String phones;     // concatenados con ', '
     private String schedule;    // concatenado tipo "1:09:00-22:00; 2:09:00-22:00"
@@ -26,16 +28,18 @@ public class RestaurantDTO {
     public RestaurantDTO() {}
 
     // 🔹 Constructor con todos los campos
-    public RestaurantDTO(Long id, String name, String address, String email, String mapUrl,
-                         String categories, String phones, String schedule) {
+    public RestaurantDTO(Long id, String name, String address, String email, Double latitude, Double longitude,
+                         String categories, String phones, String schedule, boolean delivery) {
         this.id = id;
         this.name = name;
         this.address = address;
         this.email = email;
-        this.mapUrl = mapUrl;
+        this.latitude = (latitude == null) ? latitude : 0;
+        this.longitude = (longitude == null) ? longitude : 0;
         this.categories = categories;
         this.phones = phones;
         this.schedule = schedule;
+        this.delivery = delivery;
     }
 
     // 🔹 Constructor que recibe una entidad
@@ -44,7 +48,8 @@ public class RestaurantDTO {
     this.name = entity.getName();
     this.address = entity.getAddress();
     this.email = entity.getEmail();
-    this.mapUrl = entity.getMapUrl();
+    this.latitude = Optional.ofNullable(entity.getcoordinate_lat()).orElse(0.0);
+    this.longitude = Optional.ofNullable(entity.getCoordinate_lon()).orElse(0.0);
     this.delivery = entity.getDelivery();
     // Categories: List<Category> -> String
     if(entity.getCategories() != null) {
@@ -77,7 +82,9 @@ public class RestaurantDTO {
     entity.setName(this.name);
     entity.setAddress(this.address);
     entity.setEmail(this.email);
-    entity.setMapUrl(this.mapUrl);
+    entity.setCoordinate_lat(Optional.ofNullable(this.latitude).orElse(0.0));
+    entity.setCoordinate_lon(Optional.ofNullable(this.longitude).orElse(0.0));
+    entity.setDelivery(this.delivery);
 
     // Categories: String -> List<Category>
     if(this.categories != null && !this.categories.isEmpty()) {
@@ -111,29 +118,37 @@ public class RestaurantDTO {
     List<Schedule> scheduleList = Arrays.stream(this.schedule.split(";"))
     .map(String::trim)
     .map(str -> {
-        String[] parts = str.split("[:-]");
+        String[] dayAndTimes = str.split(":", 2); // Solo primer ':'
         Schedule s = new Schedule();
-        s.setDayOfWeek(Integer.valueOf(parts[0]));
+        s.setDayOfWeek(Integer.valueOf(dayAndTimes[0]));
 
-        switch (parts.length) {
-            case 3 -> {
-                s.setOpeningTime(parts[1]);
-                s.setClosingTime(parts[2]);
-            }
-            case 2 -> {
-                // Cerrado
+        if (dayAndTimes.length == 2) {
+            String timesPart = dayAndTimes[1];
+            
+            // Verificar si es "Cerrado" o tiene horarios
+            if (timesPart.equalsIgnoreCase("Cerrado") || !timesPart.contains("-")) {
                 s.setOpeningTime("Cerrado");
                 s.setClosingTime("Cerrado");
+            } else {
+                // Tiene formato "10:00-20:00"
+                String[] times = timesPart.split("-");
+                if (times.length == 2) {
+                    s.setOpeningTime(times[0].trim());
+                    s.setClosingTime(times[1].trim());
+                } else {
+                    s.setOpeningTime("Cerrado");
+                    s.setClosingTime("Cerrado");
+                }
             }
-            default -> {
-                // Por seguridad, si hay algún formato raro
-                s.setOpeningTime("Cerrado");
-                s.setClosingTime("Cerrado");
-            }
+        } else {
+            // No hay segunda parte después del ':'
+            s.setOpeningTime("Cerrado");
+            s.setClosingTime("Cerrado");
         }
-
+        
         s.setRestaurant(entity); 
         return s;
+        
     })
     .toList();
 
@@ -178,12 +193,20 @@ entity.setSchedules(scheduleList);
         this.email = email;
     }
 
-    public String getMapUrl() {
-        return mapUrl;
+    public Double getLatitude() {
+        return latitude;
     }
 
-    public void setMapUrl(String mapUrl) {
-        this.mapUrl = mapUrl;
+    public void setLatitude(Double latitude) {
+        this.latitude = (latitude != null) ? latitude : 0.0;
+    }
+
+    public Double getLongitude (){
+        return longitude;
+    }
+
+    public void setLongitude (Double longitude){
+        this.longitude = (longitude != null) ? longitude : 0.0;
     }
 
     public String getCategories() {
