@@ -1,7 +1,8 @@
 {
     "java.compile.nullAnalysis.mode": "automatic",
-    "java.configuration.updateBuildConfiguration": "interactive",
+    "java.configuration.updateBuildConfiguration": "automatic",
     "java.project.sourcePaths": [
         "portal Backend/msvc-gastronomia/src"
-    ]
+    ],
+    "java.debug.settings.onBuildFailureProceed": true
 }
