@@ -1,4 +1,4 @@
-package com.tapalque.msvc_jwt;
+package com.tapalque.jwt;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
