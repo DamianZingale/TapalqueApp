@@ -2,6 +2,33 @@
     "configurations": [
         {
             "type": "java",
+            "name": "HosteleriaApplication",
+            "request": "launch",
+            "mainClass": "com.tapalque.hosteleria.demo.HosteleriaApplication",
+            "projectName": "demo"
+        },
+        {
+            "type": "java",
+            "name": "JwtApplication",
+            "request": "launch",
+            "mainClass": "com.tapalque.jwt.JwtApplication",
+            "projectName": "jwt"
+        },
+        {
+            "type": "java",
+            "name": "ComercioApplication",
+            "request": "launch",
+            "mainClass": "com.tapalque.comercio.ComercioApplication",
+            "projectName": "com.tapalque-comercio"
+        },
+        {
+            "type": "java",
+            "name": "JwtApplication",
+            "request": "launch",
+            "mainClass": "com.tapalque.msvc_jwt.JwtApplication"
+        },
+        {
+            "type": "java",
             "name": "Spring Boot - EurekaServerApplication <eureka-server>",
             "request": "launch",
             "cwd": "${workspaceFolder}",
