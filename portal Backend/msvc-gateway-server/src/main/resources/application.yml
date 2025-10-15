@@ -35,6 +35,13 @@ spring:
               filters:
                 - StripPrefix=2
 
+            - id: msvc-user
+              uri: lb://msvc-user
+              predicates:
+                - Path=/api/user/**
+              filters:
+                - StripPrefix=2
+
   application:
     name: msvc-gateway-server
 
