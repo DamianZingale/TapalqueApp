@@ -2,6 +2,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "UserApplication",
+            "request": "launch",
+            "mainClass": "com.tapalque.user.UserApplication",
+            "projectName": "user"
+        },
+        {
+            "type": "java",
             "name": "HosteleriaApplication",
             "request": "launch",
             "mainClass": "com.tapalque.hosteleria.demo.HosteleriaApplication",

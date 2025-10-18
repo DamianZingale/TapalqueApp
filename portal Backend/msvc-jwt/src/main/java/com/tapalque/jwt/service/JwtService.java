@@ -9,12 +9,14 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import com.tapalque.jwt.entity.Usuario;
+import com.tapalque.jwt.dto.UserResponseDTO;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.AllArgsConstructor;
 
+@AllArgsConstructor
 @Service
 public class JwtService {
     @Value("${secretKeyEncriptar}")
@@ -26,7 +28,9 @@ public class JwtService {
     @Value("${token.expiration}")
     private long refreshExpiration;
 
-    public String extractUsername(String token) {
+    private final UserClient userClient;
+
+    public String extractEmail(String token) {
         try {
             return Jwts.parserBuilder()
                     .setSigningKey(getSignInKey())
@@ -42,28 +46,29 @@ public class JwtService {
         }
     }
 
-    public String generateToken(final Usuario user) {
+    public String generateToken(final UserResponseDTO user) {
         return buildToken(user, jwtExpiration);
     }
 
-    public String generateRefreshToken(final Usuario user) {
+    public String generateRefreshToken(final UserResponseDTO user) {
         return buildToken(user, refreshExpiration);
     }
 
-    private String buildToken(final Usuario user, final long expiration) {
+    private String buildToken(final UserResponseDTO user, final long expiration) {
         return Jwts
                 .builder()
-                .setSubject(user.getNombreDeUsuario())
+                .setSubject(user.getEmail())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
-                .claim("name", user.getNombre())
+                .claim("fullName", user.getFirtName()+" "+user.getLastName())
                 .signWith(getSignInKey())
                 .compact();
     }
 
-    public boolean isTokenValid(String token, Usuario user) {
-        final String username = extractUsername(token);
-        return (username.equals(user.getNombreDeUsuario())) && !isTokenExpired(token);
+    public boolean isTokenValid(String token) {
+        UserResponseDTO user = userClient.getUser(extractEmail(token));
+        final String email = extractEmail(token);
+        return (email.equals(user.getEmail())) && !isTokenExpired(token);
     }
 
     private boolean isTokenExpired(String token) {
