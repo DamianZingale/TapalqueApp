@@ -1,19 +1,14 @@
 package com.tapalque.jwt.configuracion;
 
-import static org.springframework.security.config.http.SessionCreationPolicy.*;
-
-import java.util.List;
-
+import com.tapalque.jwt.repository.TokenRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -21,89 +16,71 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import com.tapalque.jwt.entity.Token;
-import com.tapalque.jwt.repository.TokenRepository;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
+
+import java.util.List;
+
+import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 @Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor
 @EnableMethodSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
-    
+
     private final JwtAuthenticationFilter jwtAuthFilter;
-    private final AuthenticationProvider authenticationProvider;
     private final TokenRepository tokenRepositorio;
-    
+
     @Bean
-    public SecurityFilterChain securityFilterChain(final HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .cors(Customizer.withDefaults())
-                .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(
-                        req -> req.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                                .requestMatchers("/auth/**", "/oauth/callback", "/ws/**", "/webhook", "/test",
-                                        "/pago/**")
-                                .permitAll()
-                                .anyRequest().authenticated())
-    
-                .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
-    
-                .authenticationProvider(authenticationProvider)
-    
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-    
-                .logout(logout -> logout.logoutUrl("/auth/logout")
-                        .addLogoutHandler(this::logout)
-                        .logoutSuccessHandler(
-                                (request, response, authentication) -> SecurityContextHolder.clearContext()));
-    
+            .cors().and()
+            .csrf().disable()
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                .requestMatchers("/auth/**").permitAll()
+                .anyRequest().authenticated())
+            .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+            .logout(logout -> logout.logoutUrl("/auth/logout")
+                .addLogoutHandler(this::logout)
+                .logoutSuccessHandler((req, res, auth) -> SecurityContextHolder.clearContext()));
+
         return http.build();
     }
-    
-    private void logout(
-        final HttpServletRequest request, final HttpServletResponse response,
-        final Authentication authentication) {
-            if (!"POST".equalsIgnoreCase(request.getMethod())) {
-            response.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED); // 405
+
+    private void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
+        if (!"POST".equalsIgnoreCase(request.getMethod())) {
+            response.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
             return;
         }
-        
+
         final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return;
-        }
-        
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) return;
+
         final String jwt = authHeader.substring(7);
-        
-        final Token storedToken = tokenRepositorio.findByToken(jwt).orElse(null);
-        
-        if (storedToken != null) {
-            
-            storedToken.setExpired(true);
-            storedToken.setRevoked(true);
-            tokenRepositorio.save(storedToken);
-            
+        tokenRepositorio.findByToken(jwt).ifPresent(token -> {
+            token.setExpired(true);
+            token.setRevoked(true);
+            tokenRepositorio.save(token);
             SecurityContextHolder.clearContext();
-            response.setStatus(HttpServletResponse.SC_NO_CONTENT); // 204 OK sin contenido
-        }
+            response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+        });
     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of(
-                "http://localhost:5173",
-                "https://generous-evenly-skylark.ngrok-free.app"));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "*"));
-        configuration.setExposedHeaders(List.of("Authorization"));
-        configuration.setAllowCredentials(true);
-    
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedOrigins(List.of("http://localhost:5173", "https://generous-evenly-skylark.ngrok-free.app"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "*"));
+        config.setExposedHeaders(List.of("Authorization"));
+        config.setAllowCredentials(true);
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
+        source.registerCorsConfiguration("/**", config);
         return source;
     }
 }
