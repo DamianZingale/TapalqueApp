@@ -8,5 +8,5 @@ import com.tapalque.user.entity.Role;
 import com.tapalque.user.enu.RolName;
 
 public interface RoleRepository extends JpaRepository<Role, Long> {
-    Optional<Role> findByNombre(RolName nombre);
+    Optional<Role> findByName(RolName name);
 }
