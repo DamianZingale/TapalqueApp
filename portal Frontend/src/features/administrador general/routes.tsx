@@ -17,6 +17,9 @@ import { NuevoUsuarioPage } from "./pages/NuevoUsuarioPage";
 import { EditarUsuarioPage } from "./pages/EditarUsuarioPage";
 
 export default function AdministradorGeneralRoutes(){
+   
+   
+   
     return(
         <Routes>
             <Route path="/" element={<AdministradorGeneralPage />} />
