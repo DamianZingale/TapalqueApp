@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.tapalque.jwt.dto.AuthRequestDTO;
 import com.tapalque.jwt.dto.TokenResponse;
-import com.tapalque.jwt.dto.UsuarioRequestDTO;
 import com.tapalque.jwt.service.AuthService;
 
 import lombok.RequiredArgsConstructor;
@@ -27,16 +26,6 @@ import lombok.RequiredArgsConstructor;
 public class AuthController {
 
     private final AuthService service;
-
-    @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody UsuarioRequestDTO request) {
-        try {
-            TokenResponse response = service.register(request);
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(error("Error en registro", e.getMessage()));
-        }
-    }
 
     @PostMapping("/login")
     public ResponseEntity<?> authenticate(@RequestBody AuthRequestDTO request) {
@@ -58,7 +47,6 @@ public class AuthController {
         }
     }
 
-    // Método auxiliar para formato de error
     private Map<String, String> error(String mensaje, String detalle) {
         Map<String, String> error = new HashMap<>();
         error.put("error", mensaje);
