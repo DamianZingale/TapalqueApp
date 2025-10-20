@@ -8,10 +8,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.tapalque.jwt.entity.Token;
 
 public interface TokenRepository extends JpaRepository<Token, Long> {
-    Optional<Token> findByToken(String jwt);
+    List<Token> findByEmailAndExpiredFalseAndRevokedFalse(String email);
 
-List<Token> findByUsuarioIdAndExpiredFalseAndRevokedFalse(Long id);
+    Optional<Token> findByToken(String token);
 
-List<Token> findByRevokedFalseAndExpiredFalse();
 }
-
