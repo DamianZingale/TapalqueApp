@@ -20,7 +20,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/user")
 @RequiredArgsConstructor
 public class UserController {
 
@@ -28,6 +28,7 @@ public class UserController {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody UserRequestDTO dto) {
+        System.out.println("Llega al controller register");
         try {
             UserResponseDTO response = userService.register(dto);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -38,6 +39,7 @@ public class UserController {
 
     @GetMapping("/email/{email}")
     public ResponseEntity<?> getByEmail(@PathVariable String email) {
+        System.out.println("Entra al controller del get email");
         try {
             UserResponseDTO response = userService.getByEmail(email);
             return ResponseEntity.ok(response);

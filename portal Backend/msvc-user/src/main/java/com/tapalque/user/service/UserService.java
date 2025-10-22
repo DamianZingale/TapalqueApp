@@ -2,6 +2,7 @@ package com.tapalque.user.service;
 
 import java.time.LocalDateTime;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.tapalque.user.dto.UserRequestDTO;
@@ -20,18 +21,18 @@ public class UserService {
 
     private final UserRepository userRepo;
     private final RoleRepository roleRepo;
+    private final PasswordEncoder passwordEncoder;
 
     public UserResponseDTO register(UserRequestDTO dto) {
         if (userRepo.findByEmail(dto.getCorreo()).isPresent()) {
             throw new IllegalArgumentException("El correo ya está registrado");
         }
 
-        Role role = roleRepo.findByName(RolName.USER_GRAL)
-                .orElseThrow(() -> new RuntimeException("Rol USER_GRAL no encontrado"));
-
+        Role role = new Role(1L, RolName.ADMIN_GENERAL);
+        String encoded = passwordEncoder.encode(dto.getContrasena());
         User user = User.builder()
                 .email(dto.getCorreo())
-                .password(dto.getContrasena()) // encripta desde MSVC jwt
+                .password(encoded)
                 .firtName(dto.getNombre())
                 .lastName(dto.getApellido())
                 .nameEmprise(dto.getEmpresa())
@@ -53,6 +54,7 @@ public class UserService {
     private UserResponseDTO mapToDTO(User user) {
         return UserResponseDTO.builder()
                 .email(user.getEmail())
+                .contrasena(user.getPassword())
                 .firtName(user.getFirtName())
                 .lastName(user.getLastName())
                 .nameEmprise(user.getNameEmprise())
