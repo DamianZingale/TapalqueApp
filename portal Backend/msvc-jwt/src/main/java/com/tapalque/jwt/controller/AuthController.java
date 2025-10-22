@@ -20,7 +20,7 @@ import com.tapalque.jwt.service.AuthService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/jwt")
 @CrossOrigin("*")
 @RequiredArgsConstructor
 public class AuthController {
@@ -29,6 +29,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> authenticate(@RequestBody AuthRequestDTO request) {
+        System.out.println("Entra al LOGIN!");
         try {
             TokenResponse response = service.authenticate(request);
             return ResponseEntity.ok(response);

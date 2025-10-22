@@ -1,17 +1,16 @@
 package com.tapalque.jwt.dto;
 
-import com.tapalque.jwt.enu.RolName;
+import java.util.List;
 
 import lombok.Builder;
 import lombok.Data;
 
 @Builder
 @Data
-public class UserResponseDTO {
+public class UserResponse {
     private String email;
     private String contrasena;
-    private String firtName;
     private String lastName;
     private String nameEmprise;
-    private RolName rol;
+    private List<String> rol;
 }
