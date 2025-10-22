@@ -1,0 +1,28 @@
+version: "3.9"
+
+services:
+  msvc-pedidos:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8082:8083"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATA_MONGODB_URI=mongodb://root:root@mongodb:27017/pedidosdb
+    depends_on:
+      - mongodb
+  mongodb:
+    image: mongo 7.0
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root 
+      MONGO_INITDB_ROOT_PASSWORD: root
+      MONGO_INITDB_DATABASE: pedidosdb
+    volumes:
+      - mongo-data:/data/db
+    restart: always
+volumes:
+  mongo-data:
