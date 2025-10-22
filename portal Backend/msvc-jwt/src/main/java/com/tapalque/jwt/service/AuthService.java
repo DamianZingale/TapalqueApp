@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.tapalque.jwt.dto.AuthRequestDTO;
@@ -22,16 +23,22 @@ public class AuthService {
     private final JwtService jwtServicio;
     private final AuthenticationManager authenticationManager;
     private final UserClient userClient;
+    
 
     public TokenResponse authenticate(final AuthRequestDTO request) {
+        System.out.println("Email:" + request.getEmail());
+        System.out.println("Contra:" + request.getContrasena());
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
                         request.getContrasena()));
-
+        System.out.println("Llega aca 1");
         final UserResponseDTO user = userClient.getUser(request.getEmail());
+        System.out.println("Llega aca 2");
         final String accessToken = jwtServicio.generateToken(user);
+        System.out.println("Llega aca 3");
         final String refreshToken = jwtServicio.generateRefreshToken(user);
+        System.out.println("Llega aca 4");
 
         revokeAllUserTokens(user.getEmail());
         saveUserToken(user.getEmail(), accessToken);
@@ -68,12 +75,14 @@ public class AuthService {
 
         final String refreshToken = authHeader.substring(7);
         final String email = jwtServicio.extractEmail(refreshToken);
-        if (email == null) return null;
+        if (email == null)
+            return null;
 
         final UserResponseDTO user = userClient.getUser(email);
         final boolean isTokenValid = jwtServicio.isTokenValid(refreshToken);
 
-        if (!isTokenValid) return null;
+        if (!isTokenValid)
+            return null;
 
         final String accessToken = jwtServicio.generateToken(user);
         revokeAllUserTokens(email);

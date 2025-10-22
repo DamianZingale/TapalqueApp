@@ -14,13 +14,13 @@ import com.tapalque.jwt.dto.UserResponseDTO;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Service
 public class JwtService {
     @Value("${secretKeyEncriptar}")
-    public String secretKey;
+    private String secretKey;
 
     @Value("${expiration}")
     private long jwtExpiration;
