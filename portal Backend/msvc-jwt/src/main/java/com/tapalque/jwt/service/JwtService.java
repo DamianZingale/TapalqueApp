@@ -9,19 +9,22 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import com.tapalque.jwt.entity.Usuario;
+import com.tapalque.jwt.dto.UserResponseDTO;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+
+import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.Transactional;
 
-
+@RequiredArgsConstructor
 @Service
 public class JwtService {
     @Value("${secretKeyEncriptar}")
-    public String secretKey;
+    private String secretKey;
 
     @Value("${expiration}")
     private long jwtExpiration;
@@ -29,7 +32,7 @@ public class JwtService {
     @Value("${token.expiration}")
     private long refreshExpiration;
 
-    public String extractUsername(String token) {
+    public String extractEmail(String token) {
         try {
             return Jwts.parserBuilder()
                     .setSigningKey(getSignInKey())
@@ -45,34 +48,48 @@ public class JwtService {
         }
     }
 
-    public String generateToken(final Usuario user) {
+    public String generateToken(final UserResponseDTO user) {
         return buildToken(user, jwtExpiration);
     }
 
-    public String generateRefreshToken(final Usuario user) {
+    public String generateRefreshToken(final UserResponseDTO user) {
         return buildToken(user, refreshExpiration);
     }
 
-    private String buildToken(final Usuario user, final long expiration) {
+    private String buildToken(final UserResponseDTO user, final long expiration) {
         return Jwts
                 .builder()
-                .setSubject(user.getNombreDeUsuario())
+                .setSubject(user.getEmail())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
-                .claim("name", user.getNombre())
+                .claim("fullName", user.getFirtName() + " " + user.getLastName())
+                .claim("rol", user.getRol().name())
                 .signWith(getSignInKey())
                 .compact();
     }
 
-    public boolean isTokenValid(String token, Usuario user) {
-        final String username = extractUsername(token);
-        return (username.equals(user.getNombreDeUsuario())) && !isTokenExpired(token);
+    public boolean isTokenValid(String token) {
+        try {
+            Claims claims = extractAllClaims(token);
+            return !isTokenExpired(claims);
+        } catch (Exception e) {
+            return false;
+        }
     }
 
-    private boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
+    public Claims extractAllClaims(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(getSignInKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
 
+    private boolean isTokenExpired(Claims claims) {
+        return claims.getExpiration().before(new Date());
+    }
+
+    
     private Date extractExpiration(String token) {
         return Jwts
                 .parserBuilder()
