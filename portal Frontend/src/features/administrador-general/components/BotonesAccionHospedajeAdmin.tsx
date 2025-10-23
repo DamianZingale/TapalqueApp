@@ -1,5 +1,3 @@
-import React from "react";
-
 interface Props {
     id: string;
     estado: string;
@@ -8,7 +6,7 @@ interface Props {
     onActivarDesactivar?: (id: string) => void;
 }
 
-    export const BotonesAccionHospedajeAdmin = ({
+export const BotonesAccionHospedajeAdmin = ({
     id,
     estado,
     onEditar,
