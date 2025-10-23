@@ -23,7 +23,6 @@ public class ValidateController {
 
     @PostMapping("/validate")
     public ResponseEntity<?> validarToken(@RequestHeader("Authorization") String authHeader) {
-        System.out.println("entra al if validate");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return ResponseEntity.status(HttpStatus.SC_UNAUTHORIZED).build();
         }

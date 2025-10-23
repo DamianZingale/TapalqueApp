@@ -29,8 +29,6 @@ public class JwtService {
     @Value("${token.expiration}")
     private long refreshExpiration;
 
-    private final UserClient userClient;
-
     public String extractEmail(String token) {
         try {
             return Jwts.parserBuilder()
