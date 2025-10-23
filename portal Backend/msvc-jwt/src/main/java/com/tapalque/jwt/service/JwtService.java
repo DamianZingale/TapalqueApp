@@ -15,7 +15,10 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Service
@@ -106,5 +109,12 @@ public class JwtService {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String nombreDeUsuario = ((UserDetails) auth.getPrincipal()).getUsername();
         return nombreDeUsuario;
+    }
+
+    @Transactional
+    @Scheduled(cron= "0 0 3 * * *")
+    public void cleanAuthomaticRevokedTokens(){
+        tokenRepositorio.deleteAllExpiredOrRevoked();
+        System.out.println("Limpieza de tokens ejecutada");
     }
 }

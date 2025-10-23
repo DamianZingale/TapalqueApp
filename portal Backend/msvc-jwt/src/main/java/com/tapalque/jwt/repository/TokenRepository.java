@@ -6,10 +6,20 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.tapalque.jwt.entity.Token;
+//importaciones para la limpieza
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+
 
 public interface TokenRepository extends JpaRepository<Token, Long> {
     List<Token> findByEmailAndExpiredFalseAndRevokedFalse(String email);
 
     Optional<Token> findByToken(String token);
 
+
+List<Token> findByRevokedFalseAndExpiredFalse();
+
+@Modifying
+@Query("DELETE FROM Token t WHERE t.expired = true OR t.revoked = true")
+void deleteAllExpiredOrRevoked();
 }
