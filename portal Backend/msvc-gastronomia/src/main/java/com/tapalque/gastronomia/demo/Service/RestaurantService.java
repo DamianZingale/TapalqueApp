@@ -59,8 +59,12 @@ public RestaurantDTO addRestaurant(RestaurantDTO dto) {
 
     @Override
     public void updateRestaurant(Restaurant restaurant) {
-        if (!localGastronomicoRepository.existsById(restaurant.getIdRestaurant())) {
-            throw new EntityNotFoundException("No existe el local con id " + restaurant.getIdRestaurant());
+        Long id = restaurant.getIdRestaurant();
+        if (id == null) {
+            throw new EntityNotFoundException("El id del local es nulo");
+        }
+        if (!localGastronomicoRepository.existsById(id)) {
+            throw new EntityNotFoundException("No existe el local con id " + id);
         }
         localGastronomicoRepository.save(restaurant);
     }
