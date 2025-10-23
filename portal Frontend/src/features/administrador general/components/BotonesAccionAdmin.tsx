@@ -2,6 +2,16 @@ import { useNavigate } from "react-router-dom"
 import type { BotonesAccionProps } from "../../../shared/types/PropsAdminGeneral"
 
 export const BotonesAccionAdmin: React.FC<BotonesAccionProps> = ({ id, estado }) => {
+
+    interface Props {
+    id: string;
+    estado: string;
+    onEditar?: () => void;
+    }
+    export const BotonesAccionAdmin = ({ id, estado, onEditar }: Props) => {
+    const handleActivarDesactivar = () => {
+        alert(`Llamar al backend para cambiar estado del hospedaje ${id}`);
+    };
     
     const navigate = useNavigate();
     //Aca falta llamo al backend para eliminar y desacticar el seleccionado.

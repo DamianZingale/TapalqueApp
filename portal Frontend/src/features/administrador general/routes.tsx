@@ -17,9 +17,7 @@ import { NuevoUsuarioPage } from "./pages/NuevoUsuarioPage";
 import { EditarUsuarioPage } from "./pages/EditarUsuarioPage";
 
 export default function AdministradorGeneralRoutes(){
-   
-   
-   
+
     return(
         <Routes>
             <Route path="/" element={<AdministradorGeneralPage />} />
@@ -29,7 +27,7 @@ export default function AdministradorGeneralRoutes(){
             
             <Route path="hospedajes" element={<AdminGralHospedajesPage />} />
             <Route path="hospedajes/nuevo" element={<NuevoHospedajePage />} />
-            <Route path="hospedajes/editar" element={<EditarHospedajePage />} />
+            <Route path="hospedajes/editar/:id" element={<EditarHospedajePage />} />
             
             <Route path="comercios" element={<AdminGralComerciosPage />}/>
             <Route path="comercios/nuevo" element={<NuevoComercioPage />} />
