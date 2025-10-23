@@ -6,155 +6,118 @@ import java.util.List;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-
-
-@Document (collection = "orders")
+@Document(collection = "orders")
 public class Order {
 
     @Id
     private String id;
-    private Double total_price;
-    private Boolean is_active;
-    private Boolean is_paid;
-    private Boolean is_delivered;
-    private List<item> items;
-    private LocalDateTime date_created;
-    private LocalDateTime date_updated;
+    private Double totalPrice;
+    private Boolean paidWithMercadoPago;
+    private Boolean paidWithCash;
+    private OrderStatus status;
+    private LocalDateTime dateCreated;
+    private LocalDateTime dateUpdated;
+    private List<Item> items;
+    private Restaurant restaurant;
 
-    
+    // --- Constructores ---
     public Order() {
+        this.status = OrderStatus.PENDING;
+        this.dateCreated = LocalDateTime.now();
+        this.dateUpdated = LocalDateTime.now();
     }
 
-
-    public Order(String id, Double total_price, Boolean is_active, Boolean is_paid, Boolean is_delivered,
-            List<item> items) {
+    public Order(String id, Double totalPrice, Boolean paidWithMercadoPago, Boolean paidWithCash,
+                 List<Item> items, Restaurant restaurant) {
         this.id = id;
-        this.total_price = total_price;
-        this.is_active = is_active;
-        this.is_paid = is_paid;
-        this.is_delivered = is_delivered;
+        this.totalPrice = totalPrice;
+        this.paidWithMercadoPago = paidWithMercadoPago;
+        this.paidWithCash = paidWithCash;
+        this.status = OrderStatus.PENDING;
         this.items = items;
+        this.restaurant = restaurant;
+        this.dateCreated = LocalDateTime.now();
+        this.dateUpdated = LocalDateTime.now();
     }
 
+    // --- Getters y Setters ---
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
 
-    public String getId() {
-        return id;
+    public Double getTotalPrice() { return totalPrice; }
+    public void setTotalPrice(Double totalPrice) { this.totalPrice = totalPrice; }
+
+    public Boolean getPaidWithMercadoPago() { return paidWithMercadoPago; }
+    public void setPaidWithMercadoPago(Boolean paidWithMercadoPago) { this.paidWithMercadoPago = paidWithMercadoPago; }
+
+    public Boolean getPaidWithCash() { return paidWithCash; }
+    public void setPaidWithCash(Boolean paidWithCash) { this.paidWithCash = paidWithCash; }
+
+    public OrderStatus getStatus() { return status; }
+    public void setStatus(OrderStatus status) { this.status = status; }
+
+    public LocalDateTime getDateCreated() { return dateCreated; }
+    public void setDateCreated(LocalDateTime dateCreated) { this.dateCreated = dateCreated; }
+
+    public LocalDateTime getDateUpdated() { return dateUpdated; }
+    public void setDateUpdated(LocalDateTime dateUpdated) { this.dateUpdated = dateUpdated; }
+
+    public List<Item> getItems() { return items; }
+    public void setItems(List<Item> items) { this.items = items; }
+
+    public Restaurant getRestaurant() { return restaurant; }
+    public void setRestaurant(Restaurant restaurant) { this.restaurant = restaurant; }
+
+    // --- Clases internas ---
+    public static class Item {
+        private String productId;
+        private String itemName;
+        private Double itemPrice;
+        private Integer itemQuantity;
+
+        public Item() {}
+        public Item(String productId, String itemName, Double itemPrice, Integer itemQuantity) {
+            this.productId = productId;
+            this.itemName = itemName;
+            this.itemPrice = itemPrice;
+            this.itemQuantity = itemQuantity;
+        }
+
+        public String getProductId() { return productId; }
+        public void setProductId(String productId) { this.productId = productId; }
+
+        public String getItemName() { return itemName; }
+        public void setItemName(String itemName) { this.itemName = itemName; }
+
+        public Double getItemPrice() { return itemPrice; }
+        public void setItemPrice(Double itemPrice) { this.itemPrice = itemPrice; }
+
+        public Integer getItemQuantity() { return itemQuantity; }
+        public void setItemQuantity(Integer itemQuantity) { this.itemQuantity = itemQuantity; }
     }
 
+    public static class Restaurant {
+        private String restaurantId;
+        private String restaurantName;
 
-    public void setId(String id) {
-        this.id = id;
+        public Restaurant() {}
+        public Restaurant(String restaurantId, String restaurantName) {
+            this.restaurantId = restaurantId;
+            this.restaurantName = restaurantName;
+        }
+
+        public String getRestaurantId() { return restaurantId; }
+        public void setRestaurantId(String restaurantId) { this.restaurantId = restaurantId; }
+
+        public String getRestaurantName() { return restaurantName; }
+        public void setRestaurantName(String restaurantName) { this.restaurantName = restaurantName; }
     }
 
-
-    public Double getTotal_price() {
-        return total_price;
-    }
-
-
-    public void setTotal_price(Double total_price) {
-        this.total_price = total_price;
-    }
-
-
-    public Boolean getIs_active() {
-        return is_active;
-    }
-
-
-    public void setIs_active(Boolean is_active) {
-        this.is_active = is_active;
-    }
-
-
-    public Boolean getIs_paid() {
-        return is_paid;
-    }
-
-
-    public void setIs_paid(Boolean is_paid) {
-        this.is_paid = is_paid;
-    }
-
-
-    public Boolean getIs_delivered() {
-        return is_delivered;
-    }
-
-
-    public void setIs_delivered(Boolean is_delivered) {
-        this.is_delivered = is_delivered;
-    }
-
-
-    public List<item> getItems() {
-        return items;
-    }
-
-
-    public void setItems(List<item> items) {
-        this.items = items;
-    }
-
-
-    public LocalDateTime getDate_created() {
-        return date_created;
-    }
-
-
-    public void setDate_created(LocalDateTime date_created) {
-        this.date_created = date_created;
-    }
-
-
-    public LocalDateTime getDate_updated() {
-        return date_updated;
-    }
-
-
-    public void setDate_updated(LocalDateTime date_updated) {
-        this.date_updated = date_updated;
-    }
-   
-    
-    public static class item {
-
-    String product_id;
-    String item_name;
-    Double item_price;
-    Integer item_quantity;
-    public item() {
-    }
-    public item(String product_id, String item_name, Double item_price, Integer item_quantity) {
-        this.product_id = product_id;
-        this.item_name = item_name;
-        this.item_price = item_price;
-        this.item_quantity = item_quantity;
-    }
-    public String getProduct_id() {
-        return product_id;
-    }
-    public void setProduct_id(String product_id) {
-        this.product_id = product_id;
-    }
-    public String getItem_name() {
-        return item_name;
-    }
-    public void setItem_name(String item_name) {
-        this.item_name = item_name;
-    }
-    public Double getItem_price() {
-        return item_price;
-    }
-    public void setItem_price(Double item_price) {
-        this.item_price = item_price;
-    }
-    public Integer getItem_quantity() {
-        return item_quantity;
-    }
-    public void setItem_quantity(Integer item_quantity) {
-        this.item_quantity = item_quantity;
-    }
-    
+    // --- Enum para status ---
+    public enum OrderStatus {
+        PENDING,
+        PAID,
+        READY,
+        DELIVERED
     }
 }
