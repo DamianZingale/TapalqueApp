@@ -9,7 +9,6 @@ import com.tapalque.user.dto.UserRequestDTO;
 import com.tapalque.user.dto.UserResponseDTO;
 import com.tapalque.user.entity.Role;
 import com.tapalque.user.entity.User;
-import com.tapalque.user.enu.RolName;
 import com.tapalque.user.repository.RoleRepository;
 import com.tapalque.user.repository.UserRepository;
 
