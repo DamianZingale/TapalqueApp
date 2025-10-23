@@ -28,6 +28,13 @@ spring:
               filters:
                 - StripPrefix=2
 
+            - id: msvc-jwt
+              uri: lb://msvc-jwt
+              predicates:
+                - Path=/api/jwt/**
+              filters:
+                - StripPrefix=2
+
   application:
     name: msvc-gateway-server
 
