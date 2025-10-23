@@ -25,16 +25,17 @@ public class JwtAuthGatewayFilterFactory extends AbstractGatewayFilterFactory<Jw
                 path.startsWith("/api/jwt/") ||
                 path.startsWith("/api/public")||
                 path.startsWith("/api/user/email/")) {
-                    System.out.println("Entra a este IF!");
+                    System.out.println("Entra a IF rutas publicas!");
                 return chain.filter(exchange);
             }
 
             String authHeader = exchange.getRequest().getHeaders().getFirst("Authorization");
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
                 exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+                System.out.println("Entra a If que rechaza");
                 return exchange.getResponse().setComplete();
             }
-
+            System.out.println("Autoriza el token");
             return chain.filter(exchange);
         };
     }
