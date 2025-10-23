@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.tapalque.jwt.dto.UserResponseDTO;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -60,21 +61,34 @@ public class JwtService {
                 .setSubject(user.getEmail())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
-                .claim("fullName", user.getFirtName()+" "+user.getLastName())
+                .claim("fullName", user.getFirtName() + " " + user.getLastName())
+                .claim("rol", user.getRol().name())
                 .signWith(getSignInKey())
                 .compact();
     }
 
     public boolean isTokenValid(String token) {
-        UserResponseDTO user = userClient.getUser(extractEmail(token));
-        final String email = extractEmail(token);
-        return (email.equals(user.getEmail())) && !isTokenExpired(token);
+        try {
+            Claims claims = extractAllClaims(token);
+            return !isTokenExpired(claims);
+        } catch (Exception e) {
+            return false;
+        }
     }
 
-    private boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
+    public Claims extractAllClaims(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(getSignInKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
 
+    private boolean isTokenExpired(Claims claims) {
+        return claims.getExpiration().before(new Date());
+    }
+
+    
     private Date extractExpiration(String token) {
         return Jwts
                 .parserBuilder()
