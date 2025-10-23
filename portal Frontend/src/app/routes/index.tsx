@@ -19,7 +19,7 @@ import RegisterPage from "../../features/LoginRegister/pages/RegisterPage";
 
 // Administración
 import HospedajeAdmin from "../../features/hospedajeAdmin/routes";
-import AdministradorGeneralRoutes from "../../features/administrador general/routes";
+import AdministradorGeneralRoutes from "../../features/administrador-general/routes";
 
 export const router = createBrowserRouter([
     {
