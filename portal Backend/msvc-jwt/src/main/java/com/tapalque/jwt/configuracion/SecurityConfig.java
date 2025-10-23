@@ -34,7 +34,7 @@ public class SecurityConfig {
         http
                 .csrf().disable()
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/jwt/login").permitAll()
+                        .requestMatchers("/api/jwt/login", "/api/jwt/validate").permitAll()
                         .anyRequest().authenticated());
         return http.build();
     }
