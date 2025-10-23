@@ -12,9 +12,10 @@ import org.springframework.data.jpa.repository.Query;
 
 
 public interface TokenRepository extends JpaRepository<Token, Long> {
-    Optional<Token> findByToken(String jwt);
+    List<Token> findByEmailAndExpiredFalseAndRevokedFalse(String email);
 
-List<Token> findByUsuarioIdAndExpiredFalseAndRevokedFalse(Long id);
+    Optional<Token> findByToken(String token);
+
 
 List<Token> findByRevokedFalseAndExpiredFalse();
 
@@ -22,4 +23,3 @@ List<Token> findByRevokedFalseAndExpiredFalse();
 @Query("DELETE FROM Token t WHERE t.expired = true OR t.revoked = true")
 void deleteAllExpiredOrRevoked();
 }
-

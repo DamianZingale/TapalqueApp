@@ -1,42 +1,50 @@
+server:
+  port: 8090
+
 spring:
+  application:
+    name: MSVC-GATEWAY-SERVER
+
   main:
     web-application-type: reactive
 
   cloud:
     gateway:
-      server:
-        webflux:
-          routes:
-            - id: msvc-comercio
-              uri: lb://msvc-comercio
-              predicates:
-                - Path=/api/comercio/**
-              filters:
-                - StripPrefix=2
+      routes:
+        - id: msvc-comercio
+          uri: lb://MSVC-COMERCIO
+          predicates:
+            - Path=/api/comercio/**
+          filters:
+            - JwtAuth
 
-            - id: msvc-hospedajes
-              uri: lb://msvc-hospedajes
-              predicates:
-                - Path=/api/hospedajes/**
-              filters:
-                - StripPrefix=2
+        - id: msvc-hospedajes
+          uri: lb://MSVC-HOSPEDAJES
+          predicates:
+            - Path=/api/hospedajes/**
+          filters:
+            - JwtAuth
 
-            - id: msvc-gastronomia
-              uri: lb://msvc-gastronomia
-              predicates:
-                - Path=/api/gastronomia/**
-              filters:
-                - StripPrefix=2
+        - id: msvc-gastronomia
+          uri: lb://MSVC-GASTRONOMIA
+          predicates:
+            - Path=/api/gastronomia/**
+          filters:
+            - JwtAuth
 
-            - id: msvc-jwt
-              uri: lb://msvc-jwt
-              predicates:
-                - Path=/api/jwt/**
-              filters:
-                - StripPrefix=2
+        - id: msvc-jwt
+          uri: lb://MSVC-JWT
+          predicates:
+            - Path=/api/jwt/**
+          filters:
+            - JwtAuth
 
-  application:
-    name: msvc-gateway-server
+        - id: msvc-user
+          uri: lb://MSVC-USER
+          predicates:
+            - Path=/api/user/**
+          filters:
+            - JwtAuth
 
 eureka:
   client:
