@@ -33,6 +33,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain)
             throws ServletException, IOException {
+                
         final String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
@@ -51,19 +52,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 .block();
 
         if (!datos.containsKey("email") || !datos.containsKey("rol")) {
-            System.out.println("❌ Token inválido o sin rol");
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
 
         String email = datos.get("email");
         String rol = datos.get("rol");
-        System.out.println("✅ Token válido. Email: " + email + ", Rol: " + rol);
-
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                 email,
                 null,
-                List.of(new SimpleGrantedAuthority("ROLE_" + rol)) // 👈 esto es clave
+                List.of(new SimpleGrantedAuthority("ROLE_" + rol))
         );
         SecurityContextHolder.getContext().setAuthentication(auth);
 

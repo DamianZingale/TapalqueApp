@@ -31,7 +31,6 @@ public class UserController {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody UserRequestDTO dto) {
-        System.out.println("Llega al controller register user general");
         try {
             Role role = new Role(4L, RolName.USER_GRAL);
             UserResponseDTO response = userService.register(dto, role);
@@ -44,7 +43,6 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN_GENERAL')")
     @PostMapping("/AdminRegistro")
     public ResponseEntity<?> registerAdmin(@Valid @RequestBody UserRequestDTO dto) {
-        System.out.println("Llega al controller register admin general");
         try {
             Role role = new Role(1L, RolName.ADMIN_GENERAL);
             UserResponseDTO response = userService.register(dto, role);
@@ -57,7 +55,6 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN_GENERAL')")
     @PostMapping("/GastroRegistro")
     public ResponseEntity<?> registerGastro(@Valid @RequestBody UserRequestDTO dto) {
-        System.out.println("Llega al controller register admin general");
         try {
             Role role = new Role(2L, RolName.ADMIN_GASTRO);
             UserResponseDTO response = userService.register(dto, role);
@@ -70,7 +67,6 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN_GENERAL')")
     @PostMapping("/HospRegistro")
     public ResponseEntity<?> registerHosp(@Valid @RequestBody UserRequestDTO dto) {
-        System.out.println("Llega al controller register admin general");
         try {
             Role role = new Role(3L, RolName.ADMIN_HOSPEDAJE);
             UserResponseDTO response = userService.register(dto, role);
@@ -82,7 +78,6 @@ public class UserController {
 
     @GetMapping("/email/{email}")
     public ResponseEntity<?> getByEmail(@PathVariable String email) {
-        System.out.println("Entra al controller del get email");
         try {
             UserResponseDTO response = userService.getByEmail(email);
             return ResponseEntity.ok(response);
