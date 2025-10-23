@@ -33,20 +33,46 @@ public class UserController {
     public ResponseEntity<?> register(@Valid @RequestBody UserRequestDTO dto) {
         System.out.println("Llega al controller register user general");
         try {
-            Role role = new Role(1L, RolName.USER_GRAL);
+            Role role = new Role(4L, RolName.USER_GRAL);
             UserResponseDTO response = userService.register(dto, role);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(error("Error en registro", e.getMessage()));
         }
     }
-    
+
     @PreAuthorize("hasRole('ADMIN_GENERAL')")
     @PostMapping("/AdminRegistro")
     public ResponseEntity<?> registerAdmin(@Valid @RequestBody UserRequestDTO dto) {
         System.out.println("Llega al controller register admin general");
         try {
             Role role = new Role(1L, RolName.ADMIN_GENERAL);
+            UserResponseDTO response = userService.register(dto, role);
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(error("Error en registro", e.getMessage()));
+        }
+    }
+
+    @PreAuthorize("hasRole('ADMIN_GENERAL')")
+    @PostMapping("/GastroRegistro")
+    public ResponseEntity<?> registerGastro(@Valid @RequestBody UserRequestDTO dto) {
+        System.out.println("Llega al controller register admin general");
+        try {
+            Role role = new Role(2L, RolName.ADMIN_GASTRO);
+            UserResponseDTO response = userService.register(dto, role);
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(error("Error en registro", e.getMessage()));
+        }
+    }
+
+    @PreAuthorize("hasRole('ADMIN_GENERAL')")
+    @PostMapping("/HospRegistro")
+    public ResponseEntity<?> registerHosp(@Valid @RequestBody UserRequestDTO dto) {
+        System.out.println("Llega al controller register admin general");
+        try {
+            Role role = new Role(3L, RolName.ADMIN_HOSPEDAJE);
             UserResponseDTO response = userService.register(dto, role);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (Exception e) {
