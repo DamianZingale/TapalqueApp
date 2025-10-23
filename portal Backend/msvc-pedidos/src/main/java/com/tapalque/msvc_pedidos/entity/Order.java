@@ -17,6 +17,7 @@ public class Order {
     private OrderStatus status;
     private LocalDateTime dateCreated;
     private LocalDateTime dateUpdated;
+    private String paymentReceiptPath;
     private List<Item> items;
     private Restaurant restaurant;
 
@@ -28,7 +29,7 @@ public class Order {
     }
 
     public Order(String id, Double totalPrice, Boolean paidWithMercadoPago, Boolean paidWithCash,
-                 List<Item> items, Restaurant restaurant) {
+                 List<Item> items, Restaurant restaurant, String paymentReceiptPath) {
         this.id = id;
         this.totalPrice = totalPrice;
         this.paidWithMercadoPago = paidWithMercadoPago;
@@ -38,6 +39,7 @@ public class Order {
         this.restaurant = restaurant;
         this.dateCreated = LocalDateTime.now();
         this.dateUpdated = LocalDateTime.now();
+        this.paymentReceiptPath = paymentReceiptPath;
     }
 
     // --- Getters y Setters ---
@@ -67,7 +69,10 @@ public class Order {
 
     public Restaurant getRestaurant() { return restaurant; }
     public void setRestaurant(Restaurant restaurant) { this.restaurant = restaurant; }
-
+    
+    public String getPaymentReceiptPath() {return paymentReceiptPath;}
+    public void setPaymentReceiptPath(String paymentReceiptPath) {this.paymentReceiptPath = paymentReceiptPath;
+    }
     // --- Clases internas ---
     public static class Item {
         private String productId;
@@ -120,4 +125,6 @@ public class Order {
         READY,
         DELIVERED
     }
+
+    
 }
