@@ -23,12 +23,11 @@ public class UserService {
     private final RoleRepository roleRepo;
     private final PasswordEncoder passwordEncoder;
 
-    public UserResponseDTO register(UserRequestDTO dto) {
+    public UserResponseDTO register(UserRequestDTO dto, Role role) {
         if (userRepo.findByEmail(dto.getCorreo()).isPresent()) {
             throw new IllegalArgumentException("El correo ya está registrado");
         }
 
-        Role role = new Role(1L, RolName.ADMIN_GENERAL);
         String encoded = passwordEncoder.encode(dto.getContrasena());
         User user = User.builder()
                 .email(dto.getCorreo())
