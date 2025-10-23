@@ -13,6 +13,7 @@ public class OrderDTO {
     private LocalDateTime dateUpdated;
     private List<ItemDTO> items;
     private RestaurantDTO restaurant;
+    private String paymentReceiptPath;
 
     
     public OrderDTO() {}
@@ -44,4 +45,12 @@ public class OrderDTO {
 
     public RestaurantDTO getRestaurant() { return restaurant; }
     public void setRestaurant(RestaurantDTO restaurant) { this.restaurant = restaurant; }
+
+    public String getPaymentReceiptPath() {
+        return paymentReceiptPath;
+    }
+
+    public void setPaymentReceiptPath(String paymentReceiptPath) {
+        this.paymentReceiptPath = paymentReceiptPath;
+    }
 }
