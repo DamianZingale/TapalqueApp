@@ -14,7 +14,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.tapalque.msvc_pedidos.dto.ItemDTO;
 import com.tapalque.msvc_pedidos.dto.OrderDTO;
+import com.tapalque.msvc_pedidos.dto.RestaurantDTO;
 import com.tapalque.msvc_pedidos.entity.Order;
 import com.tapalque.msvc_pedidos.service.OrderService;
 
@@ -32,10 +34,10 @@ public class OrderController {
     }
 
     // --- Crear pedido ---
-    @PostMapping
+    @PostMapping ("new")
     @ResponseStatus(HttpStatus.CREATED)
     public Mono<OrderDTO> createOrder(@RequestBody OrderDTO orderDto) {
-        Objects.requireNonNull(orderDto, "OrderDTO must not be null");
+        Objects.requireNonNull(orderDto, "Order must not be null");
         return orderService.createOrder(orderDto);
     }
 
@@ -83,14 +85,14 @@ public class OrderController {
         dto.setDateUpdated(order.getDateUpdated());
         dto.setItems(order.getItems().stream()
                 .map(i -> {
-                    var itemDto = new com.tapalque.msvc_pedidos.dto.ItemDTO();
+                    var itemDto = new ItemDTO();
                     itemDto.setProductId(i.getProductId());
                     itemDto.setItemName(i.getItemName());
                     itemDto.setItemPrice(i.getItemPrice());
                     itemDto.setItemQuantity(i.getItemQuantity());
                     return itemDto;
                 }).toList());
-        var restaurantDto = new com.tapalque.msvc_pedidos.dto.RestaurantDTO();
+        var restaurantDto = new RestaurantDTO();
         restaurantDto.setRestaurantId(order.getRestaurant().getRestaurantId());
         restaurantDto.setRestaurantName(order.getRestaurant().getRestaurantName());
         dto.setRestaurant(restaurantDto);
