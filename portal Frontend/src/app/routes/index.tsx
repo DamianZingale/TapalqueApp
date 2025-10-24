@@ -20,6 +20,7 @@ import RegisterPage from "../../features/LoginRegister/pages/RegisterPage";
 // Administración
 import HospedajeAdmin from "../../features/hospedajeAdmin/routes";
 import AdministradorGeneralRoutes from "../../features/administrador-general/routes";
+import AdminHospedajesRoutes from "../../features/administrador-general/adminHospedajes/routes"
 
 export const router = createBrowserRouter([
     {
@@ -42,8 +43,17 @@ export const router = createBrowserRouter([
     { path: "/login", element: <LoginPage /> },
     { path: "/register", element: <RegisterPage /> },
 
-  // Rutas de administración
+  // Rutas de administración de los hoteles
     { path: "/admin/hospedaje/*", element: <HospedajeAdmin /> },
-    { path: "/admin/general/*", element: <AdministradorGeneralRoutes /> },
+    {
+      path: "/admin/general",
+      children: AdministradorGeneralRoutes,
+    },
+
+    {
+  path: "/admin/hospedajes",
+  children: AdminHospedajesRoutes,
+}
+
     
 ]);
