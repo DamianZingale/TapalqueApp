@@ -62,7 +62,7 @@ public class OrderController {
     // --- Actualizar pedido ---
     @PutMapping("/{id}")
     public Mono<OrderDTO> updateOrder(@PathVariable @NonNull String id, @RequestBody @NonNull OrderDTO orderDTO) {
-        orderDTO.setId(id);
+        //orderDTO.setId(id);
         return orderService.updateOrder(orderDTO).map(this::mapToDTO);
     }
 
