@@ -1,4 +1,25 @@
-/target
+# Ignorar carpetas de compilación de Maven o Gradle
+**/target/
+**/build/
+
+# Ignorar archivos de entorno (credenciales, tokens, etc.)
+*.env
+
+# Ignorar logs
+*.log
+
+# Ignorar archivos temporales de IDE
+.idea/
+.vscode/
+!.vscode/launch.json
+
+*.iml
+
+# Ignorar binarios y empaquetados
 *.jar
 *.war
-*.class
+
+# Ignorar archivos del sistema
+.DS_Store
+Thumbs.db
+

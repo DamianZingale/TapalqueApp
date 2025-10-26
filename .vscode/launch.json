@@ -98,7 +98,8 @@
             "mainClass": "com.eureka.demo.EurekaServerAppication",
             "projectName": "com.eureka-demo",
             "args": "",
-            "envFile": "${workspaceFolder}/.env"
+            "envFile": "${workspaceFolder}/.env",
+            "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=43727 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=com.eureka-demo"
         },
         {
             "type": "java",
@@ -107,6 +108,16 @@
             "cwd": "${workspaceFolder}",
             "mainClass": "com.tapalque.demo.GatewayServerApplication",
             "projectName": "com.tapalque-demo",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-ComercioApplication<com.tapalque-comercio>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.tapalque.comercio.ComercioApplication",
+            "projectName": "com.tapalque-comercio",
             "args": "",
             "envFile": "${workspaceFolder}/.env"
         }
