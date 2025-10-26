@@ -1,4 +1,0 @@
--------------------------------------------------------------------------------
-Test set: com.eureka.demo.DemoApplicationTests
--------------------------------------------------------------------------------
-Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.689 s -- in com.eureka.demo.DemoApplicationTests
