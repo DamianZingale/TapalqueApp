@@ -111,10 +111,10 @@ public class JwtService {
         return nombreDeUsuario;
     }
 
-    @Transactional
-    @Scheduled(cron= "0 0 3 * * *")
-    public void cleanAuthomaticRevokedTokens(){
-        tokenRepositorio.deleteAllExpiredOrRevoked();
-        System.out.println("Limpieza de tokens ejecutada");
-    }
+    // @Transactional
+    // @Scheduled(cron= "0 0 3 * * *")
+    // public void cleanAuthomaticRevokedTokens(){
+    //     tokenRepositorio.deleteAllExpiredOrRevoked();
+    //     System.out.println("Limpieza de tokens ejecutada");
+    // }
 }
