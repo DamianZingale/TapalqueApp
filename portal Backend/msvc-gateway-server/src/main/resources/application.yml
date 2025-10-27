@@ -46,6 +46,13 @@ spring:
           filters:
             - JwtAuth
 
+        - id: msvc-mercado-pago
+          uri: lb://MSVC-MERCADO-PAGO
+          predicates:
+            - Path=/api/mercadopago/**
+          filters:
+            - JwtAuth
+
 eureka:
   client:
     service-url:
