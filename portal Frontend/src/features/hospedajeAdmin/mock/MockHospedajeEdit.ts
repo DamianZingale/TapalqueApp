@@ -5,6 +5,7 @@ export interface OpcionHabitacion {
     precio: number;
     tipoPrecio: "por_habitacion" | "por_persona";
     reservas: string[];
+    foto?: string[]
 }
 export interface Hospedaje {
     id: string;
