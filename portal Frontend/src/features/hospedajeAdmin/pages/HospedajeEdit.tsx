@@ -41,21 +41,21 @@ export const HospedajeEdit = () => {
     };
 
     const handleAdd = () => {
-        if (!form.titulo || !form.precio) {
-        alert("Por favor, completá todos los campos obligatorios");
-        return;
+        if (!form.id.trim() || !form.titulo || !form.precio) {
+            alert("Completá todos los campos obligatorios");
+            return;
         }
 
         setOpciones([...opciones, { ...form }]);
 
         setForm({
-        id: "",
-        titulo: "",
-        maxPersonas: 1,
-        precio: 0,
-        tipoPrecio: "por_habitacion",
-        reservas: [],
-        foto: ""
+            id: "",
+            titulo: "",
+            maxPersonas: 1,
+            precio: 0,
+            tipoPrecio: "por_habitacion",
+            reservas: [],
+            foto: ""
         });
     };
 
@@ -83,13 +83,20 @@ export const HospedajeEdit = () => {
                 className="border p-2 rounded"
             />
             <label>Título</label>
-            <input
+            <select
                 name="titulo"
                 value={form.titulo}
                 onChange={handleChange}
-                placeholder="Ej: Doble, Triple..."
                 className="border p-2 rounded"
-            />
+                >
+                <option value="">Seleccionar tipo</option>
+                <option value="Single">Single</option>
+                <option value="Doble mat">Doble mat</option>
+                <option value="Doble twin">Doble twin</option>
+                <option value="Triple mat + twin">Triple mat + twin</option>
+                <option value="Triple twin">Triple twin</option>
+                <option value="Cuádruple">Cuádruple</option>
+                </select>
 
             <label>Capacidad máxima</label>
             <select
@@ -149,6 +156,7 @@ export const HospedajeEdit = () => {
             <button
             onClick={handleAdd}
             className="mt-4 bg-blue-600 text-white px-4 py-2 rounded"
+            
             >
             Agregar habitación
             </button>
