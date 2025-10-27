@@ -1,188 +1,134 @@
-import { useState } from "react";
-import { useParams } from "react-router-dom";
-import { mockHospedajes } from "../mock/MockHospedajeEdit";
+import { useState } from "react"
+import { useParams } from "react-router-dom"
+import { mockHospedajes } from "../mock/MockHospedajeEdit"
+import type { OpcionHabitacion } from "../types/tiposHotel"
 
-interface OpcionHabitacion {
-    id: string;
-    titulo: string;
-    maxPersonas: number;
-    precio: number;
-    tipoPrecio: "por_habitacion" | "por_persona";
-    reservas: string[];
-    foto: string;
+// Tipo extendido para edición local
+interface HabitacionEditable extends Omit<OpcionHabitacion, "foto"> {
+    foto: string
+    disponible: boolean
 }
 
 export const HospedajeEdit = () => {
-    const { id } = useParams();
-    const hospedaje = mockHospedajes.find((h) => h.id === id);
+    const { id } = useParams()
+    const hospedaje = mockHospedajes.find((h) => h.id === id)
 
-    const [opciones, setOpciones] = useState<OpcionHabitacion[]>(hospedaje?.opciones || []);
-    const [form, setForm] = useState<OpcionHabitacion>({
-        id: "",
-        titulo: "",
-        maxPersonas: 1,
-        precio: 0,
-        tipoPrecio: "por_habitacion",
-        reservas: [],
-        foto: ""
-    });
+    const [opciones, setOpciones] = useState<HabitacionEditable[]>(
+        hospedaje?.opciones.map((op) => ({
+        ...op,
+        foto: Array.isArray(op.foto) ? op.foto[0] : "",
+        disponible: true
+        })) || []
+    )
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
-        const key = name === "nHab" ? "id" : name;
-
-        setForm({
-    ...form,
-    [key]: key === "maxPersonas" || key === "precio" || key === "cantidad"
-        ? Number(value)
-        : value,
-    });
-
-    };
-
-    const handleAdd = () => {
-        if (!form.id.trim() || !form.titulo || !form.precio) {
-            alert("Completá todos los campos obligatorios");
-            return;
-        }
-
-        setOpciones([...opciones, { ...form }]);
-
-        setForm({
-            id: "",
-            titulo: "",
-            maxPersonas: 1,
-            precio: 0,
-            tipoPrecio: "por_habitacion",
-            reservas: [],
-            foto: ""
-        });
-    };
+    const handleUpdate = <K extends keyof HabitacionEditable>(
+        index: number,
+        key: K,
+        value: HabitacionEditable[K]
+    ) => {
+        const nuevas = [...opciones]
+        nuevas[index] = { ...nuevas[index], [key]: value }
+        setOpciones(nuevas)
+    }
 
     const handleDelete = (id: string) => {
-        setOpciones(opciones.filter((op) => op.id !== id));
-    };
+        setOpciones(opciones.filter((op) => op.id !== id))
+    }
 
-    if (!hospedaje) return <p className="p-6">Hospedaje no encontrado</p>;
+    const handleGuardarCambios = () => {
+        console.log("Habitaciones actualizadas:", opciones)
+        alert("Cambios guardados correctamente ✅")
+        // Ejemplo de persistencia local:
+        localStorage.setItem(`habitaciones-${hospedaje?.id}`, JSON.stringify(opciones))
+    }
+
+    if (!hospedaje) return <p className="p-6">Hospedaje no encontrado</p>
 
     return (
         <div className="p-6 bg-gray-50 min-h-screen">
         <h1 className="text-2xl font-bold mb-4">Editar: {hospedaje.nombre}</h1>
         <p className="mb-6 text-gray-600">{hospedaje.descripcion}</p>
 
-        {/* Formulario */}
-        <div className="bg-white p-4 rounded shadow mb-6">
-            <h2 className="text-xl font-semibold mb-2">Agregar habitación</h2>
-            <div className="grid grid-cols-2 gap-4">
-                <label>N de Habitacion</label>
-            <input
-                name="nHab"
-                value={form.id}
-                onChange={handleChange}
-                placeholder="Ej. 105"
-                className="border p-2 rounded"
-            />
-            <label>Título</label>
-            <select
-                name="titulo"
-                value={form.titulo}
-                onChange={handleChange}
-                className="border p-2 rounded"
-                >
-                <option value="">Seleccionar tipo</option>
-                <option value="Single">Single</option>
-                <option value="Doble mat">Doble mat</option>
-                <option value="Doble twin">Doble twin</option>
-                <option value="Triple mat + twin">Triple mat + twin</option>
-                <option value="Triple twin">Triple twin</option>
-                <option value="Cuádruple">Cuádruple</option>
-                </select>
-
-            <label>Capacidad máxima</label>
-            <select
-                name="maxPersonas"
-                value={form.maxPersonas}
-                onChange={handleChange}
-                className="border p-2 rounded"
-            >
-                <option value={1}>Individual</option>
-                <option value={2}>Doble</option>
-                <option value={3}>Triple</option>
-                <option value={4}>Cuádruple</option>
-                <option value={5}>Quíntuple</option>
-            </select>
-
-            <label>Foto</label>
-            <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                    setForm({ ...form, foto: reader.result as string });
-                    };
-                    reader.readAsDataURL(file);
-                }
-                }}
-                className="border p-2 rounded"
-            />
-
-            <label>Precio</label>
-            <input
-                type="number"
-                name="precio"
-                value={form.precio}
-                onChange={handleChange}
-                placeholder="Precio"
-                className="border p-2 rounded"
-            />
-
-            <label>Tipo de precio</label>
-            <select
-                name="tipoPrecio"
-                value={form.tipoPrecio}
-                onChange={handleChange}
-                className="border p-2 rounded"
-            >
-                <option value="por_habitacion">Por habitación</option>
-                <option value="por_persona">Por persona</option>
-            </select>
-
-
-            </div>
-
-            <button
-            onClick={handleAdd}
-            className="mt-4 bg-blue-600 text-white px-4 py-2 rounded"
-            
-            >
-            Agregar habitación
-            </button>
-        </div>
-
-        {/* Listado de habitaciones */}
         <h2 className="text-xl font-semibold mb-4">Habitaciones creadas</h2>
         <ul className="space-y-6">
-            {opciones.map((op) => (
+        {opciones.map((op, index) => (
             <li key={op.id} className="bg-white p-4 rounded shadow">
-                <div className="flex justify-between items-center mb-2">
-                <div>
-                    <p className="font-bold text-lg">{op.titulo}</p>
-                    <p>Capacidad: {op.maxPersonas} personas</p>
-                    <p>Precio: ${op.precio} ({op.tipoPrecio})</p>
-                </div>
-                {op.foto && (
-                    <img
-                    src={op.foto}
-                    alt={op.titulo}
-                    className="w-20 h-12 object-cover rounded"
+                <div className="grid grid-cols-2 gap-4">
+                <input
+                    value={op.id}
+                    disabled
+                    className="border p-2 rounded"
+                />
+
+                <select
+                    value={op.titulo}
+                    onChange={(e) =>
+                    handleUpdate(index, "titulo", e.target.value)
+                    }
+                    className="border p-2 rounded"
+                >
+                    <option value="Single">Single</option>
+                    <option value="Doble mat">Doble mat</option>
+                    <option value="Doble twin">Doble twin</option>
+                    <option value="Triple mat + twin">Triple mat + twin</option>
+                    <option value="Triple twin">Triple twin</option>
+                    <option value="Cuádruple">Cuádruple</option>
+                </select>
+
+                <select
+                    value={op.maxPersonas}
+                    onChange={(e) =>
+                    handleUpdate(index, "maxPersonas", Number(e.target.value))
+                    }
+                    className="border p-2 rounded"
+                >
+                    <option value={1}>Individual</option>
+                    <option value={2}>Doble</option>
+                    <option value={3}>Triple</option>
+                    <option value={4}>Cuádruple</option>
+                    <option value={5}>Quíntuple</option>
+                </select>
+
+                <input
+                    type="number"
+                    value={op.precio}
+                    onChange={(e) =>
+                    handleUpdate(index, "precio", Number(e.target.value))
+                    }
+                    className="border p-2 rounded"
+                />
+
+                <select
+                    value={op.tipoPrecio}
+                    onChange={(e) =>
+                    handleUpdate(index, "tipoPrecio", e.target.value as HabitacionEditable["tipoPrecio"])
+                    }
+                    className="border p-2 rounded"
+                >
+                    <option value="por_habitacion">Por habitación</option>
+                    <option value="por_persona">Por persona</option>
+                </select>
+
+                <label className="flex items-center gap-2">
+                    <input
+                    type="checkbox"
+                    checked={op.disponible}
+                    onChange={(e) =>
+                        handleUpdate(index, "disponible", e.target.checked)
+                    }
                     />
-                )}
+                    Disponible
+                </label>
                 </div>
 
-                
+                {op.foto && (
+                <img
+                    src={op.foto}
+                    alt={op.titulo}
+                    className="mt-4 w-32 h-20 object-cover rounded"
+                />
+                )}
+
                 <button
                 onClick={() => handleDelete(op.id)}
                 className="mt-4 bg-red-500 text-white px-3 py-1 rounded"
@@ -192,6 +138,13 @@ export const HospedajeEdit = () => {
             </li>
             ))}
         </ul>
+
+        <button
+            onClick={handleGuardarCambios}
+            className="mt-6 bg-green-600 text-white px-4 py-2 rounded"
+        >
+            Guardar cambios
+        </button>
         </div>
-    );
-    };
+    )
+}
