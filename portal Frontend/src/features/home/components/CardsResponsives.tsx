@@ -9,20 +9,14 @@ export const CardGridResponsive = () => {
         { titulo: "Espacios Publicos", imagenUrl: "https://termastapalque.com.ar/wp-content/uploads/2023/09/088.webp" , destino: "/espublicos" },
     ];
 
-    return (
-            <div className="row justify-content-center g-4 ">
-                {cards.map((card, index) => (
-                    <div
-                        key={index}
-                        className="col-12 col-sm-6 col-md-5 col-lg-4 "
-                    >
-                        <CardSecciones
-                            titulo={card.titulo}
-                            imagenUrl={card.imagenUrl}
-                            destino={card.destino}
-                        />
-                    </div>
-                ))}
+        return (
+            <div className="">
+            {cards.map((card, index) => (
+                <div key={index} className="">
+                <CardSecciones {...card} />
+                </div>
+            ))}
             </div>
-    );
+        );
+
 };

@@ -1,0 +1,10 @@
+
+.layout{
+    display: flex;
+    flex-direction: column;
+    gap: var(--espaciado-lg);
+    padding: var(--espaciado-md);
+    max-width: 1200px;
+    margin: 0 auto;
+    
+}

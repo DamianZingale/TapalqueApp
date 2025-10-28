@@ -1,0 +1,102 @@
+/* === Importación de fuentes === */
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+/* === Reset base === */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 10px;
+}
+
+body {
+  font-size: 1.6rem;
+  font-family: 'Montserrat', 'Poppins', 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+  background-color: var(--color-fondo);
+  color: #333;
+  line-height: 1.5;
+}
+
+/* === Variables globales === */
+:root {
+  /* Colores */
+    --color-fondo: #EBE5C4;
+    --color-tarjetas: #FDEDCB;
+    --color-letras-boton: #5F7E4B;
+    --color-titulos-chicos: #343800;
+    --color-tapalquego: #7B8E5F;
+    --color-texto: #333;
+    --color-acento: #e67e22;
+
+  /* Tipografía */
+    --fuente-titulo: 'Dancing Script', cursive;
+    --fuente-texto: 'Montserrat', sans-serif;
+    --tamanio-titulo-xl: 3.2rem;
+    --tamanio-titulo-l: 2.4rem;
+    --tamanio-letras-m: 1.6rem;
+    --tamanio-letras-s: 1.2rem;
+
+  /* Espaciado */
+    --espaciado-xs: 0.4rem;
+    --espaciado-sm: 0.8rem;
+    --espaciado-md: 1.6rem;
+    --espaciado-lg: 2.4rem;
+
+  /* Bordes y sombras */
+    --borde-radius: 1rem;
+    --sombra-suave: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  /* Breakpoints */
+    --breakpoint-sm: 576px;
+    --breakpoint-md: 768px;
+    --breakpoint-lg: 992px;
+}
+
+/* === Clases utilitarias === */
+.titulo-principal {
+    font-family: var(--fuente-titulo);
+    font-size: var(--tamanio-titulo-xl);
+    color: var(--color-titulos);
+    text-align: center;
+    margin-bottom: var(--espaciado-md);
+}
+
+.titulo-secundario {
+    font-family: var(--fuente-titulo);
+    font-size: var(--tamanio-titulo-l);
+    color: var(--color-titulos);
+    margin-bottom: var(--espaciado-sm);
+}
+
+.parrafo {
+    font-family: var(--fuente-texto);
+    font-size: var(--tamanio-letras-m);
+    color: var(--color-texto);
+    margin-bottom: var(--espaciado-sm);
+}
+
+.btn {
+    background-color: var(--color-letras-boton);
+    color: white;
+    padding: var(--espaciado-sm) var(--espaciado-md);
+    border-radius: var(--borde-radius);
+    text-decoration: none;
+    display: inline-block;
+    font-size: var(--tamanio-letras-m);
+    transition: background-color 0.3s ease;
+}
+
+.btn:hover {
+    background-color: var(--color-acento);
+}
+
+/* === Layout base === */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--espaciado-md);
+    background-color: var(--color-fondo);
+}
