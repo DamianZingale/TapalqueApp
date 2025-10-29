@@ -52,12 +52,28 @@
 
 .navbar-link {
     font-family: var(--fuente-texto);
-    color: white;
+    color: var(--color-letras-boton);
+    font-weight: 600;
     text-decoration: none;
     font-size: var(--tamanio-letras-m);
+    transition: all 300ms ease-in-out;
 }
 
 .navbar-link:hover {
+    color: var(--color-acento);
+}
+
+.navbar-session{
+    font-family: var(--fuente-texto);
+    color: var(--color-letras-boton);
+    font-weight: 600;
+    text-decoration: none;
+    font-size: var(--tamanio-letras-m);
+    margin-right: 1rem;
+    transition: all 300ms ease-in-out;
+}
+
+.navbar-session:hover {
     color: var(--color-acento);
 }
 
