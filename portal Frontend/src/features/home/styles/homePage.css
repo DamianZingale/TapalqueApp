@@ -1,10 +1,26 @@
-
-.layout{
+.layout {
     display: flex;
-    flex-direction: column;
-    gap: var(--espaciado-lg);
-    padding: var(--espaciado-md);
-    max-width: 1200px;
-    margin: 0 auto;
-    
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 2rem;
+}
+
+.full-width {
+    width: 100%;
+}
+
+.half-width {
+    width: 100%
+}
+
+.card-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  justify-content: center; /* o start/end según tu diseño */
+}
+
+.card-grid > div {
+  width: 45%;
+  box-sizing: border-box;
 }

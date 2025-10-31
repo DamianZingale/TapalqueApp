@@ -1,20 +1,14 @@
-import {
-    WiDaySunny,
-    WiCloud,
-    WiRain,
-    WiSnow,
-    WiThunderstorm,
-    WiFog,
-} from "react-icons/wi";
 
-
-// Función que traduce weathercode a íconos
-export const getWeatherIcon = (code: number) => {
-    if (code === 0) return <WiDaySunny />;
-    if ([1, 2, 3].includes(code)) return <WiCloud />;
-    if ([45, 48].includes(code)) return <WiFog />;
-    if ([51, 53, 55, 61, 63, 65, 80, 81, 82].includes(code)) return <WiRain />;
-    if ([71, 73, 75, 77, 85, 86].includes(code)) return <WiSnow />;
-    if ([95, 96, 99].includes(code)) return <WiThunderstorm />;
-    return <WiCloud />;
+export const getEmojiWeather = (code: number): { emoji: string; label: string } => {
+    if ([0, 1].includes(code)) return { emoji: "☀️", label: "Soleado" };
+    if ([2].includes(code)) return { emoji: "🌤️", label: "Parcialmente nublado" };
+    if ([3].includes(code)) return { emoji: "☁️", label: "Nublado" };
+    if ([45, 48].includes(code)) return { emoji: "🌫️", label: "Neblina" };
+    if ([51, 61].includes(code)) return { emoji: "🌦️", label: "Lluvia ligera" };
+    if ([63, 65].includes(code)) return { emoji: "🌧️", label: "Lluvia fuerte" };
+    if ([71, 73, 75].includes(code)) return { emoji: "❄️", label: "Nieve" };
+    if ([95, 96, 99].includes(code)) return { emoji: "⛈️", label: "Tormenta" };
+    return { emoji: "❓", label: "Desconocido" };
 };
+
+
