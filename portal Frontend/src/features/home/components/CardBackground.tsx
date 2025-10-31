@@ -1,3 +1,5 @@
+import styles from "../styles/cardBackground.module.css"
+
 interface CardBackgroundProps {
     titulo: string;
     imagenUrl: string;
@@ -9,39 +11,30 @@ interface CardBackgroundProps {
     }
 
     export const CardBackground: React.FC<CardBackgroundProps> = ({
-    titulo,
-    imagenUrl,
-    onClick,
-    overlayOpacity = 0.4,
-    fontSize = "1.2rem",
-    letterSpacing = "0.1em",
-    extraClasses = "",
-    }) => {
-    return (
-        <div
-        className={`card-background ${extraClasses}`}
-        style={{
-            backgroundImage: `url(${imagenUrl})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            height: "170px",
-            cursor: "pointer",
-            borderRadius: "0.5rem",
-            overflow: "hidden",
-        }}
-        onClick={onClick}
-        >
-        <div
-            className="card-overlay"
-            style={{ backgroundColor: `rgba(0, 0, 0, ${overlayOpacity})` }}
-        >
-            <h2
-            className="card-title"
-            style={{ fontSize, letterSpacing }}
-            >
-            {titulo}
-            </h2>
-        </div>
-        </div>
-    );
-};
+        titulo,
+        imagenUrl,
+        onClick,
+        }) => {
+        return (
+
+                <div className={styles.backgroundCard}>
+                    <div className="">
+                        <h2>{titulo}</h2>
+                        <div
+                            className=""
+                            style={{
+                            backgroundImage: `url(${imagenUrl})`,
+                            backgroundSize: "cover",
+                            backgroundPosition: "center",
+                            height: "170px",
+                            cursor: "pointer",
+                            borderRadius: "0.5rem",
+                            overflow: "hidden",
+                            }}
+                            onClick={onClick}
+                        />
+                    </div>
+                </div>
+        );
+        };
+

@@ -6,14 +6,14 @@ import "../styles/homePage.css"
 export const HomePage = () => {
   return (
     <main className="layout">
-      <section className="">
+      <section className="full-width">
         <TapalqueWeather />
       </section>
-      <section className="">
+      <section className="half-width">
         <CardTermas />
       </section>
 
-      <section className="">
+      <section className="half-width">
         <CardGridResponsive />
       </section>      
     </main>

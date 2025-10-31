@@ -136,7 +136,7 @@
 
 
 /* Responsive toggle */
-@media (max-width: 768px) {
+@media (max-width: 911px) {
     .navbar-toggle {
         display: block;
     }
