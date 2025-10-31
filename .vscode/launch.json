@@ -2,6 +2,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "MercadoPagoApplication",
+            "request": "launch",
+            "mainClass": "com.tapalque.mercado_pago.MercadoPagoApplication",
+            "projectName": "mercado-pago"
+        },
+        {
+            "type": "java",
             "name": "UserApplication",
             "request": "launch",
             "mainClass": "com.tapalque.user.UserApplication",

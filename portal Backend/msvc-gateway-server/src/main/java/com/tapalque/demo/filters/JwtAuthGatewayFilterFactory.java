@@ -19,29 +19,31 @@ public class JwtAuthGatewayFilterFactory extends AbstractGatewayFilterFactory<Jw
         return (exchange, chain) -> {
             String path = exchange.getRequest().getURI().getPath();
 
-            //Rutas publicas que debe permitir el gateway
+            // Rutas publicas que debe permitir el gateway
             List<String> publicPaths = List.of(
                     "/api/user/register",
                     "/api/user/exists",
                     "/api/jwt/",
                     "/api/public",
-                    "/api/user/email/");
+                    "/api/user/email/",
+                    "/api/webhook",
+                    "/oauth/callback");
 
-            //Si es publica permite el ingreso
+            // Si es publica permite el ingreso
             boolean esRutaPublica = publicPaths.stream()
                     .anyMatch(path::startsWith);
             if (esRutaPublica) {
                 return chain.filter(exchange);
             }
 
-            //Chequea el token
+            // Chequea el token
             String authHeader = exchange.getRequest().getHeaders().getFirst("Authorization");
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
                 exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
                 return exchange.getResponse().setComplete();
             }
 
-            //Perimte el request y continua al Microserv
+            // Perimte el request y continua al Microserv
             return chain.filter(exchange);
         };
     }
