@@ -5,6 +5,7 @@ export const CardGridResponsive = () => {
         
         { titulo: "Hospedajes", imagenUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS-XaKNy61DeD4q2ft5nl4Gs3q88NYnubCksxa0WMCFrtUoG7aM-p1QcoPQA770S_c2Kds&usqp=CAU" , destino: "/hospedaje" },
         { titulo: "Gastronomia", imagenUrl: "https://media.istockphoto.com/id/1350197620/es/foto/comida-espa%C3%B1ola.jpg?s=612x612&w=0&k=20&c=xuhPNhV56luoGi61mDiFMk1Syp_LZ6WJIkcTuI5Et9U=" , destino: "/gastronomia" },
+        { titulo: "Eventos", imagenUrl: "https://i0.wp.com/culturayespectaculos.com/wp-content/uploads/2020/02/1-123.jpg?resize=780%2C405&ssl=1", destino: "#"},
         
         { titulo: "Comercios", imagenUrl: "https://a1noticias.com.ar/08-2020/resize_1596585742.jpg", destino: "/comercio" },
         { titulo: "Servicios", imagenUrl: "https://media.istockphoto.com/id/513445601/es/foto/grupo-multi%C3%A9tnico-diversas-personas-con-diferentes-puestos-de-trabajo.jpg?s=612x612&w=0&k=20&c=3QV_HokhvMlIRDmxHI7SRe2C3MW-MosPbMzNpKcN1zM=" , destino: "/servicios" },

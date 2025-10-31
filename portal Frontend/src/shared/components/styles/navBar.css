@@ -3,6 +3,7 @@
     height: 10rem;
     display: flex;
     border-radius: var(--borde-radius) var(--borde-radius) 0 0;
+    margin-top: 1rem;
 }
 
 .navbar-logo {

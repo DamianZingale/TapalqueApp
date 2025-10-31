@@ -19,22 +19,15 @@ interface CardBackgroundProps {
 
                 <div className={styles.backgroundCard}>
                     <div className="">
-                        <h2>{titulo}</h2>
+                        <h2 className={styles.title}>{titulo}</h2>
                         <div
-                            className=""
-                            style={{
-                            backgroundImage: `url(${imagenUrl})`,
-                            backgroundSize: "cover",
-                            backgroundPosition: "center",
-                            height: "170px",
-                            cursor: "pointer",
-                            borderRadius: "0.5rem",
-                            overflow: "hidden",
-                            }}
+                            className={styles.imageBox}
+                            style={{ backgroundImage: `url(${imagenUrl})` }}
                             onClick={onClick}
-                        />
-                    </div>
+                            />
+                        </div>
+
                 </div>
         );
-        };
+};
 

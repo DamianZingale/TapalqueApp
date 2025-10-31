@@ -3,8 +3,47 @@
     height: 25rem;
     display: flex;
     flex-direction: column;
-    border: 1px solid red;
     padding: 1rem;
     margin: 1rem 0;
     box-sizing: border-box;
+    background-color: var(--color-tarjetas);
+    border-radius: var(--borde-radius);
+    box-shadow: var(--sombra-suave);
+}
+
+.title{
+    font-size: var(--tamanio-titulo-l);
+    color: var(--color-titulos-chicos);
+    transition: all 0.3s ease;
+}
+
+.imageBox {
+    height: 170px;
+    cursor: pointer;
+    border-radius: var(--borde-radius);
+    overflow: hidden;
+    background-size: cover;
+    background-position: center;
+    filter: grayscale(100%) brightness(0.8);
+    transition: filter 0.3s ease;
+}
+
+
+.backgroundCard:hover .imageBox {
+    filter: grayscale(0%);
+}
+
+.backgroundCard:hover .title {
+    color: var(--color-letras-boton);
+}
+
+
+@media screen and (max-width: 911px) {
+    .title{
+        color: var(--color-letras-boton);
+
+    }
+    .imageBox{
+        filter: none;
+    }
 }

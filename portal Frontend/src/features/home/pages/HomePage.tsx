@@ -9,11 +9,11 @@ export const HomePage = () => {
       <section className="full-width">
         <TapalqueWeather />
       </section>
-      <section className="half-width">
+      <section className="full-width">
         <CardTermas />
       </section>
 
-      <section className="half-width">
+      <section className="full-width">
         <CardGridResponsive />
       </section>      
     </main>
