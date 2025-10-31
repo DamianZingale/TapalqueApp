@@ -23,11 +23,11 @@ body {
 /* === Variables globales === */
 :root {
   /* Colores */
-    --color-fondo: #EBE5C4;
-    --color-tarjetas: #FDEDCB;
-    --color-letras-boton: #5F7E4B;
-    --color-titulos-chicos: #343800;
-    --color-tapalquego: #7B8E5F;
+    --color-fondo: #D6D2B0;
+    --color-tarjetas: #c6c179;
+    --color-letras-boton:  #1c5b09;
+    --color-titulos-chicos: #68623a;
+    --color-tapalquego: #78811f;
     --color-texto: #333;
     --color-acento: #a8560f;
 
@@ -35,7 +35,7 @@ body {
     --fuente-titulo: 'Dancing Script', cursive;
     --fuente-texto: 'Montserrat', sans-serif;
     --tamanio-titulo-xl: 3.2rem;
-    --tamanio-titulo-l: 2.4rem;
+    --tamanio-titulo-l: 2.6rem;
     --tamanio-letras-m: 1.6rem;
     --tamanio-letras-s: 1.2rem;
 
@@ -53,6 +53,8 @@ body {
     --breakpoint-sm: 576px;
     --breakpoint-md: 768px;
     --breakpoint-lg: 992px;
+
+    
 }
 
 /* === Clases utilitarias === */
@@ -97,6 +99,6 @@ body {
 .container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: var(--espaciado-md);
+
     background-color: var(--color-fondo);
 }

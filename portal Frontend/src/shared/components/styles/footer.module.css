@@ -1,0 +1,79 @@
+.footerContainer {
+    background-color: var(--color-tarjetas);
+    border-radius: var(--borde-radius) var(--borde-radius) 0 0;
+    font-family: var(--fuente-principal);
+    color: var(--color-texto);
+    display: flex;
+    flex-direction: column;
+    height: 16rem;
+}
+
+.footerContent {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 2rem;
+}
+
+.footerColumn {
+    flex: 1;
+    min-width: 20rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.footerColumnMiddle{
+    flex: 1;
+    min-width: 20rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.logo {
+    height: 8rem;
+}
+
+.title{
+    font-family: var(--fuente-titulo);
+    font-size: var(--tamanio-titulo-xl);
+    color: var(--color-tapalquego);
+}
+
+.slogan {
+    font-style: italic;
+    color: var(--color-tapalquego);
+}
+
+.footerColumnMiddle h4 {
+    margin-bottom: 0.5rem;
+    color: var(--color-titulos-chicos);
+}
+
+.footerColumnMiddle ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.footerColumnMiddle li {
+    margin-bottom: 0.3rem;
+}
+
+.footerColumnMiddle a {
+    text-decoration: none;
+    color: var(--color-letras-boton);
+}
+
+.footerBottom {
+    text-align: center;
+    font-size: 0.9rem;
+    background-color: var(--color-acento);
+    color: var(--color-fondo);
+    font-size: 1.4rem;
+}

@@ -1,56 +1,69 @@
-
-import { Container, Row, Col } from "react-bootstrap";
+import styles from "../../shared/components/styles/footer.module.css";
+import logo from "../../../public/LogoTpqGo.png"; 
 import { Link } from "react-router-dom";
+
 
 export default function Footer() {
     return (
-        <footer 
-            className="bg-dark text-light py-4"
-            
+        <footer className={styles.footerContainer}>
+        <div className={styles.footerContent}>
+            <div className={styles.footerColumn}>
+                <img src={logo} alt="TapalquéGO!" className={styles.logo} />
+                <div className="">
+                    <h2 className={styles.title}>TapalquéGO!</h2>
+                    <p className={styles.slogan}>Naturaleza viva</p>
+                </div>
+            </div>
 
-            //aca hay que buscar una solucion si saco los styles el footer se va para arriba y si los dejo come parte del body
-        >
-            <Container>
-                <Row className="align-items-center">
-                    <Col md={6} className="text-center text-md-end">
-                        <Link to="#" className="text-light text-decoration-none me-3">Nosotros</Link>
-                        <Link to="#" className="text-light text-decoration-none me-3">Términos y condiciones</Link>
-                    </Col>
-                    <Col md={6} className="text-center text-md-start mb-2 mb-md-0">
-                        <small>
-                            Desarrollado por{" "}
-                            <a 
-                                className="text-light text-decoration-none" 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                href="https://www.linkedin.com/in/damian-zingale-7a89bb114/"
-                            >
-                                Damian
-                            </a>
-                            ,{" "}
-                            <a 
-                                className="text-light text-decoration-none" 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                href="https://www.linkedin.com/in/santiago-lamot-/"
-                            >
-                                Santiago
-                            </a>
-                            {" "}y{" "}
-                            <a 
-                                className="text-light text-decoration-none" 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                href="https://www.linkedin.com/in/nahuelncejas?"
-                            >
-                                Nahuel
-                            </a>
-                        </small>
-                        <br/>
-                        <small>&copy; {new Date().getFullYear()} Tapalqué App. Todos los derechos reservados.</small>
-                    </Col>
-                </Row>
-            </Container>
+            <div className={styles.footerColumnMiddle}>
+            <h4>Enlaces rápidos</h4>
+            <ul>
+                <li><Link to="/termas">Termas</Link></li>
+                <li><Link to="/gastronomia">Gastronomía</Link></li>
+                <li><Link to="/hospedajes">Hospedajes</Link></li>
+                <li><Link to="/comercios">Comercios</Link></li>
+            </ul>
+            </div>
+
+            <div className={styles.footerColumnMiddle}>
+            <h4>Contacto</h4>
+            <p>📞 1234-5678</p>
+            <p>📧 info@tapalque.com</p>
+            <p>📍 Tapalqué</p>
+            </div>
+        </div>
+
+        <div className={styles.footerBottom}>
+        <small>
+            Desarrollado por{" "}
+            <a
+            href="https://www.linkedin.com/in/damian-zingale-7a89bb114/"
+            target="_blank"
+            rel="noopener noreferrer"
+            >
+            Damian
+            </a>
+            ,{" "}
+            <a
+            href="https://www.linkedin.com/in/santiago-lamot-/"
+            target="_blank"
+            rel="noopener noreferrer"
+            >
+            Santiago
+            </a>{" "}
+            y{" "}
+            <a
+            href="https://www.linkedin.com/in/nahuelncejas?"
+            target="_blank"
+            rel="noopener noreferrer"
+            >
+            Nahuel
+            </a>
+        </small>
+        <br />
+        <small>&copy; {new Date().getFullYear()} TapalquéGO! - Todos los derechos reservados.</small>
+        </div>
+
         </footer>
     );
 }
