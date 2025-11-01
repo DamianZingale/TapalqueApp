@@ -38,6 +38,7 @@ body {
     --tamanio-titulo-l: 2.6rem;
     --tamanio-letras-m: 1.6rem;
     --tamanio-letras-s: 1.2rem;
+    --ancho-titulo: 600;
 
   /* Espaciado */
     --espaciado-xs: 0.4rem;

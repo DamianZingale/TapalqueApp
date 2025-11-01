@@ -77,3 +77,10 @@
     color: var(--color-fondo);
     font-size: 1.4rem;
 }
+
+.footerBottom a{
+    text-decoration: none;
+    font-weight: 600;
+    color: var(--color-fondo);
+    margin: 0 0.5rem;
+}

@@ -3,6 +3,9 @@ import { termasMock } from "./mocks/mockTermas";
 import { Carrusel } from "../../../shared/components/Carrusel";
 import { WhatsAppButton } from "../../../shared/components/WhatsAppButton";
 import { SocialLinks } from "../../../shared/components/SocialLinks";
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import styles from "../../../shared/components/styles/termas.module.css"
 
 export default function TermasDetailPage({ idDefault }: { idDefault?: string }) {
     const { id } = useParams();
@@ -11,54 +14,47 @@ export default function TermasDetailPage({ idDefault }: { idDefault?: string }) 
     if (!data) return <p>Termas no encontradas</p>;
 
     return (
-        <div className="container my-4">
-        <h1 className="text-center mb-3">{data.titulo}</h1>
+        <div>
+        <h1 className={styles.tittle}>{data.titulo}</h1>
 
-        {/* Carrusel de imágenes */}
-        <Carrusel images = {data.imagenes}></Carrusel>
+        <Carrusel images={data.imagenes} />
 
         <SocialLinks
             facebook={data.facebook}
             instagram={data.instagram}
             twitter={data.twitter}
             tiktok={data.tiktok}
-        ></SocialLinks>
+        />
 
-        {/* Descripción */}
-        <p className="lead text-center">{data.descripcion}</p>
+        <p>{data.descripcion}</p>
 
-        {/* Horarios */}
-        <div className="text-center my-3">
+        <div>
             <strong>Horarios:</strong> {data.horarios}
         </div>
-                {/* Botón Web oficial */}
+
         {data.urlWeb && (
-        <div className="text-center my-2">
+            <div>
             <a
-            href={data.urlWeb}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn btn-primary"
+                href={data.urlWeb}
+                target="_blank"
+                rel="noopener noreferrer"
             >
-            Ir a la web de Termas
+                Ir a la web de Termas
             </a>
-        </div>
+            </div>
         )}
-        
-        {/* Botón Cómo Llegar */}
-        <div className="text-center my-4">
-        <a
+
+        <div>
+            <a
             href={data.urlMaps}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-block w-[11rem] h-[2rem] bg-black text-white rounded-3xl text-[1rem] cursor-pointer flex justify-center items-center transition-all duration-300 hover:bg-[#333]"
-        >
+            >
             Cómo Llegar
-        </a>
+            </a>
         </div>
 
-        {/* Servicios */}
-        <div className="my-3">
+        <div>
             <h5>Servicios disponibles:</h5>
             <ul>
             {data.servicios.map((serv, idx) => (
@@ -67,10 +63,7 @@ export default function TermasDetailPage({ idDefault }: { idDefault?: string }) 
             </ul>
         </div>
 
-
-
-        {/* BTN whatsap */}
-        <WhatsAppButton num={data.num}></WhatsAppButton>
+        <WhatsAppButton num={data.num} />
         </div>
     );
 }
