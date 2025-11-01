@@ -1,20 +1,20 @@
 import type React from "react";
 import { Link } from "react-router-dom";
 import type { IBotonSesion } from "../types/PropsNavbar";
-import { Nav } from "react-bootstrap";
-import "../components/styles/navBar.css"
+
+import styles from "../components/styles/navBar.module.css";
 
 export const BotonSesion: React.FC<IBotonSesion> = ({ isLoggedIn, onLogout }) => {
     return (
         <>
-            {!isLoggedIn ? (
-                <Nav.Link as={Link} to="/login">Iniciar sesión</Nav.Link>
-            ) : (
-                <>
-                    <Nav.Link as={Link} to="/perfil" className="navbar-session">Mi perfil</Nav.Link>
-                    <Nav.Link onClick={onLogout} className="navbar-session">Cerrar sesión</Nav.Link>
-                </>
-            )}
+        {!isLoggedIn ? (
+            <Link to="/login" className={styles.navbarSessionButton}>Iniciar sesión</Link>
+        ) : (
+            <>
+            <Link to="/perfil" className={styles.navbarSession}>Mi perfil</Link>
+            <button onClick={onLogout} className={styles.navbarSessionButton}>Cerrar sesión</button>
+            </>
+        )}
         </>
     );
-}
+};

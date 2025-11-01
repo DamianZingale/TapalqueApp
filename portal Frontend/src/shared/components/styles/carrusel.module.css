@@ -1,0 +1,63 @@
+.carousel {
+    border-radius: var(--borde-radius);
+    overflow: hidden;
+}
+
+.image {
+    height: 500px;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+    box-shadow: var(--sombra-suave)
+}
+
+.image:hover {
+    transform: scale(1.02);
+}
+
+.indicators button {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    color: var(--color-letras-boton);
+    opacity: 0.5;
+    border: none;
+    transition: opacity 0.3s ease;
+}
+
+.indicators .active {
+    opacity: 1;
+}
+
+.controlButton {
+    background: none;
+    border: none;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    cursor: pointer;
+}
+
+.prev {
+    left: 1rem;
+}
+
+.next {
+    right: 1rem;
+}
+
+.arrow {
+    height: 4rem;
+    width: 4rem;
+    font-size: 3rem;
+    color: var(--color-letras-boton);
+    background-color: #ffffff6e;
+    border-radius: 50%;
+    padding: 0.5rem;
+    transition: transform 0.3s ease;
+}
+
+.arrow:hover {
+    transform: scale(1.1);
+    color: var(--color-acento);
+}

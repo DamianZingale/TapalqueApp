@@ -1,0 +1,9 @@
+
+
+.tittle{
+    font-size: var(--tamanio-titulo-l);
+    margin: 2rem 1rem;
+    color: var(--color-titulos-chicos);
+    cursor: default;
+    font-weight: var(--ancho-titulo);
+}
