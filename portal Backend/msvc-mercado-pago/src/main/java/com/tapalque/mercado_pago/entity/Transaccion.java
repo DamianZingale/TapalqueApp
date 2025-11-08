@@ -13,6 +13,7 @@ import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+
 @Entity
 @Data
 @AllArgsConstructor
@@ -32,7 +33,12 @@ public class Transaccion {
     @Enumerated(EnumType.STRING)
     private TipoServicioEnum tipoServicio;
 
-    public Transaccion(Long idTransaccion, String estado, Long usuarioId, TipoServicioEnum tipoServicioEnum) {
+    public Transaccion() {
+        this.fecha = LocalDateTime.now();
+    }
+    
+
+    public Transaccion(Long idTransaccion, String estado, Long usuarioId, TipoServicioEnum tipoServicioEnum, LocalDateTime fecha) {
         this.idTransaccion = idTransaccion;
         this.estado = estado;
         this.fecha = LocalDateTime.now();

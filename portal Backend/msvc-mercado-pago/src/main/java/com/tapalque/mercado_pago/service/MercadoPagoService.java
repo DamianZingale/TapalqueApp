@@ -1,8 +1,11 @@
 package com.tapalque.mercado_pago.service;
 
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Map;
 
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -20,9 +23,7 @@ import com.mercadopago.client.payment.PaymentClient;
 import com.mercadopago.client.preference.PreferenceClient;
 import com.mercadopago.client.preference.PreferenceItemRequest;
 import com.mercadopago.client.preference.PreferenceRequest;
-import com.mercadopago.exceptions.MPApiException;
 import com.mercadopago.resources.payment.Payment;
-import com.mercadopago.resources.payment.PaymentRefund;
 import com.mercadopago.resources.preference.Preference;
 import com.tapalque.mercado_pago.dto.OauthTokenRequestDTO;
 import com.tapalque.mercado_pago.dto.ProductoRequestDTO;
@@ -35,6 +36,18 @@ import com.tapalque.mercado_pago.util.EncriptadoUtil;
 @Service
 public class MercadoPagoService {
 
+    //===============RABBITMQ=================//
+     private final RabbitTemplate rabbitTemplate;
+
+    @Value("${rabbitmq.exchange}")
+    private String exchange;
+
+    @Value("${rabbitmq.routingKey.gastronomia}")
+    private String routingKeyGastronomia;
+
+    @Value("${rabbitmq.routingKey.hospedaje}")
+    private String routingKeyHospedaje;
+    //=======================================//
     // @Value("${mercadopago.access-token}")
     // String accessToken;
     @Value("${clientId}")
@@ -47,11 +60,14 @@ public class MercadoPagoService {
     private final OauthService oauthService;
     private final EncriptadoUtil encriptadoUtil;
 
-    public MercadoPagoService(TransaccionRepository t, OauthService o, EncriptadoUtil e) {
+    public MercadoPagoService(TransaccionRepository t, OauthService o, EncriptadoUtil e, RabbitTemplate rabbitTemplate) {
         this.transaccionRepository = t;
         this.oauthService = o;
         this.encriptadoUtil = e;
+        this.rabbitTemplate = rabbitTemplate;
     }
+
+    
 
     // ===============CREAR PREFERENCIA===============
 
@@ -79,7 +95,8 @@ public class MercadoPagoService {
 
         
         // Se crea la transaccion en la base de datos y se obtiene id de la misma
-        Transaccion transaccion = new Transaccion(p.getIdTransaccion(),"Pendiente",p.getIdComprador(), p.getTipoServicio());
+        //agregue LocalDateTime.now() en el constructor de Transaccion
+        Transaccion transaccion = new Transaccion(p.getIdTransaccion(),"Pendiente",p.getIdComprador(), p.getTipoServicio(), LocalDateTime.now());
         Transaccion transaccionSave = transaccionRepository.save(transaccion);
 
         // Tiempo actual
@@ -166,17 +183,28 @@ public class MercadoPagoService {
             // }
 
             // se setean los estados en caso que pase las validaciones
-            if ("approved".equalsIgnoreCase(estado)) {
-                transaccion.setEstado("Pago");
-                transaccionRepository.save(transaccion);
-    
-                //Se pasa el nuevo estado al MSVC correspondiente
-                if(transaccion.getTipoServicio()== TipoServicioEnum.GASTRONOMICO){
-                    //Llamar al endpoint gastro y pasar transaccion actualizada;
-                }else{
-                    //Llamar al endpoint hospedaje y pasar transaccion actualizada;
-                }
+        if ("approved".equalsIgnoreCase(estado)) {
+        transaccion.setEstado("Pago");
+        transaccionRepository.save(transaccion);
+
+        // Crear payload
+        Map<String, Object> mensaje = Map.of(
+            "idTransaccion", transaccion.getId(),
+            "idComprador", transaccion.getUsuarioId(),
+            "estado", transaccion.getEstado(),
+            "tipoServicio", transaccion.getTipoServicio().name(),
+            "fecha", OffsetDateTime.now().toString()
+        );
+
+        // Enviar al microservicio correspondiente
+        if (transaccion.getTipoServicio() == TipoServicioEnum.GASTRONOMICO) {
+            rabbitTemplate.convertAndSend(exchange, routingKeyGastronomia, mensaje);
+            System.out.println("Pago enviado a msvc-gastronomico");
+        } else {
+            rabbitTemplate.convertAndSend(exchange, routingKeyHospedaje, mensaje);
+            System.out.println("Pago enviado a msvc-hospedaje");
             }
+        }
         } catch (Exception e) {
             System.out.println("Error al procesar webhook: " + e.getMessage());
         }
