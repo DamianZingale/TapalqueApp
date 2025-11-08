@@ -1,4 +1,5 @@
 import { FaFacebook, FaInstagram, FaTwitter, FaTiktok } from "react-icons/fa";
+import styles from "./styles/socialLinks.module.css";
 
 interface SocialLinksProps {
     facebook?: string;
@@ -14,14 +15,14 @@ export const SocialLinks: React.FC<SocialLinksProps> = ({
     tiktok,
 }) => {
     return (
-        <div className="flex gap-3 justify-center my-3">
+        <div className={styles.socialContainer}>
         {facebook && (
             <a
             href={facebook}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-600 hover:text-blue-800"
             aria-label="Facebook"
+            className={styles.facebook}
             >
             <FaFacebook size={28} />
             </a>
@@ -31,8 +32,8 @@ export const SocialLinks: React.FC<SocialLinksProps> = ({
             href={instagram}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-pink-500 hover:text-pink-700"
             aria-label="Instagram"
+            className={styles.instagram}
             >
             <FaInstagram size={28} />
             </a>
@@ -42,8 +43,8 @@ export const SocialLinks: React.FC<SocialLinksProps> = ({
             href={twitter}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sky-500 hover:text-sky-700"
             aria-label="Twitter"
+            className={styles.twitter}
             >
             <FaTwitter size={28} />
             </a>
@@ -53,8 +54,8 @@ export const SocialLinks: React.FC<SocialLinksProps> = ({
             href={tiktok}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-black hover:text-gray-700"
             aria-label="TikTok"
+            className={styles.tiktok}
             >
             <FaTiktok size={28} />
             </a>

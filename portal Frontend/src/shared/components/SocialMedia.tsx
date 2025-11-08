@@ -1,4 +1,5 @@
 import { FaInstagram, FaFacebook, FaWhatsapp } from "react-icons/fa";
+import styles from "./RedesSociales.module.css";
 
 interface RedSocial {
     nombre: string;
@@ -12,7 +13,7 @@ interface RedesSocialesProps {
 
 export const RedesSociales: React.FC<RedesSocialesProps> = ({ redes }) => {
     return (
-        <div className="flex gap-4 justify-center items-center my-4">
+        <div className={styles.socialContainer}>
         {redes.map((red) => (
             <a
             key={red.nombre}
@@ -20,7 +21,7 @@ export const RedesSociales: React.FC<RedesSocialesProps> = ({ redes }) => {
             target="_blank"
             rel="noopener noreferrer"
             aria-label={red.nombre}
-            className="text-white p-2 rounded-full bg-black hover:bg-gray-800 transition-all duration-300"
+            className={styles.socialButton}
             >
             {red.icono}
             </a>

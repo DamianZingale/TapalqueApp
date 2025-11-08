@@ -26,18 +26,20 @@ export default function TermasDetailPage({ idDefault }: { idDefault?: string }) 
             tiktok={data.tiktok}
         />
 
-        <p>{data.descripcion}</p>
+        <p className={styles.descripcion}>{data.descripcion}</p>
 
-        <div>
-            <strong>Horarios:</strong> {data.horarios}
+        <div className={styles.containerTitle}>
+            <h3 className={styles.horarioTitulo}>Horarios:</h3> 
+            <p className={styles.horarioTexto}>{data.horarios}</p>
         </div>
 
         {data.urlWeb && (
-            <div>
+            <div >
             <a
                 href={data.urlWeb}
                 target="_blank"
                 rel="noopener noreferrer"
+                className={styles.url}
             >
                 Ir a la web de Termas
             </a>
@@ -49,21 +51,27 @@ export default function TermasDetailPage({ idDefault }: { idDefault?: string }) 
             href={data.urlMaps}
             target="_blank"
             rel="noopener noreferrer"
+            className={styles.urlMap}
             >
             Cómo Llegar
             </a>
         </div>
 
-        <div>
-            <h5>Servicios disponibles:</h5>
-            <ul>
+        <h3 className={styles.tituloService}>Servicios:</h3>
+        <ul className={styles.list}>
             {data.servicios.map((serv, idx) => (
-                <li key={idx}>{serv}</li>
+                <li key={idx}>
+                <img src="/public/TotoraPintada.png" alt="" className={styles.bulletIcon} />
+                {serv}
+                </li>
             ))}
             </ul>
-        </div>
 
-        <WhatsAppButton num={data.num} />
+
+
+        <WhatsAppButton
+        
+        num={data.num} />
         </div>
     );
 }

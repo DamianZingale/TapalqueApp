@@ -1,0 +1,20 @@
+.whatsappFloat {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    background-color: #25D366; /* WhatsApp green */
+    color: white;
+    border-radius: 50%;
+    padding: 0.75rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.whatsappFloat:hover {
+    transform: scale(1.1);
+    background-color: #1ebe5d;
+}

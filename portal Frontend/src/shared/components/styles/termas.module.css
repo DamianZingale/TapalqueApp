@@ -1,9 +1,73 @@
 
-
 .tittle{
-    font-size: var(--tamanio-titulo-l);
+    font-size: var(--tamanio-titulo-xl);
     margin: 2rem 1rem;
-    color: var(--color-titulos-chicos);
+    color: var(--color-tapalquego);
     cursor: default;
     font-weight: var(--ancho-titulo);
 }
+
+.descripcion {
+    font-family: var(--fuente-texto);
+    font-size: var(--tamanio-letras-m);
+    color: var(--color-texto);
+    line-height: 1.6;
+    margin: 1.5rem auto;
+    max-width: 60ch;
+    text-align: center;
+}
+
+.containerTitle{
+    display: flex;
+    flex-direction: row;
+    justify-content: start;
+    align-items: start;
+    width: 100%;
+    height: 3.5rem;
+}
+
+.horarioTitulo, .tituloService{
+    font-family: var(--fuente-texto);
+    font-size: var(--tamanio-subtitulo);
+    color: var(--color-titulos-chicos);
+    margin: 1.5rem 1rem 1.5rem 0;
+    font-weight: var(--ancho-titulo);
+}
+
+.horarioTexto{
+    font-family: var(--fuente-texto);
+    font-size: var(--tamanio-letras-m);
+    color: var(--color-texto);
+    margin: 1.5rem 0 1.5rem 0;
+    font-weight: var(--ancho-texto);
+}
+
+.url, .urlMap{
+    color: var(--color-letras-boton);
+    text-decoration: none;
+    display: flex;
+    justify-content: end;
+    font-weight: 600;
+    transition: all .3s linear;
+}
+
+.url:hover, .urlMap:hover{
+    color: var(--color-acento);
+}
+
+.list{
+    font-weight: var(--ancho-texto);
+}
+
+.list li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.bulletIcon {
+    width: 2rem;
+    height: auto;
+}
+
