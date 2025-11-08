@@ -36,9 +36,11 @@ body {
     --fuente-texto: 'Montserrat', sans-serif;
     --tamanio-titulo-xl: 3.2rem;
     --tamanio-titulo-l: 2.6rem;
+    --tamanio-subtitulo: 2rem;
     --tamanio-letras-m: 1.6rem;
     --tamanio-letras-s: 1.2rem;
     --ancho-titulo: 600;
+    --ancho-texto: 500;
 
   /* Espaciado */
     --espaciado-xs: 0.4rem;

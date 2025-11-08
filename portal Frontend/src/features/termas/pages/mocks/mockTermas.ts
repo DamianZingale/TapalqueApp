@@ -22,7 +22,7 @@ export const termasMock: Termas[] = [
         titulo: "Complejo Termas Tapalqué",
         imagenUrl: "https://via.placeholder.com/400x200.png?text=Termas+Tapalqué",
         descripcion:
-        "Ubicado en un entorno natural de 17 hectáreas, el complejo ofrece piscinas termales cubiertas, spa, masajes, vestuarios y zona gastronómica. Las aguas brotan desde 441 metros de profundidad y tienen propiedades terapéuticas.",
+        "Ubicado en un entorno natural de 17 hectáreas, el complejo ofrece piscinas termales cubiertas, spa, masajes, vestuarios y zona gastronómica. Las aguas brotan desde 441 metros de profundidad y tienen propiedades terapéuticas. Puto el que lee",
         direccion: "Av. Eva Perón y Ruta 51, Tapalqué",
         horarios: "Jueves a domingos y feriados, de 10:00 a 18:00hs",
         servicios: [

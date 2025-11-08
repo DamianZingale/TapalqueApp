@@ -1,0 +1,41 @@
+.socialContainer {
+    display: flex;
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.facebook {
+  color: #1877f2; /* Facebook Blue */
+    transition: color 0.3s ease;
+}
+
+.facebook:hover {
+    color: #145dbf;
+}
+
+.instagram {
+    color: radial-gradient(circle at top right, #f9ce34, #ee2a7b, #6228d7);
+    transition: color 0.3s ease;
+}
+
+.instagram:hover {
+    color: #c1275b;
+}
+
+.twitter {
+  color: #1da1f2; /* Twitter Blue */
+    transition: color 0.3s ease;
+}
+
+.twitter:hover {
+    color: #0d8ddb;
+}
+
+.tiktok {
+    color: #000000; /* TikTok Black */
+    transition: color 0.3s ease;
+}
+
+.tiktok:hover {
+    color: #444;
+}
