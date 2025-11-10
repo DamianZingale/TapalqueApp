@@ -1,0 +1,1 @@
+CREATE DATABASE portal_tpq_mercadopago_db;

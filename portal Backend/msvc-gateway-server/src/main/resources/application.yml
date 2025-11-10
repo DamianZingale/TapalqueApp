@@ -1,35 +1,57 @@
+server:
+  port: 8090
+
 spring:
+  application:
+    name: MSVC-GATEWAY-SERVER
+
   main:
     web-application-type: reactive
 
   cloud:
     gateway:
-      server:
-        webflux:
-          routes:
-            - id: msvc-comercio
-              uri: lb://msvc-comercio
-              predicates:
-                - Path=/api/comercio/**
-              filters:
-                - StripPrefix=2
+      routes:
+        - id: msvc-comercio
+          uri: lb://MSVC-COMERCIO
+          predicates:
+            - Path=/api/comercio/**
+          filters:
+            - JwtAuth
 
-            - id: msvc-hospedajes
-              uri: lb://msvc-hospedajes
-              predicates:
-                - Path=/api/hospedajes/**
-              filters:
-                - StripPrefix=2
+        - id: msvc-hospedajes
+          uri: lb://MSVC-HOSPEDAJES
+          predicates:
+            - Path=/api/hospedajes/**
+          filters:
+            - JwtAuth
 
-            - id: msvc-gastronomia
-              uri: lb://msvc-gastronomia
-              predicates:
-                - Path=/api/gastronomia/**
-              filters:
-                - StripPrefix=2
+        - id: msvc-gastronomia
+          uri: lb://MSVC-GASTRONOMIA
+          predicates:
+            - Path=/api/gastronomia/**
+          filters:
+            - JwtAuth
 
-  application:
-    name: msvc-gateway-server
+        - id: msvc-jwt
+          uri: lb://MSVC-JWT
+          predicates:
+            - Path=/api/jwt/**
+          filters:
+            - JwtAuth
+
+        - id: msvc-user
+          uri: lb://MSVC-USER
+          predicates:
+            - Path=/api/user/**
+          filters:
+            - JwtAuth
+
+        - id: msvc-mercado-pago
+          uri: lb://MSVC-MERCADO-PAGO
+          predicates:
+            - Path=/api/mercadopago/**
+          filters:
+            - JwtAuth
 
 eureka:
   client:
