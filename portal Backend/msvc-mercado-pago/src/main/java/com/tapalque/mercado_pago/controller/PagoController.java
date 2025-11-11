@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.tapalque.mercado_pago.dto.ProductoRequestDTO;
 import com.tapalque.mercado_pago.dto.WebhookDTO;
 import com.tapalque.mercado_pago.service.MercadoPagoService;
 
@@ -19,7 +18,7 @@ public class PagoController {
     public PagoController(MercadoPagoService mercadoPagoService) {
         this.mercadoPagoService = mercadoPagoService;
     }
-
+    /* SUSTITUIDO POR RABBITMQ
     @PostMapping("/pagos/crear")
     public ResponseEntity<?> crearPago(@RequestBody ProductoRequestDTO request) {
         try {
@@ -28,7 +27,7 @@ public class PagoController {
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Error al crear preferencia: " + e.getMessage());
         }
-    }
+    } */
 
     @PostMapping("/webhook")
     public ResponseEntity<String> recibirWebhook(@RequestBody WebhookDTO webhook) {

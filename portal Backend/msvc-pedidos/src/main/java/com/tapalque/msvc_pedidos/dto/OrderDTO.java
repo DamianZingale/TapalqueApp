@@ -5,15 +5,15 @@ import java.util.List;
 
 public class OrderDTO {
     private String id;
-    private Double totalPrice;
-    private Boolean paidWithMercadoPago;
-    private Boolean paidWithCash;
-    private String status;
-    private LocalDateTime dateCreated;
-    private LocalDateTime dateUpdated;
-    private List<ItemDTO> items;
-    private RestaurantDTO restaurant;
-    private String paymentReceiptPath;
+    private Double totalPrice; //precio total del pedido
+    private Boolean paidWithMercadoPago; //indica si se pagó con MercadoPago
+    private Boolean paidWithCash; //indica si se paga en efectivo
+    private String status; //estado del pedido (e.g., "PENDING", "COMPLETED", "CANCELLED")
+    private LocalDateTime dateCreated; //fecha y hora de creación del pedido
+    private LocalDateTime dateUpdated; //fecha y hora de la última actualización del pedido
+    private List<ItemDTO> items; //lista de items en el pedido
+    private RestaurantDTO restaurant; //información del restaurante asociado al pedido
+    private String paymentReceiptPath; //ruta del comprobante de pago
 
     
     public OrderDTO() {}

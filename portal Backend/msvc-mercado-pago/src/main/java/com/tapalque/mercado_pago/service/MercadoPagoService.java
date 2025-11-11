@@ -1,6 +1,5 @@
 package com.tapalque.mercado_pago.service;
 
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
@@ -27,9 +26,7 @@ import com.mercadopago.resources.payment.Payment;
 import com.mercadopago.resources.preference.Preference;
 import com.tapalque.mercado_pago.dto.OauthTokenRequestDTO;
 import com.tapalque.mercado_pago.dto.ProductoRequestDTO;
-import com.tapalque.mercado_pago.dto.TipoServicioEnum;
 import com.tapalque.mercado_pago.dto.WebhookDTO;
-import com.tapalque.mercado_pago.entity.Transaccion;
 import com.tapalque.mercado_pago.repository.TransaccionRepository;
 import com.tapalque.mercado_pago.util.EncriptadoUtil;
 
@@ -47,6 +44,8 @@ public class MercadoPagoService {
 
     @Value("${rabbitmq.routingKey.hospedaje}")
     private String routingKeyHospedaje;
+
+    
     //=======================================//
     // @Value("${mercadopago.access-token}")
     // String accessToken;
@@ -70,8 +69,55 @@ public class MercadoPagoService {
     
 
     // ===============CREAR PREFERENCIA===============
-
     public String crearPreferencia(ProductoRequestDTO p) throws Exception {
+
+    // Obtiene y desencripta el token del vendedor
+    String accessTokenEncriptado = oauthService.obtenerAccessTokenPorId(p.getIdVendedor());
+    String accessToken = encriptadoUtil.desencriptar(accessTokenEncriptado);
+
+    // Verifica que el token no esté vencido o revocado
+    if (!oauthService.AccessTokenValido(accessToken)) {
+        throw new RuntimeException("Access token vencido o revocado por el vendedor");
+    }
+
+    // Inicializa configuración de Mercado Pago
+    MercadoPagoConfig.setAccessToken(accessToken);
+
+    // Crea el ítem genérico
+    PreferenceItemRequest item = PreferenceItemRequest.builder()
+            .title("Solicitud de pago")
+            .quantity(1)
+            .currencyId("ARS")
+            .unitPrice(p.getUnitPrice()) // monto total
+            .build();
+
+    
+    OffsetDateTime now = OffsetDateTime.now();
+    OffsetDateTime expirationFrom = now;
+    OffsetDateTime expirationTo = now.plusMinutes(2);// Definir tiempo de validez del link (10-15 min en prod)
+
+    // Arma la preferencia con los datos necesarios para el webhook
+    PreferenceRequest preferenceRequest = PreferenceRequest.builder()
+            .items(List.of(item))
+            .externalReference(p.getIdTransaccion().toString()) // ID del otro microservicio
+            .metadata(Map.of(
+                "clientId", p.getIdComprador().toString(),
+                "vendedorId", Long.toString(p.getIdVendedor()),
+                "tipoServicio", p.getTipoServicio()
+            ))
+            .expires(true)
+            .expirationDateFrom(expirationFrom)
+            .expirationDateTo(expirationTo)
+            .build();
+
+    // Crea la preferencia en MP
+    PreferenceClient client = new PreferenceClient();
+    Preference preference = client.create(preferenceRequest);
+
+    // Retorna la URL de pago
+    return preference.getInitPoint();
+}
+    /*public String crearPreferencia(ProductoRequestDTO p) throws Exception {
 
         // me falta obtener el id del vendedor ej: producto.getVendedor.getId() = 1
         String accessTokenEncriptado = oauthService.obtenerAccessTokenPorId(p.getIdVendedor());
@@ -87,8 +133,8 @@ public class MercadoPagoService {
 
         // Crea el ítem
         PreferenceItemRequest item = PreferenceItemRequest.builder()
-                .title(p.getTitle())
-                .quantity(p.getQuantity())
+                .title("Solicitud de pago")
+                .quantity(1)
                 .currencyId("ARS")
                 .unitPrice(p.getUnitPrice())
                 .build();
@@ -96,21 +142,27 @@ public class MercadoPagoService {
         
         // Se crea la transaccion en la base de datos y se obtiene id de la misma
         //agregue LocalDateTime.now() en el constructor de Transaccion
-        Transaccion transaccion = new Transaccion(p.getIdTransaccion(),"Pendiente",p.getIdComprador(), p.getTipoServicio(), LocalDateTime.now());
-        Transaccion transaccionSave = transaccionRepository.save(transaccion);
+        LocalDateTime fechaTransaccion = LocalDateTime.parse(p.getFecha());
+        Transaccion transaccion = new Transaccion(p.getIdTransaccion(),"Pendiente",p.getIdComprador(), p.getTipoServicio(), fechaTransaccion);
+        //Transaccion transaccionSave = transaccionRepository.save(transaccion); NO NECESARIA, ESTA GUARDADA EN OTRO MICROSERVICIO
 
         // Tiempo actual
         OffsetDateTime now = OffsetDateTime.now();
 
         // Tiempo de expiración: 2 minutos desde ahora
         OffsetDateTime expirationFrom = now;
-        OffsetDateTime expirationTo = now.plusMinutes(2);
+        OffsetDateTime expirationTo = now.plusMinutes(2); //PASAR A 10 0 15 MIN EN PRODUCCION
 
         // Arma la preferencia
         PreferenceRequest preferenceRequest = PreferenceRequest.builder()
                 .items(List.of(item))
                 // Aca se manda el id de la transaccion para obtenerlo cuando se haga el pago
-                .externalReference(transaccionSave.getId().toString())
+                .externalReference(transaccion.getIdTransaccion().toString())
+                .metadata(Map.of(
+                    "clientId", p.getIdComprador().toString(),
+                    "vendedorId", Long.toString(p.getIdVendedor()),
+                    "tipoServicio", p.getTipoServicio()
+                    ))
                 // Aca se setean datos para que la URL expire y no sea comprada mas alla de lo
                 // que dura la reserva
                 .expires(true)
@@ -124,17 +176,84 @@ public class MercadoPagoService {
 
         // Retorna la URL de pago
         return preference.getInitPoint();
-    }
+    }*/
 
     // =============== MANEJAR WEBHOOK ===============
 
     public void procesarWebhook(WebhookDTO webhook) {
-        if (!"payment".equalsIgnoreCase(webhook.getType())) {
-            System.out.println("Webhook ignorado: tipo no soportado " + webhook.getType());
+    if (!"payment".equalsIgnoreCase(webhook.getType())) {
+        System.out.println("Webhook ignorado: tipo no soportado " + webhook.getType());
+        return;
+    }
+
+    try {
+        // Obtengo el ID de pago del webhook
+        String paymentId = webhook.getData().getId().toString();
+
+        // Consulto el pago en Mercado Pago
+        PaymentClient client = new PaymentClient();
+        Payment payment = client.get(Long.parseLong(paymentId));
+
+        // Obtengo estado y metadatos
+        String estado = payment.getStatus();
+        Map<String, Object> metadata = payment.getMetadata();
+
+        if (metadata == null) {
+            System.out.println("No hay metadata asociada al pago " + paymentId);
             return;
         }
 
-        try {
+        String tipoServicio = metadata.get("tipoServicio").toString();
+        String idComprador = metadata.get("clientId").toString();
+        String idVendedor = metadata.get("vendedorId").toString();
+        String idTransaccion = payment.getExternalReference();
+
+        // Determinar el estado para enviar
+        String estadoFinal;
+        switch (estado.toLowerCase()) {
+            case "approved":
+                estadoFinal = "PAGADO";
+                break;
+            case "rejected":
+                estadoFinal = "RECHAZADO";
+                break;
+            case "pending":
+            case "in_process":
+                estadoFinal = "PENDIENTE";
+                break;
+            default:
+                estadoFinal = "DESCONOCIDO";
+                break;
+        }
+
+        // Armar mensaje para RabbitMQ
+        Map<String, Object> mensaje = Map.of(
+            "idTransaccion", idTransaccion,
+            "idComprador", idComprador,
+            "idVendedor", idVendedor,
+            "estado", estadoFinal,
+            "tipoServicio", tipoServicio,
+            "fecha", OffsetDateTime.now().toString()
+        );
+
+        // Envío según tipo de servicio
+        if ("GASTRONOMICO".equalsIgnoreCase(tipoServicio)) {
+            rabbitTemplate.convertAndSend(exchange, routingKeyGastronomia, mensaje);
+            System.out.println("Pago enviado a msvc-gastronomico");
+        } else if ("HOSPEDAJE".equalsIgnoreCase(tipoServicio)) {
+            rabbitTemplate.convertAndSend(exchange, routingKeyHospedaje, mensaje);
+            System.out.println("Pago enviado a msvc-hospedaje");
+        } else {
+            System.out.println("Tipo de servicio no reconocido: " + tipoServicio);
+        }
+
+    } catch (Exception e) {
+        System.out.println("Error al procesar webhook: " + e.getMessage());
+        e.printStackTrace();
+    }
+}
+
+        /*try {
             // Obtengo el ID de pago
             String paymentId = webhook.getData().getId().toString();
 
@@ -181,34 +300,64 @@ public class MercadoPagoService {
             // reembolsarPago(paymentId);
             // return;
             // }
-
+        
             // se setean los estados en caso que pase las validaciones
         if ("approved".equalsIgnoreCase(estado)) {
         transaccion.setEstado("Pago");
         transaccionRepository.save(transaccion);
 
-        // Crear payload
+        
+
+        // Enviar al microservicio correspondiente
+        //Entidad pedidos:
+            /*private String id;
+            private Double totalPrice;
+            private Boolean paidWithMercadoPago;
+            private Boolean paidWithCash;
+            private OrderStatus status;
+            private LocalDateTime dateCreated;
+            private LocalDateTime dateUpdated;
+            private String paymentReceiptPath;
+            private List<Item> items;
+            private Restaurant restaurant;*/
+        //Entidad reservas:
+            /*private Boolean isPaid; // totalmente pagado
+            private Boolean hasPendingAmount; // queda saldo pendiente
+            private Boolean isDeposit; // seña o pago total
+            private PaymentType paymentType; // tipo de pago 
+            private String paymentReceiptPath; // comprobante
+            private Double amountPaid; // monto abonado
+            private Double totalAmount; // total de la reserva
+            private Double remainingAmount; // saldo restante
+        if (transaccion.getTipoServicio() == TipoServicioEnum.GASTRONOMICO) {
+            // Crear payload msvc-pedidos
         Map<String, Object> mensaje = Map.of(
+            "idTransaccion", webhook.getData().getId(),
+            "idComprador", webhook.getData().getMetadata().get("clientId"),
+            "estado", transaccion.getEstado(),
+            "tipoServicio", transaccion.getTipoServicio().name(),
+            "fecha", OffsetDateTime.now().toString()
+
+        );
+            rabbitTemplate.convertAndSend(exchange, routingKeyGastronomia, mensaje);
+            System.out.println("Pago enviado a msvc-gastronomico");
+        } else {
+            // Crear payload msvc-reservas
+            Map<String, Object> mensaje = Map.of(
             "idTransaccion", transaccion.getId(),
             "idComprador", transaccion.getUsuarioId(),
             "estado", transaccion.getEstado(),
             "tipoServicio", transaccion.getTipoServicio().name(),
             "fecha", OffsetDateTime.now().toString()
         );
-
-        // Enviar al microservicio correspondiente
-        if (transaccion.getTipoServicio() == TipoServicioEnum.GASTRONOMICO) {
-            rabbitTemplate.convertAndSend(exchange, routingKeyGastronomia, mensaje);
-            System.out.println("Pago enviado a msvc-gastronomico");
-        } else {
             rabbitTemplate.convertAndSend(exchange, routingKeyHospedaje, mensaje);
             System.out.println("Pago enviado a msvc-hospedaje");
             }
         }
         } catch (Exception e) {
             System.out.println("Error al procesar webhook: " + e.getMessage());
-        }
-    }
+        }*/
+    
 
     // private void reembolsarPago(String paymentId, String accessToken) {
     //     try {

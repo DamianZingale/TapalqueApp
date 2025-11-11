@@ -6,11 +6,8 @@ import java.util.Map;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
 
-import com.tapalque.msvc_pedidos.entity.Order;
 import com.tapalque.msvc_pedidos.entity.Order.OrderStatus;
 import com.tapalque.msvc_pedidos.repository.OrderRepository;
-
-import reactor.core.publisher.Mono;
 
 @Service
 public class RabbitMQListenerService {
@@ -22,13 +19,15 @@ public class RabbitMQListenerService {
     }
 
     @RabbitListener(queues = "pagos-gastronomia-queue")
-    public void recibirPago(Map<String, Object> mensaje) {
-        System.out.println("Pago recibido en msvc-pedidos: " + mensaje);
+    public void sendOrderCreatedMessage (Map<String, Object> mensaje) {
 
-        String id = mensaje.get("idTransaccion").toString();
-        Double monto = Double.valueOf(mensaje.get("monto").toString());
 
-        orderRepository.findById(id)
+        String idTransaccion = mensaje.get("idTransaccion").toString();
+        if (idTransaccion == null || idTransaccion.isEmpty()) {
+            System.err.println("El mensaje no contiene un id-Transaccion válido.");
+            return;
+        }
+        orderRepository.findById(idTransaccion)
             .flatMap(order -> {
                 // Si existe, actualizar
                 order.setStatus(OrderStatus.PAID);
@@ -37,21 +36,7 @@ public class RabbitMQListenerService {
                 return orderRepository.save(order)
                         .doOnSuccess(o -> System.out.println("Orden actualizada como pagada: " + o.getId()));
             })
-            .switchIfEmpty(
-                // Si no existe, crear nueva
-                Mono.defer(() -> {
-                    Order nueva = new Order();
-                    nueva.setId(id);
-                    nueva.setTotalPrice(monto);
-                    nueva.setPaidWithMercadoPago(true);
-                    nueva.setPaidWithCash(false);
-                    nueva.setStatus(OrderStatus.PAID);
-                    nueva.setDateCreated(LocalDateTime.now());
-                    nueva.setDateUpdated(LocalDateTime.now());
-                    return orderRepository.save(nueva)
-                            .doOnSuccess(o -> System.out.println("Nueva orden guardada: " + o.getId()));
-                })
-            )
+           
             .doOnError(e -> {
                 System.err.println("Error procesando mensaje de RabbitMQ: " + e.getMessage());
                 e.printStackTrace();
