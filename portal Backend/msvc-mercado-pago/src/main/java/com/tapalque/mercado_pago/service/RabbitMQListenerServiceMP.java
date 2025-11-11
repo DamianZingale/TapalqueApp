@@ -63,7 +63,7 @@ public class RabbitMQListenerServiceMP {
             // Llamar al servicio para crear la preferencia
             String initPoint = mercadoPagoService.crearPreferencia(request);
             logger.info("InitPoint recibido de Mercado Pago: " + initPoint);
-            initPointTorabbitMQ(message, initPoint);
+            initPointToRabbitMQ(message, initPoint);
 
             
 
@@ -73,9 +73,10 @@ public class RabbitMQListenerServiceMP {
         }
     }
 
-    public void initPointTorabbitMQ(Map<String, Object> message, String initPoint) {
+    public void initPointToRabbitMQ(Map<String, Object> message, String initPoint) {
 
         Map<String, Object> mensaje = Map.of(
+        "messageType", "INIT_POINT",
         "idTransaccion", message.get("idTransaccion"),
         "idComprador", message.get("idComprador"),
         "idVendedor", message.get("idVendedor"),

@@ -123,7 +123,8 @@ public class Order {
         PENDING,
         PAID,
         READY,
-        DELIVERED
+        DELIVERED,
+        FAILED
     }
 
     

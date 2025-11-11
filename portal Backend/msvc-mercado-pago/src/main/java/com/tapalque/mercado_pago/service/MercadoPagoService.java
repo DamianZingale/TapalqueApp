@@ -237,6 +237,7 @@ public class MercadoPagoService {
 
         // Armar mensaje para RabbitMQ
         Map<String, Object> mensaje = Map.of(
+            "messageType", "WEBHOOK",
             "idTransaccion", idTransaccion,
             "idComprador", idComprador,
             "idVendedor", idVendedor,
