@@ -39,17 +39,11 @@ public class RabbitMQListenerService {
             }
 
             switch (messageType) {
-                case "INIT_POINT":
-                    handleInitPoint(mensaje);
-                    break;
+                case "INIT_POINT" -> handleInitPoint(mensaje);
 
-                case "WEBHOOK":
-                    handleWebhook(mensaje);
-                    break;
+                case "WEBHOOK" -> handleWebhook(mensaje);
 
-                default:
-                    logger.warn("Tipo de mensaje desconocido recibido: {}", messageType);
-                    break;
+                default -> logger.warn("Tipo de mensaje desconocido recibido: {}", messageType);
             }
 
         } catch (Exception e) {
@@ -87,15 +81,12 @@ public class RabbitMQListenerService {
         orderRepository.findById(idTransaccion)
             .flatMap(order -> {
                 switch (estado.toUpperCase()) {
-                    case "APROBADO":
+                    case "APROBADO" -> {
                         order.setStatus(OrderStatus.PAID);
                         order.setPaidWithMercadoPago(true);
-                        break;
-                    case "RECHAZADO":
-                        order.setStatus(OrderStatus.FAILED);
-                        break;
-                    default:
-                        logger.warn("Estado desconocido en webhook: {}", estado);
+                }
+                    case "RECHAZADO" -> order.setStatus(OrderStatus.FAILED);
+                    default -> logger.warn("Estado desconocido en webhook: {}", estado);
                 }
                 order.setDateUpdated(LocalDateTime.now());
 
