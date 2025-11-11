@@ -4,6 +4,8 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -32,6 +34,8 @@ import com.tapalque.mercado_pago.util.EncriptadoUtil;
 
 @Service
 public class MercadoPagoService {
+
+    private static final Logger logger = LoggerFactory.getLogger(MercadoPagoService.class);
 
     //===============RABBITMQ=================//
      private final RabbitTemplate rabbitTemplate;
@@ -70,13 +74,15 @@ public class MercadoPagoService {
 
     // ===============CREAR PREFERENCIA===============
     public String crearPreferencia(ProductoRequestDTO p) throws Exception {
-
+    
+    logger.info("Creando preferencia para transaccion ID: " + p.getIdTransaccion());
     // Obtiene y desencripta el token del vendedor
     String accessTokenEncriptado = oauthService.obtenerAccessTokenPorId(p.getIdVendedor());
     String accessToken = encriptadoUtil.desencriptar(accessTokenEncriptado);
 
     // Verifica que el token no esté vencido o revocado
     if (!oauthService.AccessTokenValido(accessToken)) {
+        logger.error("Access token vencido o revocado para vendedor ID: " + p.getIdVendedor());
         throw new RuntimeException("Access token vencido o revocado por el vendedor");
     }
 
@@ -181,8 +187,11 @@ public class MercadoPagoService {
     // =============== MANEJAR WEBHOOK ===============
 
     public void procesarWebhook(WebhookDTO webhook) {
+
+    logger.info("webhook recibido: " + webhook.getId());
+
     if (!"payment".equalsIgnoreCase(webhook.getType())) {
-        System.out.println("Webhook ignorado: tipo no soportado " + webhook.getType());
+        logger.info("Webhook recibido no es de tipo 'payment', se ignora." + webhook.getType());
         return;
     }
 
@@ -199,7 +208,7 @@ public class MercadoPagoService {
         Map<String, Object> metadata = payment.getMetadata();
 
         if (metadata == null) {
-            System.out.println("No hay metadata asociada al pago " + paymentId);
+            logger.warn("Metadata del pago es nula, no se puede procesar webhook." + paymentId);
             return;
         }
 
@@ -237,14 +246,14 @@ public class MercadoPagoService {
         );
 
         // Envío según tipo de servicio
-        if ("GASTRONOMICO".equalsIgnoreCase(tipoServicio)) {
+        if ("GASTRONOMIA".equalsIgnoreCase(tipoServicio)) {
             rabbitTemplate.convertAndSend(exchange, routingKeyGastronomia, mensaje);
-            System.out.println("Pago enviado a msvc-gastronomico");
+            logger.info("Pago enviado a msvc-gastronomico");
         } else if ("HOSPEDAJE".equalsIgnoreCase(tipoServicio)) {
             rabbitTemplate.convertAndSend(exchange, routingKeyHospedaje, mensaje);
-            System.out.println("Pago enviado a msvc-hospedaje");
+            logger.info("Pago enviado a msvc-hospedaje");
         } else {
-            System.out.println("Tipo de servicio no reconocido: " + tipoServicio);
+            logger.warn("Tipo de servicio desconocido en metadata: " + tipoServicio);
         }
 
     } catch (Exception e) {
