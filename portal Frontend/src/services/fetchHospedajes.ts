@@ -1,4 +1,5 @@
-// src/services/fetchHospedajes.ts
+import { getToken } from "./authService";
+
 export interface Hospedaje {
     id: string;
     nombre: string;
@@ -15,7 +16,17 @@ export interface Hospedaje {
 
 export async function fetchHospedajes(): Promise<Hospedaje[]> {
     try {
-        const response = await fetch("/api/hospedajes");
+        const token = getToken();
+
+        const API_URL = import.meta.env.VITE_API_URL;
+
+        const response = await fetch(`${API_URL}/api/hospedajes`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+
 
         if (!response.ok) {
         throw new Error(`Error al obtener hospedajes: ${response.status}`);
