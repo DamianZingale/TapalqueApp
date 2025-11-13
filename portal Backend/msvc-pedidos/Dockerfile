@@ -1,5 +1,9 @@
 FROM eclipse-temurin:21-jdk-alpine
-WORKDIR /TapalqueApp
-COPY target/msvc-pedidos-0.0.1-SNAPSHOT.jar app.jar
+
+WORKDIR /app
+
+COPY target/*.jar app.jar
+
 EXPOSE 8082
-ENTRYPOINT ["java","-jar","app.jar"]
+
+ENTRYPOINT ["java", "-jar", "app.jar"]

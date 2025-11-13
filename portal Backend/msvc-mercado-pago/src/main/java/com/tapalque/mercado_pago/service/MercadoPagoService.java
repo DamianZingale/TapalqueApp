@@ -201,7 +201,7 @@ public class MercadoPagoService {
 
         // Consulto el pago en Mercado Pago
         PaymentClient client = new PaymentClient();
-        Payment payment = client.get(Long.parseLong(paymentId));
+        Payment payment = client.get(Long.valueOf(paymentId));
 
         // Obtengo estado y metadatos
         String estado = payment.getStatus();
@@ -219,21 +219,12 @@ public class MercadoPagoService {
 
         // Determinar el estado para enviar
         String estadoFinal;
-        switch (estado.toLowerCase()) {
-            case "approved":
-                estadoFinal = "PAGADO";
-                break;
-            case "rejected":
-                estadoFinal = "RECHAZADO";
-                break;
-            case "pending":
-            case "in_process":
-                estadoFinal = "PENDIENTE";
-                break;
-            default:
-                estadoFinal = "DESCONOCIDO";
-                break;
-        }
+        estadoFinal = switch (estado.toLowerCase()) {
+            case "approved" -> "PAGADO";
+            case "rejected" -> "RECHAZADO";
+            case "pending", "in_process" -> "PENDIENTE";
+            default -> "DESCONOCIDO";
+        };
 
         // Armar mensaje para RabbitMQ
         Map<String, Object> mensaje = Map.of(

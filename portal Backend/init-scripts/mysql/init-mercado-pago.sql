@@ -1,0 +1,1 @@
+CREATE DATABASE IF NO EXISTS mercado_pago:
