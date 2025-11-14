@@ -1,0 +1,63 @@
+
+
+.layoutCard{
+    height: 20rem;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+    background-color: var(--color-tarjetas);
+    border: var(--borde-radius);
+    box-shadow: var(--sombra-suave);
+    padding: 2rem;
+    
+}
+
+.CardImg{
+    width: 30rem;
+}
+
+.cardSubtitle{
+    font-size: var(--tamanio-subtitulo);
+    color: var(--color-titulos-chicos);
+}
+
+.cardDirection{
+    font-size: var(--tamanio-letras-m);
+    color: var(--color-texto);
+}
+
+.cardAncor{
+    display: flex;
+    justify-content: center;
+    height: 5rem;
+    width: 10rem;
+}
+
+.ancorGo{
+    text-decoration: none;
+    color: var(--color-letras-boton);
+    font-weight: 600;
+    font-size: var(--tamanio-subtitulo);
+    transition: all .3s ease-in;
+    display: flex; 
+    align-items: end;
+    gap: 0.5rem;
+}
+
+.ancorGo:hover{
+    color: var(--color-acento);
+}
+
+.AncorIcon {
+    height: 5rem;
+    width: 5rem;
+    object-fit: contain;
+    transition: transform 0.3s ease-in-out; 
+}
+
+.ancorGo:hover .AncorIcon {
+    /* Aplique una traslación horizontal y una rotación */
+    transform: translateX(8px) rotate(15deg); 
+}

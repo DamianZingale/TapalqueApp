@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Card } from "../../../shared/components/Card";
 import { Loading } from "../../../shared/components/Loading";
 import type { LocalGastronomicoDTO } from "../types/IlocalegastronomicoDTO";
+import styles from "../../../shared/styles/listPages.module.css"
 
 export default function GastronomiaListPage() {
   const [locales, setLocales] = useState<LocalGastronomicoDTO[]>([]);
@@ -49,9 +50,9 @@ export default function GastronomiaListPage() {
   }
 
   return (
-    <div className="">
-      <h1 className="">Locales Gastronómicos</h1>
-      <div className="">
+    <div className={styles.layout}>
+      <h1 className={styles.tittle}>Locales Gastronómicos</h1>
+      <div className={styles.layoutBox}>
         {locales.length > 0 ? (
           locales.map((local) => (
             <Card
