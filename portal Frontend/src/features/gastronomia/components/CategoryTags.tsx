@@ -10,7 +10,7 @@ interface Props {
 
 export const CategoryTags : FC<Props> = ({categories, activeCategory, onSelect}) => {
 
-   return (
+  return (
     <div className="mb-3 d-flex gap-2 flex-wrap">
       <Button
         variant={!activeCategory ? "primary" : "outline-primary"}

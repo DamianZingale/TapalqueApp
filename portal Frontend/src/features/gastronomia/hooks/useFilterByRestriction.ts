@@ -1,9 +1,6 @@
 import { useMemo, useState } from "react";
 import type { Imenu } from "../types/Imenu"
 
-
-
-
 export const useFilterByRestriction = (items: Imenu[]) => {
   
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
