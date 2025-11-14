@@ -1,5 +1,6 @@
 import type { IRestaurantInfo } from "../types/IrestaurantInfo";
 import { ButtonComoLlegar } from "../../../shared/components/ButtonComoLlegar";
+import styles from "../../../shared/styles/pagesTourist.module.css"
 
 interface InfoProps extends IRestaurantInfo {
   onVerMenu: () => void;
@@ -20,32 +21,25 @@ export const Info: React.FC<InfoProps> = ({
   showMenu
 }) => {
   return (
-    <div className="container my-4">
-      <div className="card p-3">
-        <div className="row align-items-center">
-          {/* Columna izquierda - datos*/}
-          <div className="col-md-4">
-            <h2>{name}</h2>
-            <p>
-              📍 {address} <br />
-              📞 {phone} <br />
-              ✉️ {email} <br />
-              🚚 {delivery ? "Delivery disponible" : "Solo en el local"}
-            </p>
-          </div>
+    <div className={styles.layout}>
 
-          {/* Columna central - imagen */}
-          <div className="col-md-6 text-center">
+            <h2 className={styles.tittle}>{name}</h2>
+          <div className={styles.imgBox}>
             <img
               src={imageUrl}
               alt={name}
-              className="img-fluid rounded"
-              style={{ maxHeight: "250px", objectFit: "cover", width: "100%" }}
+              className={styles.img}
             />
           </div>
+          <div className={styles.infoBox}>
+              <p className={styles.info}>📍 {address}</p>
+              <p className={styles.info}>📞 {phone}</p>
+              <p className={styles.info}>✉️ {email}</p>
+              <p className={styles.info}>🚚 {delivery ? "Delivery disponible" : "Solo en el local"}</p>
+            </div>
 
           {/* Columna derecha - botones*/}
-          <div className="col-md-2 text-center">
+          <div className={styles.buttonBox}>
             <ButtonComoLlegar
               destination={
                 destination?.lat && destination?.lng
@@ -53,12 +47,10 @@ export const Info: React.FC<InfoProps> = ({
                   : { lat: "0", lng: "0" }
               }
             />
-            <button className="btn btn-primary mt-2" onClick={onVerMenu}>
+            <button className="btn" onClick={onVerMenu}>
               {showMenu ? "Ocultar Menú" : "Ver Menú"}
             </button>
           </div>
         </div>
-      </div>
-    </div>
   );
 };

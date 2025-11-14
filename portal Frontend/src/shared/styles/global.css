@@ -96,6 +96,7 @@ body {
 
 .btn:hover {
     background-color: var(--color-acento);
+    color: white;
 }
 
 /* === Layout base === */

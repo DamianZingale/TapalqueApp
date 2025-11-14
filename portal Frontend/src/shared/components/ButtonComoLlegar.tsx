@@ -23,7 +23,7 @@ export const ButtonComoLlegar: React.FC<ButtonComoLlegarProps> = ({ destination 
   };
 
   return (
-    <button className="btn btn-secondary" onClick={handleClick}>
+    <button className="btn" onClick={handleClick}>
       📍 Cómo Llegar
     </button>
   );
