@@ -11,17 +11,9 @@ export default function GastronomiaDetailPage() {
   // Mostrar menú o no
   const [showMenu, setShowMenu] = useState(false);
 
-
-
-  
-
   // Toggle menú
   const toggleMenu = () => setShowMenu(prev => !prev);
 
-  
-
-  
-  
 
   return (
     <div className="container my-4">
@@ -30,11 +22,9 @@ export default function GastronomiaDetailPage() {
 
       {/* Mostrar menú */}
       {showMenu && (
-         <MenuCard items={menuTest} />  
+        <MenuCard items={menuTest} />  
         
       )}
-
-     
 
       {/* Botón WhatsApp */}
       <WhatsAppButton num={mockData.phone ?? ""} />
