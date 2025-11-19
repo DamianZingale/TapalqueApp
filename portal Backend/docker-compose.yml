@@ -138,8 +138,10 @@ services:
     depends_on:
       - eureka-server
     ports:
-      - "8080:8080"
-    restart: always
+      - "8090:8090"
+    restart: on-failure
+    environment:
+      - APP_FRONTEND_URL=http://localhost:3000
     networks:
       - tapalque-net
 
@@ -149,7 +151,7 @@ services:
     depends_on:
       - jwt-db
       - eureka-server
-    restart: always
+    restart: on-failure
     networks:
       - tapalque-net
 
@@ -159,7 +161,7 @@ services:
     depends_on:
       - user-db
       - eureka-server
-    restart: always
+    restart: on-failure
     networks:
       - tapalque-net
 
@@ -170,7 +172,7 @@ services:
       - pedidos-db
       - rabbitmq
       - eureka-server
-    restart: always
+    restart: on-failure
     networks:
       - tapalque-net
 
@@ -181,7 +183,7 @@ services:
       - reservas-db
       - rabbitmq
       - eureka-server
-    restart: always
+    restart: on-failure
     networks:
       - tapalque-net
 
@@ -191,7 +193,7 @@ services:
     depends_on:
       - gastronomia-db
       - eureka-server
-    restart: always
+    restart: on-failure
     networks:
       - tapalque-net
 
@@ -201,7 +203,7 @@ services:
     depends_on:
       - hosteleria-db
       - eureka-server
-    restart: always
+    restart: on-failure
     networks:
       - tapalque-net
 
@@ -212,7 +214,7 @@ services:
       - mercado-pago-db
       - rabbitmq
       - eureka-server
-    restart: always
+    restart: on-failure
     networks:
       - tapalque-net
 
@@ -222,7 +224,7 @@ services:
     depends_on:
       - comercio-db
       - eureka-server
-    restart: always
+    restart: on-failure
     networks:
       - tapalque-net
 

@@ -30,7 +30,7 @@ public class DataInitializer {
         return args -> {
             log.info("🔄 Iniciando creación de roles...");
             
-            // PRIMERO: Crear roles si no existen
+            // creacion de roles si no existen
             createRoleIfNotExists(RolName.ADMIN_GENERAL);
             createRoleIfNotExists(RolName.ADMIN_GASTRO);
             createRoleIfNotExists(RolName.ADMIN_HOSPEDAJE);
@@ -38,7 +38,7 @@ public class DataInitializer {
             
             log.info("✅ Roles verificados/creados");
 
-            // SEGUNDO: Crear usuario admin si no existe
+            // Crear usuario admin si no existe
             if (!userRepository.existsByEmail("admin@tapalque.com")) {
                 log.info("🔄 Creando usuario admin...");
                 
