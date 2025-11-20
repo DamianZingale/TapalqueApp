@@ -87,11 +87,6 @@ services:
       MYSQL_DATABASE: jwt
     ports:
       - "3309:3306"
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot" ]
-      interval: 5s
-      timeout: 3s
-      retries: 10
     volumes:
       - jwt_data:/var/lib/mysql
       - ./init-scripts/mysql/init-jwt.sql:/docker-entrypoint-initdb.d/init-jwt.sql:ro
@@ -134,12 +129,6 @@ services:
     container_name: eureka-server
     ports:
       - "8761:8761"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://eureka-server:8761/eureka" ]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 20s
     restart: always
     networks:
       - tapalque-net
@@ -147,8 +136,6 @@ services:
   msvc-gateway-server:
     build: ./msvc-gateway-server
     container_name: msvc-gateway-server
-    depends_on:
-      - eureka-server
     ports:
       - "8090:8090"
     restart: always
@@ -158,11 +145,6 @@ services:
   msvc-jwt:
     build: ./msvc-jwt
     container_name: msvc-jwt
-    depends_on:
-      jwt-db: 
-        condition: service_healthy
-      eureka-server:
-        condition: service_healthy
     restart: always
     networks:
       - tapalque-net
@@ -172,7 +154,6 @@ services:
     container_name: msvc-user
     depends_on:
       - user-db
-      - eureka-server
     restart: always
     networks:
       - tapalque-net
@@ -183,7 +164,6 @@ services:
     depends_on:
       - pedidos-db
       - rabbitmq
-      - eureka-server
     restart: always
     networks:
       - tapalque-net
@@ -194,7 +174,6 @@ services:
     depends_on:
       - reservas-db
       - rabbitmq
-      - eureka-server
     restart: always
     networks:
       - tapalque-net
@@ -204,7 +183,6 @@ services:
     container_name: msvc-gastronomia
     depends_on:
       - gastronomia-db
-      - eureka-server
     restart: always
     networks:
       - tapalque-net
@@ -214,7 +192,6 @@ services:
     container_name: msvc-hosteleria
     depends_on:
       - hosteleria-db
-      - eureka-server
     restart: always
     networks:
       - tapalque-net
@@ -225,7 +202,6 @@ services:
     depends_on:
       - mercado-pago-db
       - rabbitmq
-      - eureka-server
     restart: always
     networks:
       - tapalque-net
@@ -235,7 +211,6 @@ services:
     container_name: msvc-comercio
     depends_on:
       - comercio-db
-      - eureka-server
     restart: always
     networks:
       - tapalque-net
