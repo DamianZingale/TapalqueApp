@@ -15,8 +15,6 @@ spring:
           uri: lb://MSVC-COMERCIO
           predicates:
             - Path=/api/comercio/**
-          filters:
-            - JwtAuth
 
         - id: msvc-hospedajes
           uri: lb://MSVC-HOSPEDAJES
@@ -25,10 +23,18 @@ spring:
           filters:
             - JwtAuth
 
-        - id: msvc-gastronomia
+        - id: msvc-gastronomia-public
           uri: lb://MSVC-GASTRONOMIA
           predicates:
-            - Path=/api/gastronomia/**
+            - Path=/api/gastronomia/findAll
+            - Path=/api/gastronomia/findById/**
+            - Path+=/gastronomia/public/menu/**
+
+
+        - id: msvc-gastronomia-private
+          uri: lb://MSVC-GASTRONOMIA
+          predicates:
+            - Path=/api/gastronomia/save
           filters:
             - JwtAuth
 

@@ -87,6 +87,11 @@ services:
       MYSQL_DATABASE: jwt
     ports:
       - "3309:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot" ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
     volumes:
       - jwt_data:/var/lib/mysql
       - ./init-scripts/mysql/init-jwt.sql:/docker-entrypoint-initdb.d/init-jwt.sql:ro
@@ -129,6 +134,13 @@ services:
     container_name: eureka-server
     ports:
       - "8761:8761"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/eureka/apps" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_interval: 20s
+    restart: always
     networks:
       - tapalque-net
 
@@ -138,7 +150,7 @@ services:
     depends_on:
       - eureka-server
     ports:
-      - "8080:8080"
+      - "8090:8090"
     restart: always
     networks:
       - tapalque-net
@@ -147,8 +159,10 @@ services:
     build: ./msvc-jwt
     container_name: msvc-jwt
     depends_on:
-      - jwt-db
-      - eureka-server
+      jwt-db: 
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
     restart: always
     networks:
       - tapalque-net
