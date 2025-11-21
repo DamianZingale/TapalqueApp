@@ -1,1 +1,2 @@
-CREATE DATABASE IF NO EXISTS mercado_pago:
+CREATE DATABASE IF NOT EXISTS mercado_pago;
+USE mercado_pago;

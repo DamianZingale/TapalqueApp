@@ -1,1 +1,2 @@
-CREATE DATABASE IF NO EXISTS gastronomia;
+CREATE DATABASE IF NOT EXISTS gastronomia;
+USE gastronomia;

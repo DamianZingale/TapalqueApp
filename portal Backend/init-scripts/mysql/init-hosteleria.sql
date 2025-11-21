@@ -1,1 +1,2 @@
-CREATE DATABASE IF NO EXISTS hosteleria;
+CREATE DATABASE IF NOT EXISTS hosteleria;
+USE hosteleria;

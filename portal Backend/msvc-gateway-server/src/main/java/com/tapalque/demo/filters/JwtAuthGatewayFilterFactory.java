@@ -27,7 +27,9 @@ public class JwtAuthGatewayFilterFactory extends AbstractGatewayFilterFactory<Jw
                     "/api/public",
                     "/api/user/email/",
                     "/api/webhook",
-                    "/oauth/callback");
+                    "/oauth/callback",
+                    "/api/comercio",
+                    "api/gastronomia");
 
             // Si es publica permite el ingreso
             boolean esRutaPublica = publicPaths.stream()
