@@ -48,16 +48,19 @@ export const MenuCard: FC<Props> = ({ items }) => {
       )}
 
       {!isFinalizing ? (
-        <div>
+        <div >
           {Object.entries(groupedItems).map(([category, items]) => (
-            <section key={category}>
-              <h3>{category}</h3>
+            
+            <section key={category} className={styles.layoutCard}>
+              <div className={styles.divition}>
+            </div>
+              <h3 className={styles.dishTittle}>{category}</h3>
               {items.map(plato => (
                 <div
                   key={plato.id}
                 
                 >
-                  <img
+                  <img className={styles.dishImg}
                     src={plato.picture}
                     alt={plato.dish_name}
                   
