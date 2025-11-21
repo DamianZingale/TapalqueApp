@@ -31,7 +31,7 @@ public class RabbitMQListenerServiceMP {
     private String routingKeyHospedaje;
     
     @Autowired
-    private MercadoPagoService mercadoPagoService;
+    private final MercadoPagoService mercadoPagoService;
 
     public RabbitMQListenerServiceMP(MercadoPagoService mercadoPagoService) {
         this.mercadoPagoService = mercadoPagoService;
