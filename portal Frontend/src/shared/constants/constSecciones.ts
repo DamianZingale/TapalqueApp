@@ -3,5 +3,6 @@ export const SECCION_TYPE = {
     GASTRONOMIA: 'gastronomia',
     HOSPEDAJES: 'hospedaje',
     SERVICIOS: 'servicios',
-    ESP_PUBLICOS: 'espublicos'
+    ESP_PUBLICOS: 'espublicos',
+    EVENTOS: 'eventos'
 } as const
