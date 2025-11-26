@@ -30,6 +30,8 @@ body {
     --color-tapalquego: #78811f;
     --color-texto: #333;
     --color-acento: #a8560f;
+    --color-blanco: #fff8e1;
+    --color-verde: #29a929;
 
   /* Tipografía */
     --fuente-titulo: 'Dancing Script', cursive;
@@ -37,6 +39,7 @@ body {
     --tamanio-titulo-xl: 3.2rem;
     --tamanio-titulo-l: 2.6rem;
     --tamanio-subtitulo: 2rem;
+    --tamanio-letras-l: 1.8rem;
     --tamanio-letras-m: 1.6rem;
     --tamanio-letras-s: 1.2rem;
     --ancho-titulo: 600;

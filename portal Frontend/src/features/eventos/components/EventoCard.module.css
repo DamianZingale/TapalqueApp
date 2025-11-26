@@ -1,9 +1,9 @@
 .card {
-    background-color: #fff8e1;
+    background-color: var(--color-blanco);
     border-radius: 8px;
     padding: 1rem;
     margin-bottom: 1rem;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    box-shadow: var(--sombra-suave)
 }
 
 .titulo {
@@ -33,9 +33,14 @@
     display: inline-block;
     margin-top: 0.5rem;
     padding: 0.4rem 0.8rem;
-    background-color: #4caf50;
-    color: white;
+    background-color: var(--color-letras-boton);
+    color: var(--color-blanco);
     text-decoration: none;
     border-radius: 4px;
     font-weight: bold;
+    transition: all .4s ease-in-out;
+}
+
+.boton:hover{
+    background-color: #29a929;
 }

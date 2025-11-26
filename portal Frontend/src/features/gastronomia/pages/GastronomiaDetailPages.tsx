@@ -16,7 +16,7 @@ export default function GastronomiaDetailPage() {
 
 
   return (
-    <div className="container my-4">
+    <div className="">
       {/* Info del restaurante */}
       <Info onVerMenu={toggleMenu} showMenu={showMenu} {...mockData} />
 
