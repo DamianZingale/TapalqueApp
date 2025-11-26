@@ -11,7 +11,6 @@
     border: var(--borde-radius);
     box-shadow: var(--sombra-suave);
     padding: 2rem;
-    
 }
 
 .CardImg{
@@ -58,6 +57,6 @@
 }
 
 .ancorGo:hover .AncorIcon {
-    /* Aplique una traslación horizontal y una rotación */
+    
     transform: translateX(8px) rotate(15deg); 
 }

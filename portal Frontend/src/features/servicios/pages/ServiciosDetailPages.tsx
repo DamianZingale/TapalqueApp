@@ -14,7 +14,7 @@ export default function ServiciosDetailPage() {
     if (!data) return <p>Servicio no encontrado</p>;
 
     return (
-        <div className="container">
+        <div className="">
         <Title text={data.titulo} />
         <Carrusel images={data.imagenes} />
         <SocialLinks 

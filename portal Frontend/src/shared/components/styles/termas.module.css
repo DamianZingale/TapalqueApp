@@ -9,9 +9,8 @@
 
 .descripcion {
     font-family: var(--fuente-texto);
-    font-size: var(--tamanio-letras-m);
+    font-size: var(--tamanio-letras-l);
     color: var(--color-texto);
-    line-height: 1.6;
     margin: 1.5rem auto;
     max-width: 60ch;
     text-align: center;
