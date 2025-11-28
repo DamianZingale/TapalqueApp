@@ -120,6 +120,20 @@ services:
       - ./init-scripts/mysql/init-comercio.sql:/docker-entrypoint-initdb.d/init-comercio.sql:ro
     networks:
       - tapalque-net
+    
+  eventos-db:
+    image: mysql:8
+    container_name: eventos-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: eventos
+    ports:
+      - "3312:3306"
+    volumes:
+      - eventos_data:/var/lib/mysql
+      - ./init-scripts/mysql/init-eventos.sql:/docker-entrypoint-initdb.d/init-eventos.sql:ro
+    networks:
+      - tapalque-net
 
   # ==========================================
   # MICROSERVICIOS
@@ -216,6 +230,14 @@ services:
     restart: always
     networks:
       - tapalque-net
+  msvc-eventos:
+    build: ./msvc-eventos
+    container_name: msvc-eventos
+    depends_on:
+      - eventos-db
+    restart: always
+    networks:
+      - tapalque-net
 
 # ==========================================
 # VOLUMENES Y REDES
@@ -229,6 +251,7 @@ volumes:
   jwt_data:
   user_data:
   comercio_data:
+  eventos_data:
 
 networks:
   tapalque-net:
