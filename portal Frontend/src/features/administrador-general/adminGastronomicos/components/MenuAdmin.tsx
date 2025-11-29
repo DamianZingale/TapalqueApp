@@ -59,14 +59,14 @@ export const MenuAdmin: FC = () => {
   const categories = [...new Set(menu.map((m) => m.category))];
 
   return (
-    <div className="p-3">
+    <div className="">
       <h2>Administrar Menú</h2>
 
       {/* Selector de categoría */}
-      <div className="mb-3">
-        <label className="me-2">Filtrar por categoría:</label>
+      <div className="">
+        <label className="">Filtrar por categoría:</label>
         <select
-          className="form-select form-select-sm d-inline-block w-auto"
+          className=""
           value={activeCategory ?? ""}
           onChange={(e) => setActiveCategory(e.target.value || null)}
         >
@@ -80,7 +80,7 @@ export const MenuAdmin: FC = () => {
       </div>
 
       {/* Tabla responsive */}
-      <div className="table-responsive">
+      <div className="">
         <Table striped bordered hover>
           <thead>
             <tr>
@@ -102,7 +102,7 @@ export const MenuAdmin: FC = () => {
                 <td>
                   {editingId === item.id ? (
                     <input
-                      className="form-control form-control-sm"
+                      className=""
                       name="dish_name"
                       value={editData.dish_name || ""}
                       onChange={handleChange}
@@ -116,7 +116,7 @@ export const MenuAdmin: FC = () => {
                   {editingId === item.id ? (
                     <input
                       type="number"
-                      className="form-control form-control-sm"
+                      className=""
                       name="price"
                       value={editData.price || 0}
                       onChange={handleChange}
@@ -129,7 +129,7 @@ export const MenuAdmin: FC = () => {
                 <td>
                   {editingId === item.id ? (
                     <select
-                      className="form-select form-select-sm"
+                      className=""
                       name="category"
                       value={editData.category || ""}
                       onChange={handleChange}
@@ -148,7 +148,7 @@ export const MenuAdmin: FC = () => {
                 <td>
                   {editingId === item.id ? (
                     <input
-                      className="form-control form-control-sm"
+                      className=""
                       name="ingredients"
                       value={(editData.ingredients || []).toString()}
                       onChange={handleChange}
@@ -161,7 +161,7 @@ export const MenuAdmin: FC = () => {
                 <td>
                   {editingId === item.id ? (
                     <input
-                      className="form-control form-control-sm"
+                      className=""
                       name="restrictions"
                       value={(editData.restrictions || []).toString()}
                       onChange={handleChange}
@@ -175,13 +175,13 @@ export const MenuAdmin: FC = () => {
                   {editingId === item.id ? (
                     <>
                       <button
-                        className="btn btn-sm btn-success me-2 mb-1"
+                        className=""
                         onClick={handleSave}
                       >
                         💾 Guardar
                       </button>
                       <button
-                        className="btn btn-sm btn-secondary mb-1"
+                        className=""
                         onClick={handleCancel}
                       >
                         ❌ Cancelar
@@ -190,13 +190,13 @@ export const MenuAdmin: FC = () => {
                   ) : (
                     <>
                       <button
-                        className="btn btn-sm btn-warning me-2 mb-1"
+                        className=""
                         onClick={() => handleEdit(item)}
                       >
                         ✏️ Editar
                       </button>
                       <button
-                        className="btn btn-sm btn-danger mb-1"
+                        className=""
                         onClick={() => handleDelete(item.id)}
                       >
                         🗑️ Eliminar

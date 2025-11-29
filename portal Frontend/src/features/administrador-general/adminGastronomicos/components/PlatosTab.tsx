@@ -67,7 +67,7 @@ export const PlatosTab = () => {
   return (
     <Form>
       {/* Nombre y precio */}
-      <Row className="mb-3">
+      <Row className="">
         <Col xs={12} md={6}>
           <Form.Control
             type="text"
@@ -76,7 +76,7 @@ export const PlatosTab = () => {
             onChange={(e) => setDishName(e.target.value)}
           />
         </Col>
-        <Col xs={12} md={6} className="mt-2 mt-md-0">
+        <Col xs={12} md={6} className="">
           <Form.Control
             type="number"
             placeholder="Precio"
@@ -87,17 +87,17 @@ export const PlatosTab = () => {
       </Row>
 
       {/* Categorías */}
-      <Row className="mb-3">
+      <Row className="">
         <Col xs={12}>
-          <h3 className="h5">Categorías</h3>
+          <h3 className="">Categorías</h3>
           <CategoryTags selectedCategory={category} onSelect={setCategory} />
         </Col>
       </Row>
 
      {/* Ingredientes y restricciones */}
-<Row className="mb-3">
+<Row className="">
   <Col xs={12}>
-    <h3 className="h5">Ingredientes</h3>
+    <h3 className="">Ingredientes</h3>
     <IngredientesSelector
   data={ingredientesDB}
   selected={ingredients}
@@ -106,9 +106,9 @@ export const PlatosTab = () => {
 />  </Col>
 </Row>
 
-<Row className="mb-3">
+<Row className="">
   <Col xs={12}>
-    <h3 className="h5">Restricciones</h3>
+    <h3 className="">Restricciones</h3>
     <RestrictionTags
       selectedRestrictions={restrictions}
       onChange={setRestrictions}
@@ -118,18 +118,11 @@ export const PlatosTab = () => {
 
 
       {/* Imagen */}
-      <Row className="mb-3 justify-content-center">
+      <Row className="">
         <Col xs={12} md={8} lg={6}>
           <div
             onDrop={handleDrop}
             onDragOver={handleDragOver}
-            style={{
-              border: "2px dashed #ccc",
-              borderRadius: 8,
-              padding: 20,
-              textAlign: "center",
-              cursor: "pointer",
-            }}
             onClick={() => document.getElementById("pictureInput")?.click()}
           >
             {previewUrl ? (
@@ -137,7 +130,6 @@ export const PlatosTab = () => {
                 src={previewUrl}
                 alt="Preview"
                 thumbnail
-                style={{ maxHeight: 200 }}
                 fluid
               />
             ) : (
@@ -156,7 +148,7 @@ export const PlatosTab = () => {
 
       {/* Botón */}
       <Row>
-        <Col xs={12} className="text-center">
+        <Col xs={12} className="">
           <Button variant="primary" onClick={handleAgregarPlato}>
             Agregar Plato
           </Button>

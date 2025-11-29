@@ -7,7 +7,7 @@ interface AddAllButtonProps {
 
 export const AddAllButton = ({ onClick, disabled }: AddAllButtonProps) => {
   return (
-    <div className="mt-3">
+    <div className="">
       <Button
         variant="success"
         size="sm"

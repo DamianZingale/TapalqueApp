@@ -41,7 +41,7 @@ export function RestaurantTabs() {
     },
   ]);
 
- const handleEnviar = (id: number) => {
+const handleEnviar = (id: number) => {
   if (enviados.some((p) => p.id === id)) return;
   const pedido = deliveries.find((d) => d.id === id);
   if (!pedido) return;
@@ -71,7 +71,7 @@ export function RestaurantTabs() {
       <Tab eventKey="Pedidos" title="Pedidos">
         <Row>
           {deliveries.map((delivery) => (
-            <Col key={delivery.id} xs={12} md={6} lg={4} className="mb-3">
+            <Col key={delivery.id} xs={12} md={6} lg={4} className="">
               <DeliveryCard delivery={delivery} onEnviar={handleEnviar} />
             </Col>
           ))}
@@ -80,7 +80,7 @@ export function RestaurantTabs() {
         {/*Listado global de pedidos enviados */}
         {enviados.length > 0 && (
   <>
-    <h4 className="mt-4">Pedidos enviados</h4>
+    <h4 className="">Pedidos enviados</h4>
     <Accordion>
       {enviados.map((pedido) => (
         <Accordion.Item eventKey={pedido.id.toString()} key={pedido.id}>
@@ -99,7 +99,7 @@ export function RestaurantTabs() {
 </Accordion.Body>
         </Accordion.Item>
       ))}
-    <button className="btn btn-secondary mt-3" onClick={() => setEnviados([])}>Limpiar Pedidos</button>      
+    <button className="" onClick={() => setEnviados([])}>Limpiar Pedidos</button>      
     </Accordion>
   </>
         )}

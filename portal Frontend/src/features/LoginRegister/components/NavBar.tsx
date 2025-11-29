@@ -12,7 +12,7 @@ export const NavBar = () => {
                     Tapalqué App
                 </Navbar.Brand>
                 <Navbar.Toggle aria-controls="main-navbar" />
-                    <Nav className="ms-auto">
+                    <Nav className="">
                         {isLoginPage ? (
                             <Nav.Link as={Link} to="/register">Registrarse</Nav.Link>
                         ) : (

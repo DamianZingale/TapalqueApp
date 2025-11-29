@@ -17,7 +17,5 @@ export interface Delivery {
 }
 
 export interface ItemsMenu {
-
   items: Imenu[]; 
-
 }

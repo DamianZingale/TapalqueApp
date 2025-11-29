@@ -1,26 +1,26 @@
 export const Register = () => {
     return (
-        <div className="bg-light vh-100 d-flex flex-column">
-            <div className="flex-grow-1 d-flex justify-content-center align-items-center">
+        <div className="">
+            <div className="">
                 <form
-                    className="p-4 rounded-4 shadow-sm bg-white"
-                    style={{ width: "100%", maxWidth: "400px" }}
+                    className=""
+                    
                 >
-                    <div className="text-center mb-4">
-                        <h2 className="fw-semibold text-secundary">Registrarse</h2>
+                    <div className="">
+                        <h2 className="">Registrarse</h2>
                     </div>
 
-                    <div className="mb-3">
-                        <label htmlFor="name" className="form-label">Nombre completo</label>
+                    <div className="">
+                        <label htmlFor="name" className="">Nombre completo</label>
                         <input
                             type="text"
-                            className="form-control rounded-3"
+                            className=""
                             id="name"
                             placeholder="Ingrese su nombre"
                         />
                     </div>
 
-                    <div className="mb-3">
+                    <div className="">
                         <label htmlFor="email" className="form-label">Email</label>
                         <input
                             type="email"
@@ -30,7 +30,7 @@ export const Register = () => {
                         />
                     </div>
 
-                    <div className="mb-3">
+                    <div className="">
                         <label htmlFor="password" className="form-label">Contraseña</label>
                         <input
                             type="password"
@@ -40,7 +40,7 @@ export const Register = () => {
                         />
                     </div>
 
-                    <div className="mb-4">
+                    <div className="">
                         <label htmlFor="confirmPassword" className="form-label">Confirmar contraseña</label>
                         <input
                             type="password"
@@ -50,8 +50,8 @@ export const Register = () => {
                         />
                     </div>
 
-                    <div className="d-grid">
-                        <button type="submit" className="btn btn-secondary p-1">
+                    <div className="">
+                        <button type="submit" className="">
                             Crear cuenta
                         </button>
                     </div>

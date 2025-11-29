@@ -5,7 +5,6 @@ interface SuggestionsListProps {
   suggestions: string[];
   highlightIndex: number;
   onSelect: (suggestion: string) => void;
- 
 }
 
 export const SuggestionsList = ({ 
@@ -19,15 +18,7 @@ export const SuggestionsList = ({
 
   return (
     <ListGroup
-      style={{
-        position: "absolute",
-        top: "100%",
-        left: 0,
-        right: 0,
-        zIndex: 1000,
-        maxHeight: "200px",
-        overflowY: "auto",
-      }}
+
     >
       {suggestions.map((suggestion, idx) => (
         <ListGroup.Item

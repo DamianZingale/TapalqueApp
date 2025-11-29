@@ -18,20 +18,10 @@ export function DeliveryCard({
   
   return (
     <Card
-      style={{
-        width: "22rem",
-        marginBottom: "1rem",
-        border:
-          estado === "En preparación"
-            ? "6px solid orange"
-            : estado === "Listo"
-            ? "6px solid green"
-            : "1px solid #ddd"
-      }}
     >
       <Card.Body>
         <Card.Title>Delivery #{delivery.id}</Card.Title>
-        <Card.Subtitle className="mb-2 text-muted">
+        <Card.Subtitle className="">
           {delivery.delivery ? "Con delivery" : "Para retirar"} –{" "}
           {delivery.address} {horario}
         </Card.Subtitle>
@@ -45,11 +35,11 @@ export function DeliveryCard({
         </ListGroup>
 
         <div>Total: ${delivery.total}</div>
-        <div className="mb-2">Estado: {estado}</div>
+        <div className="">Estado: {estado}</div>
 
         <Button
           variant="warning"
-          className="me-2"
+          className=""
           onClick={() => setEstado("En preparación")}
         >
           En preparación
@@ -61,7 +51,7 @@ export function DeliveryCard({
         {estado === "Listo" && (
           <Button
             variant="primary"
-            className="ms-2"
+            className=""
             onClick={() => onEnviar(delivery.id, delivery.address, delivery.total)}
           >
             Enviar
