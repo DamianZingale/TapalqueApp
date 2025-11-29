@@ -18,13 +18,13 @@ export const RestrictionTags = ({ selectedRestrictions, onChange }: RestrictionT
   };
 
   return (
-    <ButtonGroup className="mb-3" style={{ flexWrap: "wrap" }}>
+    <ButtonGroup className="" >
       {restriccionesDB.map((res) => (
         <Button
           key={res}
           variant={selectedRestrictions.includes(res) ? "primary" : "outline-primary"}
           onClick={() => toggleRestriction(res)}
-          className="m-1"
+          className=""
         >
           {res}
         </Button>

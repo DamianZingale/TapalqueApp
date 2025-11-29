@@ -66,7 +66,7 @@ export const IngredientesSelector = ({ selected, onChange, data, placeholder }: 
 
   return (
     <>
-      <Row className="align-items-center mb-3">
+      <Row className="">
         <Col xs={9} style={{ position: "relative" }}>
           <SearchInput
             value={input}

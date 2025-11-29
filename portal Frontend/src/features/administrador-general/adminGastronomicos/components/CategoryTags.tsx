@@ -8,13 +8,13 @@ interface CategoryTagsProps {
 
 export const CategoryTags = ({ selectedCategory, onSelect }: CategoryTagsProps) => {
   return (
-    <div className="d-flex flex-wrap gap-2 mb-3">
+    <div className="">
       {categoriasDB.map((cat) => (
         <Button
           key={cat}
           variant={selectedCategory === cat ? "primary" : "outline-primary"}
           onClick={() => onSelect(cat)}
-          className="flex-grow-0"
+          className=""
         >
           {cat}
         </Button>

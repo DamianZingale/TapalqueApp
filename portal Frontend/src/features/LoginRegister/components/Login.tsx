@@ -28,22 +28,22 @@ export const Login = () => {
 };
 
     return (
-        <div className="bg-light vh-100 d-flex flex-column">
-        <div className="flex-grow-1 d-flex justify-content-center align-items-center">
+        <div className="">
+        <div className="">
             <form
             onSubmit={handleLogin}
-            className="p-4 rounded-4 shadow-sm bg-white"
-            style={{ width: "100%", maxWidth: "400px" }}
+            className=""
+            
             >
-            <div className="text-center mb-4">
-                <h2 className="fw-semibold text-secondary">Ingresar</h2>
+            <div className="">
+                <h2 className="">Ingresar</h2>
             </div>
 
-            <div className="mb-3">
-                <label htmlFor="email" className="form-label">Email</label>
+            <div className="">
+                <label htmlFor="email" className="">Email</label>
                 <input
                 type="email"
-                className="form-control rounded-3"
+                className=""
                 id="email"
                 placeholder="ejemplo@correo.com"
                 value={email}
@@ -56,7 +56,7 @@ export const Login = () => {
                 <label htmlFor="password" className="form-label">Contraseña</label>
                 <input
                 type="password"
-                className="form-control rounded-3"
+                className=""
                 id="password"
                 placeholder="••••••••"
                 value={password}
@@ -65,8 +65,8 @@ export const Login = () => {
                 />
             </div>
 
-            <div className="d-grid">
-                <button type="submit" className="btn btn-secondary p-1">
+            <div className="">
+                <button type="submit" className="">
                 Ingresar
                 </button>
             </div>

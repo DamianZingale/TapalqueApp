@@ -11,7 +11,7 @@ export const AddButton = ({ onClick, disabled }: AddButtonProps) => {
     <Col xs={3}>
       <Button
         variant="primary"
-        className="w-100"
+        className=""
         onClick={onClick}
         disabled={disabled}
       >
