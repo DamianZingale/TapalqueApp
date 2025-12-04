@@ -19,7 +19,7 @@ export const BotonesAccionAdmin: React.FC<BotonesAccionProps> = ({ id, estado })
     };
 
     return (
-        <div className="d-flex gap-2 justify-content-center mb-3">
+        <div className="">
         <button
             className={`btn ${estado === "Activo" ? "btn-warning" : "btn-success"}`}
             onClick={handleActivarDesactivar}
@@ -27,11 +27,11 @@ export const BotonesAccionAdmin: React.FC<BotonesAccionProps> = ({ id, estado })
             {estado === "Activo" ? "Desactivar" : "Activar"}
         </button>
 
-        <button onClick={handleClickEditar} className="btn btn-primary">
+        <button onClick={handleClickEditar} className="">
             Editar
         </button>
 
-        <button onClick={handleEliminar} className="btn btn-danger">
+        <button onClick={handleEliminar} className="">
             Eliminar
         </button>
         </div>

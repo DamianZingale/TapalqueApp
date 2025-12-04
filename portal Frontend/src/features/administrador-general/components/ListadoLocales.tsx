@@ -6,11 +6,11 @@ export const ListadoLocalesUsuarios: React.FC<PropsListadoLocalesUsuarios> = ({ 
             className={`card text-center mb-4 cursor-pointer ${selectedId === id ? 'border-secondary' : ''}`}
             onClick={() => onSelect?.(id)}
         >
-            <div className="card-header">{estado}</div>
-            <div className="card-body">
-                <h5 className="card-title">{nombre}</h5>
+            <div className="">{estado}</div>
+            <div className="">
+                <h5 className="">{nombre}</h5>
             </div>
-            <div className="card-footer text-body-secondary">{direccionOtipo}</div>
+            <div className="">{direccionOtipo}</div>
         </div>
     );
 }

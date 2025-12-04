@@ -5,7 +5,7 @@ export const AdministradorGeneralPage = () => {
     return (
         <div className="vh-100 flex-column">
                     <Title text="Administrador General" />
-                    <div className="d-grid gap-2 col-6 mx-auto">
+                    <div className="">
                         <BotonOpciones texto="Gastronomicos" redireccion="gastronomicos" />
                         <BotonOpciones texto="Hospedajes" redireccion="hospedajes" />
                         <BotonOpciones texto="Comercios" redireccion="comercios" />

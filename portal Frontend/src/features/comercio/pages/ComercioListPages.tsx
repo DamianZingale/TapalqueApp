@@ -4,9 +4,9 @@ import { comerciosMock } from './mocks/mockComercios'
 
 export default function ComercioListPage() {
     return (
-        <div className="container">
-        <h1 className="text-center my-4">Comercios</h1>
-        <div className="row justify-content-center">
+        <div className="">
+        <h1 className="">Comercios</h1>
+        <div className="">
             {comerciosMock.map((comercio) => (
             <Card
                 key={comercio.id}
