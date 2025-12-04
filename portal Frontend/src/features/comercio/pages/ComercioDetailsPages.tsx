@@ -14,7 +14,7 @@ export default function ComercioDetailPage() {
     if (!data) return <p>Comercio no encontrado</p>;
 
     return (
-        <div className="container">
+        <div className="">
         <Title text={data.titulo} />
         <Carrusel images={data.imagenes} />
 
@@ -25,7 +25,7 @@ export default function ComercioDetailPage() {
         twitter={data.twitter}
         tiktok={data.tiktok}
         />
-        <div className="text-center my-4">
+        <div className="">
         <a
             href={data.urlMaps}
             target="_blank"
@@ -43,7 +43,7 @@ export default function ComercioDetailPage() {
                 {/* Botón Cómo Llegar */}
         
         <WhatsAppButton num={data.num} />
-        <div className="text-center my-3">
+        <div className="">
 </div>
 
         </div>

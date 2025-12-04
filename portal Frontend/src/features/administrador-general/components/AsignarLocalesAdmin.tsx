@@ -20,21 +20,21 @@ export const AsignarLocalesAdmin: React.FC<PropsAsignarLocalesAdmin> = ({ idAdmi
         setLoading(false);
     }, [idAdmin]);
     return (
-        <div className="mt-4 mb-3">
+        <div className="">
             <h5>Asignar local como administrador</h5>
             {loading ? (
                 <p>Cargando locales...</p>
             ) : locales.length === 0 ? (
                 <p>No se encontraron locales para este tipo.</p>
             ) : (
-                <ul className="list-group">
+                <ul className="">
                     {locales.map((local) => (
-                        <li key={local.id} className="list-group-item d-flex justify-content-between align-items-center">
+                        <li key={local.id} className="">
                             <div>
                                 <strong>{local.nombre}</strong><br />
                                 <small>{local.direccion}</small>
                             </div>
-                            <button className="btn btn-sm btn-secondary" onClick={() => onAsignar(local.id)}>
+                            <button className="" onClick={() => onAsignar(local.id)}>
                                 Asignar
                             </button>
                         </li>

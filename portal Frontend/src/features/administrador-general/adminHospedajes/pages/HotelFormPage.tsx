@@ -36,28 +36,28 @@ export const HotelFormPage = () => {
     }
 
     return (
-        <div className="container mt-4">
+        <div className="">
         <h2>Nuevo Hotel</h2>
-        <input className="form-control mb-2" placeholder="Nombre del hotel" value={nombre} onChange={(e) => setNombre(e.target.value)} />
-        <select className="form-control mb-3" value={estado} onChange={(e) => setEstado(e.target.value as "Activo" | "Inactivo")}>
+        <input className="" placeholder="Nombre del hotel" value={nombre} onChange={(e) => setNombre(e.target.value)} />
+        <select className="" value={estado} onChange={(e) => setEstado(e.target.value as "Activo" | "Inactivo")}>
             <option value="Activo">Activo</option>
             <option value="Inactivo">Inactivo</option>
         </select>
 
         <h4>Agregar habitación</h4>
-        <input className="form-control mb-2" placeholder="Número" value={nuevaHab.numero} onChange={(e) => setNuevaHab({ ...nuevaHab, numero: e.target.value })} />
-        <input className="form-control mb-2" placeholder="Tipo (single, doble mat, etc)" value={nuevaHab.tipo} onChange={(e) => setNuevaHab({ ...nuevaHab, tipo: e.target.value })} />
-        <input className="form-control mb-2" placeholder="Camas" value={nuevaHab.camas} onChange={(e) => setNuevaHab({ ...nuevaHab, camas: e.target.value })} />
+        <input className="" placeholder="Número" value={nuevaHab.numero} onChange={(e) => setNuevaHab({ ...nuevaHab, numero: e.target.value })} />
+        <input className="" placeholder="Tipo (single, doble mat, etc)" value={nuevaHab.tipo} onChange={(e) => setNuevaHab({ ...nuevaHab, tipo: e.target.value })} />
+        <input className="" placeholder="Camas" value={nuevaHab.camas} onChange={(e) => setNuevaHab({ ...nuevaHab, camas: e.target.value })} />
         <button className="btn btn-primary mb-3" onClick={handleAgregarHabitacion}>Agregar habitación</button>
 
         <h5>Habitaciones cargadas</h5>
         {habitaciones.map((h) => (
-            <div key={h.id} className="card mb-2 p-2">
+            <div key={h.id} className="">
             <strong>{h.numero}</strong> — {h.tipo} — {h.camas}
             </div>
         ))}
 
-        <button className="btn btn-success mt-3" onClick={handleGuardar}>Guardar hotel</button>
+        <button className="" onClick={handleGuardar}>Guardar hotel</button>
         </div>
     )
 }

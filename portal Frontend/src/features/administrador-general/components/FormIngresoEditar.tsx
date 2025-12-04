@@ -28,7 +28,7 @@ export const FormIngresoEditar: React.FC<PropsFormIngresoAdminGeneral> = ({ tipo
     };
 
     return (
-        <form onSubmit={handleSubmit} className="p-4 border rounded bg-light">
+        <form onSubmit={handleSubmit} className="">
             {tipoCampos.map((field) => (
                 <div className="mb-3" key={field.name}>
                     <label htmlFor={field.name} className="form-label">
@@ -36,7 +36,7 @@ export const FormIngresoEditar: React.FC<PropsFormIngresoAdminGeneral> = ({ tipo
                     </label>
                     {field.type === 'file' ? (
                         <input
-                            className="form-control"
+                            className=""
                             type="file"
                             name={field.name}
                             id={field.name}
@@ -45,7 +45,7 @@ export const FormIngresoEditar: React.FC<PropsFormIngresoAdminGeneral> = ({ tipo
                         />
                     ) : field.type === 'textarea' ? (
                         <textarea
-                            className="form-control"
+                            className=""
                             name={field.name}
                             id={field.name}
                             value={String(formData[field.name] ?? '')}
@@ -72,7 +72,7 @@ export const FormIngresoEditar: React.FC<PropsFormIngresoAdminGeneral> = ({ tipo
                         </select>
                     ) : (
                         <input
-                            className="form-control"
+                            className=""
                             type={field.type}
                             name={field.name}
                             id={field.name}
@@ -82,8 +82,8 @@ export const FormIngresoEditar: React.FC<PropsFormIngresoAdminGeneral> = ({ tipo
                     )}
                 </div>
             ))}
-            <div className='text-center'>
-                <button type="submit" className="btn btn-secondary btn-lg">
+            <div className=''>
+                <button type="submit" className="">
                     Guardar
                 </button>
             </div>
