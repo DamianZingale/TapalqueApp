@@ -48,7 +48,7 @@ export const MisPedidosPage = () => {
     };
 
     return (
-        <div className="container">
+        <div className="">
             <Title text="Mis Pedidos" />
             {data.map((data) => (
                 <Listado

@@ -47,7 +47,7 @@ export const Info: React.FC<InfoProps> = ({
                   : { lat: "0", lng: "0" }
               }
             />
-            <button className="btn" onClick={onVerMenu}>
+            <button className="" onClick={onVerMenu}>
               {showMenu ? "Ocultar Menú" : "Ver Menú"}
             </button>
           </div>

@@ -41,10 +41,10 @@ const data = [
 
 export const MisReservasPage = () => {
     return (
-        <div className="container min-vh-100 d-flex flex-column">
+        <div className="">
             <Title text="Mis Reservas" />
             {data.map((data) => (
-                <div key={data.id} className="mb-3">
+                <div key={data.id} className="">
                     <Listado
                         id={data.id}
                         encabezado={data.estado}

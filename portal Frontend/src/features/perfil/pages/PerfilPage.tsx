@@ -5,9 +5,9 @@ import { BotonAdministrador } from "../components/BotonAdministrador";
 
 export const PerfilPage = () => {
     return (
-        <div className="vh-100 flex-column">
+        <div className="">
             <Title text="Mi perfil" />
-            <div className="d-grid gap-2 col-6 mx-auto">
+            <div className="">
                 <BotonAdministrador />
                 <BotonOpciones texto="Datos Personales" redireccion="datosPersonales" />
                 <BotonOpciones texto="Notificaciones" redireccion="notificaciones" />

@@ -17,7 +17,7 @@ export const ItemCounter: FC<ItemCounterProps> = ({ quantity, onChange }) => {
   };
 
   return (
-    <section className="item-row d-flex align-items-center gap-2">
+    <section className="">
       <Button variant="outline-secondary" onClick={handleSubtract}>-1</Button>
       <span style={{ color: quantity === 0 ? 'gray' : 'black' }}>{quantity}</span>
       <Button variant="outline-secondary" onClick={handleAdd}>+1</Button>
