@@ -24,7 +24,7 @@ const data = [
 
 export const NotificacionesPages = () => {
     return (
-        <div className="container min-vh-100 d-flex flex-column">
+        <div className="">
             <Title text="Notificaciones" />
 
             <div className="list-group">

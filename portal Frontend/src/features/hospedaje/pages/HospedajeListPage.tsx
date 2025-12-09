@@ -20,13 +20,13 @@ export default function HospedajeListPage() {
         .finally(() => setLoading(false));
     }, []);
 
-    if (loading) return <p className="text-center my-5">Cargando hospedajes...</p>;
-    if (error) return <p className="text-center text-danger my-5">{error}</p>;
+    if (loading) return <p className="">Cargando hospedajes...</p>;
+    if (error) return <p className="">{error}</p>;
 
     return (
-        <div className="container">
-        <h1 className="text-center my-4">Hospedajes</h1>
-        <div className="row justify-content-center">
+        <div className="">
+        <h1 className="">Hospedajes</h1>
+        <div className="">
             {hospedajes.map((hospedaje) => (
             <Card
                 key={hospedaje.id}
@@ -38,7 +38,7 @@ export default function HospedajeListPage() {
             />
             ))}
             {hospedajes.length === 0 && (
-                <p className="text-center my-5">No hay hospedajes disponibles por el momento.</p>
+                <p className="">No hay hospedajes disponibles por el momento.</p>
             )}
 
         </div>

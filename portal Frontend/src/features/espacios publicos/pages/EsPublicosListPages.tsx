@@ -5,12 +5,12 @@ import { Link } from "react-router-dom";
 
 export default function EspaciosListPage() {
     return (
-        <div className="container my-4">
-        <h1 className="text-center mb-4">Espacios Públicos</h1>
-        <div className="row justify-content-center">
+        <div className="">
+        <h1 className="">Espacios Públicos</h1>
+        <div className="">
             {espaciosMock.map((espacio) => (
-            <div key={espacio.id} className="col-md-4 mb-4">
-                <Link to={`/espublicos/${espacio.id}`} className="text-decoration-none">
+            <div key={espacio.id} className="">
+                <Link to={`/espublicos/${espacio.id}`} className="">
                 <Card
                     id={espacio.id}
                     titulo={espacio.titulo}

@@ -22,10 +22,10 @@ export const OrderSummaryCard: FC<Props> = ({ initialPedido, onConfirm, onCancel
   const total = subtotal + (delivery ? 500 : 0);
 
   return (
-    <div className="p-3 border rounded bg-light">
+    <div className="">
       <h5>Pedido final:</h5>
       {pedido.map((i) => (
-        <div key={i.id} className="d-flex justify-content-between align-items-center mb-2">
+        <div key={i.id} className="">
           <div>{i.dish_name} (${i.price.toFixed(2)})</div>
           <ItemCounter quantity={i.cantidad} onChange={(q) => handleQuantityChange(i.cantidad, q)} />
         </div>
@@ -42,7 +42,7 @@ export const OrderSummaryCard: FC<Props> = ({ initialPedido, onConfirm, onCancel
         <div>
           <input
             type="text"
-            className="form-control"
+            className=""
             placeholder="Dirección de entrega"
             value={address}
             onChange={(e) => setAddress(e.target.value)}
@@ -50,9 +50,9 @@ export const OrderSummaryCard: FC<Props> = ({ initialPedido, onConfirm, onCancel
         </div>
       )}
 
-      <div className="mb-3"><strong>Total: ${total.toFixed(2)}</strong></div>
+      <div className=""><strong>Total: ${total.toFixed(2)}</strong></div>
 
-      <div className="d-flex justify-content-end gap-2">
+      <div className="">
         <Button variant="secondary" onClick={onCancel}>Cancelar</Button>
           <Button
           variant="primary"

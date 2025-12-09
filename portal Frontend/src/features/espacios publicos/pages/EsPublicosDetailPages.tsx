@@ -11,8 +11,8 @@ export default function EspaciosDetailPage() {
     if (!data) return <p>Espacio no encontrado</p>;
 
     return (
-        <div className="container my-4">
-        <h1 className="text-center mb-3">{data.titulo}</h1>
+        <div className="">
+        <h1 className="">{data.titulo}</h1>
 
         {/* Carrusel de imágenes */}
         <Carrusel images = {data.imagenes}></Carrusel>
@@ -20,7 +20,7 @@ export default function EspaciosDetailPage() {
             href={data.urlMaps}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-block w-[11rem] h-[2rem] bg-black text-white rounded-3xl text-[1rem] cursor-pointer flex justify-center items-center transition-all duration-300 hover:bg-[#333]"
+            className=""
         >
             Cómo Llegar
         </a>
@@ -34,10 +34,10 @@ export default function EspaciosDetailPage() {
         />
 
         {/* Descripción */}
-        <p className="lead text-center">{data.descripcion}</p>
+        <p className="">{data.descripcion}</p>
 
         {/* Dirección */}
-        <div className="text-center my-3">
+        <div className="">
             <strong>Dirección:</strong> {data.direccion}
         </div>
 

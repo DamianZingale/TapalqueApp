@@ -16,23 +16,23 @@ export const DatosPersonales = () => {
         console.log("Email:", email);
     };
     return (
-        <form onSubmit={handleSubmit} className="p-4 border rounded bg-light">
-            <Form.Group className="mb-3">
+        <form onSubmit={handleSubmit} className="">
+            <Form.Group className="">
                 <Form.Label>Nombre</Form.Label>
                 <Form.Control plaintext readOnly defaultValue={nombre} />
             </Form.Group>
 
-            <Form.Group className="mb-3">
+            <Form.Group className="">
                 <Form.Label>Apellido</Form.Label>
                 <Form.Control plaintext readOnly defaultValue={apellido} />
             </Form.Group>
 
-            <Form.Group className="mb-3">
+            <Form.Group className="">
                 <Form.Label>DNI</Form.Label>
                 <Form.Control plaintext readOnly defaultValue={dni} />
             </Form.Group>
 
-            <Form.Group className="mb-3">
+            <Form.Group className="">
                 <Form.Label>Dirección</Form.Label>
                 <Form.Control
                     type="text"
@@ -41,7 +41,7 @@ export const DatosPersonales = () => {
                 />
             </Form.Group>
 
-            <Form.Group className="mb-3">
+            <Form.Group className="">
                 <Form.Label>Email</Form.Label>
                 <Form.Control
                     type="email"

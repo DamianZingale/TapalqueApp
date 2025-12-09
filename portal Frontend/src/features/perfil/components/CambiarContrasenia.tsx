@@ -16,8 +16,8 @@ export const CambiarContraseña = () => {
     };
 
     return (
-        <Form onSubmit={handleSubmit} className="p-4 border rounded bg-light">
-            <Form.Group className="mb-3">
+        <Form onSubmit={handleSubmit} className="">
+            <Form.Group className="">
                 <Form.Label>Contraseña actual</Form.Label>
                 <Form.Control
                     type="password"
@@ -27,7 +27,7 @@ export const CambiarContraseña = () => {
                 />
             </Form.Group>
 
-            <Form.Group className="mb-3">
+            <Form.Group className="">
                 <Form.Label>Nueva contraseña</Form.Label>
                 <Form.Control
                     type="password"
@@ -37,7 +37,7 @@ export const CambiarContraseña = () => {
                 />
             </Form.Group>
 
-            <Form.Group className="mb-3">
+            <Form.Group className="">
                 <Form.Label>Repetir nueva contraseña</Form.Label>
                 <Form.Control
                     type="password"
