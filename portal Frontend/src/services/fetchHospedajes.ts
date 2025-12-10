@@ -6,7 +6,8 @@ export interface Hospedaje {
     descripcion: string;
     imagenes: string[];
     servicios: string[];
-    ubicacion: string;
+    lat: string;
+    long: string;
     contacto: {
         whatsapp?: string;
         telefono?: string;
