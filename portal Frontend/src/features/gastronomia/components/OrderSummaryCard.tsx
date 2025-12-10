@@ -1,6 +1,5 @@
 import { useState, type FC } from "react";
 import { Button, Form } from "react-bootstrap";
-
 import { ItemCounter } from "./ItemCounter";
 import type { PedidoItem } from "../types/Imenu";
 
@@ -36,7 +35,7 @@ export const OrderSummaryCard: FC<Props> = ({ initialPedido, onConfirm, onCancel
         label="Delivery ($500)"
         checked={delivery}
         onChange={(e) => setDelivery(e.target.checked)}
-        className="my-3"
+        className=""
       />
       {delivery && (
         <div>

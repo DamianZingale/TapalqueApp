@@ -1,6 +1,7 @@
 import type { IRestaurantInfo } from "../types/IrestaurantInfo";
 import { ButtonComoLlegar } from "../../../shared/components/ButtonComoLlegar";
 import styles from "../../../shared/styles/pagesTourist.module.css"
+import stylesBtn from "../../../shared/styles/btn.module.css"
 
 interface InfoProps extends IRestaurantInfo {
   onVerMenu: () => void;
@@ -47,7 +48,7 @@ export const Info: React.FC<InfoProps> = ({
                   : { lat: "0", lng: "0" }
               }
             />
-            <button className="" onClick={onVerMenu}>
+            <button className={stylesBtn.btn}onClick={onVerMenu}>
               {showMenu ? "Ocultar Menú" : "Ver Menú"}
             </button>
           </div>

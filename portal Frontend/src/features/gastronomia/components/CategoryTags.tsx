@@ -1,5 +1,6 @@
 import { type FC } from 'react'
 import { Button } from 'react-bootstrap';
+import styles from "../styles/ItemCounter.module.css";
 
 interface Props {
   categories: string[];
@@ -11,7 +12,7 @@ interface Props {
 export const CategoryTags : FC<Props> = ({categories, activeCategory, onSelect}) => {
 
   return (
-    <div className="">
+    <div className={styles.espacios}>
       <Button
         variant={!activeCategory ? "primary" : "outline-primary"}
         onClick={() => onSelect(null)}

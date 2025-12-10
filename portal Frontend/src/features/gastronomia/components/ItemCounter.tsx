@@ -1,6 +1,7 @@
 
 import type { FC } from 'react';
 import { Button } from 'react-bootstrap';
+import styles from "../styles/ItemCounter.module.css";
 
 interface ItemCounterProps {
   quantity: number;
@@ -17,9 +18,9 @@ export const ItemCounter: FC<ItemCounterProps> = ({ quantity, onChange }) => {
   };
 
   return (
-    <section className="">
+    <section className={styles.espacios}>
       <Button variant="outline-secondary" onClick={handleSubtract}>-1</Button>
-      <span style={{ color: quantity === 0 ? 'gray' : 'black' }}>{quantity}</span>
+      <span style={{ color: quantity === 0 ? 'gray' : '#333' }}>{quantity}</span>
       <Button variant="outline-secondary" onClick={handleAdd}>+1</Button>
     </section>
   );

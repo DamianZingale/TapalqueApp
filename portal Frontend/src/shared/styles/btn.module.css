@@ -1,0 +1,16 @@
+
+.btn{
+    background-color: var(--color-letras-boton);
+    color: white;
+    padding: var(--espaciado-sm) var(--espaciado-md);
+    border-radius: var(--borde-radius);
+    text-decoration: none;
+    border: none;
+    display: inline-block;
+    font-size: var(--tamanio-letras-m);
+    transition: background-color 0.3s ease;
+}
+
+.btn:hover{
+    background-color: var(--color-acento);
+}

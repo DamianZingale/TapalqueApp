@@ -10,7 +10,7 @@ interface Props {
 }
 
 export const RestrictionsTags: FC<Props> = ({ tags, selectedTags, toggleTag, clearTags }) => (
-  <div className="mb-3 d-flex flex-wrap gap-2">
+  <div className="">
     {tags.map((tag) => (
       <Button
         key={tag}

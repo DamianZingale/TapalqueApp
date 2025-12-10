@@ -65,16 +65,21 @@ export const MenuCard: FC<Props> = ({ items }) => {
                     alt={plato.dish_name}
                   
                   />
-                  <div style={{ flexGrow: 1 }}>
-                    <strong>{plato.dish_name}</strong><br />
-                    <small>{plato.ingredients.join(", ")}</small><br />
-                    <small>{plato.restrictions.length ? plato.restrictions.join(", ") : "-"}</small><br />
-                    <strong>${plato.price.toFixed(2)}</strong>
-                  </div>
+                  <div className={styles.layoutPlatos}>
+                    <p className={styles.titleDish}>{plato.dish_name}</p>
+                    <div className={styles.dishIngredients}>
+                    <p className={styles.ingredients}>{plato.ingredients.join(", ")}</p>
+                    <p className={styles.restriction}>{plato.restrictions.length ? plato.restrictions.join(", ") : "-"}</p>
+                    </div>
+                    <p className={styles.priceDish}>${plato.price.toFixed(2)}</p>
+                  
+                  <div className={styles.counterSpace}>
                   <ItemCounter
                     quantity={order[plato.id] || 0}
-                    onChange={(q) => handleQuantityChange(plato.id, q)}
+                    onChange={(q) => handleQuantityChange(plato.id, q)}                    
                   />
+                  </div>
+                  </div>
                 </div>
               ))}
             </section>
