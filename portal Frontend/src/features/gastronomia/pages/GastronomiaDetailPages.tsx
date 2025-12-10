@@ -5,6 +5,7 @@ import { MenuCard } from "../components/MenuCard";
 //import { OrderSummaryCard } from "../components/OrderSummaryCard";
 import { menuTest } from "../mock/MenuMock";
 import { mockData } from "../mock/RestaurantMock";
+import styles from "../styles/ItemCounter.module.css"
 
 
 export default function GastronomiaDetailPage() {
@@ -16,7 +17,7 @@ export default function GastronomiaDetailPage() {
 
 
   return (
-    <div className="">
+    <div className={styles.itemLayout}>
       {/* Info del restaurante */}
       <Info onVerMenu={toggleMenu} showMenu={showMenu} {...mockData} />
 

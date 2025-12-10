@@ -79,3 +79,128 @@
     font-size: 0.9rem;
     color: var(--color-titulos-chicos);
 }
+
+
+/* --- PLATOS --- */
+.layoutPlatos {
+    width: 100%;
+    min-height: 11rem;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+    gap: 1rem;
+}
+
+.titleDish {
+    font-size: var(--tamanio-letras-m);
+    font-weight: var(--ancho-titulo);
+    padding: 1rem;
+    flex: 1;
+}
+
+.dishIngredients {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    flex: 2;
+}
+
+.ingredients {
+    font-size: var(--tamanio-letras-s);
+    font-weight: var(--ancho-titulo);
+    padding: 0.5rem 0;
+}
+
+.restriction {
+    font-size: var(--tamanio-letras-xs);
+    font-weight: var(--ancho-titulo);
+    color: var(--color-acento);
+    padding: 0.5rem 0;
+}
+
+.priceDish {
+    font-size: var(--tamanio-letras-m);
+    font-weight: var(--ancho-titulo);
+    flex: 1;
+}
+
+.counterSpace {
+    width: auto;
+    padding: 0.5rem;
+}
+
+
+
+/* --- RESPONSIVE --- */
+@media (max-width: 768px) {
+    .layoutCard > div {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1rem 0;
+    }
+
+    .dishImg {
+        width: 100%;
+        height: auto;
+        max-height: 200px;
+        object-fit: cover;
+        border-radius: 12px;
+        margin-bottom: 0.5rem;
+    }
+
+    .layoutPlatos {
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: flex-start;
+        width: 100%;
+        gap: 0.5rem;
+    }
+
+    .titleDish {
+        font-size: var(--tamanio-letras-s);
+        padding: 0.5rem 0;
+        width: 100%;
+    }
+
+    .dishIngredients {
+        width: 100%;
+        padding: 0.5rem 0;
+        align-items: flex-start;
+    }
+
+    .ingredients,
+    .restriction {
+        font-size: var(--tamanio-letras-xs);
+        padding: 0.25rem 0;
+    }
+
+    .priceDish {
+        font-size: var(--tamanio-letras-s);
+        margin-top: 0.5rem;
+    }
+
+    .counterSpace {
+        width: 100%;
+        display: flex;
+        justify-content: flex-start;
+        margin-top: 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .titleDish {
+        font-size: var(--tamanio-letras-xs);
+    }
+
+    .priceDish {
+        font-size: var(--tamanio-letras-xs);
+    }
+
+    .layoutCard {
+        padding: 1rem;
+    }
+}

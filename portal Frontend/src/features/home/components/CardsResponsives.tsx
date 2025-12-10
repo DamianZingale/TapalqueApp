@@ -13,7 +13,7 @@ export const CardGridResponsive = () => {
     ];
 
         return (
-            <div className="card-grid">
+            <div className="">
             {cards.map((card, index) => (
                 <div key={index} className="">
                 <CardSecciones {...card} />
