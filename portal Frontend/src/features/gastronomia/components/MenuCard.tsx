@@ -31,8 +31,9 @@ export const MenuCard: FC<Props> = ({ items }) => {
 
   return (
     <div className={styles.layout}>
+      
       {!isFinalizing && (
-        <>
+        <div className={styles.filtersContainer}>
           <CategoryTags
             categories={categories}
             activeCategory={activeCategory}
@@ -44,7 +45,7 @@ export const MenuCard: FC<Props> = ({ items }) => {
             toggleTag={toggleTag}
             clearTags={clearTags}
           />
-        </>
+        </div>
       )}
 
       {!isFinalizing ? (

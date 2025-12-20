@@ -1,3 +1,33 @@
+/* --- CONTENEDOR DE FILTROS --- */
+.filtersContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  justify-content: center;
+}
+
+/* --- BOTONES DE FILTRO --- */
+.filterButton {
+  background-color: var(--color-acento); /* verde */
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 0.5rem 1rem;
+  font-size: var(--tamanio-letras-s);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.filterButton:hover {
+  background-color: var(--color-acento-hover, #2e7d32);
+}
+
+.filterButton.active {
+  background-color: #1b5e20; /* tono más oscuro para activo */
+}
+
 /* --- CONTENEDOR GENERAL --- */
 .layout {
     display: flex;
