@@ -1,4 +1,5 @@
 import { CardSecciones } from "./CardSecciones";
+import "../styles/homePage.css";
 
 export const CardGridResponsive = () => {
     const cards = [
@@ -13,7 +14,8 @@ export const CardGridResponsive = () => {
     ];
 
         return (
-            <div className="">
+            <div className="card-grid">
+
             {cards.map((card, index) => (
                 <div key={index} className="">
                 <CardSecciones {...card} />

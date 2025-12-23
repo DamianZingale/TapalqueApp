@@ -1,32 +1,56 @@
 /* --- CONTENEDOR DE FILTROS --- */
 .filtersContainer {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  margin-bottom: 1.5rem;
-  justify-content: center;
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 1rem; 
 }
+
+/* Apunta a los hijos directos (cada bloque de tags) */
+.filtersContainer > * {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.75rem;
+    border: none;
+    outline: none;
+}
+
 
 /* --- BOTONES DE FILTRO --- */
 .filterButton {
-  background-color: var(--color-acento); /* verde */
-  color: #fff;
-  border: none;
-  border-radius: 20px;
-  padding: 0.5rem 1rem;
-  font-size: var(--tamanio-letras-s);
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
+    background-color: var(--color-acento); 
+    color: var(--color-fondo);
+    border: none;
+    outline: none;
+    box-shadow: none;
+    border-radius: 20px;
+    padding: 0.5rem 1rem;
+    font-size: var(--tamanio-letras-s);
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
 }
 
 .filterButton:hover {
-  background-color: var(--color-acento-hover, #2e7d32);
+    background-color: var(--color-acento-hover, #2e7d32);
 }
 
-.filterButton.active {
-  background-color: #1b5e20; /* tono más oscuro para activo */
+.categoryTags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem; 
 }
+
+.restrictionsTags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem; 
+}
+
+
 
 /* --- CONTENEDOR GENERAL --- */
 .layout {
@@ -45,7 +69,7 @@
     background-color: var(--color-tarjetas);
     border-radius: var(--borde-radius);
     padding: 2rem 2.5rem;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    box-shadow: var(----sombra-suave);
     display: flex;
     flex-direction: column;
     gap: 2rem;

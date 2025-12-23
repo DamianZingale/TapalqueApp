@@ -30,6 +30,7 @@ export const MenuCard: FC<Props> = ({ items }) => {
   const [isFinalizing, setIsFinalizing] = useState(false);
 
   return (
+    
     <div className={styles.layout}>
       
       {!isFinalizing && (
@@ -38,7 +39,7 @@ export const MenuCard: FC<Props> = ({ items }) => {
             categories={categories}
             activeCategory={activeCategory}
             onSelect={setActiveCategory}
-          />
+          /> 
           <RestrictionsTags
             tags={tags}
             selectedTags={selectedTags}
