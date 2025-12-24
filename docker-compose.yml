@@ -19,7 +19,7 @@ services:
       - "27017:27017"
     volumes:
       - pedidos_data:/data/db
-      - ./init-scripts/Mongo/init-pedidos.js:/docker-entrypoint-initdb.d/init-pedidos.js:ro
+      - ./portal Backend/init-scripts/Mongo/init-pedidos.js:/docker-entrypoint-initdb.d/init-pedidos.js:ro
     networks:
       - tapalque-net
 
@@ -30,7 +30,7 @@ services:
       - "27018:27017"
     volumes:
       - reservas_data:/data/db
-      - ./init-scripts/Mongo/init-reservas.js:/docker-entrypoint-initdb.d/init-reservas.js:ro
+      - ./portal Backend/init-scripts/Mongo/init-reservas.js:/docker-entrypoint-initdb.d/init-reservas.js:ro
     networks:
       - tapalque-net
 
@@ -45,7 +45,7 @@ services:
       - "3305:3306"
     volumes:
       - gastronomia_data:/var/lib/mysql
-      - ./init-scripts/MySql/init-gastronomia.sql:/docker-entrypoint-initdb.d/init-gastronomia.sql:ro
+      - ./portal Backend/init-scripts/MySql/init-gastronomia.sql:/docker-entrypoint-initdb.d/init-gastronomia.sql:ro
     networks:
       - tapalque-net
 
@@ -59,7 +59,7 @@ services:
       - "3307:3306"
     volumes:
       - hosteleria_data:/var/lib/mysql
-      - ./init-scripts/MySql/init-hosteleria.sql:/docker-entrypoint-initdb.d/init-hosteleria.sql:ro
+      - ./portal Backend/init-scripts/MySql/init-hosteleria.sql:/docker-entrypoint-initdb.d/init-hosteleria.sql:ro
     networks:
       - tapalque-net
 
@@ -73,7 +73,7 @@ services:
       - "3308:3306"
     volumes:
       - mercado_pago_data:/var/lib/mysql
-      - ./init-scripts/MySql/init-mercado-pago.sql:/docker-entrypoint-initdb.d/init-mercado-pago.sql:ro
+      - ./portal Backend/init-scripts/MySql/init-mercado-pago.sql:/docker-entrypoint-initdb.d/init-mercado-pago.sql:ro
     networks:
       - tapalque-net
 
@@ -87,7 +87,7 @@ services:
       - "3309:3306"
     volumes:
       - jwt_data:/var/lib/mysql
-      - ./init-scripts/MySql/init-jwt.sql:/docker-entrypoint-initdb.d/init-jwt.sql:ro
+      - ./portal Backend/init-scripts/MySql/init-jwt.sql:/docker-entrypoint-initdb.d/init-jwt.sql:ro
     networks:
       - tapalque-net
 
@@ -101,7 +101,7 @@ services:
       - "3310:3306"
     volumes:
       - user_data:/var/lib/mysql
-      - ./init-scripts/MySql/init-user.sql:/docker-entrypoint-initdb.d/init-user.sql:ro
+      - ./portal Backend/init-scripts/MySql/init-user.sql:/docker-entrypoint-initdb.d/init-user.sql:ro
     networks:
       - tapalque-net
 
@@ -115,7 +115,7 @@ services:
       - "3311:3306"
     volumes:
       - comercio_data:/var/lib/mysql
-      - ./init-scripts/MySql/init-comercio.sql:/docker-entrypoint-initdb.d/init-comercio.sql:ro
+      - ./portal Backend/init-scripts/MySql/init-comercio.sql:/docker-entrypoint-initdb.d/init-comercio.sql:ro
     networks:
       - tapalque-net
     
@@ -129,7 +129,7 @@ services:
       - "3312:3306"
     volumes:
       - eventos_data:/var/lib/mysql
-      - ./init-scripts/MySql/init-eventos.sql:/docker-entrypoint-initdb.d/init-eventos.sql:ro
+      - ./portal Backend/init-scripts/MySql/init-eventos.sql:/docker-entrypoint-initdb.d/init-eventos.sql:ro
     networks:
       - tapalque-net
 
@@ -137,7 +137,7 @@ services:
   # MICROSERVICIOS
   # ==========================================
   eureka-server:
-    build: ./eureka-server
+    build: ./portal Backend/eureka-server
     container_name: eureka-server
     ports:
       - "8761:8761"
@@ -146,23 +146,24 @@ services:
       - tapalque-net
 
   msvc-gateway-server:
-    build: ./msvc-gateway-server
+    build: ./portal Backend/msvc-gateway-server
     container_name: msvc-gateway-server
-    ports:
-      - "8090:8090"
+    # NO exponemos el puerto 8090 externamente, solo lo usa el frontend internamente
+    expose:
+      - "8090"
     restart: always
     networks:
       - tapalque-net
 
   msvc-jwt:
-    build: ./msvc-jwt
+    build: ./portal Backend/msvc-jwt
     container_name: msvc-jwt
     restart: always
     networks:
       - tapalque-net
 
   msvc-user:
-    build: ./msvc-user
+    build: ./portal Backend/msvc-user
     container_name: msvc-user
     depends_on:
       - user-db
@@ -171,7 +172,7 @@ services:
       - tapalque-net
 
   msvc-pedidos:
-    build: ./msvc-pedidos
+    build: ./portal Backend/msvc-pedidos
     container_name: msvc-pedidos
     depends_on:
       - pedidos-db
@@ -181,7 +182,7 @@ services:
       - tapalque-net
 
   msvc-reservas:
-    build: ./msvc-reservas
+    build: ./portal Backend/msvc-reservas
     container_name: msvc-reservas
     depends_on:
       - reservas-db
@@ -191,7 +192,7 @@ services:
       - tapalque-net
 
   msvc-gastronomia:
-    build: ./msvc-gastronomia
+    build: ./portal Backend/msvc-gastronomia
     container_name: msvc-gastronomia
     depends_on:
       - gastronomia-db
@@ -200,7 +201,7 @@ services:
       - tapalque-net
 
   msvc-hosteleria:
-    build: ./msvc-hosteleria
+    build: ./portal Backend/msvc-hosteleria
     container_name: msvc-hosteleria
     depends_on:
       - hosteleria-db
@@ -209,7 +210,7 @@ services:
       - tapalque-net
 
   msvc-mercado-pago:
-    build: ./msvc-mercado-pago
+    build: ./portal Backend/msvc-mercado-pago
     container_name: msvc-mercado-pago
     depends_on:
       - mercado-pago-db
@@ -221,18 +222,33 @@ services:
       - tapalque-net
 
   msvc-comercio:
-    build: ./msvc-comercio
+    build: ./portal Backend/msvc-comercio
     container_name: msvc-comercio
     depends_on:
       - comercio-db
     restart: always
     networks:
       - tapalque-net
+
   msvc-eventos:
-    build: ./msvc-eventos
+    build: ./portal Backend/msvc-eventos
     container_name: msvc-eventos
     depends_on:
       - eventos-db
+    restart: always
+    networks:
+      - tapalque-net
+
+  # ==========================================
+  # FRONTEND - PUNTO DE ENTRADA PRINCIPAL
+  # ==========================================
+  frontend:
+    build: ./portal Frontend
+    container_name: frontend
+    ports:
+      - "80:80"      # UNICO PUNTO DE ENTRADA EXTERNO
+    depends_on:
+      - msvc-gateway-server
     restart: always
     networks:
       - tapalque-net
