@@ -1,4 +1,3 @@
- portal Frontend/src/config/api.js
 
 // URL base de la API - todas las llamadas irán a través de /api/
 const API_BASE_URL = '/api';
