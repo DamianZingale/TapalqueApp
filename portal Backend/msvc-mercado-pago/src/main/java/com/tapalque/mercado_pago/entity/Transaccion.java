@@ -13,6 +13,7 @@ import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+
 @Entity
 @Data
 @AllArgsConstructor
@@ -25,17 +26,22 @@ public class Transaccion {
 
     private String estado;
 
-    private final LocalDateTime fecha;
+    private LocalDateTime fecha;
 
     private Long usuarioId; // ID del usuario interno (del microservicio de usuarios)
 
     @Enumerated(EnumType.STRING)
     private TipoServicioEnum tipoServicio;
 
-    public Transaccion(Long idTransaccion, String estado, Long usuarioId, TipoServicioEnum tipoServicioEnum) {
+    public Transaccion() {
+       
+    }
+    
+
+    public Transaccion(Long idTransaccion, String estado, Long usuarioId, TipoServicioEnum tipoServicioEnum, LocalDateTime fecha) {
         this.idTransaccion = idTransaccion;
         this.estado = estado;
-        this.fecha = LocalDateTime.now();
+        this.fecha = fecha; //la fecha ya viene desde msvc-pedidos
         this.usuarioId = usuarioId;
         this.tipoServicio = tipoServicioEnum;
     }

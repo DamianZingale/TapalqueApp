@@ -34,7 +34,7 @@ public class OrderController {
     }
 
     // --- Crear pedido ---
-    @PostMapping ("new")
+    @PostMapping ("newOrder")
     @ResponseStatus(HttpStatus.CREATED)
     public Mono<OrderDTO> createOrder(@RequestBody OrderDTO orderDto) {
         Objects.requireNonNull(orderDto, "Order must not be null");

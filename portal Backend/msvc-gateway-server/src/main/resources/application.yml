@@ -16,44 +16,57 @@ spring:
           predicates:
             - Path=/api/comercio/**
           filters:
-            - JwtAuth
+            - name: JwtAuth
 
         - id: msvc-hospedajes
           uri: lb://MSVC-HOSPEDAJES
           predicates:
             - Path=/api/hospedajes/**
           filters:
-            - JwtAuth
+            - name: JwtAuth
 
         - id: msvc-gastronomia
           uri: lb://MSVC-GASTRONOMIA
           predicates:
             - Path=/api/gastronomia/**
           filters:
-            - JwtAuth
+            - name: JwtAuth
 
         - id: msvc-jwt
           uri: lb://MSVC-JWT
           predicates:
             - Path=/api/jwt/**
-          filters:
-            - JwtAuth
+          # SIN FILTRO - rutas públicas
 
         - id: msvc-user
           uri: lb://MSVC-USER
           predicates:
             - Path=/api/user/**
           filters:
-            - JwtAuth
+            - name: JwtAuth
 
         - id: msvc-mercado-pago
           uri: lb://MSVC-MERCADO-PAGO
           predicates:
             - Path=/api/mercadopago/**
           filters:
-            - JwtAuth
+            - name: JwtAuth
+
+        - id: msvc-pedidos
+          uri: lb://MSVC-PEDIDOS
+          predicates:
+            - Path=/api/pedidos/**
+          filters:
+            - name: JwtAuth
+
+        - id: msvc-reservas
+          uri: lb://MSVC-RESERVAS
+          predicates:
+            - Path=/api/reservas/**
+          filters:
+            - name: JwtAuth
 
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka
+      defaultZone: http://eureka-server:8761/eureka

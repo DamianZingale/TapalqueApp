@@ -1,0 +1,258 @@
+
+
+services:
+  # ==========================================
+  # INFRAESTRUCTURA
+  # ==========================================
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "15672:15672" # Panel de gestión
+      - "5672:5672"   # Comunicación interna
+    networks:
+      - tapalque-net
+
+  # Bases de datos Mongo
+  pedidos-db:
+    image: mongo:latest
+    container_name: pedidos-db
+    ports:
+      - "27017:27017"
+    volumes:
+      - pedidos_data:/data/db
+      - ./init-scripts/mongo/init-pedidos.js:/docker-entrypoint-initdb.d/init-pedidos.js:ro
+    networks:
+      - tapalque-net
+
+  reservas-db:
+    image: mongo:latest
+    container_name: reservas-db
+    ports:
+      - "27018:27017"
+    volumes:
+      - reservas_data:/data/db
+      - ./init-scripts/mongo/init-reservas.js:/docker-entrypoint-initdb.d/init-reservas.js:ro
+    networks:
+      - tapalque-net
+
+  # Bases de datos MySQL
+  gastronomia-db:
+    image: mysql:8
+    container_name: gastronomia-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: gastronomia
+    ports:
+      - "3305:3306"
+    volumes:
+      - gastronomia_data:/var/lib/mysql
+      - ./init-scripts/mysql/init-gastronomia.sql:/docker-entrypoint-initdb.d/init-gastronomia.sql:ro
+    networks:
+      - tapalque-net
+
+  hosteleria-db:
+    image: mysql:8
+    container_name: hosteleria-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: hosteleria
+    ports:
+      - "3307:3306"
+    volumes:
+      - hosteleria_data:/var/lib/mysql
+      - ./init-scripts/mysql/init-hosteleria.sql:/docker-entrypoint-initdb.d/init-hosteleria.sql:ro
+    networks:
+      - tapalque-net
+
+  mercado-pago-db:
+    image: mysql:8
+    container_name: mercado-pago-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: mercado_pago
+    ports:
+      - "3308:3306"
+    volumes:
+      - mercado_pago_data:/var/lib/mysql
+      - ./init-scripts/mysql/init-mercado-pago.sql:/docker-entrypoint-initdb.d/init-mercado-pago.sql:ro
+    networks:
+      - tapalque-net
+
+  jwt-db:
+    image: mysql:8
+    container_name: jwt-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: jwt
+    ports:
+      - "3309:3306"
+    volumes:
+      - jwt_data:/var/lib/mysql
+      - ./init-scripts/mysql/init-jwt.sql:/docker-entrypoint-initdb.d/init-jwt.sql:ro
+    networks:
+      - tapalque-net
+
+  user-db:
+    image: mysql:8
+    container_name: user-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: user
+    ports:
+      - "3310:3306"
+    volumes:
+      - user_data:/var/lib/mysql
+      - ./init-scripts/mysql/init-user.sql:/docker-entrypoint-initdb.d/init-user.sql:ro
+    networks:
+      - tapalque-net
+
+  comercio-db:
+    image: mysql:8
+    container_name: comercio-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: comercio
+    ports:
+      - "3311:3306"
+    volumes:
+      - comercio_data:/var/lib/mysql
+      - ./init-scripts/mysql/init-comercio.sql:/docker-entrypoint-initdb.d/init-comercio.sql:ro
+    networks:
+      - tapalque-net
+    
+  eventos-db:
+    image: mysql:8
+    container_name: eventos-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: eventos
+    ports:
+      - "3312:3306"
+    volumes:
+      - eventos_data:/var/lib/mysql
+      - ./init-scripts/mysql/init-eventos.sql:/docker-entrypoint-initdb.d/init-eventos.sql:ro
+    networks:
+      - tapalque-net
+
+  # ==========================================
+  # MICROSERVICIOS
+  # ==========================================
+  eureka-server:
+    build: ./eureka-server
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    restart: always
+    networks:
+      - tapalque-net
+
+  msvc-gateway-server:
+    build: ./msvc-gateway-server
+    container_name: msvc-gateway-server
+    ports:
+      - "8090:8090"
+    restart: always
+    networks:
+      - tapalque-net
+
+  msvc-jwt:
+    build: ./msvc-jwt
+    container_name: msvc-jwt
+    restart: always
+    networks:
+      - tapalque-net
+
+  msvc-user:
+    build: ./msvc-user
+    container_name: msvc-user
+    depends_on:
+      - user-db
+    restart: always
+    networks:
+      - tapalque-net
+
+  msvc-pedidos:
+    build: ./msvc-pedidos
+    container_name: msvc-pedidos
+    depends_on:
+      - pedidos-db
+      - rabbitmq
+    restart: always
+    networks:
+      - tapalque-net
+
+  msvc-reservas:
+    build: ./msvc-reservas
+    container_name: msvc-reservas
+    depends_on:
+      - reservas-db
+      - rabbitmq
+    restart: always
+    networks:
+      - tapalque-net
+
+  msvc-gastronomia:
+    build: ./msvc-gastronomia
+    container_name: msvc-gastronomia
+    depends_on:
+      - gastronomia-db
+    restart: always
+    networks:
+      - tapalque-net
+
+  msvc-hosteleria:
+    build: ./msvc-hosteleria
+    container_name: msvc-hosteleria
+    depends_on:
+      - hosteleria-db
+    restart: always
+    networks:
+      - tapalque-net
+
+  msvc-mercado-pago:
+    build: ./msvc-mercado-pago
+    container_name: msvc-mercado-pago
+    depends_on:
+      - mercado-pago-db
+      - rabbitmq
+    env_file:
+      - .env
+    restart: always
+    networks:
+      - tapalque-net
+
+  msvc-comercio:
+    build: ./msvc-comercio
+    container_name: msvc-comercio
+    depends_on:
+      - comercio-db
+    restart: always
+    networks:
+      - tapalque-net
+  msvc-eventos:
+    build: ./msvc-eventos
+    container_name: msvc-eventos
+    depends_on:
+      - eventos-db
+    restart: always
+    networks:
+      - tapalque-net
+
+# ==========================================
+# VOLUMENES Y REDES
+# ==========================================
+volumes:
+  pedidos_data:
+  reservas_data:
+  gastronomia_data:
+  hosteleria_data:
+  mercado_pago_data:
+  jwt_data:
+  user_data:
+  comercio_data:
+  eventos_data:
+
+networks:
+  tapalque-net:
+    driver: bridge

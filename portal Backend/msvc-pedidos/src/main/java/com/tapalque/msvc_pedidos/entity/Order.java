@@ -11,6 +11,7 @@ public class Order {
 
     @Id
     private String id;
+    private String userId;
     private Double totalPrice;
     private Boolean paidWithMercadoPago;
     private Boolean paidWithCash;
@@ -28,9 +29,10 @@ public class Order {
         this.dateUpdated = LocalDateTime.now();
     }
 
-    public Order(String id, Double totalPrice, Boolean paidWithMercadoPago, Boolean paidWithCash,
+    public Order(String id,String userId, Double totalPrice, Boolean paidWithMercadoPago, Boolean paidWithCash,
                  List<Item> items, Restaurant restaurant, String paymentReceiptPath) {
         this.id = id;
+        this .userId = userId;
         this.totalPrice = totalPrice;
         this.paidWithMercadoPago = paidWithMercadoPago;
         this.paidWithCash = paidWithCash;
@@ -46,6 +48,9 @@ public class Order {
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
 
+    public String getUserId() { return userId; }
+    public void setUserId(String userId) { this.userId = userId; }
+    
     public Double getTotalPrice() { return totalPrice; }
     public void setTotalPrice(Double totalPrice) { this.totalPrice = totalPrice; }
 
@@ -123,7 +128,8 @@ public class Order {
         PENDING,
         PAID,
         READY,
-        DELIVERED
+        DELIVERED,
+        FAILED
     }
 
     

@@ -8,4 +8,5 @@ import com.tapalque.user.entity.User;
 
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String nombreDeUsuario);
+    boolean existsByEmail(String email);
 }

@@ -1,7 +1,10 @@
 package com.tapalque.msvc_pedidos.service;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.NonNull;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -20,18 +23,39 @@ import reactor.core.publisher.Mono;
 public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
+    private final RabbitTemplate rabbitTemplate;
 
-    public OrderServiceImpl(OrderRepository orderRepository) {
+    @Value("${rabbitmq.pedido.exchange}")
+    private String orderExchange;
+
+    @Value("${rabbitmq.routingKey.mercado.pago}")
+    private String routingKeyMercadoPago;
+
+    public OrderServiceImpl(OrderRepository orderRepository, RabbitTemplate rabbitTemplate) {
         this.orderRepository = orderRepository;
+        this.rabbitTemplate = rabbitTemplate;
     }
-
-   @Override
+    
+    @Override
     public Mono<OrderDTO> createOrder(@NonNull OrderDTO orderDto) {
     Order order = mapToEntity(orderDto);
     order.setDateCreated(LocalDateTime.now());
     order.setDateUpdated(LocalDateTime.now());
+
     return orderRepository.save(order)
-                          .map(this::mapToDTO);  
+        .map(savedOrder -> {
+            rabbitTemplate.convertAndSend(
+                orderExchange,  
+                routingKeyMercadoPago,                      
+                Map.of(
+                    "idPedido", savedOrder.getId(),
+                    "monto", savedOrder.getTotalPrice(),
+                    "fecha", savedOrder.getDateCreated().toString()
+                )
+            );
+
+            return mapToDTO(savedOrder);
+        });
 }
 
     @Override

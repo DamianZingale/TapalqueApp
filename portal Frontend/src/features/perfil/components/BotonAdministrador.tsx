@@ -7,7 +7,7 @@ export const BotonAdministrador = () => {
     // pongan 1 en rol si quieren probar el adminGeneral
     
     const handleClick = () => {
-        switch (1) {
+        switch (rol) {
             case 1:
                 navegate("/admin")
                 break;
