@@ -10,6 +10,7 @@ code --install-extension christian-kohler.path-intellisense
 code --install-extension christian-kohler.npm-intellisense
 
 Script para manejar compose
+
 # Iniciar todo
 ./manage.sh start
 
@@ -31,3 +32,12 @@ Script para manejar compose
 
 # Reconstruir servicio específico
 ./manage.sh rebuild frontend
+
+# Solo descargar imágenes (útil para pre-descargar en conexión lenta)
+./manage.sh pull
+
+# Solo construir (sin levantar)
+./manage.sh build
+
+# Ver estado completo
+./manage.sh status
