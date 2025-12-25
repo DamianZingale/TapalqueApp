@@ -1,33 +1,38 @@
 .whatsapp-float {
-    position: fixed;
-    bottom: 140px; /* Encima del footer */
-    right: 20px;
-    z-index: 1040; /* Mayor que el footer (1030) */
-    background-color: #25D366;
-    color: white;
-    border-radius: 50%;
-    width: 60px;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    transition: all 0.3s ease;
+  position: fixed;
+  bottom: 140px; /* Encima del footer */
+  right: 20px;
+  z-index: 1040; /* Mayor que el footer (1030) */
+  background-color: #25d366;
+  color: white;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
 }
 
 .whatsapp-float:hover {
-    transform: scale(1.1);
-    color: white; /* Mantiene el color blanco en hover */
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+  transform: scale(1.1);
+  color: white; /* Mantiene el color blanco en hover */
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
 }
 
 /* Responsive: ajusta la posición en móviles */
 @media (max-width: 768px) {
-    .whatsapp-float {
-        bottom: 150px; /* Un poco más arriba en móviles */
-        right: 15px;
-        width: 55px;
-        height: 55px;
-    }
+  .whatsapp-float {
+    bottom: 150px; /* Un poco más arriba en móviles */
+    right: 15px;
+    width: 55px;
+    height: 55px;
+  }
+}
+body {
+  background-color: #e8e6e3;
+  margin: 0;
+  min-height: 100vh;
 }

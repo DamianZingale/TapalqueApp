@@ -7,9 +7,20 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependency directories
 node_modules
-dist
-dist-ssr
+
+# Build artifacts (comentado porque se genera dentro del Docker)
+# build
+# dist
+# dist-ssr
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 *.local
 
 # Editor directories and files
@@ -22,22 +33,20 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-
-
-# Dependency directories
-npm-debug.log
-build
-.git
-.gitignore
-README.md
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-.DS_Store
-.vscode
-.idea
 *.swp
 *.swo
+
+# Git
+.git
+.gitignore
+
+# Documentation
+README.md
+README.txt
+
+# Test coverage
 coverage
+.nyc_output
+
+# Cache
+.cache

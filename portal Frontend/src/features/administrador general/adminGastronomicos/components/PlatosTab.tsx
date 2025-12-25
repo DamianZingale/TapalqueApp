@@ -1,19 +1,20 @@
-import { useState, useEffect } from "react";
-import { Row, Col, Form, Button, Image } from "react-bootstrap";
-import type { Imenu } from "../../../gastronomia/types/Imenu";
-import { ingredientesDB } from "../mock";
-import { IngredientesSelector } from "./IngredientsSelector";
-import { CategoryTags } from "./CategoryTags";
-import { RestrictionTags } from "./RestrictionTags";
+import { useEffect, useState } from 'react';
+import { Button, Col, Form, Image, Row } from 'react-bootstrap';
+import type { Imenu } from '../../../gastronomia/types/Imenu';
+import { ingredientesDB } from '../mock';
+import { CategoryTags } from './CategoryTags';
+import { IngredientesSelector } from './IngredientsSelector';
+import { RestrictionTags } from './RestrictionTags';
 
 export const PlatosTab = () => {
-  const [dishName, setDishName] = useState("");
-  const [price, setPrice] = useState("");
-  const [category, setCategory] = useState("");
+  const [id, setId] = useState('');
+  const [dishName, setDishName] = useState('');
+  const [price, setPrice] = useState('');
+  const [category, setCategory] = useState('');
   const [ingredients, setIngredients] = useState<string[]>([]);
   const [restrictions, setRestrictions] = useState<string[]>([]);
   const [picture, setPicture] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string>("");
+  const [previewUrl, setPreviewUrl] = useState<string>('');
 
   useEffect(() => {
     if (picture) {
@@ -21,12 +22,13 @@ export const PlatosTab = () => {
       setPreviewUrl(url);
       return () => URL.revokeObjectURL(url);
     } else {
-      setPreviewUrl("");
+      setPreviewUrl('');
     }
   }, [picture]);
 
   const handleAgregarPlato = () => {
     const plato: Imenu = {
+      id: parseInt(id),
       dish_name: dishName,
       price: parseFloat(price),
       category,
@@ -35,16 +37,17 @@ export const PlatosTab = () => {
       picture: previewUrl,
     };
 
-    console.log("Plato a enviar al backend:", plato);
+    console.log('Plato a enviar al backend:', plato);
 
     // limpiar campos
-    setDishName("");
-    setPrice("");
-    setCategory("");
+    setId('');
+    setDishName('');
+    setPrice('');
+    setCategory('');
     setIngredients([]);
     setRestrictions([]);
     setPicture(null);
-    setPreviewUrl("");
+    setPreviewUrl('');
   };
 
   const handlePictureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -94,28 +97,28 @@ export const PlatosTab = () => {
         </Col>
       </Row>
 
-     {/* Ingredientes y restricciones */}
-<Row className="mb-3">
-  <Col xs={12}>
-    <h3 className="h5">Ingredientes</h3>
-    <IngredientesSelector
-  data={ingredientesDB}
-  selected={ingredients}
-  onChange={setIngredients}
-  placeholder="Buscar ingrediente"
-/>  </Col>
-</Row>
+      {/* Ingredientes y restricciones */}
+      <Row className="mb-3">
+        <Col xs={12}>
+          <h3 className="h5">Ingredientes</h3>
+          <IngredientesSelector
+            data={ingredientesDB}
+            selected={ingredients}
+            onChange={setIngredients}
+            placeholder="Buscar ingrediente"
+          />{' '}
+        </Col>
+      </Row>
 
-<Row className="mb-3">
-  <Col xs={12}>
-    <h3 className="h5">Restricciones</h3>
-    <RestrictionTags
-      selectedRestrictions={restrictions}
-      onChange={setRestrictions}
-    />
-  </Col>
-</Row>
-
+      <Row className="mb-3">
+        <Col xs={12}>
+          <h3 className="h5">Restricciones</h3>
+          <RestrictionTags
+            selectedRestrictions={restrictions}
+            onChange={setRestrictions}
+          />
+        </Col>
+      </Row>
 
       {/* Imagen */}
       <Row className="mb-3 justify-content-center">
@@ -124,13 +127,13 @@ export const PlatosTab = () => {
             onDrop={handleDrop}
             onDragOver={handleDragOver}
             style={{
-              border: "2px dashed #ccc",
+              border: '2px dashed #ccc',
               borderRadius: 8,
               padding: 20,
-              textAlign: "center",
-              cursor: "pointer",
+              textAlign: 'center',
+              cursor: 'pointer',
             }}
-            onClick={() => document.getElementById("pictureInput")?.click()}
+            onClick={() => document.getElementById('pictureInput')?.click()}
           >
             {previewUrl ? (
               <Image
@@ -141,12 +144,12 @@ export const PlatosTab = () => {
                 fluid
               />
             ) : (
-              "Arrastrá la imagen o hacé click para subirla"
+              'Arrastrá la imagen o hacé click para subirla'
             )}
             <input
               type="file"
               id="pictureInput"
-              style={{ display: "none" }}
+              style={{ display: 'none' }}
               accept="image/*"
               onChange={handlePictureChange}
             />

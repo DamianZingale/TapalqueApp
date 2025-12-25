@@ -1,5 +1,5 @@
 # Etapa 1: Build de la aplicación React
-FROM node:18-alpine AS build
+FROM node:20-alpine AS build
 
 WORKDIR /app
 
@@ -7,7 +7,8 @@ WORKDIR /app
 COPY package*.json ./
 
 # Instalar dependencias
-RUN npm ci --only=production
+RUN npm ci 
+#--only=production
 
 # Copiar el resto del código fuente
 COPY . .
