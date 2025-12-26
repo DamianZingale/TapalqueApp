@@ -28,7 +28,7 @@ case "$1" in
         echo "✅ TapalqueApp iniciada exitosamente!"
         echo ""
         echo "🌐 Servicios disponibles:"
-        echo "   Frontend:  http://localhost"
+        echo "   Frontend:  http://localhost:3000"
         echo "   Eureka:    http://localhost:8761"
         echo "   RabbitMQ:  http://localhost:15672 (user: guest, pass: guest)"
         ;;

@@ -8,19 +8,18 @@ COPY package*.json ./
 
 # Instalar dependencias
 RUN npm ci 
-#--only=production
 
 # Copiar el resto del código fuente
 COPY . .
 
-# Construir la aplicación para producción
+# Construir la aplicación
 RUN npm run build
 
 # Etapa 2: Servir con Nginx
 FROM nginx:alpine
 
-# Copiar los archivos compilados de React
-COPY --from=build /app/build /usr/share/nginx/html
+# Copiar los archivos compilados de React (Vite usa 'dist', no 'build')
+COPY --from=build /app/dist /usr/share/nginx/html
 
 # Copiar configuración personalizada de Nginx
 COPY nginx.conf /etc/nginx/conf.d/default.conf

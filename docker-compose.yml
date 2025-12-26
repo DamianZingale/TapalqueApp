@@ -6,8 +6,8 @@ services:
     image: rabbitmq:3-management
     container_name: rabbitmq
     ports:
-      - "15672:15672" # Panel de gestión
-      - "5672:5672"   # Comunicación interna
+      - '15672:15672' # Panel de gestión
+      - '5672:5672' # Comunicación interna
     networks:
       - tapalque-net
 
@@ -16,7 +16,7 @@ services:
     image: mongo:latest
     container_name: pedidos-db
     ports:
-      - "27017:27017"
+      - '27017:27017'
     volumes:
       - pedidos_data:/data/db
       - ./portal Backend/init-scripts/Mongo/init-pedidos.js:/docker-entrypoint-initdb.d/init-pedidos.js:ro
@@ -27,7 +27,7 @@ services:
     image: mongo:latest
     container_name: reservas-db
     ports:
-      - "27018:27017"
+      - '27018:27017'
     volumes:
       - reservas_data:/data/db
       - ./portal Backend/init-scripts/Mongo/init-reservas.js:/docker-entrypoint-initdb.d/init-reservas.js:ro
@@ -42,7 +42,7 @@ services:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: gastronomia
     ports:
-      - "3305:3306"
+      - '3305:3306'
     volumes:
       - gastronomia_data:/var/lib/mysql
       - ./portal Backend/init-scripts/MySql/init-gastronomia.sql:/docker-entrypoint-initdb.d/init-gastronomia.sql:ro
@@ -56,7 +56,7 @@ services:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: hosteleria
     ports:
-      - "3307:3306"
+      - '3307:3306'
     volumes:
       - hosteleria_data:/var/lib/mysql
       - ./portal Backend/init-scripts/MySql/init-hosteleria.sql:/docker-entrypoint-initdb.d/init-hosteleria.sql:ro
@@ -70,7 +70,7 @@ services:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: mercado_pago
     ports:
-      - "3308:3306"
+      - '3308:3306'
     volumes:
       - mercado_pago_data:/var/lib/mysql
       - ./portal Backend/init-scripts/MySql/init-mercado-pago.sql:/docker-entrypoint-initdb.d/init-mercado-pago.sql:ro
@@ -84,7 +84,7 @@ services:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: jwt
     ports:
-      - "3309:3306"
+      - '3309:3306'
     volumes:
       - jwt_data:/var/lib/mysql
       - ./portal Backend/init-scripts/MySql/init-jwt.sql:/docker-entrypoint-initdb.d/init-jwt.sql:ro
@@ -98,7 +98,7 @@ services:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: user
     ports:
-      - "3310:3306"
+      - '3310:3306'
     volumes:
       - user_data:/var/lib/mysql
       - ./portal Backend/init-scripts/MySql/init-user.sql:/docker-entrypoint-initdb.d/init-user.sql:ro
@@ -112,13 +112,13 @@ services:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: comercio
     ports:
-      - "3311:3306"
+      - '3311:3306'
     volumes:
       - comercio_data:/var/lib/mysql
       - ./portal Backend/init-scripts/MySql/init-comercio.sql:/docker-entrypoint-initdb.d/init-comercio.sql:ro
     networks:
       - tapalque-net
-    
+
   eventos-db:
     image: mysql:8
     container_name: eventos-db
@@ -126,7 +126,7 @@ services:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: eventos
     ports:
-      - "3312:3306"
+      - '3312:3306'
     volumes:
       - eventos_data:/var/lib/mysql
       - ./portal Backend/init-scripts/MySql/init-eventos.sql:/docker-entrypoint-initdb.d/init-eventos.sql:ro
@@ -140,7 +140,7 @@ services:
     build: ./portal Backend/eureka-server
     container_name: eureka-server
     ports:
-      - "8761:8761"
+      - '8761:8761'
     restart: always
     networks:
       - tapalque-net
@@ -150,7 +150,7 @@ services:
     container_name: msvc-gateway-server
     # NO exponemos el puerto 8090 externamente, solo lo usa el frontend internamente
     expose:
-      - "8090"
+      - '8090'
     restart: always
     networks:
       - tapalque-net
@@ -246,7 +246,7 @@ services:
     build: ./portal Frontend
     container_name: frontend
     ports:
-      - "80:80"      # UNICO PUNTO DE ENTRADA EXTERNO
+      - '3000:80' # UNICO PUNTO DE ENTRADA EXTERNO
     depends_on:
       - msvc-gateway-server
     restart: always
