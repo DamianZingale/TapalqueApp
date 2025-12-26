@@ -1,55 +1,38 @@
-import { useEffect, useState } from "react";
-import { Card } from "../../../shared/components/Card";
-import { Loading } from "../../../shared/components/Loading";
-import type { LocalGastronomicoDTO } from "../types/IlocalegastronomicoDTO";
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { api } from '../../../config/api';
+import { CardResto } from '../../../shared/components/CardResto';
+import { Loading } from '../../../shared/components/Loading';
+import { IRestaurantInfo } from '../types/IrestaurantInfo';
 
-
-
-
-
-export default function GastronomiaListPage () {
-
-
-  const [locales, setLocales] = useState<LocalGastronomicoDTO[]>([]);
+export default function GastronomiaListPage() {
+  const [locales, setLocales] = useState<IRestaurantInfo[]>([]);
   const [loading, setLoading] = useState(true);
-  
-  useEffect(() => {
-    fetch("http://localhost:8081/api/gastronomia/local/findAll")
-      .then((res) => {
-        if (!res.ok) throw new Error("Error al obtener los locales");
-        return res.json();
-      })
-      .then((data) => {
-        setLocales(data);
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      })
-      .finally(() => setLoading(false));
-      // Datos de ejemplo en caso de que la API no esté disponible
-      const mockData: LocalGastronomicoDTO[] = [
-    {
-      id_local: 1,
-      nombre_local: "Pizzería Giuseppe",
-      direccion_local: "Av 9 de Julio 500",
-      image: "public/descarga.jpeg",
-      
-    },
-    {
-      id_local: 2,
-      nombre_local: "La Parrilla del Centro",
-      direccion_local: "Mitre 1234",
-      image: "/public/pizzeria-le-basilico.jpg",
-      
-    },
-  ];
+  const navigate = useNavigate();
 
-  setLocales(mockData);
-  setLoading(false);
+  useEffect(() => {
+    fetchRestaurantList();
   }, []);
 
+  const fetchRestaurantList = async () => {
+    try {
+      const response = await api.get<IRestaurantInfo[]>('/gastronomia/findAll');
+      setLocales(response.data);
+    } catch (error) {
+      console.error('Error fetching restaurant list:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCardClick = (local: IRestaurantInfo) => {
+    navigate(`/gastronomia/${local.id}`, {
+      state: { restaurante: local },
+    });
+  };
+
   if (loading) {
-    return <Loading text= "Cargando locales..."/>
+    return <Loading text="Cargando locales..." />;
   }
 
   return (
@@ -58,13 +41,17 @@ export default function GastronomiaListPage () {
       <div className="row justify-content-center">
         {locales.length > 0 ? (
           locales.map((local) => (
-            <Card
-              key= {local.id_local}
-              id= {local.id_local.toString()}
-              titulo={local.nombre_local}
-              direccion_local={local.direccion_local}
-              imagenUrl= {local.image} tipo={"gastronomia"} />
-
+            <div key={local.id} className="col-md-4 col-sm-6">
+              <CardResto
+                id={local.id.toString()}
+                titulo={local.name || 'Nombre no disponible'}
+                direccion_local={local.address || 'Dirección no disponible'}
+                imagenUrl={local.imageUrl}
+                tipo={'gastronomia'}
+                schedule={local.schedule} // ← Pasar schedule
+                onClick={() => handleCardClick(local)}
+              />
+            </div>
           ))
         ) : (
           <p>No hay locales disponibles</p>
@@ -72,5 +59,4 @@ export default function GastronomiaListPage () {
       </div>
     </div>
   );
-
 }

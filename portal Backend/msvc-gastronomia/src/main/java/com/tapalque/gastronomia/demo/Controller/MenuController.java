@@ -10,7 +10,7 @@ import com.tapalque.gastronomia.demo.Service.MenuServiceInterface;
 
 
 @RestController
-@RequestMapping("/menu")
+@RequestMapping("gastronomia/menu")
 public class MenuController {
 
     private final MenuServiceInterface menuService;
