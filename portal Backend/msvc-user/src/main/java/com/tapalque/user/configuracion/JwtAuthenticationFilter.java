@@ -29,25 +29,36 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
+    protected void doFilterInternal(
+            HttpServletRequest request,
             HttpServletResponse response,
             FilterChain filterChain)
             throws ServletException, IOException {
-                
-        final String authHeader = request.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+
+        String path = request.getRequestURI();
+
+        // 1️⃣ RUTAS PÚBLICAS → NO VALIDAR JWT
+        if (path.startsWith("/user/public") || path.startsWith("/jwt/public")) {  // ← CORREGIDO: sin /api
             filterChain.doFilter(request, response);
             return;
         }
 
+        // 2️⃣ Header Authorization
+        String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        }
+
+        // 3️⃣ Validar token con msvc-jwt
         Map<String, String> datos = webClientBuilder.build()
                 .post()
-                .uri("lb://MSVC-JWT/api/jwt/validate")
+                .uri("lb://msvc-jwt/api/jwt/public/validate")
                 .header(HttpHeaders.AUTHORIZATION, authHeader)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<Map<String, String>>() {
-                })
+                .bodyToMono(new ParameterizedTypeReference<Map<String, String>>() {})
                 .onErrorReturn(Map.of())
                 .block();
 
@@ -56,13 +67,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        String email = datos.get("email");
-        String rol = datos.get("rol");
-        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                email,
-                null,
-                List.of(new SimpleGrantedAuthority("ROLE_" + rol))
-        );
+        // 4️⃣ Autenticación en Spring Security
+        UsernamePasswordAuthenticationToken auth =
+                new UsernamePasswordAuthenticationToken(
+                        datos.get("email"),
+                        null,
+                        List.of(new SimpleGrantedAuthority("ROLE_" + datos.get("rol")))
+                );
+
         SecurityContextHolder.getContext().setAuthentication(auth);
 
         filterChain.doFilter(request, response);

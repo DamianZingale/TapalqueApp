@@ -148,10 +148,11 @@ services:
   msvc-gateway-server:
     build: ./portal Backend/msvc-gateway-server
     container_name: msvc-gateway-server
-    # NO exponemos el puerto 8090 externamente, solo lo usa el frontend internamente
-    expose:
-      - '8090'
+    ports:
+      - '8090:8090' # ← CAMBIO 1: De "expose" a "ports"
     restart: always
+    depends_on: # ← CAMBIO 2: Agregar depends_on
+      - eureka-server
     networks:
       - tapalque-net
 
@@ -159,6 +160,9 @@ services:
     build: ./portal Backend/msvc-jwt
     container_name: msvc-jwt
     restart: always
+    depends_on: # ← CAMBIO 3: Agregar depends_on
+      - eureka-server
+      - jwt-db
     networks:
       - tapalque-net
 
@@ -167,6 +171,7 @@ services:
     container_name: msvc-user
     depends_on:
       - user-db
+      - eureka-server # ← CAMBIO 4: Agregar eureka
     restart: always
     networks:
       - tapalque-net
@@ -177,6 +182,7 @@ services:
     depends_on:
       - pedidos-db
       - rabbitmq
+      - eureka-server # ← CAMBIO 5: Agregar eureka
     restart: always
     networks:
       - tapalque-net
@@ -187,6 +193,7 @@ services:
     depends_on:
       - reservas-db
       - rabbitmq
+      - eureka-server # ← CAMBIO 6: Agregar eureka
     restart: always
     networks:
       - tapalque-net
@@ -196,6 +203,9 @@ services:
     container_name: msvc-gastronomia
     depends_on:
       - gastronomia-db
+      - eureka-server # ← CAMBIO 7: Agregar eureka
+    volumes:
+      - gastronomia_images:/app/images
     restart: always
     networks:
       - tapalque-net
@@ -205,6 +215,7 @@ services:
     container_name: msvc-hosteleria
     depends_on:
       - hosteleria-db
+      - eureka-server # ← CAMBIO 8: Agregar eureka
     restart: always
     networks:
       - tapalque-net
@@ -215,6 +226,7 @@ services:
     depends_on:
       - mercado-pago-db
       - rabbitmq
+      - eureka-server # ← CAMBIO 9: Agregar eureka
     env_file:
       - .env
     restart: always
@@ -226,6 +238,7 @@ services:
     container_name: msvc-comercio
     depends_on:
       - comercio-db
+      - eureka-server # ← CAMBIO 10: Agregar eureka
     restart: always
     networks:
       - tapalque-net
@@ -235,6 +248,7 @@ services:
     container_name: msvc-eventos
     depends_on:
       - eventos-db
+      - eureka-server # ← CAMBIO 11: Agregar eureka
     restart: always
     networks:
       - tapalque-net
@@ -260,6 +274,7 @@ volumes:
   pedidos_data:
   reservas_data:
   gastronomia_data:
+  gastronomia_images:
   hosteleria_data:
   mercado_pago_data:
   jwt_data:

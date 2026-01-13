@@ -2,9 +2,11 @@ package com.tapalque.jwt.service;
 
 import java.util.List;
 
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.tapalque.jwt.dto.AuthRequestDTO;
 import com.tapalque.jwt.dto.TokenResponse;
@@ -36,7 +38,7 @@ public class AuthService {
         revokeAllUserTokens(user.getEmail());
         saveUserToken(user.getEmail(), accessToken);
 
-        return new TokenResponse(accessToken, refreshToken, user.getEmail());
+        return new TokenResponse(accessToken, refreshToken, user);
     }
 
     private void saveUserToken(String email, String jwtToken) {
@@ -81,6 +83,14 @@ public class AuthService {
         revokeAllUserTokens(email);
         saveUserToken(email, accessToken);
 
-        return new TokenResponse(accessToken, refreshToken, email);
+        return new TokenResponse(accessToken, refreshToken, user);
     }
+
+    @Transactional
+    @Scheduled(cron= "0 0 3 * * *")
+    public void cleanAuthomaticRevokedTokens(){
+         tokenRepositorio.deleteAllExpiredOrRevoked();
+         System.out.println("Limpieza de tokens ejecutada");
+     }
 }
+

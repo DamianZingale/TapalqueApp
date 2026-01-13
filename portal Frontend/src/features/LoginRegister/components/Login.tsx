@@ -1,84 +1,155 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+// portal Frontend/src/components/Login.tsx
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import authService, { UserData } from '../../../services/authService';
 
+interface LoginResponse {
+  accessToken: string;
+  refreshToken: string;
+  user: UserData;
+}
+
+interface ApiErrorResponse {
+  message?: string;
+}
 
 export const Login = () => {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const navigate = useNavigate();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
 
-    const handleLogin = async (e: React.FormEvent) => {
-        e.preventDefault();
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
 
-        // EJEMPLO PARA SOLI INICIO DE SESION
-        try {
-            //     const res = await axios.post("https://tapalqueapp.com/login", {
-            //         email,
-            //         password,
-            //     });
+    try {
+      const response = await fetch('/api/jwt/public/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
 
-            //     const token = res.data.token;
-            
-            //simulo token con rol 3 (admin de hospedaje)
-            const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." +
-                "eyJzdWIiOiIxMjMiLCJub21icmUiOiJTYW50aWFnbyIsInJvbCI6MywiZXhwIjoxNzAwMDAwMDAwfQ." +
-                "SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
-            if (token) {
-                localStorage.setItem("token", token); // guardo token q recibo del back
-                navigate("/"); //voy al incio
-            } else {
-                alert("Credenciales inválidas");
-            }
-        } catch (err) {
-            console.error("Error al iniciar sesión:", err);
-        }
-    };
+      const data: LoginResponse = await response.json();
 
-    return (
-        <div className="bg-light vh-100 d-flex flex-column">
-            <div className="flex-grow-1 d-flex justify-content-center align-items-center">
-                <form
-                    onSubmit={handleLogin}
-                    className="p-4 rounded-4 shadow-sm bg-white"
-                    style={{ width: "100%", maxWidth: "400px" }}
-                >
-                    <div className="text-center mb-4">
-                        <h2 className="fw-semibold text-secondary">Ingresar</h2>
-                    </div>
+      if (!response.ok) {
+        throw new Error(
+          (data as ApiErrorResponse).message || 'Credenciales inválidas'
+        );
+      }
 
-                    <div className="mb-3">
-                        <label htmlFor="email" className="form-label">Email</label>
-                        <input
-                            type="email"
-                            className="form-control rounded-3"
-                            id="email"
-                            placeholder="ejemplo@correo.com"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                        />
-                    </div>
+      authService.setToken(data.accessToken);
+      authService.setUser(data.user);
+      authService.setRefreshToken(data.refreshToken);
 
-                    <div className="mb-4">
-                        <label htmlFor="password" className="form-label">Contraseña</label>
-                        <input
-                            type="password"
-                            className="form-control rounded-3"
-                            id="password"
-                            placeholder="••••••••"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                        />
-                    </div>
+      const redirectUrl = sessionStorage.getItem('redirectAfterLogin');
 
-                    <div className="d-grid">
-                        <button type="submit" className="btn btn-secondary p-1">
-                            Ingresar
-                        </button>
-                    </div>
-                </form>
+      if (redirectUrl) {
+        sessionStorage.removeItem('redirectAfterLogin');
+        navigate(redirectUrl);
+      } else {
+        navigate('/HomePage');
+      }
+    } catch (err) {
+      console.error('Error al iniciar sesión:', err);
+
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Error al iniciar sesión. Verifica tus credenciales.'
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="bg-light vh-100 d-flex flex-column">
+      <div className="flex-grow-1 d-flex justify-content-center align-items-center">
+        <form
+          onSubmit={handleLogin}
+          className="p-4 rounded-4 shadow-sm bg-white"
+          style={{ width: '100%', maxWidth: '400px' }}
+        >
+          <div className="text-center mb-4">
+            <h2 className="fw-semibold text-secondary">Ingresar</h2>
+          </div>
+
+          <div className="mb-3">
+            <label htmlFor="email" className="form-label">
+              Email
+            </label>
+            <input
+              type="email"
+              className="form-control rounded-3"
+              id="email"
+              placeholder="ejemplo@correo.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              disabled={loading}
+            />
+          </div>
+
+          <div className="mb-4">
+            <label htmlFor="password" className="form-label">
+              Contraseña
+            </label>
+            <input
+              type="password"
+              className="form-control rounded-3"
+              id="password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              disabled={loading}
+            />
+          </div>
+
+          {error && (
+            <div className="alert alert-danger py-2" role="alert">
+              {error}
             </div>
-        </div>
-    );
+          )}
+
+          <div className="d-grid mb-3">
+            <button
+              type="submit"
+              className="btn btn-secondary p-2"
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <span className="spinner-border spinner-border-sm me-2" />
+                  Ingresando...
+                </>
+              ) : (
+                'Ingresar'
+              )}
+            </button>
+          </div>
+
+          <div className="text-center">
+            <p className="text-muted mb-0">
+              ¿No tienes cuenta?{' '}
+              <Link
+                to="/register"
+                className="text-secondary fw-semibold text-decoration-none"
+              >
+                Regístrate aquí
+              </Link>
+            </p>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
 };

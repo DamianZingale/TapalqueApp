@@ -9,9 +9,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.tapalque.gastronomia.demo.GastronomiaApplication;
 import com.tapalque.gastronomia.demo.DTO.RestaurantDTO;
 import com.tapalque.gastronomia.demo.Service.I_RestaurantService;
 
@@ -19,15 +19,14 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 
 @RestController
-
+@RequestMapping("/restaurante")
 @CrossOrigin("*")
 public class LocalGastronomicoController {
 
    private final I_RestaurantService localGastronomicoService;
 
-    public LocalGastronomicoController(I_RestaurantService localGastronomicoService, GastronomiaApplication gastronomiaApplication) {
+     public LocalGastronomicoController(I_RestaurantService localGastronomicoService) {
         this.localGastronomicoService = localGastronomicoService;
-        
     }
 
 

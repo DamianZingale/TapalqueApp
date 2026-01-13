@@ -1,6 +1,7 @@
 package com.tapalque.user.entity;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -10,19 +11,13 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Builder
+
 @Entity
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Table(name = "usuarios_tb")
 public class User {
 
@@ -32,18 +27,21 @@ public class User {
 
     @Email
     @NotBlank
-    @Column(unique = true)
+    @Column(nullable = false, unique=true)
     private String email;
 
     @NotBlank
+    @Column(name = "password", nullable = false)
     private String password;
 
     @NotBlank
-    private String firtName;
+    @Column(name = "first_name", nullable = false)
+    private String firstName;
 
-    @NotBlank
+    @Column(name = "last_name", nullable = true) 
     private String lastName;
 
+    @Column(name = "name_emprise", nullable = true) 
     private String nameEmprise;
 
     private LocalDateTime registrationDate;
@@ -51,4 +49,152 @@ public class User {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "rol_id")
     private Role role;
+
+    @OneToMany(mappedBy = "owner")
+    private List<Business> businesses;
+
+    public User(Long id, @Email @NotBlank String email, @NotBlank String password, @NotBlank String firstName,
+            String lastName, String nameEmprise, LocalDateTime registrationDate, Role role) {
+        this.id = id;
+        this.email = email;
+        this.password = password;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.nameEmprise = nameEmprise;
+        this.registrationDate = registrationDate;
+        this.role = role;
+    }
+
+    public User() {
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public String getNameEmprise() {
+        return nameEmprise;
+    }
+
+    public void setNameEmprise(String nameEmprise) {
+        this.nameEmprise = nameEmprise;
+    }
+
+    public LocalDateTime getRegistrationDate() {
+        return registrationDate;
+    }
+
+    public void setRegistrationDate(LocalDateTime registrationDate) {
+        this.registrationDate = registrationDate;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
+        public List<Business> getBusinesses() {
+        return businesses;
+    }
+
+    public void setBusinesses(List<Business> businesses) {
+        this.businesses = businesses;
+    }
+
+    public static User.Builder builder() {
+        return new User.Builder();
+    }
+
+    public static class Builder {
+        private Long id;
+        private String email;
+        private String firstName;
+        private String password;
+        private LocalDateTime registrationDate;
+        private Role role;
+
+        public Builder id(Long id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder email(String email) {
+            this.email = email;
+            return this;
+        }
+
+        public Builder firstName(String firstName) {
+            this.firstName = firstName;
+            return this;
+        }
+
+        public Builder password(String password) {
+            this.password = password;
+            return this;
+        }
+
+        public Builder registrationDate(LocalDateTime registrationDate) {
+            this.registrationDate = registrationDate;
+            return this;
+        }
+
+        public Builder role(Role role) {
+            this.role = role;
+            return this;
+        }
+
+        public User build() {
+            User user = new User();
+            user.setId(this.id);
+            user.setEmail(this.email);
+            user.setFirstName(this.firstName);
+            user.setPassword(this.password);
+            user.setRegistrationDate(this.registrationDate);
+            user.setRole(this.role);
+            return user;
+        }
+    }
+
+
+    
+
 }

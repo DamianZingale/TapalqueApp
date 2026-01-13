@@ -12,13 +12,13 @@ import org.springframework.stereotype.Service;
 import com.tapalque.jwt.dto.UserResponseDTO;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-
 import lombok.RequiredArgsConstructor;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Service
@@ -43,7 +43,7 @@ public class JwtService {
                     .getSubject();
         } catch (io.jsonwebtoken.security.SignatureException ex) {
             throw new RuntimeException("Token con firma inválida", ex);
-        } catch (Exception ex) {
+        } catch (ExpiredJwtException | MalformedJwtException | UnsupportedJwtException | IllegalArgumentException ex) {
             throw new RuntimeException("Error al parsear token", ex);
         }
     }
@@ -62,7 +62,7 @@ public class JwtService {
                 .setSubject(user.getEmail())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
-                .claim("fullName", user.getFirtName() + " " + user.getLastName())
+                .claim("fullName", user.getFirtName())
                 .claim("rol", user.getRol().name())
                 .signWith(getSignInKey())
                 .compact();
@@ -90,6 +90,7 @@ public class JwtService {
     }
 
     
+    @SuppressWarnings("unused")
     private Date extractExpiration(String token) {
         return Jwts
                 .parserBuilder()
@@ -111,10 +112,4 @@ public class JwtService {
         return nombreDeUsuario;
     }
 
-    // @Transactional
-    // @Scheduled(cron= "0 0 3 * * *")
-    // public void cleanAuthomaticRevokedTokens(){
-    //     tokenRepositorio.deleteAllExpiredOrRevoked();
-    //     System.out.println("Limpieza de tokens ejecutada");
-    // }
 }

@@ -33,7 +33,7 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/jwt/login", "/api/jwt/validate").permitAll()
+                        .requestMatchers("/api/jwt/public/login", "/api/jwt/public/validate").permitAll()
                         .anyRequest().authenticated());
         return http.build();
     }

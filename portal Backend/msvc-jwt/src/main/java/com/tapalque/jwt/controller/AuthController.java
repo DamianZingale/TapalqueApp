@@ -20,7 +20,7 @@ import com.tapalque.jwt.service.AuthService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/jwt")
+@RequestMapping("/jwt/public")
 @CrossOrigin("*")
 @RequiredArgsConstructor
 public class AuthController {

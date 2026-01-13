@@ -15,7 +15,7 @@ import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/jwt")
+@RequestMapping("/jwt/public")
 @RequiredArgsConstructor
 public class ValidateController {
 

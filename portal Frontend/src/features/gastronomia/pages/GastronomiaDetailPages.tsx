@@ -101,7 +101,7 @@ export default function GastronomiaDetailPage() {
         ← Volver
       </button>
 
-      {/* Info del restaurante - ahora con datos reales */}
+      {/* Info del restaurante */}
       <Info
         id={restaurante.id}
         onVerMenu={toggleMenu}

@@ -5,12 +5,12 @@ import java.time.LocalDateTime;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.tapalque.user.dto.UserRequestDTO;
-import com.tapalque.user.dto.UserResponseDTO;
+import com.tapalque.user.dto.UserRegistrationDTO;
+import com.tapalque.user.dto.UserResponseDTO;  // ← NUEVO
 import com.tapalque.user.entity.Role;
 import com.tapalque.user.entity.User;
-import com.tapalque.user.repository.RoleRepository;
 import com.tapalque.user.repository.UserRepository;
+import com.tapalque.user.util.PasswordValidator;
 
 import lombok.RequiredArgsConstructor;
 
@@ -19,44 +19,35 @@ import lombok.RequiredArgsConstructor;
 public class UserService {
 
     private final UserRepository userRepo;
-    private final RoleRepository roleRepo;
     private final PasswordEncoder passwordEncoder;
 
-    public UserResponseDTO register(UserRequestDTO dto, Role role) {
-        if (userRepo.findByEmail(dto.getCorreo()).isPresent()) {
+    public UserResponseDTO register(UserRegistrationDTO dto, Role role) {  // ← Retorna UserResponseDTO
+        // Validar fortaleza de contraseña
+        PasswordValidator.validate(dto.getPassword());
+        
+        // Verificar si el email ya existe
+        if (userRepo.findByEmail(dto.getEmail()).isPresent()) {
             throw new IllegalArgumentException("El correo ya está registrado");
         }
 
-        String encoded = passwordEncoder.encode(dto.getContrasena());
+        // Encriptar contraseña
+        String encoded = passwordEncoder.encode(dto.getPassword());
+        
+        // Crear usuario
         User user = User.builder()
-                .email(dto.getCorreo())
+                .email(dto.getEmail())
                 .password(encoded)
-                .firtName(dto.getNombre())
-                .lastName(dto.getApellido())
-                .nameEmprise(dto.getEmpresa())
+                .firstName(dto.getFirtName())
                 .registrationDate(LocalDateTime.now())
                 .role(role)
                 .build();
 
         userRepo.save(user);
 
-        return mapToDTO(user);
+        return UserResponseDTO.fromEntity(user);  // ← Sin password
     }
 
-    public UserResponseDTO getByEmail(String email) {
-        User user = userRepo.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-        return mapToDTO(user);
-    }
-
-    private UserResponseDTO mapToDTO(User user) {
-        return UserResponseDTO.builder()
-                .email(user.getEmail())
-                .contrasena(user.getPassword())
-                .firtName(user.getFirtName())
-                .lastName(user.getLastName())
-                .nameEmprise(user.getNameEmprise())
-                .rol(user.getRole().getName())
-                .build();
+    public Boolean getByEmail(String email) {
+        return userRepo.findByEmail(email).isPresent();
     }
 }
