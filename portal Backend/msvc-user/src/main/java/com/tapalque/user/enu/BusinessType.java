@@ -1,6 +1,6 @@
 package com.tapalque.user.enu;
 
-public enum BussinesType {
+public enum BusinessType {
     
     RESTAURANT,
     HOSPEDAJE

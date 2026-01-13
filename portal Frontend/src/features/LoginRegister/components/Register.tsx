@@ -107,24 +107,10 @@ export const Register = () => {
       if (!response.ok) {
         throw new Error(data.message || 'Error al registrar');
       }
-      if (data.token) {
-        authService.setToken(data.token);
-        if (data.user) {
-          authService.setUser(data.user);
-        }
 
-        const redirectUrl = sessionStorage.getItem('redirectAfterLogin');
-
-        if (redirectUrl) {
-          sessionStorage.removeItem('redirectAfterLogin');
-          navigate(redirectUrl);
-        } else {
-          navigate('/');
-        }
-      } else {
-        alert('Registro exitoso. Por favor, inicia sesión.');
-        navigate('/api/public/login');
-      }
+      // Mostrar mensaje de verificación de email
+      alert('¡Registro exitoso! Se ha enviado un correo de verificación a tu email. Por favor, verifica tu cuenta antes de iniciar sesión.');
+      navigate('/login');
     } catch (err) {
       console.error('Error en registro:', err);
 

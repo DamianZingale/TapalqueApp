@@ -12,5 +12,5 @@ public class UserResponseDTO {
     private String firtName;
     private String password;
     private RolName rol;
-    
+    private boolean emailVerified;
 }

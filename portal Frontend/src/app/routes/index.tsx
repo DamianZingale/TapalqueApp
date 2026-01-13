@@ -16,8 +16,10 @@ import PerfilRoutes from "../../features/perfil/routes";
 // Login/Register
 import LoginPage from "../../features/LoginRegister/pages/LoginPage";
 import RegisterPage from "../../features/LoginRegister/pages/RegisterPage";
+import { VerifyEmail } from "../../features/LoginRegister/components/VerifyEmail";
 
 // Administración
+import { SelectBusinessPage } from "../../features/admin/pages/SelectBusinessPage";
 import HospedajeAdmin from "../../features/hospedajeAdmin/routes";
 import AdministradorGeneralRoutes from "../../features/administrador general/routes";
 
@@ -41,8 +43,10 @@ export const router = createBrowserRouter([
   // Rutas fuera del layout principal
     { path: "/login", element: <LoginPage /> },
     { path: "/register", element: <RegisterPage /> },
+    { path: "/verify-email", element: <VerifyEmail /> },
 
   // Rutas de administración
+    { path: "/admin/select-business", element: <SelectBusinessPage /> },
     { path: "/admin/hospedaje/*", element: <HospedajeAdmin /> },
     { path: "/admin/general/*", element: <AdministradorGeneralRoutes /> },
     

@@ -24,7 +24,7 @@ spring:
             - id: msvc-jwt-login
               uri: lb://msvc-jwt
               predicates:
-                - Path=/api/jwt/public/login, /api/jwt/public/refresh
+                - Path=/api/jwt/public/login, /api/jwt/public/refresh-token
               filters:
                 - RewritePath=/api/(?<segment>.*), /$\{segment}
 

@@ -55,7 +55,18 @@ export const Login = () => {
         sessionStorage.removeItem('redirectAfterLogin');
         navigate(redirectUrl);
       } else {
-        navigate('/HomePage');
+        // Redirigir según el rol del usuario
+        // El rol puede venir como string o number
+        const userRole = String(data.user.rol);
+
+        if (userRole === 'ADMINISTRADOR' || userRole === '2') {
+          navigate('/admin/select-business');
+        } else if (userRole === 'MODERADOR' || userRole === '1') {
+          navigate('/admin/general');
+        } else {
+          // USER o rol 3
+          navigate('/HomePage');
+        }
       }
     } catch (err) {
       console.error('Error al iniciar sesión:', err);

@@ -243,15 +243,15 @@ services:
     networks:
       - tapalque-net
 
-  msvc-eventos:
-    build: ./portal Backend/msvc-eventos
-    container_name: msvc-eventos
-    depends_on:
-      - eventos-db
-      - eureka-server # ← CAMBIO 11: Agregar eureka
-    restart: always
-    networks:
-      - tapalque-net
+  # msvc-eventos:
+  #   build: ./portal Backend/msvc-eventos
+  #   container_name: msvc-eventos
+  #   depends_on:
+  #     - eventos-db
+  #     - eureka-server
+  #   restart: always
+  #   networks:
+  #     - tapalque-net
 
   # ==========================================
   # FRONTEND - PUNTO DE ENTRADA PRINCIPAL

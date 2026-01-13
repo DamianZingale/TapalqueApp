@@ -30,8 +30,14 @@ public class AuthService {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
-                        request.getContrasena()));
+                        request.getPassword()));
         final UserResponseDTO user = userClient.getUser(request.getEmail());
+
+        // Verificar si el email está verificado
+        if (!user.isEmailVerified()) {
+            throw new IllegalStateException("Debes verificar tu email antes de iniciar sesión. Revisa tu correo electrónico.");
+        }
+
         final String accessToken = jwtServicio.generateToken(user);
         final String refreshToken = jwtServicio.generateRefreshToken(user);
 

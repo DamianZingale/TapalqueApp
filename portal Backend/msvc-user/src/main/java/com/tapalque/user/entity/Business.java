@@ -1,5 +1,7 @@
 package com.tapalque.user.entity;
 
+import com.tapalque.user.enu.BusinessType;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -30,7 +32,7 @@ public class Business {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "business_type", nullable = false)
-    private Business businessType;
+    private BusinessType businessType; // Changed from Business to BusinessType
 
     // ID del recurso real (restaurante u hospedaje)
     @Column(name = "external_business_id", nullable = false)
@@ -39,7 +41,7 @@ public class Business {
     public Business() {
     }
 
-    public Business(Long id, User owner, String name, Business businessType, Long externalBusinessId) {
+    public Business(Long id, User owner, String name, BusinessType businessType, Long externalBusinessId) {
         this.id = id;
         this.owner = owner;
         this.name = name;
@@ -71,11 +73,11 @@ public class Business {
         this.name = name;
     }
 
-    public Business getBusinessType() {
+    public BusinessType getBusinessType() { // Changed return type
         return businessType;
     }
 
-    public void setBusinessType(Business businessType) {
+    public void setBusinessType(BusinessType businessType) { // Changed parameter type
         this.businessType = businessType;
     }
 
@@ -86,6 +88,4 @@ public class Business {
     public void setExternalBusinessId(Long externalBusinessId) {
         this.externalBusinessId = externalBusinessId;
     }
-
-    
 }

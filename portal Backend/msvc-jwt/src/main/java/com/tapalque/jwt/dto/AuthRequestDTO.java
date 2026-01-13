@@ -14,5 +14,5 @@ public class AuthRequestDTO {
     @NotBlank(message = "El nombre de usuario es obligatorio")
     String email;
     @NotBlank(message = "La contraseña es obligatoria")
-    String contrasena;
+    String password;
 }

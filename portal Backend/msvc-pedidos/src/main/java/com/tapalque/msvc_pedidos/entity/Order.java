@@ -11,6 +11,7 @@ public class Order {
 
     @Id
     private String id;
+    private String userId;
     private Double totalPrice;
     private Boolean paidWithMercadoPago;
     private Boolean paidWithCash;
@@ -45,6 +46,9 @@ public class Order {
     // --- Getters y Setters ---
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
+
+    public String getUserId() { return userId; }
+    public void setUserId(String userId) { this.userId = userId; }
 
     public Double getTotalPrice() { return totalPrice; }
     public void setTotalPrice(Double totalPrice) { this.totalPrice = totalPrice; }
