@@ -133,6 +133,34 @@ services:
     networks:
       - tapalque-net
 
+  servicios-db:
+    image: mysql:8
+    container_name: servicios-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: servicios
+    ports:
+      - '3313:3306'
+    volumes:
+      - servicios_data:/var/lib/mysql
+      - ./portal Backend/init-scripts/MySql/init-servicios.sql:/docker-entrypoint-initdb.d/init-servicios.sql:ro
+    networks:
+      - tapalque-net
+
+  termas-db:
+    image: mysql:8
+    container_name: termas-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: termas
+    ports:
+      - '3314:3306'
+    volumes:
+      - termas_data:/var/lib/mysql
+      - ./portal Backend/init-scripts/MySql/init-termas.sql:/docker-entrypoint-initdb.d/init-termas.sql:ro
+    networks:
+      - tapalque-net
+
   # ==========================================
   # MICROSERVICIOS
   # ==========================================
@@ -207,7 +235,7 @@ services:
       - gastronomia-db
       - eureka-server # ← CAMBIO 7: Agregar eureka
     volumes:
-      - gastronomia_images:/app/images
+      - gastronomia_uploads:/app/uploads
     restart: always
     networks:
       - tapalque-net
@@ -218,6 +246,8 @@ services:
     depends_on:
       - hosteleria-db
       - eureka-server # ← CAMBIO 8: Agregar eureka
+    volumes:
+      - hosteleria_uploads:/app/uploads
     restart: always
     networks:
       - tapalque-net
@@ -241,19 +271,47 @@ services:
     depends_on:
       - comercio-db
       - eureka-server # ← CAMBIO 10: Agregar eureka
+    volumes:
+      - comercio_uploads:/app/uploads
     restart: always
     networks:
       - tapalque-net
 
-  # msvc-eventos:
-  #   build: ./portal Backend/msvc-eventos
-  #   container_name: msvc-eventos
-  #   depends_on:
-  #     - eventos-db
-  #     - eureka-server
-  #   restart: always
-  #   networks:
-  #     - tapalque-net
+  msvc-eventos:
+    build: ./portal Backend/msvc-eventos
+    container_name: msvc-eventos
+    depends_on:
+      - eventos-db
+      - eureka-server
+    volumes:
+      - eventos_uploads:/app/uploads
+    restart: always
+    networks:
+      - tapalque-net
+
+  msvc-servicios:
+    build: ./portal Backend/msvc-servicios
+    container_name: msvc-servicios
+    depends_on:
+      - servicios-db
+      - eureka-server
+    volumes:
+      - servicios_uploads:/app/uploads
+    restart: always
+    networks:
+      - tapalque-net
+
+  msvc-termas:
+    build: ./portal Backend/msvc-termas
+    container_name: msvc-termas
+    depends_on:
+      - termas-db
+      - eureka-server
+    volumes:
+      - termas_uploads:/app/uploads
+    restart: always
+    networks:
+      - tapalque-net
 
   # ==========================================
   # FRONTEND - PUNTO DE ENTRADA PRINCIPAL
@@ -276,13 +334,20 @@ volumes:
   pedidos_data:
   reservas_data:
   gastronomia_data:
-  gastronomia_images:
+  gastronomia_uploads:
   hosteleria_data:
+  hosteleria_uploads:
   mercado_pago_data:
   jwt_data:
   user_data:
   comercio_data:
+  comercio_uploads:
   eventos_data:
+  eventos_uploads:
+  servicios_data:
+  servicios_uploads:
+  termas_data:
+  termas_uploads:
 
 networks:
   tapalque-net:

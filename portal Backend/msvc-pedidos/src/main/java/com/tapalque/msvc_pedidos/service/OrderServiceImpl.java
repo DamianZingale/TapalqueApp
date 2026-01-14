@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.tapalque.msvc_pedidos.dto.ItemDTO;
 import com.tapalque.msvc_pedidos.dto.OrderDTO;
+import com.tapalque.msvc_pedidos.dto.PagoEventoDTO;
 import com.tapalque.msvc_pedidos.dto.RestaurantDTO;
 import com.tapalque.msvc_pedidos.entity.Order;
 import com.tapalque.msvc_pedidos.repository.OrderRepository;
@@ -67,6 +68,40 @@ public class OrderServiceImpl implements OrderService {
         orderRepository.deleteByPaidWithMercadoPagoFalseAndPaidWithCashFalse()
             .subscribe();
     }
+
+    @Override
+    public void confirmarPagoPedido(@NonNull String pedidoId, @NonNull PagoEventoDTO evento) {
+        orderRepository.findById(pedidoId)
+            .flatMap(order -> {
+                order.setStatus(Order.OrderStatus.PAID);
+                order.setPaidWithMercadoPago(true);
+                order.setTransaccionId(evento.getTransaccionId());
+                order.setMercadoPagoId(evento.getMercadoPagoId());
+                order.setFechaPago(evento.getFechaPago());
+                order.setDateUpdated(LocalDateTime.now());
+                return orderRepository.save(order);
+            })
+            .doOnSuccess(order -> System.out.println("Pedido " + pedidoId + " confirmado como PAGADO"))
+            .doOnError(error -> System.err.println("Error al confirmar pago del pedido " + pedidoId + ": " + error.getMessage()))
+            .subscribe();
+    }
+
+    @Override
+    public void rechazarPagoPedido(@NonNull String pedidoId, @NonNull PagoEventoDTO evento) {
+        orderRepository.findById(pedidoId)
+            .flatMap(order -> {
+                order.setStatus(Order.OrderStatus.PENDING); // Mantener como pendiente o agregar un estado RECHAZADO
+                order.setPaidWithMercadoPago(false);
+                order.setTransaccionId(evento.getTransaccionId());
+                order.setMercadoPagoId(evento.getMercadoPagoId());
+                order.setDateUpdated(LocalDateTime.now());
+                return orderRepository.save(order);
+            })
+            .doOnSuccess(order -> System.out.println("Pago rechazado para pedido " + pedidoId))
+            .doOnError(error -> System.err.println("Error al procesar rechazo de pago del pedido " + pedidoId + ": " + error.getMessage()))
+            .subscribe();
+    }
+
     // mapeos
     private Order mapToEntity(OrderDTO dto) {
     Order order = new Order();

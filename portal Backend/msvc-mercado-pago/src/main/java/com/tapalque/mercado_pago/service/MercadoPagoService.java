@@ -1,5 +1,6 @@
 package com.tapalque.mercado_pago.service;
 
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -46,11 +47,13 @@ public class MercadoPagoService {
     private final TransaccionRepository transaccionRepository;
     private final OauthService oauthService;
     private final EncriptadoUtil encriptadoUtil;
+    private final PagoProducerService pagoProducerService;
 
-    public MercadoPagoService(TransaccionRepository t, OauthService o, EncriptadoUtil e) {
+    public MercadoPagoService(TransaccionRepository t, OauthService o, EncriptadoUtil e, PagoProducerService p) {
         this.transaccionRepository = t;
         this.oauthService = o;
         this.encriptadoUtil = e;
+        this.pagoProducerService = p;
     }
 
     // ===============CREAR PREFERENCIA===============
@@ -77,9 +80,10 @@ public class MercadoPagoService {
                 .unitPrice(p.getUnitPrice())
                 .build();
 
-        
+
         // Se crea la transaccion en la base de datos y se obtiene id de la misma
         Transaccion transaccion = new Transaccion(p.getIdTransaccion(),"Pendiente",p.getIdComprador(), p.getTipoServicio());
+        transaccion.setMonto(p.getUnitPrice().multiply(java.math.BigDecimal.valueOf(p.getQuantity())));
         Transaccion transaccionSave = transaccionRepository.save(transaccion);
 
         // Tiempo actual
@@ -168,13 +172,50 @@ public class MercadoPagoService {
             // se setean los estados en caso que pase las validaciones
             if ("approved".equalsIgnoreCase(estado)) {
                 transaccion.setEstado("Pago");
+                transaccion.setMercadoPagoId(paymentId);
+                transaccion.setFechaPago(LocalDateTime.now());
                 transaccionRepository.save(transaccion);
-    
-                //Se pasa el nuevo estado al MSVC correspondiente
+
+                // Crear evento para RabbitMQ
+                com.tapalque.mercado_pago.dto.PagoEventoDTO evento = new com.tapalque.mercado_pago.dto.PagoEventoDTO(
+                    transaccion.getId(),
+                    transaccion.getIdTransaccion(),
+                    transaccion.getTipoServicio().name(),
+                    "APROBADO",
+                    transaccion.getMonto(),
+                    transaccion.getMercadoPagoId(),
+                    transaccion.getUsuarioId(),
+                    transaccion.getFechaPago()
+                );
+
+                // Enviar a la cola correspondiente
                 if(transaccion.getTipoServicio()== TipoServicioEnum.GASTRONOMICO){
-                    //Llamar al endpoint gastro y pasar transaccion actualizada;
+                    pagoProducerService.enviarNotificacionPagoPedido(evento);
                 }else{
-                    //Llamar al endpoint hospedaje y pasar transaccion actualizada;
+                    pagoProducerService.enviarNotificacionPagoReserva(evento);
+                }
+            } else if ("rejected".equalsIgnoreCase(estado)) {
+                transaccion.setEstado("Rechazado");
+                transaccion.setMercadoPagoId(paymentId);
+                transaccionRepository.save(transaccion);
+
+                // Crear evento de rechazo
+                com.tapalque.mercado_pago.dto.PagoEventoDTO evento = new com.tapalque.mercado_pago.dto.PagoEventoDTO(
+                    transaccion.getId(),
+                    transaccion.getIdTransaccion(),
+                    transaccion.getTipoServicio().name(),
+                    "RECHAZADO",
+                    transaccion.getMonto(),
+                    transaccion.getMercadoPagoId(),
+                    transaccion.getUsuarioId(),
+                    LocalDateTime.now()
+                );
+
+                // Enviar notificación de rechazo
+                if(transaccion.getTipoServicio()== TipoServicioEnum.GASTRONOMICO){
+                    pagoProducerService.enviarNotificacionPagoPedido(evento);
+                }else{
+                    pagoProducerService.enviarNotificacionPagoReserva(evento);
                 }
             }
         } catch (Exception e) {

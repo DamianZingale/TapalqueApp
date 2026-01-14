@@ -22,6 +22,11 @@ public class Order {
     private List<Item> items;
     private Restaurant restaurant;
 
+    // Información de Mercado Pago
+    private Long transaccionId; // ID de la transacción en msvc-mercado-pago
+    private String mercadoPagoId; // ID del pago en Mercado Pago
+    private LocalDateTime fechaPago; // Fecha en que se aprobó el pago
+
     // --- Constructores ---
     public Order() {
         this.status = OrderStatus.PENDING;
@@ -75,8 +80,17 @@ public class Order {
     public void setRestaurant(Restaurant restaurant) { this.restaurant = restaurant; }
     
     public String getPaymentReceiptPath() {return paymentReceiptPath;}
-    public void setPaymentReceiptPath(String paymentReceiptPath) {this.paymentReceiptPath = paymentReceiptPath;
-    }
+    public void setPaymentReceiptPath(String paymentReceiptPath) {this.paymentReceiptPath = paymentReceiptPath;}
+
+    public Long getTransaccionId() { return transaccionId; }
+    public void setTransaccionId(Long transaccionId) { this.transaccionId = transaccionId; }
+
+    public String getMercadoPagoId() { return mercadoPagoId; }
+    public void setMercadoPagoId(String mercadoPagoId) { this.mercadoPagoId = mercadoPagoId; }
+
+    public LocalDateTime getFechaPago() { return fechaPago; }
+    public void setFechaPago(LocalDateTime fechaPago) { this.fechaPago = fechaPago; }
+
     // --- Clases internas ---
     public static class Item {
         private String productId;

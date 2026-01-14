@@ -68,3 +68,23 @@ export const CampoUsuario: ConfiguracionDeCampos[] = [
         ],
     },
 ];
+
+export const CampoTerma: ConfiguracionDeCampos[] = [
+    { name: 'titulo', label: 'Nombre', type: 'text' },
+    { name: 'descripcion', label: 'Descripción', type: 'textarea' },
+    { name: 'horario', label: 'Horarios', type: 'textarea' },
+    { name: 'urlMap', label: 'URL google maps', type: 'text' },
+    { name: 'whatsapp', label: 'Whatsapp', type: 'text' },
+    { name: 'images', label: 'Fotos', type: 'file', multiple: true },
+];
+
+export const CampoEvento: ConfiguracionDeCampos[] = [
+    { name: 'nombreEvento', label: 'Nombre del Evento', type: 'text' },
+    { name: 'lugar', label: 'Lugar', type: 'text' },
+    { name: 'horario', label: 'Horario', type: 'text' },
+    { name: 'fechaInicio', label: 'Fecha de Inicio', type: 'text' },
+    { name: 'fechaFin', label: 'Fecha de Fin (opcional)', type: 'text' },
+    { name: 'telefonoContacto', label: 'Teléfono de Contacto', type: 'text' },
+    { name: 'nombreContacto', label: 'Nombre de Contacto', type: 'text' },
+    { name: 'images', label: 'Imágenes del banner', type: 'file', multiple: true },
+];

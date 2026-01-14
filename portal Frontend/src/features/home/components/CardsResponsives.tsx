@@ -7,6 +7,7 @@ export const CardGridResponsive = () => {
         { titulo: "Hospedajes", imagenUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS-XaKNy61DeD4q2ft5nl4Gs3q88NYnubCksxa0WMCFrtUoG7aM-p1QcoPQA770S_c2Kds&usqp=CAU" , destino: "/hospedaje" },
         { titulo: "Servicios", imagenUrl: "https://media.istockphoto.com/id/513445601/es/foto/grupo-multi%C3%A9tnico-diversas-personas-con-diferentes-puestos-de-trabajo.jpg?s=612x612&w=0&k=20&c=3QV_HokhvMlIRDmxHI7SRe2C3MW-MosPbMzNpKcN1zM=" , destino: "/servicios" },
         { titulo: "Espacios Publicos", imagenUrl: "https://termastapalque.com.ar/wp-content/uploads/2023/09/088.webp" , destino: "/espublicos" },
+        { titulo: "Eventos", imagenUrl: "https://media.istockphoto.com/id/1345912457/es/foto/fiesta-de-los-a%C3%B1os-50-rock-and-roll-concierto-de-m%C3%BAsica-en-directo.jpg?s=612x612&w=0&k=20&c=r6S2v0FPxNiKm_Sxx1kMYIZQu0j8E9Sn7JhiHx-0s8g=" , destino: "/eventos" },
     ];
 
     return (
@@ -26,3 +27,4 @@ export const CardGridResponsive = () => {
             </div>
     );
 };
+

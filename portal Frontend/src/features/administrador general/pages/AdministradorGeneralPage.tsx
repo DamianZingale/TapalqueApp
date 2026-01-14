@@ -10,6 +10,8 @@ export const AdministradorGeneralPage = () => {
                         <BotonOpciones texto="Hospedajes" redireccion="hospedajes" />
                         <BotonOpciones texto="Comercios" redireccion="comercios" />
                         <BotonOpciones texto="Servicios" redireccion="servicios" />
+                        <BotonOpciones texto="Termas" redireccion="termas" />
+                        <BotonOpciones texto="Eventos" redireccion="eventos" />
                         <BotonOpciones texto="Gestion de Usuarios" redireccion="usuarios" />
                     </div>
                 </div>

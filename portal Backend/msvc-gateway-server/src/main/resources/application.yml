@@ -101,6 +101,22 @@ spring:
                 - RewritePath=/api/(?<segment>.*), /$\{segment}
                 - JwtAuth
 
+            - id: msvc-servicios
+              uri: lb://msvc-servicios
+              predicates:
+                - Path=/api/servicios/**
+              filters:
+                - RewritePath=/api/(?<segment>.*), /$\{segment}
+                - JwtAuth
+
+            - id: msvc-termas
+              uri: lb://msvc-termas
+              predicates:
+                - Path=/api/termas/**
+              filters:
+                - RewritePath=/api/(?<segment>.*), /$\{segment}
+                - JwtAuth
+
 eureka:
   client:
     service-url:

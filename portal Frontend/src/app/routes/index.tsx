@@ -11,6 +11,7 @@ import HospedajeRoutes from "../../features/hospedaje/routes";
 import EsPublicosRoutes from "../../features/espacios publicos/routes";
 import ServiciosRoutes from "../../features/servicios/routes";
 import TermasRoutes from "../../features/termas/routes";
+import EventosRoutes from "../../features/eventos/routes";
 import PerfilRoutes from "../../features/perfil/routes";
 
 // Login/Register
@@ -34,6 +35,7 @@ export const router = createBrowserRouter([
         { path: "/gastronomia/*", element: <GastronomiaRoutes /> },
         { path: "/hospedaje/*", element: <HospedajeRoutes /> },
         { path: "/servicios/*", element: <ServiciosRoutes /> },
+        { path: "/eventos/*", element: <EventosRoutes /> },
         { path: "/espublicos/*", element: <EsPublicosRoutes /> },
         { path: "/perfil/*", element: <PerfilRoutes /> },
         { path: "*", element: <Navigate to="/" /> }, // Ruta comodín

@@ -1,12 +1,14 @@
 package com.tapalque.user.controller;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 // import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -137,6 +139,92 @@ public class UserController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(error("Error al reenviar verificación", e.getMessage()));
+        }
+    }
+
+    // ==================== MODERADOR ENDPOINTS ====================
+
+    /**
+     * Listar todos los usuarios del sistema
+     * Solo accesible por MODERADOR
+     */
+    // @PreAuthorize("hasRole('MODERADOR')")
+    @GetMapping("/all")
+    public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
+        try {
+            List<UserResponseDTO> users = userService.getAllUsers();
+            return ResponseEntity.ok(users);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
+     * Obtener un usuario por ID
+     * Solo accesible por MODERADOR
+     */
+    // @PreAuthorize("hasRole('MODERADOR')")
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getUserById(@PathVariable Long id) {
+        try {
+            return userService.getUserById(id)
+                    .map(ResponseEntity::ok)
+                    .orElse(ResponseEntity.notFound().build());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(error("Error al obtener usuario", e.getMessage()));
+        }
+    }
+
+    /**
+     * Listar solo usuarios con rol ADMINISTRADOR
+     * Para asignar administradores a negocios
+     * Solo accesible por MODERADOR
+     */
+    // @PreAuthorize("hasRole('MODERADOR')")
+    @GetMapping("/administradores")
+    public ResponseEntity<List<UserResponseDTO>> getAdministrators() {
+        try {
+            List<UserResponseDTO> admins = userService.getUsersByRole(RolName.ADMINISTRADOR);
+            return ResponseEntity.ok(admins);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
+     * Cambiar el rol de un usuario
+     * Permite cambiar entre USER y ADMINISTRADOR
+     * NO permite crear MODERADORES
+     * Solo accesible por MODERADOR
+     */
+    // @PreAuthorize("hasRole('MODERADOR')")
+    @PatchMapping("/{id}/role")
+    public ResponseEntity<?> changeUserRole(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> payload) {
+        try {
+            String newRoleName = payload.get("role");
+            if (newRoleName == null || newRoleName.isBlank()) {
+                return ResponseEntity.badRequest()
+                        .body(error("Error", "El rol es obligatorio"));
+            }
+
+            // Validar que no se intente crear otro MODERADOR
+            if ("MODERADOR".equalsIgnoreCase(newRoleName)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(error("Error", "No se puede asignar el rol MODERADOR"));
+            }
+
+            RolName newRole = RolName.valueOf(newRoleName.toUpperCase());
+            UserResponseDTO updated = userService.changeUserRole(id, newRole);
+            return ResponseEntity.ok(updated);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                    .body(error("Error", "Rol inválido. Use: USER o ADMINISTRADOR"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(error("Error al cambiar rol", e.getMessage()));
         }
     }
 

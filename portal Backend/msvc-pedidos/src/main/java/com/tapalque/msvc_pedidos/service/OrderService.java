@@ -4,6 +4,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import com.tapalque.msvc_pedidos.dto.OrderDTO;
+import com.tapalque.msvc_pedidos.dto.PagoEventoDTO;
 import com.tapalque.msvc_pedidos.entity.Order;
 
 import reactor.core.publisher.Flux;
@@ -26,5 +27,10 @@ public interface OrderService {
 
     // limpieza de pedidos no pagados
     void cleanUnpaidOrders();
+
+    // Métodos para RabbitMQ - confirmación de pagos
+    void confirmarPagoPedido(@NonNull String pedidoId, @NonNull PagoEventoDTO evento);
+
+    void rechazarPagoPedido(@NonNull String pedidoId, @NonNull PagoEventoDTO evento);
 
 }
