@@ -173,6 +173,8 @@ services:
       - user-db
       - eureka-server # ← CAMBIO 4: Agregar eureka
     restart: always
+    env_file:
+      - .env
     networks:
       - tapalque-net
 

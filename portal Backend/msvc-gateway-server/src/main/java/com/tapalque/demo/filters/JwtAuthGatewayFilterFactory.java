@@ -25,11 +25,15 @@ public class JwtAuthGatewayFilterFactory extends AbstractGatewayFilterFactory<Jw
             // Rutas públicas que debe permitir el gateway
             List<String> publicPaths = List.of(
                     "/user/register",           // Sin /api (ya viene sin el prefijo)
+                    "/user/public",             // Rutas públicas de user (verificación de email)
                     "/user/exists",
                     "/jwt/login",               // Login también sin /api
+                    "/jwt/public",              // Rutas públicas de JWT
                     "/jwt/refresh",
                     "/api/user/register",       // Por si acaso viene con /api
+                    "/api/user/public",
                     "/api/jwt/login",
+                    "/api/jwt/public",
                     "/api/jwt/refresh",
                     "/api/public",
                     "/user/email/",

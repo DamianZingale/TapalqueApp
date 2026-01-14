@@ -3,7 +3,7 @@ package com.tapalque.user.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
+// import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,7 +24,7 @@ public class BusinessController {
     /**
      * Obtiene todos los negocios de un usuario (administrador)
      */
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'MODERADOR')")
+    // @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'MODERADOR')")
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<BusinessDTO>> getBusinessesByUserId(@PathVariable Long userId) {
         List<BusinessDTO> businesses = businessService.getBusinessesByUserId(userId);
@@ -34,7 +34,7 @@ public class BusinessController {
     /**
      * Obtiene un negocio por ID
      */
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'MODERADOR')")
+    // @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'MODERADOR')")
     @GetMapping("/{businessId}")
     public ResponseEntity<BusinessDTO> getBusinessById(@PathVariable Long businessId) {
         BusinessDTO business = businessService.getBusinessById(businessId);

@@ -14,10 +14,10 @@ spring:
         webflux:
           routes:
             # ========== RUTAS PÚBLICAS ==========
-            - id: msvc-user-register
+            - id: msvc-user-public
               uri: lb://msvc-user
               predicates:
-                - Path=/api/user/public/register
+                - Path=/api/user/public/**
               filters:
                 - RewritePath=/api/(?<segment>.*), /$\{segment}
 

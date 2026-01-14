@@ -5,7 +5,7 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
+// import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -45,7 +45,7 @@ public class UserController {
         }
     }
 
-    @PreAuthorize("hasRole('MODERADOR')")
+    // @PreAuthorize("hasRole('MODERADOR')")
     @PostMapping("/AdminRegistro")
     public ResponseEntity<?> registerAdmin(@Valid @RequestBody UserRegistrationDTO dto) {
         try {
@@ -57,7 +57,7 @@ public class UserController {
         }
     }
 
-    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    // @PreAuthorize("hasRole('ADMINISTRADOR')")
     @PostMapping("/GastroRegistro")
     public ResponseEntity<?> registerGastro(@Valid @RequestBody UserRegistrationDTO dto) {
         try {

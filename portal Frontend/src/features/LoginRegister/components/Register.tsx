@@ -1,7 +1,7 @@
 // portal Frontend/src/modules/auth/components/Register.tsx
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import authService, { type UserData } from '../../../services/authService';
+import { UserData } from '../../../services/authService';
 
 interface RegisterResponse {
   token?: string;
@@ -15,6 +15,7 @@ interface ApiError {
       message?: string;
     };
   };
+
   message?: string;
 }
 
@@ -105,11 +106,25 @@ export const Register = () => {
       const data: RegisterResponse = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Error al registrar');
+        // Manejar errores específicos del backend
+        const errorData = data as any;
+        if (
+          errorData.detalle &&
+          errorData.detalle.includes('email ya está registrado')
+        ) {
+          throw new Error(
+            'Este email ya está registrado. Por favor, usa otro o inicia sesión.'
+          );
+        }
+        throw new Error(
+          errorData.detalle || errorData.message || 'Error al registrar'
+        );
       }
 
       // Mostrar mensaje de verificación de email
-      alert('¡Registro exitoso! Se ha enviado un correo de verificación a tu email. Por favor, verifica tu cuenta antes de iniciar sesión.');
+      alert(
+        '¡Registro exitoso! Se ha enviado un correo de verificación a tu email. Por favor, verifica tu cuenta antes de iniciar sesión.'
+      );
       navigate('/login');
     } catch (err) {
       console.error('Error en registro:', err);
@@ -118,7 +133,7 @@ export const Register = () => {
       setError(
         apiError.response?.data?.message ||
           apiError.message ||
-          'Error al registrar. El email podría estar en uso.'
+          'Error al registrar. Por favor, intenta de nuevo.'
       );
     } finally {
       setLoading(false);
