@@ -58,6 +58,23 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public Flux<Order> getOrdersByRestaurantAndDateRange(
+            @NonNull String restaurantId,
+            @NonNull LocalDateTime desde,
+            @NonNull LocalDateTime hasta) {
+        return orderRepository.findByRestaurant_RestaurantIdAndDateCreatedBetween(
+                restaurantId, desde, hasta);
+    }
+
+    @Override
+    public Flux<Order> getOrdersByUserAndDateRange(
+            @NonNull String userId,
+            @NonNull LocalDateTime desde,
+            @NonNull LocalDateTime hasta) {
+        return orderRepository.findByUserIdAndDateCreatedBetween(userId, desde, hasta);
+    }
+
+    @Override
     public Mono<Void> deleteOrder(@NonNull String id) {
         return orderRepository.deleteById(id);
     }

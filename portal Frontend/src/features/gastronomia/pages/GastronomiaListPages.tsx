@@ -16,8 +16,8 @@ export default function GastronomiaListPage() {
 
   const fetchRestaurantList = async () => {
     try {
-      const response = await api.get<IRestaurantInfo[]>('/gastronomia/findAll');
-      setLocales(response.data);
+      const data = await api.get<IRestaurantInfo[]>('/gastronomia/findAll');
+      setLocales(data || []);
     } catch (error) {
       console.error('Error fetching restaurant list:', error);
     } finally {
@@ -43,12 +43,12 @@ export default function GastronomiaListPage() {
           locales.map((local) => (
             <div key={local.id} className="col-md-4 col-sm-6">
               <CardResto
-                id={local.id.toString()}
+                id={String(local.id)}
                 titulo={local.name || 'Nombre no disponible'}
                 direccion_local={local.address || 'Dirección no disponible'}
                 imagenUrl={local.imageUrl}
                 tipo={'gastronomia'}
-                schedule={local.schedule} // ← Pasar schedule
+                schedule={local.schedule}
                 onClick={() => handleCardClick(local)}
               />
             </div>

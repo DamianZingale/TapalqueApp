@@ -7,8 +7,10 @@ import java.util.stream.Collectors;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.tapalque.user.dto.ChangePasswordDTO;
+import com.tapalque.user.dto.UpdateProfileDTO;
 import com.tapalque.user.dto.UserRegistrationDTO;
-import com.tapalque.user.dto.UserResponseDTO;  // ← NUEVO
+import com.tapalque.user.dto.UserResponseDTO;
 import com.tapalque.user.entity.Role;
 import com.tapalque.user.entity.User;
 import com.tapalque.user.enu.RolName;
@@ -129,5 +131,48 @@ public class UserService {
         userRepo.save(user);
 
         return UserResponseDTO.fromEntity(user);
+    }
+
+    // ==================== PROFILE METHODS ====================
+
+    /**
+     * Actualizar perfil del usuario (nombre, apellido, direccion)
+     */
+    public UserResponseDTO updateProfile(Long userId, UpdateProfileDTO dto) {
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+
+        if (dto.getNombre() != null && !dto.getNombre().isBlank()) {
+            user.setFirstName(dto.getNombre());
+        }
+        if (dto.getApellido() != null) {
+            user.setLastName(dto.getApellido());
+        }
+        if (dto.getDireccion() != null) {
+            user.setDireccion(dto.getDireccion());
+        }
+
+        userRepo.save(user);
+        return UserResponseDTO.fromEntity(user);
+    }
+
+    /**
+     * Cambiar contraseña del usuario
+     */
+    public void changePassword(Long userId, ChangePasswordDTO dto) {
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+
+        // Verificar contraseña actual
+        if (!passwordEncoder.matches(dto.getPasswordActual(), user.getPassword())) {
+            throw new IllegalArgumentException("La contraseña actual es incorrecta");
+        }
+
+        // Validar fortaleza de nueva contraseña
+        PasswordValidator.validate(dto.getPasswordNueva());
+
+        // Actualizar contraseña
+        user.setPassword(passwordEncoder.encode(dto.getPasswordNueva()));
+        userRepo.save(user);
     }
 }

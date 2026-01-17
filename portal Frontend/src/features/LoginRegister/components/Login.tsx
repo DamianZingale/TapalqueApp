@@ -11,6 +11,8 @@ interface LoginResponse {
 
 interface ApiErrorResponse {
   message?: string;
+  detalle?: string;
+  error?: string;
 }
 
 export const Login = () => {
@@ -37,13 +39,17 @@ export const Login = () => {
         }),
       });
 
-      const data: LoginResponse = await response.json();
-
       if (!response.ok) {
-        throw new Error(
-          (data as ApiErrorResponse).message || 'Credenciales inválidas'
-        );
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage =
+          (errorData as ApiErrorResponse).detalle ||
+          (errorData as ApiErrorResponse).message ||
+          (errorData as ApiErrorResponse).error ||
+          'Credenciales inválidas. Por favor verifica tu email y contraseña.';
+        throw new Error(errorMessage);
       }
+
+      const data: LoginResponse = await response.json();
 
       authService.setToken(data.accessToken);
       authService.setUser(data.user);

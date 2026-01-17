@@ -20,7 +20,7 @@ import com.tapalque.eventos.dto.EventoResponseDTO;
 import com.tapalque.eventos.service.EventoService;
 
 @RestController
-@RequestMapping("api/comercio")
+@RequestMapping("/api/evento")
 public class EventoController {
     @Autowired
     private EventoService comercioService;

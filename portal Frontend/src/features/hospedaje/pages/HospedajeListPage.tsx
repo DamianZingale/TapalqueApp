@@ -30,9 +30,9 @@ export default function HospedajeListPage() {
             {hospedajes.map((hospedaje) => (
             <Card
                 key={hospedaje.id}
-                id={hospedaje.id}
-                titulo={hospedaje.nombre}
-                imagenUrl={hospedaje.imagenes[0]}
+                id={String(hospedaje.id)}
+                titulo={hospedaje.titulo}
+                imagenUrl={hospedaje.imagenes?.[0] || "https://via.placeholder.com/400x200.png?text=Sin+Imagen"}
                 tipo={SECCION_TYPE.HOSPEDAJES}
                 direccion_local={hospedaje.ubicacion}
             />
@@ -40,7 +40,6 @@ export default function HospedajeListPage() {
             {hospedajes.length === 0 && (
                 <p className="text-center my-5">No hay hospedajes disponibles por el momento.</p>
             )}
-
         </div>
         </div>
     );

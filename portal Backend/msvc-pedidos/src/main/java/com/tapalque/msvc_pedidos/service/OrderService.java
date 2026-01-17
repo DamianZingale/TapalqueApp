@@ -1,5 +1,7 @@
 package com.tapalque.msvc_pedidos.service;
 
+import java.time.LocalDateTime;
+
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +24,17 @@ public interface OrderService {
     Flux<Order> getOrdersByRestaurant(@NonNull String restaurantId);
 
     Flux<Order> getOrdersByUser(@NonNull String userId);
+
+    // Filtrado por fechas
+    Flux<Order> getOrdersByRestaurantAndDateRange(
+            @NonNull String restaurantId,
+            @NonNull LocalDateTime desde,
+            @NonNull LocalDateTime hasta);
+
+    Flux<Order> getOrdersByUserAndDateRange(
+            @NonNull String userId,
+            @NonNull LocalDateTime desde,
+            @NonNull LocalDateTime hasta);
 
     Mono<Void> deleteOrder(@NonNull String id);
 

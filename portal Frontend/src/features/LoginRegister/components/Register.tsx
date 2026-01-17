@@ -103,6 +103,16 @@ export const Register = () => {
           contrasenia: formData.password,
         }),
       });
+
+      // Verificar si la respuesta es JSON antes de parsear
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        if (!response.ok) {
+          throw new Error(`Error del servidor: ${response.status} ${response.statusText}`);
+        }
+        throw new Error('El servidor no devolvió una respuesta válida');
+      }
+
       const data: RegisterResponse = await response.json();
 
       if (!response.ok) {

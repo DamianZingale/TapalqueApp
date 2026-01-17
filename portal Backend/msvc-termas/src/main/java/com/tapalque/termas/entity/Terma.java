@@ -39,7 +39,9 @@ public class Terma {
 
     private String telefono;
 
-    private String urlMap;
+    private Double latitud;
+
+    private Double longitud;
 
     private String facebook;
 
@@ -54,7 +56,8 @@ public class Terma {
         this.setDireccion(dto.getDireccion());
         this.setHorario(dto.getHorario());
         this.setTelefono(dto.getTelefono());
-        this.setUrlMap(dto.getUrlMap());
+        this.setLatitud(dto.getLatitud());
+        this.setLongitud(dto.getLongitud());
         this.setFacebook(dto.getFacebook());
         this.setInstagram(dto.getInstagram());
     }
@@ -70,8 +73,10 @@ public class Terma {
             this.horario = dto.getHorario();
         if (dto.getTelefono() != null)
             this.telefono = dto.getTelefono();
-        if (dto.getUrlMap() != null)
-            this.urlMap = dto.getUrlMap();
+        if (dto.getLatitud() != null)
+            this.latitud = dto.getLatitud();
+        if (dto.getLongitud() != null)
+            this.longitud = dto.getLongitud();
         if (dto.getFacebook() != null)
             this.facebook = dto.getFacebook();
         if (dto.getInstagram() != null)

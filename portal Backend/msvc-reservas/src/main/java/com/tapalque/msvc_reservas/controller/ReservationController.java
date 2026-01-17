@@ -1,7 +1,11 @@
 package com.tapalque.msvc_reservas.controller;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Objects;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -80,8 +85,22 @@ public class ReservationController {
 
 
     @GetMapping("/by-hotel/{hotelId}")
-    public Flux<ReservationDTO> getReservationsByHotel(@PathVariable String hotelId) {
+    public Flux<ReservationDTO> getReservationsByHotel(
+            @PathVariable String hotelId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta) {
         Objects.requireNonNull(hotelId, "Hotel ID cannot be null");
+
+        if (desde != null && hasta != null) {
+            LocalDateTime desdeDateTime = desde.atStartOfDay();
+            LocalDateTime hastaDateTime = hasta.atTime(LocalTime.MAX);
+            return reservationService.getReservationsByHotelAndDateRange(hotelId, desdeDateTime, hastaDateTime)
+                .onErrorResume(e -> {
+                    logger.log(System.Logger.Level.ERROR, "Error fetching reservations by hotel and date range: " + e.getMessage());
+                    return Flux.empty();
+                });
+        }
+
         return reservationService.getReservationsByHotel(hotelId)
             .onErrorResume(e -> {
                 logger.log(System.Logger.Level.ERROR, "Error fetching reservations by hotel: " + e.getMessage());
@@ -90,8 +109,22 @@ public class ReservationController {
     }
 
     @GetMapping("/by-customer/{customerId}")
-    public Flux<ReservationDTO> getReservationsByCustomer(@PathVariable String customerId) {
+    public Flux<ReservationDTO> getReservationsByCustomer(
+            @PathVariable String customerId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta) {
         Objects.requireNonNull(customerId, "Customer ID cannot be null");
+
+        if (desde != null && hasta != null) {
+            LocalDateTime desdeDateTime = desde.atStartOfDay();
+            LocalDateTime hastaDateTime = hasta.atTime(LocalTime.MAX);
+            return reservationService.getReservationsByCustomerAndDateRange(customerId, desdeDateTime, hastaDateTime)
+                .onErrorResume(e -> {
+                    logger.log(System.Logger.Level.ERROR, "Error fetching reservations by customer and date range: " + e.getMessage());
+                    return Flux.empty();
+                });
+        }
+
         return reservationService.getReservationsByCustomer(customerId)
             .onErrorResume(e -> {
                 logger.log(System.Logger.Level.ERROR, "Error fetching reservations by customer: " + e.getMessage());

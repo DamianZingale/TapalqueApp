@@ -1,5 +1,5 @@
+import { HospedajeAdminDashboard } from './HospedajeAdminDashboard';
+
 export const HospedajeAdminPage = () => {
-    return (
-        <div>HospedajeAdminPage</div>
-    )
+    return <HospedajeAdminDashboard />;
 }

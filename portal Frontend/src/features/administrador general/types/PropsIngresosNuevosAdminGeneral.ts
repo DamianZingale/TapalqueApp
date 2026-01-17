@@ -30,7 +30,8 @@ export const CampoHospedaje: ConfiguracionDeCampos[] = [
     { name: 'address', label: 'Ubicación', type: 'text' },
     { name: 'whatapp', label: 'Whatsapp', type: 'text' },
     { name: 'descripcion', label: 'Descripcion', type: 'textarea' },
-    { name: 'urlMap', label: 'URL google maps', type: 'text' },
+    { name: 'latitud', label: 'Latitud', type: 'text' },
+    { name: 'longitud', label: 'Longitud', type: 'text' },
     { name: 'images', label: 'Fotos del lugar', type: 'file', multiple: true },
 ];
 
@@ -38,7 +39,8 @@ export const CampoComercio: ConfiguracionDeCampos[] = [
     { name: 'name', label: 'Nombre del comercio', type: 'text' },
     { name: 'descripcion', label: 'Descripcion', type: 'textarea' },
     { name: 'horario', label: 'Horarios', type: 'textarea' },
-    { name: 'urlMap', label: 'URL google maps', type: 'text' },
+    { name: 'latitud', label: 'Latitud', type: 'text' },
+    { name: 'longitud', label: 'Longitud', type: 'text' },
     { name: 'whatapp', label: 'Whatsapp', type: 'text' },
     { name: 'images', label: 'Fotos del lugar', type: 'file', multiple: true },
 ];
@@ -73,7 +75,8 @@ export const CampoTerma: ConfiguracionDeCampos[] = [
     { name: 'titulo', label: 'Nombre', type: 'text' },
     { name: 'descripcion', label: 'Descripción', type: 'textarea' },
     { name: 'horario', label: 'Horarios', type: 'textarea' },
-    { name: 'urlMap', label: 'URL google maps', type: 'text' },
+    { name: 'latitud', label: 'Latitud', type: 'text' },
+    { name: 'longitud', label: 'Longitud', type: 'text' },
     { name: 'whatsapp', label: 'Whatsapp', type: 'text' },
     { name: 'images', label: 'Fotos', type: 'file', multiple: true },
 ];

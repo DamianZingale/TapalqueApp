@@ -13,7 +13,8 @@ public class ServicioRequestDTO {
     private String direccion;
     private String horario;
     private String telefono;
-    private String urlMap;
+    private Double latitud;
+    private Double longitud;
     private String facebook;
     private String instagram;
 }

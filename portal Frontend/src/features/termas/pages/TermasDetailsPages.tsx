@@ -1,76 +1,76 @@
 import { useParams } from "react-router-dom";
-import { termasMock } from "./mocks/mockTermas";
+import { useState, useEffect } from "react";
 import { Carrusel } from "../../../shared/components/Carrusel";
 import { WhatsAppButton } from "../../../shared/components/WhatsAppButton";
 import { SocialLinks } from "../../../shared/components/SocialLinks";
+import { fetchTermaById, Terma } from "../../../services/fetchTermas";
 
 export default function TermasDetailPage({ idDefault }: { idDefault?: string }) {
     const { id } = useParams();
-    const data = termasMock.find((t) => t.id === (id ?? idDefault));
+    const [data, setData] = useState<Terma | null>(null);
+    const [loading, setLoading] = useState(true);
 
-    if (!data) return <p>Termas no encontradas</p>;
+    useEffect(() => {
+        const cargarTerma = async () => {
+            const termaId = id ?? idDefault;
+            if (termaId) {
+                setLoading(true);
+                const terma = await fetchTermaById(termaId);
+                setData(terma);
+                setLoading(false);
+            }
+        };
+        cargarTerma();
+    }, [id, idDefault]);
+
+    if (loading) {
+        return (
+            <div className="container text-center py-5">
+                <div className="spinner-border" role="status">
+                    <span className="visually-hidden">Cargando...</span>
+                </div>
+            </div>
+        );
+    }
+
+    if (!data) return <p className="text-center py-5">Termas no encontradas</p>;
+
+    // Convertir imágenes al formato esperado
+    const imagenes = data.imagenes?.map(img => img.imagenUrl) || [];
 
     return (
         <div className="container my-4">
-        <h1 className="text-center mb-3">{data.titulo}</h1>
+            <h1 className="text-center mb-3">{data.titulo}</h1>
 
-        {/* Carrusel de imágenes */}
-        <Carrusel images = {data.imagenes}></Carrusel>
+            {/* Carrusel de imágenes */}
+            <Carrusel images={imagenes} />
 
-        <SocialLinks
-            facebook={data.facebook}
-            instagram={data.instagram}
-            twitter={data.twitter}
-            tiktok={data.tiktok}
-        ></SocialLinks>
+            <SocialLinks />
 
-        {/* Descripción */}
-        <p className="lead text-center">{data.descripcion}</p>
+            {/* Descripción */}
+            <p className="lead text-center">{data.description}</p>
 
-        {/* Horarios */}
-        <div className="text-center my-3">
-            <strong>Horarios:</strong> {data.horarios}
-        </div>
-                {/* Botón Web oficial */}
-        {data.urlWeb && (
-        <div className="text-center my-2">
-            <a
-            href={data.urlWeb}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn btn-primary"
-            >
-            Ir a la web de Termas
-            </a>
-        </div>
-        )}
-        
-        {/* Botón Cómo Llegar */}
-        <div className="text-center my-4">
-        <a
-            href={data.urlMaps}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-block w-[11rem] h-[2rem] bg-black text-white rounded-3xl text-[1rem] cursor-pointer flex justify-center items-center transition-all duration-300 hover:bg-[#333]"
-        >
-            Cómo Llegar
-        </a>
-        </div>
+            {/* Horarios */}
+            <div className="text-center my-3">
+                <strong>Horarios:</strong> {data.horario}
+            </div>
 
-        {/* Servicios */}
-        <div className="my-3">
-            <h5>Servicios disponibles:</h5>
-            <ul>
-            {data.servicios.map((serv, idx) => (
-                <li key={idx}>{serv}</li>
-            ))}
-            </ul>
-        </div>
+            {/* Botón Cómo Llegar */}
+            {data.latitud && data.longitud && (
+                <div className="text-center my-4">
+                    <a
+                        href={`https://www.google.com/maps?q=${data.latitud},${data.longitud}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-block w-[11rem] h-[2rem] bg-black text-white rounded-3xl text-[1rem] cursor-pointer flex justify-center items-center transition-all duration-300 hover:bg-[#333]"
+                    >
+                        Cómo Llegar
+                    </a>
+                </div>
+            )}
 
-
-
-        {/* BTN whatsap */}
-        <WhatsAppButton num={data.num}></WhatsAppButton>
+            {/* BTN teléfono/contacto */}
+            {data.telefono && <WhatsAppButton num={data.telefono} />}
         </div>
     );
 }

@@ -11,13 +11,16 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.tapalque.user.dto.ChangePasswordDTO;
+import com.tapalque.user.dto.UpdateProfileDTO;
 import com.tapalque.user.dto.UserRegistrationDTO;
-import com.tapalque.user.dto.UserResponseDTO;  // ← NUEVO
+import com.tapalque.user.dto.UserResponseDTO;
 import com.tapalque.user.entity.Role;
 import com.tapalque.user.enu.RolName;
 import com.tapalque.user.service.EmailService;
@@ -225,6 +228,50 @@ public class UserController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(error("Error al cambiar rol", e.getMessage()));
+        }
+    }
+
+    // ==================== PROFILE ENDPOINTS ====================
+
+    /**
+     * Actualizar perfil del usuario (nombre, apellido, direccion)
+     * Cualquier usuario autenticado puede actualizar su propio perfil
+     */
+    @PutMapping("/{id}/profile")
+    public ResponseEntity<?> updateProfile(
+            @PathVariable Long id,
+            @RequestBody UpdateProfileDTO dto) {
+        try {
+            UserResponseDTO updated = userService.updateProfile(id, dto);
+            return ResponseEntity.ok(updated);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                    .body(error("Error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(error("Error al actualizar perfil", e.getMessage()));
+        }
+    }
+
+    /**
+     * Cambiar contraseña del usuario
+     * Requiere contraseña actual para verificación
+     */
+    @PutMapping("/{id}/password")
+    public ResponseEntity<?> changePassword(
+            @PathVariable Long id,
+            @Valid @RequestBody ChangePasswordDTO dto) {
+        try {
+            userService.changePassword(id, dto);
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Contraseña actualizada correctamente");
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                    .body(error("Error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(error("Error al cambiar contraseña", e.getMessage()));
         }
     }
 

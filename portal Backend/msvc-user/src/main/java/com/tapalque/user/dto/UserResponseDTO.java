@@ -7,17 +7,23 @@ public class UserResponseDTO {
     private Long id;
     private String email;
     private String nombre;
+    private String apellido;
+    private String direccion;
     private String rol;
-    // NO incluir password en la respuesta
+    private boolean emailVerified;
 
     public UserResponseDTO() {
     }
 
-    public UserResponseDTO(Long id, String email, String nombre, String rol) {
+    public UserResponseDTO(Long id, String email, String nombre, String apellido,
+                           String direccion, String rol, boolean emailVerified) {
         this.id = id;
         this.email = email;
         this.nombre = nombre;
+        this.apellido = apellido;
+        this.direccion = direccion;
         this.rol = rol;
+        this.emailVerified = emailVerified;
     }
 
     // Getters y Setters
@@ -45,6 +51,22 @@ public class UserResponseDTO {
         this.nombre = nombre;
     }
 
+    public String getApellido() {
+        return apellido;
+    }
+
+    public void setApellido(String apellido) {
+        this.apellido = apellido;
+    }
+
+    public String getDireccion() {
+        return direccion;
+    }
+
+    public void setDireccion(String direccion) {
+        this.direccion = direccion;
+    }
+
     public String getRol() {
         return rol;
     }
@@ -53,13 +75,24 @@ public class UserResponseDTO {
         this.rol = rol;
     }
 
+    public boolean isEmailVerified() {
+        return emailVerified;
+    }
+
+    public void setEmailVerified(boolean emailVerified) {
+        this.emailVerified = emailVerified;
+    }
+
     // Método estático para convertir
     public static UserResponseDTO fromEntity(User user) {
         return new UserResponseDTO(
             user.getId(),
             user.getEmail(),
             user.getFirstName(),
-            user.getRole().getName().toString()
+            user.getLastName(),
+            user.getDireccion(),
+            user.getRole().getName().toString(),
+            user.isEmailVerified()
         );
     }
 }

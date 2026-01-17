@@ -161,6 +161,20 @@ services:
     networks:
       - tapalque-net
 
+  espacios-publicos-db:
+    image: mysql:8
+    container_name: espacios-publicos-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: espacios_publicos
+    ports:
+      - '3315:3306'
+    volumes:
+      - espacios_publicos_data:/var/lib/mysql
+      - ./portal Backend/init-scripts/MySql/init-espacios-publicos.sql:/docker-entrypoint-initdb.d/init-espacios-publicos.sql:ro
+    networks:
+      - tapalque-net
+
   # ==========================================
   # MICROSERVICIOS
   # ==========================================
@@ -313,6 +327,18 @@ services:
     networks:
       - tapalque-net
 
+  msvc-espacios-publicos:
+    build: ./portal Backend/msvc-espacios-publicos
+    container_name: msvc-espacios-publicos
+    depends_on:
+      - espacios-publicos-db
+      - eureka-server
+    volumes:
+      - espacios_publicos_uploads:/app/uploads
+    restart: always
+    networks:
+      - tapalque-net
+
   # ==========================================
   # FRONTEND - PUNTO DE ENTRADA PRINCIPAL
   # ==========================================
@@ -348,6 +374,8 @@ volumes:
   servicios_uploads:
   termas_data:
   termas_uploads:
+  espacios_publicos_data:
+  espacios_publicos_uploads:
 
 networks:
   tapalque-net:

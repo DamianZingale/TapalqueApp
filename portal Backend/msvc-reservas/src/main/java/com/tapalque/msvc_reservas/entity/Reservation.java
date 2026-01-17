@@ -25,6 +25,11 @@ public class Reservation {
     private LocalDateTime dateCreated;
     private LocalDateTime dateUpdated;
 
+    // Información de Mercado Pago
+    private Long transaccionId; // ID de la transacción en msvc-mercado-pago
+    private String mercadoPagoId; // ID del pago en Mercado Pago
+    private LocalDateTime fechaPago; // Fecha en que se aprobó el pago
+
     public Reservation() {}
 
     public Reservation(Customer customer, Hotel hotel, StayPeriod stayPeriod, Payment payment, Double totalPrice) {
@@ -118,6 +123,30 @@ public LocalDateTime getDateUpdated() {
 
 public void setDateUpdated(LocalDateTime dateUpdated) {
     this.dateUpdated = dateUpdated;
+}
+
+public Long getTransaccionId() {
+    return transaccionId;
+}
+
+public void setTransaccionId(Long transaccionId) {
+    this.transaccionId = transaccionId;
+}
+
+public String getMercadoPagoId() {
+    return mercadoPagoId;
+}
+
+public void setMercadoPagoId(String mercadoPagoId) {
+    this.mercadoPagoId = mercadoPagoId;
+}
+
+public LocalDateTime getFechaPago() {
+    return fechaPago;
+}
+
+public void setFechaPago(LocalDateTime fechaPago) {
+    this.fechaPago = fechaPago;
 }
 
     // --- Inner classes --- //

@@ -19,12 +19,13 @@ public class ComercioResponseDTO {
     private String direccion;
     private String horario;
     private String telefono;
-    private String urlMap;
+    private Double latitud;
+    private Double longitud;
     private String facebook;
     private String instagram;
     private List<ImagenResponseDTO> imagenes;
 
-    // constructor para matear de entity a dto
+    // constructor para mapear de entity a dto
     public ComercioResponseDTO(Comercio c) {
         this.id = c.getId();
         this.titulo = c.getTitulo();
@@ -32,7 +33,8 @@ public class ComercioResponseDTO {
         this.direccion = c.getDireccion();
         this.horario = c.getHorario();
         this.telefono = c.getTelefono();
-        this.urlMap = c.getUrlMap();
+        this.latitud = c.getLatitud();
+        this.longitud = c.getLongitud();
         this.facebook = c.getFacebook();
         this.instagram = c.getInstagram();
         this.imagenes = c.getImagenes()

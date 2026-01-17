@@ -44,6 +44,9 @@ public class User {
     @Column(name = "name_emprise", nullable = true)
     private String nameEmprise;
 
+    @Column(name = "direccion", nullable = true)
+    private String direccion;
+
     private LocalDateTime registrationDate;
 
     @Column(name = "email_verified", nullable = false)
@@ -123,6 +126,14 @@ public class User {
 
     public void setNameEmprise(String nameEmprise) {
         this.nameEmprise = nameEmprise;
+    }
+
+    public String getDireccion() {
+        return direccion;
+    }
+
+    public void setDireccion(String direccion) {
+        this.direccion = direccion;
     }
 
     public LocalDateTime getRegistrationDate() {

@@ -2,16 +2,20 @@
 export interface Terma {
     id: number;
     titulo: string;
-    descripcion: string;
+    description: string;  // Backend uses 'description'
+    direccion?: string;
     horario: string;
-    urlMap: string;
-    whatsapp: string;
+    telefono?: string;    // Backend uses 'telefono' instead of 'whatsapp'
+    latitud?: number;
+    longitud?: number;
+    facebook?: string;
+    instagram?: string;
     imagenes: { imagenUrl: string }[];
 }
 
 export async function fetchTermas(): Promise<Terma[]> {
     try {
-        const response = await fetch("/api/termas");
+        const response = await fetch("/api/terma");
 
         if (!response.ok) {
             throw new Error(`Error al obtener termas: ${response.status}`);
@@ -27,7 +31,7 @@ export async function fetchTermas(): Promise<Terma[]> {
 
 export async function fetchTermaById(id: string): Promise<Terma | null> {
     try {
-        const response = await fetch(`/api/termas/${id}`);
+        const response = await fetch(`/api/terma/${id}`);
 
         if (!response.ok) {
             throw new Error(`Error al obtener terma: ${response.status}`);

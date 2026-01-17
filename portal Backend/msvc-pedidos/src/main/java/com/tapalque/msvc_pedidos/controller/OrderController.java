@@ -1,7 +1,11 @@
 package com.tapalque.msvc_pedidos.controller;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Objects;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -11,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -47,15 +52,35 @@ public class OrderController {
         return orderService.getOrderById(id).map(this::mapToDTO);
     }
 
-    // --- Obtener pedidos por restaurante ---
+    // --- Obtener pedidos por restaurante (con filtro opcional de fechas) ---
     @GetMapping("/restaurant/{restaurantId}")
-    public Flux<OrderDTO> getOrdersByRestaurant(@PathVariable @NonNull String restaurantId) {
+    public Flux<OrderDTO> getOrdersByRestaurant(
+            @PathVariable @NonNull String restaurantId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta) {
+
+        if (desde != null && hasta != null) {
+            LocalDateTime desdeDateTime = desde.atStartOfDay();
+            LocalDateTime hastaDateTime = hasta.atTime(LocalTime.MAX);
+            return orderService.getOrdersByRestaurantAndDateRange(restaurantId, desdeDateTime, hastaDateTime)
+                    .map(this::mapToDTO);
+        }
         return orderService.getOrdersByRestaurant(restaurantId).map(this::mapToDTO);
     }
 
-    // --- Obtener pedidos por usuario ---
+    // --- Obtener pedidos por usuario (con filtro opcional de fechas) ---
     @GetMapping("/user/{userId}")
-    public Flux<OrderDTO> getOrdersByUser(@PathVariable @NonNull String userId) {
+    public Flux<OrderDTO> getOrdersByUser(
+            @PathVariable @NonNull String userId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta) {
+
+        if (desde != null && hasta != null) {
+            LocalDateTime desdeDateTime = desde.atStartOfDay();
+            LocalDateTime hastaDateTime = hasta.atTime(LocalTime.MAX);
+            return orderService.getOrdersByUserAndDateRange(userId, desdeDateTime, hastaDateTime)
+                    .map(this::mapToDTO);
+        }
         return orderService.getOrdersByUser(userId).map(this::mapToDTO);
     }
 

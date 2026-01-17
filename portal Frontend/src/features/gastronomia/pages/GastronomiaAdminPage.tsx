@@ -1,5 +1,5 @@
+import { GastronomiaAdminDashboard } from './GastronomiaAdminDashboard';
+
 export const GastronomiaAdminPage = () => {
-    return (
-        <div>GastronomiaAdminPage</div>
-    )
+    return <GastronomiaAdminDashboard />;
 }

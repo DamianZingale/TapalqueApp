@@ -30,9 +30,9 @@ export default function EventosListPage() {
                     {eventos.map((evento) => (
                         <Card
                         key={evento.id}
-                        id={evento.id}
+                        id={String(evento.id)}
                         titulo={evento.nombreEvento}
-                        imagenUrl={evento.imagenes[0]?.imagenUrl || "https://via.placeholder.com/300"}
+                        imagenUrl={evento.imagenes?.[0]?.imagenUrl || "https://via.placeholder.com/300"}
                         direccion_local={`${evento.fechaInicio}${evento.fechaFin ? ` - ${evento.fechaFin}` : ''}`}
                         tipo="eventos"
                         />

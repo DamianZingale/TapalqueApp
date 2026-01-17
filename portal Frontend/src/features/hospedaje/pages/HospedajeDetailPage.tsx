@@ -1,42 +1,81 @@
 import { useParams } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { Calendario } from "../components/Calendario";
 import { Title } from "../../../shared/components/Title";
 import { Carrusel } from "../../../shared/components/Carrusel";
 import { Description } from "../../../shared/components/Description";
-import { Horarios } from "../../../shared/components/Horarios";
-import { GMaps } from "../../../shared/components/GMaps";
 import { WhatsAppButton } from "../../../shared/components/WhatsAppButton";
 import { Subtitle } from "../../../shared/components/Subtitle";
+import { fetchHospedajeById, Hospedaje } from "../../../services/fetchHospedajes";
 
 export default function HospedajeDetailPage() {
     const { id } = useParams();
-    const data = {
-        //Aca ir a buscar al backend datos para mostrar desp del hospedaje
-        nombre: "Hotel Tapalqué Cooperativo",
-        imagenes: [
-            "https://termastapalque.com.ar/wp-content/uploads/2023/08/Hotel-0.webp",
-            "https://www.tiempoar.com.ar/wp-content/uploads/2023/03/WEB-2hotel-tapalque-1.jpg"
-        ],
-        descripcion: "Hotel centrico con wifi y desayuno gratis",
-        urlMaps: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d25705.23026079333!2d-60.0246847048651!3d-36.357053790105866!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9595ddc94f489d7b%3A0xb76799233bfd34e!2sHotel%20Tapalqu%C3%A9%20Cooperativo!5e0!3m2!1ses-419!2sar!4v1758036941552!5m2!1ses-419!2sar",
-        horarios: "Todos los dias\nLas 24hs.",
-        num: "2281683888"
+    const [data, setData] = useState<Hospedaje | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const cargarHospedaje = async () => {
+            if (id) {
+                setLoading(true);
+                const hospedaje = await fetchHospedajeById(id);
+                setData(hospedaje);
+                setLoading(false);
+            }
+        };
+        cargarHospedaje();
+    }, [id]);
+
+    if (loading) {
+        return (
+            <div className="container text-center py-5">
+                <div className="spinner-border" role="status">
+                    <span className="visually-hidden">Cargando...</span>
+                </div>
+            </div>
+        );
     }
 
+    if (!data) return <p className="text-center py-5">Hospedaje no encontrado</p>;
+
+    // Convertir imágenes al formato esperado
+    const imagenes = data.imagenes?.map(img => img.imagenUrl) || [];
+
+    // Obtener tipo de hospedaje legible
+    const tipoLabel = {
+        'HOTEL': 'Hotel',
+        'DEPARTAMENTO': 'Departamento',
+        'CABAÑA': 'Cabaña',
+        'CASA': 'Casa',
+        'OTRO': 'Alojamiento'
+    }[data.tipoHospedaje] || 'Alojamiento';
 
     return (
-        <>
-            <div className="container">
-                <Title text={`${data.nombre} ${id}`} />
-                <Carrusel images={data.imagenes} />
-                <Description description={data.descripcion} />
-                <Horarios horarios={data.horarios} />
-                <WhatsAppButton num={data.num} />
-                <Subtitle text="¡Reserva ahora!" />
-                <Calendario />
-                <GMaps url={data.urlMaps} />
-            </div>
-        </>
-    )
+        <div className="container">
+            <Title text={data.titulo} />
+            <p className="text-center text-muted mb-3">
+                <span className="badge bg-info">{tipoLabel}</span>
+                {data.ubicacion && <span className="ms-2">{data.ubicacion}</span>}
+            </p>
+            <Carrusel images={imagenes} />
+            <Description description={data.description} />
 
+            {data.numWhatsapp && <WhatsAppButton num={data.numWhatsapp} />}
+
+            <Subtitle text="¡Reserva ahora!" />
+            <Calendario />
+
+            {data.googleMapsUrl && (
+                <div className="text-center my-4">
+                    <a
+                        href={data.googleMapsUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn btn-dark"
+                    >
+                        Ver en Google Maps
+                    </a>
+                </div>
+            )}
+        </div>
+    );
 }

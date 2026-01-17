@@ -20,7 +20,7 @@ import com.tapalque.termas.dto.TermaResponseDTO;
 import com.tapalque.termas.service.TermaService;
 
 @RestController
-@RequestMapping("api/terma")
+@RequestMapping("/api/terma")
 public class TermaController {
     @Autowired
     private TermaService termaService;
