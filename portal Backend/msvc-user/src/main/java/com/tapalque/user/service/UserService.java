@@ -70,6 +70,38 @@ public class UserService {
         return UserResponseDTO.fromEntity(user);  // ← Sin password
     }
 
+    /**
+     * Registrar usuario desde el panel del moderador con email verificado automáticamente
+     */
+    public UserResponseDTO registerByModerator(UserRegistrationDTO dto, Role role) {
+        // Validar fortaleza de contraseña
+        PasswordValidator.validate(dto.getPassword());
+
+        // Verificar si el email ya existe
+        if (userRepo.findByEmail(dto.getEmail()).isPresent()) {
+            throw new IllegalArgumentException("El correo ya está registrado");
+        }
+
+        // Encriptar contraseña
+        String encoded = passwordEncoder.encode(dto.getPassword());
+
+        // Crear usuario (verificado automáticamente por moderador)
+        User user = User.builder()
+                .email(dto.getEmail())
+                .password(encoded)
+                .firstName(dto.getFirtName())
+                .registrationDate(LocalDateTime.now())
+                .role(role)
+                .build();
+
+        user.setEmailVerified(true); // Verificado automáticamente por moderador
+        userRepo.save(user);
+
+        // No enviar email de verificación ya que el moderador ya validó al usuario
+
+        return UserResponseDTO.fromEntity(user);
+    }
+
     public Boolean getByEmail(String email) {
         return userRepo.findByEmail(email).isPresent();
     }

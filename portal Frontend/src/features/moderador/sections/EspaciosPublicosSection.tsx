@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Row, Col, Button, Form, Alert, Spinner, ListGroup, Modal } from "react-bootstrap";
+import { ImageManager } from "../../../shared/components/ImageManager";
 
 interface EspacioPublico {
     id: number;
@@ -20,7 +21,8 @@ interface EspacioPublico {
 
 const emptyItem: Partial<EspacioPublico> = {
     titulo: "", descripcion: "", direccion: "", telefono: "", latitud: undefined, longitud: undefined,
-    facebook: "", instagram: "", twitter: "", tiktok: "", categoria: "", horario: ""
+    facebook: "", instagram: "", twitter: "", tiktok: "", categoria: "", horario: "",
+    imagenes: []
 };
 
 export function EspaciosPublicosSection() {
@@ -38,7 +40,13 @@ export function EspaciosPublicosSection() {
     const cargarDatos = async () => {
         try {
             setLoading(true);
-            const res = await fetch("/api/espacio-publico");
+            const res = await fetch("/api/espacio-publico", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+            });
             if (res.ok) setItems(await res.json());
         } catch (err) { console.error("Error:", err); }
         finally { setLoading(false); }
@@ -54,10 +62,26 @@ export function EspaciosPublicosSection() {
         try {
             const token = localStorage.getItem("token");
             const url = isNew ? "/api/espacio-publico" : `/api/espacio-publico/${selected?.id}`;
+            
+            const cleanedData = {
+                ...formData,
+                descripcion: formData.descripcion?.trim() || undefined,
+                telefono: formData.telefono?.trim() || undefined,
+                facebook: formData.facebook?.trim() || undefined,
+                instagram: formData.instagram?.trim() || undefined,
+                twitter: formData.twitter?.trim() || undefined,
+                tiktok: formData.tiktok?.trim() || undefined,
+                categoria: formData.categoria?.trim() || undefined,
+                horario: formData.horario?.trim() || undefined,
+                latitud: formData.latitud || undefined,
+                longitud: formData.longitud || undefined,
+                imagenes: (formData.imagenes?.length ?? 0) > 0 ? formData.imagenes : undefined,
+            };
+            
             const res = await fetch(url, {
                 method: isNew ? "POST" : "PUT",
                 headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
-                body: JSON.stringify(formData)
+                body: JSON.stringify(cleanedData)
             });
             if (res.ok) {
                 setMensaje({ tipo: "success", texto: isNew ? "Creado" : "Actualizado" });
@@ -102,6 +126,16 @@ export function EspaciosPublicosSection() {
                 {(selected || isNew) ? (
                     <Form>
                         <h6>{isNew ? "Nuevo Espacio Público" : `Editando: ${selected?.titulo}`}</h6>
+                        {!isNew && selected && (
+                            <Row className="mb-2">
+                                <Col md={12}>
+                                    <Form.Group>
+                                        <Form.Label className="small mb-0">ID</Form.Label>
+                                        <Form.Control size="sm" value={selected.id} disabled />
+                                    </Form.Group>
+                                </Col>
+                            </Row>
+                        )}
                         <Row>
                             <Col md={6}><Form.Group className="mb-2"><Form.Label className="small mb-0">Título *</Form.Label><Form.Control size="sm" value={formData.titulo || ""} onChange={e => handleChange("titulo", e.target.value)} /></Form.Group></Col>
                             <Col md={6}><Form.Group className="mb-2"><Form.Label className="small mb-0">Categoría</Form.Label><Form.Control size="sm" value={formData.categoria || ""} onChange={e => handleChange("categoria", e.target.value)} /></Form.Group></Col>
@@ -122,7 +156,16 @@ export function EspaciosPublicosSection() {
                             <Col md={3}><Form.Group className="mb-2"><Form.Label className="small mb-0">Twitter</Form.Label><Form.Control size="sm" value={formData.twitter || ""} onChange={e => handleChange("twitter", e.target.value)} /></Form.Group></Col>
                             <Col md={3}><Form.Group className="mb-2"><Form.Label className="small mb-0">TikTok</Form.Label><Form.Control size="sm" value={formData.tiktok || ""} onChange={e => handleChange("tiktok", e.target.value)} /></Form.Group></Col>
                         </Row>
-                        {selected?.imagenes && selected.imagenes.length > 0 && (<div className="mb-2"><Form.Label className="small mb-1">Imágenes</Form.Label><div className="d-flex gap-1 flex-wrap">{selected.imagenes.map((img, i) => (<img key={i} src={img.imagenUrl} alt="" style={{ width: 60, height: 60, objectFit: "cover" }} />))}</div></div>)}
+                        <ImageManager 
+                            images={formData.imagenes || []}
+                            onChange={(images) => setFormData(prev => ({ 
+                                ...prev, 
+                                imagenes: images.map(url => ({ imagenUrl: url })) 
+                            }))}
+                            maxImages={5}
+                            entityType="espacio-publico"
+                            entityId={selected?.id}
+                        />
                         <div className="d-flex gap-2 mt-3">
                             <Button size="sm" variant="primary" onClick={handleSave} disabled={saving}>{saving ? <Spinner size="sm" /> : (isNew ? "Crear" : "Guardar")}</Button>
                             {!isNew && selected && (<Button size="sm" variant="outline-danger" onClick={() => setShowDeleteModal(true)}>Eliminar</Button>)}

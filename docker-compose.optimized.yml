@@ -1,0 +1,169 @@
+# Versión optimizada de docker-compose para desarrollo con límites de recursos
+# Consumo total estimado: ~2-3GB RAM en lugar de 8-10GB
+
+version: '3.8'
+
+services:
+  # ==========================================
+  # INFRAESTRUCTURA LIGERA
+  # ==========================================
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq
+    ports:
+      - '15672:15672'
+      - '5672:5672'
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+    networks:
+      - tapalque-net
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+    restart: unless-stopped
+
+  # Base de datos unificada para desarrollo (MySQL)
+  dev-db:
+    image: mysql:8.0
+    container_name: dev-db
+    ports:
+      - '3306:3306'
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: tapalque_dev
+    volumes:
+      - dev_db_data:/var/lib/mysql
+      - ./init-scripts/dev-db.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - tapalque-net
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+    restart: unless-stopped
+    command: --default-authentication-plugin=mysql_native_password --innodb-buffer-pool-size=128M --max-connections=50
+
+  # ==========================================
+  # MICROSERVICIOS ESENCIALES (SOLO 5 para desarrollo)
+  # ==========================================
+  eureka-server:
+    build: ./portal Backend/eureka-server
+    container_name: eureka-server
+    ports:
+      - '8761:8761'
+    environment:
+      JAVA_OPTS: '-Xms128m -Xmx256m'
+    networks:
+      - tapalque-net
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.3'
+    restart: unless-stopped
+
+  msvc-gateway-server:
+    build: ./portal Backend/msvc-gateway-server
+    container_name: msvc-gateway-server
+    ports:
+      - '8090:8090'
+    environment:
+      JAVA_OPTS: '-Xms128m -Xmx384m'
+    depends_on:
+      - eureka-server
+      - dev-db
+    networks:
+      - tapalque-net
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+          cpus: '0.5'
+    restart: unless-stopped
+
+  msvc-jwt:
+    build: ./portal Backend/msvc-jwt
+    container_name: msvc-jwt
+    environment:
+      JAVA_OPTS: '-Xms64m -Xmx192m'
+    depends_on:
+      - eureka-server
+      - dev-db
+    networks:
+      - tapalque-net
+    deploy:
+      resources:
+        limits:
+          memory: 192M
+          cpus: '0.3'
+    restart: unless-stopped
+
+  msvc-user:
+    build: ./portal Backend/msvc-user
+    container_name: msvc-user
+    environment:
+      JAVA_OPTS: '-Xms64m -Xmx192m'
+    depends_on:
+      - dev-db
+      - eureka-server
+    networks:
+      - tapalque-net
+    deploy:
+      resources:
+        limits:
+          memory: 192M
+          cpus: '0.3'
+    restart: unless-stopped
+
+  msvc-comercio:
+    build: ./portal Backend/msvc-comercio
+    container_name: msvc-comercio
+    volumes:
+      - comercio_uploads:/app/uploads
+    environment:
+      JAVA_OPTS: '-Xms64m -Xmx192m'
+    depends_on:
+      - dev-db
+      - eureka-server
+    networks:
+      - tapalque-net
+    deploy:
+      resources:
+        limits:
+          memory: 192M
+          cpus: '0.3'
+    restart: unless-stopped
+
+  # ==========================================
+  # FRONTEND
+  # ==========================================
+  frontend:
+    build: ./portal Frontend
+    container_name: frontend
+    ports:
+      - '3000:80'
+    depends_on:
+      - msvc-gateway-server
+    networks:
+      - tapalque-net
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.2'
+    restart: unless-stopped
+
+# ==========================================
+# VOLÚMENES Y REDES
+# ==========================================
+volumes:
+  dev_db_data:
+  comercio_uploads:
+
+networks:
+  tapalque-net:
+    driver: bridge

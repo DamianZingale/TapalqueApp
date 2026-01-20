@@ -21,13 +21,21 @@ export interface Comercio {
 
 export async function fetchComercios(): Promise<Comercio[]> {
     try {
-        const response = await fetch("/api/comercio");
+        // El gateway define /api/comercio/list como público para GET
+        const response = await fetch("/api/comercio/list", {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
 
         if (!response.ok) {
+            console.warn(`Backend respondió con status: ${response.status} ${response.statusText}`);
             throw new Error(`Error al obtener comercios: ${response.status}`);
         }
 
         const data = await response.json();
+        console.log("Comercios cargados:", data.length, "items");
         return data as Comercio[];
     } catch (error) {
         console.error("Error en fetchComercios:", error);
@@ -37,13 +45,23 @@ export async function fetchComercios(): Promise<Comercio[]> {
 
 export async function fetchComercioById(id: string | number): Promise<Comercio | null> {
     try {
-        const response = await fetch(`/api/comercio/${id}`);
+        // El gateway requiere autenticación para detalles individuales
+        const token = localStorage.getItem('token');
+        const response = await fetch(`/api/comercio/${id}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': token ? `Bearer ${token}` : ''
+            }
+        });
 
         if (!response.ok) {
+            console.warn(`Backend respondió con status: ${response.status} al obtener comercio ${id}`);
             throw new Error(`Error al obtener comercio: ${response.status}`);
         }
 
         const data = await response.json();
+        console.log("Comercio individual cargado:", data);
         return data as Comercio;
     } catch (error) {
         console.error("Error en fetchComercioById:", error);

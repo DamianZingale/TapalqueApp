@@ -49,16 +49,6 @@ export const BotonSesion = ({ isLoggedIn, onLogout }: BotonSesionProps) => {
           </>
         )}
 
-        {/* Moderador ve acceso a su panel */}
-        {esModerador && (
-          <>
-            <NavDropdown.Item as={Link} to="/moderador">
-              🛠️ Panel de Moderador
-            </NavDropdown.Item>
-            <NavDropdown.Divider />
-          </>
-        )}
-
         {/* Admin ve acceso a administración */}
         {esAdmin && (
           <>
@@ -69,10 +59,15 @@ export const BotonSesion = ({ isLoggedIn, onLogout }: BotonSesionProps) => {
           </>
         )}
 
-        <NavDropdown.Item as={Link} to="/perfil">
-          👤 Mi Perfil
-        </NavDropdown.Item>
-        <NavDropdown.Divider />
+        {/* Mi Perfil solo para usuarios comunes y admin, no moderador */}
+        {!esModerador && (
+          <>
+            <NavDropdown.Item as={Link} to="/perfil">
+              👤 Mi Perfil
+            </NavDropdown.Item>
+            <NavDropdown.Divider />
+          </>
+        )}
         <NavDropdown.Item onClick={onLogout}>🚪 Cerrar Sesión</NavDropdown.Item>
       </NavDropdown>
     );

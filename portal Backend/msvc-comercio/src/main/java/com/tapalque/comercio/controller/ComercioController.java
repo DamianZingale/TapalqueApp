@@ -20,7 +20,7 @@ import com.tapalque.comercio.dto.ComercioResponseDTO;
 import com.tapalque.comercio.service.ComercioService;
 
 @RestController
-@RequestMapping("api/comercio")
+@RequestMapping("/comercio")
 public class ComercioController {
     @Autowired
     private ComercioService comercioService;
@@ -33,7 +33,7 @@ public class ComercioController {
     }
 
     // Listar todos
-    @GetMapping
+    @GetMapping("/list")
     public ResponseEntity<List<ComercioResponseDTO>> listarComercios() {
         return ResponseEntity.ok(comercioService.obtenerTodos());
     }
@@ -52,7 +52,7 @@ public class ComercioController {
     }
 
     // Actualizar parcial (PATCH)
-    @PatchMapping("/{id}")
+    @PatchMapping("/patch/{id}")
     public ResponseEntity<ComercioResponseDTO> actualizarParcial(@PathVariable Long id,
             @RequestBody ComercioRequestDTO dto) {
         return ResponseEntity.ok(comercioService.actualizarParcial(id, dto));

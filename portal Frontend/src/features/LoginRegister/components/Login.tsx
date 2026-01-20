@@ -55,22 +55,20 @@ export const Login = () => {
       authService.setUser(data.user);
       authService.setRefreshToken(data.refreshToken);
 
-      const redirectUrl = sessionStorage.getItem('redirectAfterLogin');
-
-      if (redirectUrl) {
-        sessionStorage.removeItem('redirectAfterLogin');
-        navigate(redirectUrl);
+      const userRole = String(data.user.rol);
+      console.log('ROL:', data.user.rol);
+      if (userRole === 'ADMINISTRADOR' || userRole === '2') {
+        navigate('/admin');
+      } else if (userRole === 'MODERADOR' || userRole === '1') {
+        navigate('/moderador');
       } else {
-        // Redirigir según el rol del usuario
-        // El rol puede venir como string o number
-        const userRole = String(data.user.rol);
+        // USER o rol 3
+        const redirectUrl = sessionStorage.getItem('redirectAfterLogin');
 
-        if (userRole === 'ADMINISTRADOR' || userRole === '2') {
-          navigate('/admin/select-business');
-        } else if (userRole === 'MODERADOR' || userRole === '1') {
-          navigate('/admin/general');
+        if (redirectUrl) {
+          sessionStorage.removeItem('redirectAfterLogin');
+          navigate(redirectUrl);
         } else {
-          // USER o rol 3
           navigate('/HomePage');
         }
       }

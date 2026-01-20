@@ -2,40 +2,46 @@ import { useEffect, useState } from "react";
 import { Card } from "../../../shared/components/Card";
 import { SECCION_TYPE } from "../../../shared/constants/constSecciones";
 import { fetchServicios, type Servicio } from "../../../services/fetchServicios";
+import { LoadingSkeleton, ApiErrorDisplay } from "../../../shared/components/ErrorBoundary";
 
 export default function ServiciosListPage() {
     const [servicios, setServicios] = useState<Servicio[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
+    const loadServicios = async () => {
+        try {
+            setError(null);
+            const data = await fetchServicios();
+            setServicios(data);
+        } catch (err) {
+            console.error("Error al cargar servicios:", err);
+            setError("No se pudieron cargar los servicios. Intenta recargar la página.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const loadServicios = async () => {
-            try {
-                const data = await fetchServicios();
-                setServicios(data);
-            } catch (err) {
-                console.error("Error al cargar servicios:", err);
-                setError("No se pudieron cargar los servicios.");
-            } finally {
-                setLoading(false);
-            }
-        };
         loadServicios();
     }, []);
 
     if (loading) {
         return (
-            <div className="container text-center py-5">
-                <div className="spinner-border" role="status">
-                    <span className="visually-hidden">Cargando...</span>
-                </div>
-                <p className="mt-2">Cargando servicios...</p>
+            <div className="container py-5">
+                <h1 className="text-center mb-4">Servicios</h1>
+                <LoadingSkeleton count={3} />
             </div>
         );
     }
 
     if (error) {
-        return <p className="text-center text-danger my-5">{error}</p>;
+        return (
+            <div className="container py-5">
+                <h1 className="text-center mb-4">Servicios</h1>
+                <ApiErrorDisplay error={error} onRetry={loadServicios} />
+            </div>
+        );
     }
 
     return (

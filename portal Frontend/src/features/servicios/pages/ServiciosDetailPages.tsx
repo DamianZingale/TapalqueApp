@@ -5,24 +5,56 @@ import { Carrusel } from "../../../shared/components/Carrusel";
 import { Description } from "../../../shared/components/Description";
 import { Title } from "../../../shared/components/Title";
 import { SocialLinks } from "../../../shared/components/SocialLinks";
+import { LoadingSkeleton, ApiErrorDisplay } from "../../../shared/components/ErrorBoundary";
 import { fetchServicioById, type Servicio } from "../../../services/fetchServicios";
 
 export default function ServiciosDetailPage() {
     const { id } = useParams();
     const [data, setData] = useState<Servicio | null>(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    const loadServicio = async () => {
+        if (!id) return;
+        
+        try {
+            setError(null);
+            setLoading(true);
+            const servicio = await fetchServicioById(id);
+            setData(servicio);
+            if (!servicio) {
+                setError("Servicio no encontrado");
+            }
+        } catch (err) {
+            console.error("Error cargando servicio:", err);
+            setError("No se pudo cargar el servicio. Intenta nuevamente.");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        if (id) {
-            fetchServicioById(id).then(servicio => {
-                setData(servicio);
-                setLoading(false);
-            });
-        }
+        loadServicio();
     }, [id]);
 
-    if (loading) return <div className="container text-center py-5">Cargando...</div>;
-    if (!data) return <p className="container text-center py-5">Servicio no encontrado</p>;
+    if (loading) {
+        return (
+            <div className="container py-5">
+                <LoadingSkeleton height="300px" />
+            </div>
+        );
+    }
+
+    if (error || !data) {
+        return (
+            <div className="container py-5">
+                <ApiErrorDisplay 
+                    error={error || "Servicio no encontrado"} 
+                    onRetry={loadServicio} 
+                />
+            </div>
+        );
+    }
 
     const imagenes = data.imagenes?.map(img => img.imagenUrl) || [];
 

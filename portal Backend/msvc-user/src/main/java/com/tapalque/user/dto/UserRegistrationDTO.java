@@ -22,6 +22,9 @@ public class UserRegistrationDTO {
     @JsonProperty("contrasenia")  // ← Frontend envía "contrasenia"
     private String password;
 
+    @JsonProperty("role")
+    private String role;
+
     // Constructores
     public UserRegistrationDTO() {
     }
@@ -55,5 +58,13 @@ public class UserRegistrationDTO {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 }

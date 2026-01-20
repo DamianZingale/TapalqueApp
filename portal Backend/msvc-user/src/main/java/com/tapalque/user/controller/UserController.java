@@ -197,8 +197,7 @@ public class UserController {
 
     /**
      * Cambiar el rol de un usuario
-     * Permite cambiar entre USER y ADMINISTRADOR
-     * NO permite crear MODERADORES
+     * Permite cambiar entre USER, ADMINISTRADOR y MODERADOR
      * Solo accesible por MODERADOR
      */
     // @PreAuthorize("hasRole('MODERADOR')")
@@ -213,21 +212,49 @@ public class UserController {
                         .body(error("Error", "El rol es obligatorio"));
             }
 
-            // Validar que no se intente crear otro MODERADOR
-            if ("MODERADOR".equalsIgnoreCase(newRoleName)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body(error("Error", "No se puede asignar el rol MODERADOR"));
-            }
-
             RolName newRole = RolName.valueOf(newRoleName.toUpperCase());
             UserResponseDTO updated = userService.changeUserRole(id, newRole);
             return ResponseEntity.ok(updated);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest()
-                    .body(error("Error", "Rol inválido. Use: USER o ADMINISTRADOR"));
+                    .body(error("Error", "Rol inválido. Use: USER, ADMINISTRADOR o MODERADOR"));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(error("Error al cambiar rol", e.getMessage()));
+        }
+    }
+
+    /**
+     * Crear usuario con rol específico (solo MODERADOR)
+     * Permite crear usuarios con cualquier rol y los crea con email verificado
+     */
+    // @PreAuthorize("hasRole('MODERADOR')")
+    @PostMapping("/moderador/create")
+    public ResponseEntity<?> createUserWithRole(@Valid @RequestBody UserRegistrationDTO dto) {
+        try {
+            String roleName = dto.getRole() != null ? dto.getRole().toUpperCase() : "USER";
+            RolName rolName = RolName.valueOf(roleName);
+
+            Long roleId;
+            switch (rolName) {
+                case MODERADOR:
+                    roleId = 1L;
+                    break;
+                case ADMINISTRADOR:
+                    roleId = 2L;
+                    break;
+                default:
+                    roleId = 3L;
+            }
+
+            Role role = new Role(roleId, rolName);
+            UserResponseDTO response = userService.registerByModerator(dto, role);
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                    .body(error("Error", "Rol inválido. Use: USER, ADMINISTRADOR o MODERADOR"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(error("Error en registro", e.getMessage()));
         }
     }
 

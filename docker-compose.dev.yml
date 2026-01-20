@@ -1,0 +1,362 @@
+version: '3.8'
+
+# Docker Compose para perfil dev - Servicios clave para pruebas integradas (sin init scripts)
+# Consumo estimado: ~2GB RAM
+
+services:
+  # ==========================================
+  # INFRAESTRUCTURA ESENCIAL
+  # ==========================================
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq
+    ports:
+      - '15672:15672'
+      - '5672:5672'
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+    networks:
+      - tapalque-net
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.3'
+    restart: unless-stopped
+
+  # Bases de datos para servicios de dev (sin init scripts por ahora)
+  user-db:
+    image: mysql:8.0
+    container_name: user-db
+    ports:
+      - '3310:3306'
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: user
+    volumes:
+      - user_data:/var/lib/mysql
+    networks:
+      - tapalque-net
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.2'
+    restart: unless-stopped
+    command: >
+      --default-authentication-plugin=mysql_native_password 
+      --innodb-buffer-pool-size=32M
+      --max-connections=25
+      --innodb-log-file-size=8M
+
+  jwt-db:
+    image: mysql:8.0
+    container_name: jwt-db
+    ports:
+      - '3309:3306'
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: jwt
+    volumes:
+      - jwt_data:/var/lib/mysql
+    networks:
+      - tapalque-net
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.2'
+    restart: unless-stopped
+    command: >
+      --default-authentication-plugin=mysql_native_password 
+      --innodb-buffer-pool-size=32M
+      --max-connections=25
+      --innodb-log-file-size=8M
+
+  gastronomia-db:
+    image: mysql:8.0
+    container_name: gastronomia-db
+    ports:
+      - '3305:3306'
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: gastronomia
+    volumes:
+      - gastronomia_data:/var/lib/mysql
+    networks:
+      - tapalque-net
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.2'
+    restart: unless-stopped
+    command: >
+      --default-authentication-plugin=mysql_native_password 
+      --innodb-buffer-pool-size=32M
+      --max-connections=25
+      --innodb-log-file-size=8M
+
+  hosteleria-db:
+    image: mysql:8.0
+    container_name: hosteleria-db
+    ports:
+      - '3307:3306'
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: hosteleria
+    volumes:
+      - hosteleria_data:/var/lib/mysql
+    networks:
+      - tapalque-net
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.2'
+    restart: unless-stopped
+    command: >
+      --default-authentication-plugin=mysql_native_password 
+      --innodb-buffer-pool-size=32M
+      --max-connections=25
+      --innodb-log-file-size=8M
+
+  mercado-pago-db:
+    image: mysql:8.0
+    container_name: mercado-pago-db
+    ports:
+      - '3308:3306'
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: mercado_pago
+    volumes:
+      - mercado_pago_data:/var/lib/mysql
+    networks:
+      - tapalque-net
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.2'
+    restart: unless-stopped
+    command: >
+      --default-authentication-plugin=mysql_native_password 
+      --innodb-buffer-pool-size=32M
+      --max-connections=25
+      --innodb-log-file-size=8M
+
+  pedidos-db:
+    image: mongo:6.0
+    container_name: pedidos-db
+    ports:
+      - '27017:27017'
+    volumes:
+      - pedidos_data:/data/db
+    networks:
+      - tapalque-net
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.2'
+    restart: unless-stopped
+
+  reservas-db:
+    image: mongo:6.0
+    container_name: reservas-db
+    ports:
+      - '27018:27017'
+    volumes:
+      - reservas_data:/data/db
+    networks:
+      - tapalque-net
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.2'
+    restart: unless-stopped
+
+  # ==========================================
+  # MICROSERVICIOS ESENCIALES PARA PRUEBAS
+  # ==========================================
+  eureka-server:
+    build: ./portal Backend/eureka-server
+    container_name: eureka-server
+    ports:
+      - '8761:8761'
+    networks:
+      - tapalque-net
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.2'
+    restart: unless-stopped
+
+  msvc-gateway-server:
+    build: ./portal Backend/msvc-gateway-server
+    container_name: msvc-gateway-server
+    ports:
+      - '8090:8090'
+    depends_on:
+      - eureka-server
+    networks:
+      - tapalque-net
+    deploy:
+      resources:
+        limits:
+          memory: 192M
+          cpus: '0.3'
+    restart: unless-stopped
+
+  msvc-jwt:
+    build: ./portal Backend/msvc-jwt
+    container_name: msvc-jwt
+    depends_on:
+      - eureka-server
+      - jwt-db
+    networks:
+      - tapalque-net
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.2'
+    restart: unless-stopped
+
+  msvc-user:
+    build: ./portal Backend/msvc-user
+    container_name: msvc-user
+    depends_on:
+      - user-db
+      - eureka-server
+    networks:
+      - tapalque-net
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.2'
+    restart: unless-stopped
+
+  msvc-gastronomia:
+    build: ./portal Backend/msvc-gastronomia
+    container_name: msvc-gastronomia
+    volumes:
+      - gastronomia_uploads:/app/uploads
+    depends_on:
+      - gastronomia-db
+      - eureka-server
+    networks:
+      - tapalque-net
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.2'
+    restart: unless-stopped
+
+  msvc-hosteleria:
+    build: ./portal Backend/msvc-hosteleria
+    container_name: msvc-hosteleria
+    volumes:
+      - hosteleria_uploads:/app/uploads
+    depends_on:
+      - hosteleria-db
+      - eureka-server
+    networks:
+      - tapalque-net
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.2'
+    restart: unless-stopped
+
+  msvc-pedidos:
+    build: ./portal Backend/msvc-pedidos
+    container_name: msvc-pedidos
+    depends_on:
+      - pedidos-db
+      - rabbitmq
+      - eureka-server
+    networks:
+      - tapalque-net
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.2'
+    restart: unless-stopped
+
+  msvc-reservas:
+    build: ./portal Backend/msvc-reservas
+    container_name: msvc-reservas
+    depends_on:
+      - reservas-db
+      - rabbitmq
+      - eureka-server
+    networks:
+      - tapalque-net
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.2'
+    restart: unless-stopped
+
+  msvc-mercado-pago:
+    build: ./portal Backend/msvc-mercado-pago
+    container_name: msvc-mercado-pago
+    depends_on:
+      - mercado-pago-db
+      - eureka-server
+    networks:
+      - tapalque-net
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.2'
+    restart: unless-stopped
+
+  frontend:
+    build: ./portal Frontend
+    container_name: frontend
+    ports:
+      - '3000:80'
+    depends_on:
+      - msvc-gateway-server
+    networks:
+      - tapalque-net
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+          cpus: '0.1'
+    restart: unless-stopped
+
+# ==========================================
+# VOLÚMENES Y REDES
+# ==========================================
+volumes:
+  # Bases de datos MySQL
+  user_data:
+  jwt_data:
+  gastronomia_data:
+  hosteleria_data:
+  mercado_pago_data:
+  
+  # Bases de datos MongoDB
+  pedidos_data:
+  reservas_data:
+  
+  # Uploads
+  gastronomia_uploads:
+  hosteleria_uploads:
+
+networks:
+  tapalque-net:
+    driver: bridge

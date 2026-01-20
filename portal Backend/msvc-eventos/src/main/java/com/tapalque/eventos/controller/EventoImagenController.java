@@ -23,7 +23,7 @@ import com.tapalque.eventos.service.EventoImagenService;
 import jakarta.annotation.PostConstruct;
 
 @RestController
-@RequestMapping("/api/comercio")
+@RequestMapping("/api/evento")
 public class EventoImagenController {
 
     @Autowired
@@ -34,29 +34,29 @@ public class EventoImagenController {
         return ResponseEntity.ok("EL TEST ANDA");
     }
     // Agregar imagen
-    @PostMapping(value = "/{comercioId}/imagenes", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/{eventoId}/imagenes", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ImagenResponseDTO> agregarImagen(
-            @PathVariable Long comercioId,
+            @PathVariable Long eventoId,
             @RequestParam("file") MultipartFile file) {
-        System.out.println("📸 Imagen recibida para comercio ID: " + comercioId);
+        System.out.println("📸 Imagen recibida para evento ID: " + eventoId);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(cImagenService.agregarImagen(comercioId, file));
+                .body(cImagenService.agregarImagen(eventoId, file));
     }
 
     // Listar imágenes
-    @GetMapping("/{comercioId}/imagenes")
-    public ResponseEntity<List<ImagenResponseDTO>> listarImagenes(@PathVariable Long comercioId) {
-        return ResponseEntity.ok(cImagenService.listarImagenes(comercioId));
+    @GetMapping("/{eventoId}/imagenes")
+    public ResponseEntity<List<ImagenResponseDTO>> listarImagenes(@PathVariable Long eventoId) {
+        return ResponseEntity.ok(cImagenService.listarImagenes(eventoId));
     }
     
 
     // Eliminar imagen
-    @DeleteMapping("/{comercioId}/imagenes")
-    public ResponseEntity<Void> eliminarImagen(@PathVariable Long comercioId,
+    @DeleteMapping("/{eventoId}/imagenes")
+    public ResponseEntity<Void> eliminarImagen(@PathVariable Long eventoId,
             @RequestBody EventoImagenRequestDTO dto) {
 
         System.out.println("LLega a endpoint");
-        cImagenService.eliminarImagen(comercioId, dto);
+        cImagenService.eliminarImagen(eventoId, dto);
         return ResponseEntity.noContent().build();
     }
 

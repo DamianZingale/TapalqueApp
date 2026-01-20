@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Row, Col, Button, Form, Alert, Spinner, ListGroup, Modal } from "react-bootstrap";
+import { ImageManager } from "../../../shared/components/ImageManager";
 
 interface Restaurant {
     id: number;
@@ -12,15 +13,27 @@ interface Restaurant {
     phones?: string;
     schedule?: string;
     delivery?: boolean;
+    imagenes?: { imagenUrl: string }[];
+    userId?: number;
+}
+
+interface Usuario {
+    id: number;
+    firstName: string;
+    lastName: string;
+    email: string;
+    role: string;
 }
 
 const emptyItem: Partial<Restaurant> = {
     name: "", address: "", email: "", latitude: undefined, longitude: undefined,
-    categories: "", phones: "", schedule: "", delivery: false
+    categories: "", phones: "", schedule: "", delivery: false,
+    imagenes: [], userId: undefined
 };
 
 export function GastronomiaSection() {
     const [items, setItems] = useState<Restaurant[]>([]);
+    const [administradores, setAdministradores] = useState<Usuario[]>([]);
     const [loading, setLoading] = useState(true);
     const [selected, setSelected] = useState<Restaurant | null>(null);
     const [isNew, setIsNew] = useState(false);
@@ -29,12 +42,18 @@ export function GastronomiaSection() {
     const [mensaje, setMensaje] = useState<{ tipo: "success" | "danger"; texto: string } | null>(null);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-    useEffect(() => { cargarDatos(); }, []);
+    useEffect(() => { cargarDatos(); cargarAdministradores(); }, []);
 
     const cargarDatos = async () => {
         try {
             setLoading(true);
-            const res = await fetch("/api/gastronomia/findAll");
+            const res = await fetch("/api/gastronomia/findAll", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+            });
             if (res.ok) {
                 const data = await res.json();
                 setItems(data || []);
@@ -43,23 +62,73 @@ export function GastronomiaSection() {
         finally { setLoading(false); }
     };
 
+    const cargarAdministradores = async () => {
+        try {
+            const res = await fetch("/api/user/administradores", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setAdministradores(data || []);
+            }
+        } catch (err) { console.error("Error cargando administradores:", err); }
+    };
+
     const handleSelect = (item: Restaurant) => { setSelected(item); setIsNew(false); setFormData({ ...item }); };
     const handleNew = () => { setSelected(null); setIsNew(true); setFormData({ ...emptyItem }); setMensaje(null); };
     const handleChange = (field: keyof Restaurant, value: string | number | boolean) => { setFormData(prev => ({ ...prev, [field]: value })); };
 
-    const handleSave = async () => {
+const handleSave = async () => {
         if (!formData.name) { setMensaje({ tipo: "danger", texto: "Nombre requerido" }); return; }
         setSaving(true);
         try {
             const token = localStorage.getItem("token");
-            const url = isNew ? "/api/gastronomia/save" : `/api/gastronomia/update/${selected?.id}`;
-            const method = isNew ? "POST" : "PUT";
+            const url = isNew ? "/api/gastronomia" : `/api/gastronomia/${selected?.id}`;
+
+            const cleanedData = {
+                ...formData,
+                address: formData.address?.trim() || undefined,
+                email: formData.email?.trim() || undefined,
+                categories: formData.categories?.trim() || undefined,
+                phones: formData.phones?.trim() || undefined,
+                schedule: formData.schedule?.trim() || undefined,
+                latitude: formData.latitude || undefined,
+                longitude: formData.longitude || undefined,
+                imagenes: (formData.imagenes?.length ?? 0) > 0 ? formData.imagenes : undefined,
+            };
+
             const res = await fetch(url, {
-                method,
+                method: isNew ? "POST" : "PUT",
                 headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
-                body: JSON.stringify(formData)
+                body: JSON.stringify(cleanedData)
             });
             if (res.ok) {
+                const createdData = await res.json();
+
+                // Si es nuevo y se seleccionó un administrador, crear el Business
+                if (isNew && formData.userId) {
+                    const businessPayload = {
+                        ownerId: formData.userId,
+                        name: formData.name,
+                        businessType: "GASTRONOMIA",
+                        externalBusinessId: createdData.id
+                    };
+
+                    const businessRes = await fetch("/api/business", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+                        body: JSON.stringify(businessPayload)
+                    });
+
+                    if (!businessRes.ok) {
+                        console.warn("No se pudo asignar el administrador al negocio");
+                    }
+                }
+
                 setMensaje({ tipo: "success", texto: isNew ? "Creado" : "Actualizado" });
                 cargarDatos();
                 if (isNew) { setIsNew(false); setFormData(emptyItem); }
@@ -110,6 +179,37 @@ export function GastronomiaSection() {
                 {(selected || isNew) ? (
                     <Form>
                         <h6>{isNew ? "Nuevo Local Gastronómico" : `Editando: ${selected?.name}`}</h6>
+                        {!isNew && selected && (
+                            <Row className="mb-2">
+                                <Col md={12}>
+                                    <Form.Group>
+                                        <Form.Label className="small mb-0">ID</Form.Label>
+                                        <Form.Control size="sm" value={selected.id} disabled />
+                                    </Form.Group>
+                                </Col>
+                            </Row>
+                        )}
+                        {isNew && (
+                            <Row className="mb-2">
+                                <Col md={12}>
+                                    <Form.Group>
+                                        <Form.Label className="small mb-0">Administrador/Dueño</Form.Label>
+                                        <Form.Select
+                                            size="sm"
+                                            value={formData.userId || ""}
+                                            onChange={e => handleChange("userId", parseInt(e.target.value) || 0)}
+                                        >
+                                            <option value="">Seleccionar administrador...</option>
+                                            {administradores.map(admin => (
+                                                <option key={admin.id} value={admin.id}>
+                                                    {admin.firstName} {admin.lastName} ({admin.email})
+                                                </option>
+                                            ))}
+                                        </Form.Select>
+                                    </Form.Group>
+                                </Col>
+                            </Row>
+                        )}
                         <Row>
                             <Col md={6}><Form.Group className="mb-2"><Form.Label className="small mb-0">Nombre *</Form.Label><Form.Control size="sm" value={formData.name || ""} onChange={e => handleChange("name", e.target.value)} /></Form.Group></Col>
                             <Col md={6}><Form.Group className="mb-2"><Form.Label className="small mb-0">Email</Form.Label><Form.Control size="sm" type="email" value={formData.email || ""} onChange={e => handleChange("email", e.target.value)} /></Form.Group></Col>
@@ -127,6 +227,16 @@ export function GastronomiaSection() {
                             <Col md={4}><Form.Group className="mb-2"><Form.Label className="small mb-0">Longitud</Form.Label><Form.Control size="sm" type="number" step="any" value={formData.longitude ?? ""} onChange={e => handleChange("longitude", parseFloat(e.target.value) || 0)} /></Form.Group></Col>
                             <Col md={4}><Form.Group className="mb-2 pt-4"><Form.Check type="checkbox" label="Delivery" checked={formData.delivery || false} onChange={e => handleChange("delivery", e.target.checked)} /></Form.Group></Col>
                         </Row>
+                        <ImageManager 
+                            images={formData.imagenes || []}
+                            onChange={(images) => setFormData(prev => ({ 
+                                ...prev, 
+                                imagenes: images.map(url => ({ imagenUrl: url })) 
+                            }))}
+                            maxImages={5}
+                            entityType="gastronomia"
+                            entityId={selected?.id}
+                        />
                         <div className="d-flex gap-2 mt-3">
                             <Button size="sm" variant="primary" onClick={handleSave} disabled={saving}>{saving ? <Spinner size="sm" /> : (isNew ? "Crear" : "Guardar")}</Button>
                             {!isNew && selected && (<Button size="sm" variant="outline-danger" onClick={() => setShowDeleteModal(true)}>Eliminar</Button>)}

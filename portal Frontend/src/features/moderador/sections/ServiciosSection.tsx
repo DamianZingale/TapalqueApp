@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Row, Col, Button, Form, Alert, Spinner, ListGroup, Modal } from "react-bootstrap";
+import { ImageManager } from "../../../shared/components/ImageManager";
 
 interface Servicio {
     id: number;
@@ -17,7 +18,8 @@ interface Servicio {
 
 const emptyItem: Partial<Servicio> = {
     titulo: "", descripcion: "", direccion: "", horario: "",
-    telefono: "", latitud: undefined, longitud: undefined, facebook: "", instagram: ""
+    telefono: "", latitud: undefined, longitud: undefined, facebook: "", instagram: "",
+    imagenes: []
 };
 
 export function ServiciosSection() {
@@ -35,7 +37,13 @@ export function ServiciosSection() {
     const cargarDatos = async () => {
         try {
             setLoading(true);
-            const res = await fetch("/api/servicio");
+            const res = await fetch("/api/servicio", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+            });
             if (res.ok) setItems(await res.json());
         } catch (err) { console.error("Error:", err); }
         finally { setLoading(false); }
@@ -51,10 +59,23 @@ export function ServiciosSection() {
         try {
             const token = localStorage.getItem("token");
             const url = isNew ? "/api/servicio" : `/api/servicio/${selected?.id}`;
+            
+            // Limpiar datos antes de enviar
+            const cleanedData = {
+                ...formData,
+                descripcion: formData.descripcion?.trim() || undefined,
+                telefono: formData.telefono?.trim() || undefined,
+                facebook: formData.facebook?.trim() || undefined,
+                instagram: formData.instagram?.trim() || undefined,
+                latitud: formData.latitud || undefined,
+                longitud: formData.longitud || undefined,
+                imagenes: (formData.imagenes?.length ?? 0) > 0 ? formData.imagenes : undefined,
+            };
+            
             const res = await fetch(url, {
                 method: isNew ? "POST" : "PUT",
                 headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
-                body: JSON.stringify(formData)
+                body: JSON.stringify(cleanedData)
             });
             if (res.ok) {
                 setMensaje({ tipo: "success", texto: isNew ? "Creado" : "Actualizado" });
@@ -99,6 +120,16 @@ export function ServiciosSection() {
                 {(selected || isNew) ? (
                     <Form>
                         <h6>{isNew ? "Nuevo Servicio" : `Editando: ${selected?.titulo}`}</h6>
+                        {!isNew && selected && (
+                            <Row className="mb-2">
+                                <Col md={12}>
+                                    <Form.Group>
+                                        <Form.Label className="small mb-0">ID</Form.Label>
+                                        <Form.Control size="sm" value={selected.id} disabled />
+                                    </Form.Group>
+                                </Col>
+                            </Row>
+                        )}
                         <Row><Col md={6}><Form.Group className="mb-2"><Form.Label className="small mb-0">Título *</Form.Label><Form.Control size="sm" value={formData.titulo || ""} onChange={e => handleChange("titulo", e.target.value)} /></Form.Group></Col>
                         <Col md={6}><Form.Group className="mb-2"><Form.Label className="small mb-0">Teléfono</Form.Label><Form.Control size="sm" value={formData.telefono || ""} onChange={e => handleChange("telefono", e.target.value)} /></Form.Group></Col></Row>
                         <Form.Group className="mb-2"><Form.Label className="small mb-0">Descripción</Form.Label><Form.Control size="sm" as="textarea" rows={2} value={formData.descripcion || ""} onChange={e => handleChange("descripcion", e.target.value)} /></Form.Group>
@@ -108,7 +139,16 @@ export function ServiciosSection() {
                         <Col md={6}><Form.Group className="mb-2"><Form.Label className="small mb-0">Longitud</Form.Label><Form.Control size="sm" type="number" step="any" value={formData.longitud ?? ""} onChange={e => handleChange("longitud", parseFloat(e.target.value) || 0)} /></Form.Group></Col></Row>
                         <Row><Col md={6}><Form.Group className="mb-2"><Form.Label className="small mb-0">Facebook</Form.Label><Form.Control size="sm" value={formData.facebook || ""} onChange={e => handleChange("facebook", e.target.value)} /></Form.Group></Col>
                         <Col md={6}><Form.Group className="mb-2"><Form.Label className="small mb-0">Instagram</Form.Label><Form.Control size="sm" value={formData.instagram || ""} onChange={e => handleChange("instagram", e.target.value)} /></Form.Group></Col></Row>
-                        {selected?.imagenes && selected.imagenes.length > 0 && (<div className="mb-2"><Form.Label className="small mb-1">Imágenes</Form.Label><div className="d-flex gap-1 flex-wrap">{selected.imagenes.map((img, i) => (<img key={i} src={img.imagenUrl} alt="" style={{ width: 60, height: 60, objectFit: "cover" }} />))}</div></div>)}
+                        <ImageManager 
+                            images={formData.imagenes || []}
+                            onChange={(images) => setFormData(prev => ({ 
+                                ...prev, 
+                                imagenes: images.map(url => ({ imagenUrl: url })) 
+                            }))}
+                            maxImages={5}
+                            entityType="servicio"
+                            entityId={selected?.id}
+                        />
                         <div className="d-flex gap-2 mt-3">
                             <Button size="sm" variant="primary" onClick={handleSave} disabled={saving}>{saving ? <Spinner size="sm" /> : (isNew ? "Crear" : "Guardar")}</Button>
                             {!isNew && selected && (<Button size="sm" variant="outline-danger" onClick={() => setShowDeleteModal(true)}>Eliminar</Button>)}
