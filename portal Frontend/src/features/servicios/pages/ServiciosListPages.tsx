@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card } from "../../../shared/components/Card";
 import { SECCION_TYPE } from "../../../shared/constants/constSecciones";
 import { fetchServicios, type Servicio } from "../../../services/fetchServicios";
@@ -8,6 +9,7 @@ export default function ServiciosListPage() {
     const [servicios, setServicios] = useState<Servicio[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const navigate = useNavigate();
 
     const loadServicios = async () => {
         try {
@@ -20,6 +22,12 @@ export default function ServiciosListPage() {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleCardClick = (servicio: Servicio) => {
+        navigate(`/servicios/${servicio.id}`, {
+            state: { servicio },
+        });
     };
 
     useEffect(() => {
@@ -57,6 +65,7 @@ export default function ServiciosListPage() {
                             imagenUrl={servicio.imagenes?.[0]?.imagenUrl || "https://via.placeholder.com/400x200.png?text=Sin+Imagen"}
                             direccion_local={servicio.horario || ""}
                             tipo={SECCION_TYPE.SERVICIOS}
+                            onClick={() => handleCardClick(servicio)}
                         />
                     ))
                 ) : (

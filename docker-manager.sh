@@ -82,7 +82,7 @@ show_status() {
     echo -e "${BLUE}📊 Estado de los servicios:${NC}"
     echo ""
     
-    local containers=$(docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" | head -10)
+    local containers=$(docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}")
     if [ -n "$containers" ]; then
         echo -e "${GREEN}🟢 Contenedores activos:${NC}"
         echo "$containers"
@@ -93,7 +93,7 @@ show_status() {
     echo ""
     if docker ps -q | grep -q .; then
         echo -e "${BLUE}💾 Uso de recursos:${NC}"
-        docker stats --no-stream --format "table {{.Container}}\t{{.CPUPerc}}\t{{.MemUsage}}" | head -10
+        docker stats --no-stream --format "table {{.Container}}\t{{.CPUPerc}}\t{{.MemUsage}}"
     fi
 }
 

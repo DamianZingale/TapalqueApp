@@ -1,4 +1,4 @@
-import { getStatusText } from '../../utils/schaduleUtils';
+import { getStatusText } from '../utils/scheduleUtils';
 import type { CardProps } from '../types/ICardProps';
 
 export const CardResto: React.FC<CardProps> = ({
@@ -8,6 +8,7 @@ export const CardResto: React.FC<CardProps> = ({
   imagenUrl,
   tipo,
   schedule,
+  onClick,
 }) => {
   // Obtener estado de apertura si hay schedule
   const status = schedule ? getStatusText(schedule) : null;
@@ -37,9 +38,12 @@ export const CardResto: React.FC<CardProps> = ({
         )}
 
         <div className="d-grid gap-2 col-6 mx-auto">
-          <a href={`/${tipo}/${id}`} className="btn btn-secondary p-1">
+          <button 
+            onClick={onClick} 
+            className="btn btn-secondary p-1"
+          >
             Ver más
-          </a>
+          </button>
         </div>
       </div>
     </div>

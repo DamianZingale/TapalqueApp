@@ -5,7 +5,7 @@ import MainLayout from '../../shared/layouts/MainLayouts';
 
 // Rutas públicas
 import ComercioRoutes from '../../features/comercio/routes';
-import EsPublicosRoutes from '../../features/espacios publicos/routes';
+import EsPublicosRoutes from '../../features/espacios-publicos/routes';
 import EventosRoutes from '../../features/eventos/routes';
 import GastronomiaRoutes from '../../features/gastronomia/routes';
 import HomeRoutes from '../../features/home/routes';
@@ -15,19 +15,19 @@ import ServiciosRoutes from '../../features/servicios/routes';
 import TermasRoutes from '../../features/termas/routes';
 
 // Usuario
-import UserDashboardRoutes from '../../features/userDashboard/routes';
+import UserDashboardRoutes from '../../features/user-dashboard/routes';
 
 // Login / Register
-import { VerifyEmail } from '../../features/LoginRegister/components/VerifyEmail';
-import LoginPage from '../../features/LoginRegister/pages/LoginPage';
-import RegisterPage from '../../features/LoginRegister/pages/RegisterPage';
+import { VerifyEmail } from '../../features/auth/components/VerifyEmail';
+import LoginPage from '../../features/auth/pages/LoginPage';
+import RegisterPage from '../../features/auth/pages/RegisterPage';
 
 // Administradores
-import { AdministradoresRoutes } from '../../features/administradores';
+import { AdministradoresRoutes } from '../../features/admin-negocios';
 
 // Moderador
 import { lazy } from 'react';
-const ModeradorDashboard = lazy(() => import('../../features/moderador/ModeradorDashboard'));
+const ModeradorDashboard = lazy(() => import('../../features/moderador/pages/ModeradorDashboard'));
 
 // Protección
 import {

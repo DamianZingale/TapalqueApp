@@ -3,11 +3,21 @@ services:
   # INFRAESTRUCTURA
   # ==========================================
   rabbitmq:
-    image: rabbitmq:3-management
+    image: rabbitmq:3.9-management-alpine
     container_name: rabbitmq
     ports:
       - '15672:15672' # Panel de gestión
       - '5672:5672' # Comunicación interna
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+    tmpfs:
+      - /var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 15s
+      timeout: 10s
+      retries: 6
     networks:
       - tapalque-net
 
@@ -184,6 +194,12 @@ services:
     ports:
       - '8761:8761'
     restart: always
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8761"]
+      interval: 15s
+      timeout: 10s
+      retries: 8
+      start_period: 90s
     networks:
       - tapalque-net
 
@@ -194,7 +210,8 @@ services:
       - '8090:8090' # ← CAMBIO 1: De "expose" a "ports"
     restart: always
     depends_on: # ← CAMBIO 2: Agregar depends_on
-      - eureka-server
+      eureka-server:
+        condition: service_healthy
     networks:
       - tapalque-net
 
@@ -223,10 +240,18 @@ services:
   msvc-pedidos:
     build: ./portal Backend/msvc-pedidos
     container_name: msvc-pedidos
+    environment:
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: admin
+      SPRING_RABBITMQ_PASSWORD: admin
     depends_on:
-      - pedidos-db
-      - rabbitmq
-      - eureka-server # ← CAMBIO 5: Agregar eureka
+      pedidos-db:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
     restart: always
     networks:
       - tapalque-net
@@ -234,10 +259,18 @@ services:
   msvc-reservas:
     build: ./portal Backend/msvc-reservas
     container_name: msvc-reservas
+    environment:
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: admin
+      SPRING_RABBITMQ_PASSWORD: admin
     depends_on:
-      - reservas-db
-      - rabbitmq
-      - eureka-server # ← CAMBIO 6: Agregar eureka
+      reservas-db:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
     restart: always
     networks:
       - tapalque-net
@@ -269,10 +302,18 @@ services:
   msvc-mercado-pago:
     build: ./portal Backend/msvc-mercado-pago
     container_name: msvc-mercado-pago
+    environment:
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: admin
+      SPRING_RABBITMQ_PASSWORD: admin
     depends_on:
-      - mercado-pago-db
-      - rabbitmq
-      - eureka-server # ← CAMBIO 9: Agregar eureka
+      mercado-pago-db:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
     env_file:
       - .env
     restart: always

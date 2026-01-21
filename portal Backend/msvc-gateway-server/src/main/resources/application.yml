@@ -64,7 +64,7 @@ spring:
             - id: msvc-termas-list-public
               uri: lb://msvc-termas
               predicates:
-                - Path=/api/terma
+                - Path=/api/terma, /api/terma/{id}
                 - Method=GET
               filters:
                 - RewritePath=/api/(?<segment>.*), /api/$\{segment}

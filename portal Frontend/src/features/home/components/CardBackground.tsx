@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { RobustImageLoader } from "../../utils/imageLoader";
+import { RobustImageLoader } from "../../../shared/utils/imageLoader";
 
 interface CardBackgroundProps {
     titulo: string;

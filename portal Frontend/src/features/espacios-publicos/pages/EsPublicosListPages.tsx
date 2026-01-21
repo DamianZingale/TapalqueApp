@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card } from "../../../shared/components/Card";
 import { SECCION_TYPE } from "../../../shared/constants/constSecciones";
-import { Link } from "react-router-dom";
 import { fetchEspaciosPublicos, type EspacioPublico } from "../../../services/fetchEspaciosPublicos";
 
 export default function EspaciosListPage() {
     const [espacios, setEspacios] = useState<EspacioPublico[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const loadEspacios = async () => {
@@ -23,6 +24,12 @@ export default function EspaciosListPage() {
         };
         loadEspacios();
     }, []);
+
+    const handleCardClick = (espacio: EspacioPublico) => {
+        navigate(`/espublicos/${espacio.id}`, {
+            state: { espacio },
+        });
+    };
 
     if (loading) {
         return (
@@ -46,15 +53,14 @@ export default function EspaciosListPage() {
                 {espacios.length > 0 ? (
                     espacios.map((espacio) => (
                         <div key={espacio.id} className="col-md-4 mb-4">
-                            <Link to={`/espublicos/${espacio.id}`} className="text-decoration-none">
-                                <Card
-                                    id={String(espacio.id)}
-                                    titulo={espacio.titulo}
-                                    imagenUrl={espacio.imagenes?.[0]?.imagenUrl || "https://via.placeholder.com/400x200.png?text=Sin+Imagen"}
-                                    direccion_local={espacio.direccion}
-                                    tipo={SECCION_TYPE.ESP_PUBLICOS}
-                                />
-                            </Link>
+                            <Card
+                                id={String(espacio.id)}
+                                titulo={espacio.titulo}
+                                imagenUrl={espacio.imagenes?.[0]?.imagenUrl || "https://via.placeholder.com/400x200.png?text=Sin+Imagen"}
+                                direccion_local={espacio.direccion}
+                                tipo={SECCION_TYPE.ESP_PUBLICOS}
+                                onClick={() => handleCardClick(espacio)}
+                            />
                         </div>
                     ))
                 ) : (

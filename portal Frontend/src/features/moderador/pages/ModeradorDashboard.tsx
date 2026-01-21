@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { Accordion, Badge, Container } from 'react-bootstrap';
-import { ComerciosSection } from './sections/ComerciosSection';
-import { EspaciosPublicosSection } from './sections/EspaciosPublicosSection';
-import { EventosSection } from './sections/EventosSection';
-import { GastronomiaSection } from './sections/GastronomiaSection';
-import { HospedajesSection } from './sections/HospedajesSection';
-import { ServiciosSection } from './sections/ServiciosSection';
-import { TermasSection } from './sections/TermasSection';
-import { UsuariosSection } from './sections/UsuariosSection';
+import { ComerciosSection } from '../components/ComerciosSection';
+import { EspaciosPublicosSection } from '../components/EspaciosPublicosSection';
+import { EventosSection } from '../components/EventosSection';
+import { GastronomiaSection } from '../components/GastronomiaSection';
+import { HospedajesSection } from '../components/HospedajesSection';
+import { ServiciosSection } from '../components/ServiciosSection';
+import { TermasSection } from '../components/TermasSection';
+import { UsuariosSection } from '../components/UsuariosSection';
 
 const secciones = [
   { key: 'usuarios', titulo: 'Usuarios', componente: <UsuariosSection /> },

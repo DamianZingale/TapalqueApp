@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card } from "../../../shared/components/Card";
 import { fetchEventos, type Evento } from "../../../services/fetchEventos";
 
 export default function EventosListPage() {
     const [eventos, setEventos] = useState<Evento[]>([]);
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const loadEventos = async () => {
@@ -15,6 +17,12 @@ export default function EventosListPage() {
         };
         loadEventos();
     }, []);
+
+    const handleCardClick = (evento: Evento) => {
+        navigate(`/eventos/${evento.id}`, {
+            state: { evento },
+        });
+    };
 
     if (loading) {
         return <div className="container"><h1 className="text-center my-4">Cargando eventos...</h1></div>;
@@ -35,6 +43,7 @@ export default function EventosListPage() {
                         imagenUrl={evento.imagenes?.[0]?.imagenUrl || "https://via.placeholder.com/300"}
                         direccion_local={`${evento.fechaInicio}${evento.fechaFin ? ` - ${evento.fechaFin}` : ''}`}
                         tipo="eventos"
+                        onClick={() => handleCardClick(evento)}
                         />
                     ))}
                 </div>
