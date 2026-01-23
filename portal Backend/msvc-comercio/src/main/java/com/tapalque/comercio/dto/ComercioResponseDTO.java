@@ -15,7 +15,7 @@ import lombok.Setter;
 public class ComercioResponseDTO {
     private Long id;
     private String titulo;
-    private String description;
+    private String descripcion;
     private String direccion;
     private String horario;
     private String telefono;
@@ -29,7 +29,7 @@ public class ComercioResponseDTO {
     public ComercioResponseDTO(Comercio c) {
         this.id = c.getId();
         this.titulo = c.getTitulo();
-        this.description = c.getDescripcion();
+        this.descripcion = c.getDescripcion();
         this.direccion = c.getDireccion();
         this.horario = c.getHorario();
         this.telefono = c.getTelefono();
@@ -37,9 +37,10 @@ public class ComercioResponseDTO {
         this.longitud = c.getLongitud();
         this.facebook = c.getFacebook();
         this.instagram = c.getInstagram();
-        this.imagenes = c.getImagenes()
-                .stream()
-                .map(img -> new ImagenResponseDTO(img.getImagenUrl()))
-                .collect(Collectors.toList());
+        this.imagenes = c.getImagenes() != null
+                ? c.getImagenes().stream()
+                        .map(img -> new ImagenResponseDTO(img.getImagenUrl()))
+                        .collect(Collectors.toList())
+                : List.of();
     }
 }

@@ -1,13 +1,20 @@
 package com.tapalque.user.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tapalque.user.dto.ChangePasswordDTO;
-import com.tapalque.user.dto.UpdateProfileDTO;
-import com.tapalque.user.dto.UserRegistrationDTO;
-import com.tapalque.user.dto.UserResponseDTO;
-import com.tapalque.user.service.EmailService;
-import com.tapalque.user.service.EmailVerificationService;
-import com.tapalque.user.service.UserService;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.Arrays;
+import java.util.Optional;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -18,14 +25,14 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Arrays;
-import java.util.Optional;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tapalque.user.dto.ChangePasswordDTO;
+import com.tapalque.user.dto.UpdateProfileDTO;
+import com.tapalque.user.dto.UserRegistrationDTO;
+import com.tapalque.user.dto.UserResponseDTO;
+import com.tapalque.user.service.EmailService;
+import com.tapalque.user.service.EmailVerificationService;
+import com.tapalque.user.service.UserService;
 
 @WebMvcTest(UserController.class)
 @DisplayName("UserController Tests")
@@ -51,7 +58,7 @@ class UserControllerTest {
     @BeforeEach
     void setUp() {
         testUserResponse = new UserResponseDTO(
-                1L, "test@example.com", "Test", "User", "Calle 123", "USER", true
+                1L, "test@example.com", "Test", "User", "Calle 123", "USER", true, true
         );
     }
 
@@ -148,7 +155,7 @@ class UserControllerTest {
         void getAdministrators_RetornaListaAdmins() throws Exception {
             // Given
             UserResponseDTO adminResponse = new UserResponseDTO(
-                    2L, "admin@example.com", "Admin", "User", null, "ADMINISTRADOR", true
+                    2L, "admin@example.com", "Admin", "User", null, "ADMINISTRADOR", true, true
             );
             when(userService.getUsersByRole(any())).thenReturn(Arrays.asList(adminResponse));
 
@@ -156,7 +163,6 @@ class UserControllerTest {
             mockMvc.perform(get("/user/administradores"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$[0].rol").value("ADMINISTRADOR"));
-        }
     }
 
     @Nested
@@ -295,4 +301,5 @@ class UserControllerTest {
                     .andExpect(status().isCreated());
         }
     }
+}
 }

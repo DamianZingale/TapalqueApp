@@ -52,6 +52,21 @@ public class BusinessController {
         return ResponseEntity.notFound().build();
     }
 
+    /**
+     * Obtiene un negocio por externalBusinessId y businessType
+     */
+    // @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'MODERADOR')")
+    @GetMapping("/external/{externalBusinessId}/type/{businessType}")
+    public ResponseEntity<BusinessDTO> getBusinessByExternalIdAndType(
+            @PathVariable Long externalBusinessId,
+            @PathVariable String businessType) {
+        BusinessDTO business = businessService.getBusinessByExternalIdAndType(externalBusinessId, businessType);
+        if (business != null) {
+            return ResponseEntity.ok(business);
+        }
+        return ResponseEntity.notFound().build();
+    }
+
     // ==================== MODERADOR ENDPOINTS ====================
 
     /**

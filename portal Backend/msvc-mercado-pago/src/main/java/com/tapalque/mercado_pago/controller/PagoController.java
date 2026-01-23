@@ -12,7 +12,7 @@ import com.tapalque.mercado_pago.service.MercadoPagoService;
 
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/mercado-pago")
 public class PagoController {
     private final MercadoPagoService mercadoPagoService;
 

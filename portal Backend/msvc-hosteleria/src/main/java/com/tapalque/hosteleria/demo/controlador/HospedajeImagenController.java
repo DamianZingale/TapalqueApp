@@ -22,16 +22,17 @@ import com.tapalque.hosteleria.demo.dto.ImagenResponseDTO;
 import com.tapalque.hosteleria.demo.servicio.HospedajeImagenService;
 
 @RestController
-@RequestMapping("/api/hospedajes")
+@RequestMapping("/hospedajes")
 @CrossOrigin(origins = "*")
 public class HospedajeImagenController {
 
-    @Autowired
-    private HospedajeImagenService imagenService;
+   
+    private final HospedajeImagenService imagenService;
+    public HospedajeImagenController(@Autowired HospedajeImagenService imagenService) {
+        this.imagenService = imagenService;
+    }
 
-    /**
-     * Agregar imagen a un hospedaje
-     */
+
     @PostMapping(value = "/{hospedajeId}/imagenes", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ImagenResponseDTO> agregarImagen(
             @PathVariable Long hospedajeId,

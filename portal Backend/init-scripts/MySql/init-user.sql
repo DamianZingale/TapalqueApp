@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS usuarios_tb (
     id BIGINT NOT NULL AUTO_INCREMENT,
     email VARCHAR(255) NOT NULL,
     email_verified BIT(1) NOT NULL DEFAULT 0,
+    activo BIT(1) NOT NULL DEFAULT 1,
     first_name VARCHAR(255) NOT NULL,
     last_name VARCHAR(255) DEFAULT NULL,
     name_emprise VARCHAR(255) DEFAULT NULL,
@@ -59,11 +60,12 @@ ON DUPLICATE KEY UPDATE name = name;
 -- Email: go@tapalque.com
 -- Password: T4p4lqu3!
 -- Email verificado: true
-INSERT INTO usuarios_tb (email, first_name, password, email_verified, roles_id, registration_date)
+INSERT INTO usuarios_tb (email, first_name, password, email_verified, activo,roles_id, registration_date)
 VALUES (
     'go@tapalque.com',
     'Moderador Tapalque',
     '$2a$10$gC0M/qqLxsjfAKNCWepxh.rPkvrtGD.hOQgR/d1rUhO6RqsSOGYAO',
+    1,
     1,
     1,
     NOW()

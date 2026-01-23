@@ -1,98 +1,142 @@
-import { api } from "../config/api";
+import { api } from '../config/api';
+import {
+  MenuResponseDTO,
+  DishCategoryDTO,
+  DishRestrictionDTO,
+  Imenu,
+  transformMenuResponse,
+} from '../features/gastronomia/types/Imenu';
 
-export interface MenuItem {
-    id: number;
-    dish_name: string;
-    description?: string;
-    price: number;
-    ingredients: string[];
-    picture?: string;
-    category: string;
-    restrictions: string[];
-    available: boolean;
-    restaurantId?: string;
+// Tipo para items del menú con disponibilidad
+export interface MenuItem extends Imenu {
+  available: boolean;
+  description?: string;
 }
 
-export interface NuevoMenuItem {
-    dish_name: string;
-    description?: string;
-    price: number;
-    ingredients: string[];
-    picture?: string;
-    category: string;
-    restrictions: string[];
-    available?: boolean;
+// Obtener menú de un restaurante
+export async function fetchMenuByRestaurant(
+  restaurantId: string
+): Promise<Imenu[]> {
+  try {
+    const response = await api.get<MenuResponseDTO>(
+      `/gastronomia/menu/restaurant/${restaurantId}`
+    );
+    return transformMenuResponse(response);
+  } catch (error) {
+    console.error('Error en fetchMenuByRestaurant:', error);
+    return [];
+  }
 }
 
-export const CATEGORIAS_MENU = [
-    "Pizza",
-    "Empanadas",
-    "Hamburguesas",
-    "Pastas",
-    "Carnes",
-    "Ensaladas",
-    "Bebidas",
-    "Postres",
-    "Otros"
-];
-
-export const RESTRICCIONES_MENU = [
-    "Vegetariano",
-    "Vegano",
-    "Sin Gluten",
-    "Sin Lactosa",
-    "Sin Alcohol"
-];
-
-export async function fetchMenuByRestaurant(restaurantId: string): Promise<MenuItem[]> {
-    try {
-        const response = await api.get<MenuItem[]>(`/gastronomia/api/menu/restaurant/${restaurantId}`);
-        return response;
-    } catch (error) {
-        console.error("Error en fetchMenuByRestaurant:", error);
-        return [];
+// Obtener menú filtrado por categoría y/o restricciones
+export async function fetchMenuFiltered(
+  restaurantId: string,
+  category?: string,
+  restrictions?: string[]
+): Promise<Imenu[]> {
+  try {
+    const params = new URLSearchParams();
+    if (category) {
+      params.append('category', category);
     }
-}
-
-export async function crearMenuItem(restaurantId: string, item: NuevoMenuItem): Promise<MenuItem | null> {
-    try {
-        const response = await api.post<MenuItem>(`/gastronomia/api/menu/restaurant/${restaurantId}`, {
-            ...item,
-            available: item.available ?? true
-        });
-        return response;
-    } catch (error) {
-        console.error("Error en crearMenuItem:", error);
-        return null;
+    if (restrictions && restrictions.length > 0) {
+      restrictions.forEach((r) => params.append('restrictions', r));
     }
+
+    const queryString = params.toString();
+    const url = `/gastronomia/menu/restaurant/${restaurantId}/filter${queryString ? `?${queryString}` : ''}`;
+
+    const response = await api.get<MenuResponseDTO>(url);
+    return transformMenuResponse(response);
+  } catch (error) {
+    console.error('Error en fetchMenuFiltered:', error);
+    return [];
+  }
 }
 
-export async function actualizarMenuItem(itemId: number, data: Partial<MenuItem>): Promise<MenuItem | null> {
-    try {
-        const response = await api.put<MenuItem>(`/gastronomia/api/menu/${itemId}`, data);
-        return response;
-    } catch (error) {
-        console.error("Error en actualizarMenuItem:", error);
-        return null;
-    }
+// Obtener todas las categorías de platos disponibles
+export async function fetchDishCategories(): Promise<DishCategoryDTO[]> {
+  try {
+    const response = await api.get<DishCategoryDTO[]>(
+      '/gastronomia/menu/categories'
+    );
+    return response;
+  } catch (error) {
+    console.error('Error en fetchDishCategories:', error);
+    return [];
+  }
 }
 
-export async function cambiarDisponibilidadItem(itemId: number, available: boolean): Promise<boolean> {
-    try {
-        await api.patch(`/gastronomia/api/menu/${itemId}/disponibilidad`, { available });
-        return true;
-    } catch (error) {
-        console.error("Error en cambiarDisponibilidadItem:", error);
-        return false;
-    }
+// Obtener todas las restricciones dietéticas disponibles
+export async function fetchDishRestrictions(): Promise<DishRestrictionDTO[]> {
+  try {
+    const response = await api.get<DishRestrictionDTO[]>(
+      '/gastronomia/menu/restrictions'
+    );
+    return response;
+  } catch (error) {
+    console.error('Error en fetchDishRestrictions:', error);
+    return [];
+  }
 }
 
+// Crear un nuevo item de menú
+export async function crearMenuItem(
+  restaurantId: string,
+  data: Omit<MenuItem, 'id'>
+): Promise<MenuItem | null> {
+  try {
+    const response = await api.post<MenuItem>(
+      `/gastronomia/menu/restaurant/${restaurantId}/dish`,
+      data
+    );
+    return response;
+  } catch (error) {
+    console.error('Error en crearMenuItem:', error);
+    return null;
+  }
+}
+
+// Actualizar un item de menú
+export async function actualizarMenuItem(
+  itemId: number,
+  data: Partial<MenuItem>
+): Promise<MenuItem | null> {
+  try {
+    const response = await api.put<MenuItem>(
+      `/gastronomia/menu/dish/${itemId}`,
+      data
+    );
+    return response;
+  } catch (error) {
+    console.error('Error en actualizarMenuItem:', error);
+    return null;
+  }
+}
+
+// Eliminar un item de menú
 export async function eliminarMenuItem(itemId: number): Promise<boolean> {
-    try {
-        await api.delete(`/gastronomia/api/menu/${itemId}`);
-        return true;
-    } catch (error) {
-        console.error("Error en eliminarMenuItem:", error);
-        return false;
-    }
+  try {
+    await api.delete(`/gastronomia/menu/dish/${itemId}`);
+    return true;
+  } catch (error) {
+    console.error('Error en eliminarMenuItem:', error);
+    return false;
+  }
+}
+
+// Cambiar disponibilidad de un item
+export async function cambiarDisponibilidadItem(
+  itemId: number,
+  available: boolean
+): Promise<boolean> {
+  try {
+    await api.patch(`/gastronomia/menu/dish/${itemId}/availability`, {
+      available,
+    });
+    return true;
+  } catch (error) {
+    console.error('Error en cambiarDisponibilidadItem:', error);
+    return false;
+  }
 }

@@ -11,9 +11,10 @@ import com.tapalque.mercado_pago.service.OauthService;
 
 
 @RestController
-@RequestMapping("/oauth")
+@RequestMapping("/mercadopago/oauth")
 public class OauthController {
-    OauthService oauthService;
+
+   private final OauthService oauthService;
 
     public OauthController(OauthService os) {
         this.oauthService = os;

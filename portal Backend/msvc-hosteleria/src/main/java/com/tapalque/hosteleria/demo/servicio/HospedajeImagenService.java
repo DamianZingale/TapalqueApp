@@ -24,7 +24,7 @@ import com.tapalque.hosteleria.demo.repositorio.HospedajeRepository;
 @Service
 public class HospedajeImagenService {
 
-    @Value("${upload.dir:uploads}")
+    @Value("${upload.dir}")
     private String uploadDir;
 
     @Autowired

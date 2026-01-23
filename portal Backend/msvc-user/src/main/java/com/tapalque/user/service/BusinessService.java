@@ -41,6 +41,20 @@ public class BusinessService {
                 .orElse(null);
     }
 
+    /**
+     * Obtiene un negocio por externalBusinessId y businessType
+     */
+    public BusinessDTO getBusinessByExternalIdAndType(Long externalBusinessId, String businessType) {
+        try {
+            com.tapalque.user.enu.BusinessType type = com.tapalque.user.enu.BusinessType.valueOf(businessType);
+            return businessRepository.findByExternalBusinessIdAndBusinessType(externalBusinessId, type)
+                    .map(BusinessDTO::fromEntity)
+                    .orElse(null);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
     // ==================== MODERADOR METHODS ====================
 
     /**

@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/gastronomia/images")
+@RequestMapping("/gastronomia/images")
 public class ImageController {
 
     // Ruta donde están guardadas las imágenes en el volumen

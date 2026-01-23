@@ -1,5 +1,7 @@
 package com.tapalque.espaciospublicos.dto;
 
+import org.springframework.lang.NonNull;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,9 +10,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EspacioPublicoRequestDTO {
+    @NonNull
     private String titulo;
+
+    @NonNull
     private String descripcion;
+
+    @NonNull
     private String direccion;
+
     private String telefono;
     private Double latitud;
     private Double longitud;

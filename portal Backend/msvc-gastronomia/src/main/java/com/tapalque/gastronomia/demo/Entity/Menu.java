@@ -31,7 +31,7 @@ public class Menu {
     // Relación con Restaurant
     @JsonBackReference
     @OneToOne
-    @JoinColumn(name = "idRestaurant", nullable = false)
+    @JoinColumn(name = "id_restaurant", nullable = false)
     private Restaurant restaurant;
 
     // Relación con Dish

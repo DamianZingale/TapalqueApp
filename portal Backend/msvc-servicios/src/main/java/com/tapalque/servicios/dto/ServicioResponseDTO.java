@@ -15,7 +15,7 @@ import lombok.Setter;
 public class ServicioResponseDTO {
     private Long id;
     private String titulo;
-    private String description;
+    private String descripcion;
     private String direccion;
     private String horario;
     private String telefono;
@@ -29,7 +29,7 @@ public class ServicioResponseDTO {
     public ServicioResponseDTO(Servicio c) {
         this.id = c.getId();
         this.titulo = c.getTitulo();
-        this.description = c.getDescripcion();
+        this.descripcion = c.getDescripcion();
         this.direccion = c.getDireccion();
         this.horario = c.getHorario();
         this.telefono = c.getTelefono();

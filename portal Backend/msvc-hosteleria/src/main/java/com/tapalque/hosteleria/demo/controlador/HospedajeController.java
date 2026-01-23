@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,8 +13,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.tapalque.hosteleria.demo.dto.DisponibilidadResponseDTO;
 import com.tapalque.hosteleria.demo.dto.HospedajeDTO;
 import com.tapalque.hosteleria.demo.dto.HospedajeRequestDTO;
 import com.tapalque.hosteleria.demo.servicio.HospedajeService;
@@ -21,7 +24,7 @@ import com.tapalque.hosteleria.demo.servicio.HospedajeService;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/hospedajes")
+@RequestMapping("/hospedajes")
 @CrossOrigin(origins = "*") // permitir requests del frontend
 public class HospedajeController {
 
@@ -59,5 +62,17 @@ public class HospedajeController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminarHospedaje(@PathVariable Long id) {
         return hospedajeService.eliminarPorId(id);
+    }
+
+    // Consultar disponibilidad
+    @GetMapping("/{id}/disponibilidad")
+    public ResponseEntity<DisponibilidadResponseDTO> consultarDisponibilidad(
+            @PathVariable @NonNull Long id,
+            @RequestParam(required = false) String fechaInicio,
+            @RequestParam(required = false) String fechaFin,
+            @RequestParam(required = false) Integer personas) {
+        DisponibilidadResponseDTO resultado = hospedajeService.consultarDisponibilidad(
+                id, fechaInicio, fechaFin, personas);
+        return ResponseEntity.ok(resultado);
     }
 }

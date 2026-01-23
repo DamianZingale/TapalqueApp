@@ -52,6 +52,9 @@ public class User {
     @Column(name = "email_verified", nullable = false)
     private boolean emailVerified = false;
 
+    @Column(name = "activo", nullable = false)
+    private boolean activo = true;
+
     @Column(name = "verification_token")
     private String verificationToken;
 
@@ -150,6 +153,14 @@ public class User {
 
     public void setEmailVerified(boolean emailVerified) {
         this.emailVerified = emailVerified;
+    }
+
+    public boolean isActivo() {
+        return activo;
+    }
+
+    public void setActivo(boolean activo) {
+        this.activo = activo;
     }
 
     public String getVerificationToken() {

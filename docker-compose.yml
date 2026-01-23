@@ -14,10 +14,14 @@ services:
     tmpfs:
       - /var/lib/rabbitmq
     healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      test: ['CMD', 'rabbitmq-diagnostics', '-q', 'ping']
       interval: 15s
       timeout: 10s
       retries: 6
+    deploy:
+      resources:
+        limits:
+          memory: 256M
     networks:
       - tapalque-net
 
@@ -30,6 +34,10 @@ services:
     volumes:
       - pedidos_data:/data/db
       - ./portal Backend/init-scripts/Mongo/init-pedidos.js:/docker-entrypoint-initdb.d/init-pedidos.js:ro
+    deploy:
+      resources:
+        limits:
+          memory: 256M
     networks:
       - tapalque-net
 
@@ -41,6 +49,10 @@ services:
     volumes:
       - reservas_data:/data/db
       - ./portal Backend/init-scripts/Mongo/init-reservas.js:/docker-entrypoint-initdb.d/init-reservas.js:ro
+    deploy:
+      resources:
+        limits:
+          memory: 256M
     networks:
       - tapalque-net
 
@@ -195,7 +207,15 @@ services:
       - '8761:8761'
     restart: always
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8761"]
+      test:
+        [
+          'CMD',
+          'wget',
+          '--quiet',
+          '--tries=1',
+          '--spider',
+          'http://localhost:8761',
+        ]
       interval: 15s
       timeout: 10s
       retries: 8
@@ -295,6 +315,7 @@ services:
       - eureka-server # ← CAMBIO 8: Agregar eureka
     volumes:
       - hosteleria_uploads:/app/uploads
+
     restart: always
     networks:
       - tapalque-net

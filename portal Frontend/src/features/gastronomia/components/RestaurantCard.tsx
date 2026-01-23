@@ -9,13 +9,14 @@ interface InfoProps extends IRestaurantInfo {
 export const Info: React.FC<InfoProps> = ({
   name,
   address,
-  phone,
+  phones,
   email,
   delivery,
   imageUrl,
   schedule,
-  category,
-  destination,
+  categories,
+  latitude,
+  longitude,
   onVerMenu,
   showMenu,
 }) => {
@@ -31,7 +32,7 @@ export const Info: React.FC<InfoProps> = ({
               📍 <strong>Dirección:</strong> {address}
             </p>
             <p className="mb-1">
-              📞 <strong>Tel:</strong> {phone}
+              📞 <strong>Tel:</strong> {phones}
             </p>
             <p className="mb-1">
               ✉️ <strong>Email:</strong> {email}
@@ -42,9 +43,9 @@ export const Info: React.FC<InfoProps> = ({
               {delivery ? 'Delivery disponible' : 'Solo en el local'}
             </p>
 
-            {category && (
+            {categories && (
               <p className="mb-1">
-                🍽️ <strong>Categoría:</strong> {category}
+                🍽️ <strong>Categoría:</strong> {categories}
               </p>
             )}
 
@@ -58,7 +59,7 @@ export const Info: React.FC<InfoProps> = ({
           {/* Columna central - imagen */}
           <div className="col-md-6 text-center">
             <img
-              src={imageUrl}
+              src={imageUrl || '/placeholder-restaurant.jpg'}
               alt={name}
               className="img-fluid rounded"
               style={{
@@ -73,10 +74,10 @@ export const Info: React.FC<InfoProps> = ({
           <div className="col-md-2 text-center">
             <ButtonComoLlegar
               destination={
-                destination?.lat && destination?.lng
+                latitude && longitude
                   ? {
-                      lat: String(destination.lat),
-                      lng: String(destination.lng),
+                      lat: String(latitude),
+                      lng: String(longitude),
                     }
                   : { lat: '0', lng: '0' }
               }

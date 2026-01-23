@@ -6,7 +6,7 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-// import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,7 +31,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/user")  // ← CORREGIDO: sin /api
+@RequestMapping("/user")  
 @RequiredArgsConstructor
 public class UserController {
 
@@ -43,7 +43,7 @@ public class UserController {
     public ResponseEntity<?> register(@Valid @RequestBody UserRegistrationDTO dto) {
         try {
             Role role = new Role(3L, RolName.USER);
-            UserResponseDTO response = userService.register(dto, role);  // ← UserResponseDTO
+            UserResponseDTO response = userService.register(dto, role);  
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(error("Error en registro", e.getMessage()));
@@ -55,7 +55,7 @@ public class UserController {
     public ResponseEntity<?> registerAdmin(@Valid @RequestBody UserRegistrationDTO dto) {
         try {
             Role role = new Role(1L, RolName.MODERADOR);
-            UserResponseDTO response = userService.register(dto, role);  // ← UserResponseDTO
+            UserResponseDTO response = userService.register(dto, role); 
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (Exception e) {
            return ResponseEntity.badRequest().body(error("Error en registro", e.getMessage()));
@@ -67,7 +67,7 @@ public class UserController {
     public ResponseEntity<?> registerGastro(@Valid @RequestBody UserRegistrationDTO dto) {
         try {
             Role role = new Role(2L, RolName.ADMINISTRADOR);
-            UserResponseDTO response = userService.register(dto, role);  // ← UserResponseDTO
+            UserResponseDTO response = userService.register(dto, role); 
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(error("Error en registro", e.getMessage()));
@@ -147,10 +147,6 @@ public class UserController {
 
     // ==================== MODERADOR ENDPOINTS ====================
 
-    /**
-     * Listar todos los usuarios del sistema
-     * Solo accesible por MODERADOR
-     */
     // @PreAuthorize("hasRole('MODERADOR')")
     @GetMapping("/all")
     public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
@@ -162,28 +158,19 @@ public class UserController {
         }
     }
 
-    /**
-     * Obtener un usuario por ID
-     * Solo accesible por MODERADOR
-     */
     // @PreAuthorize("hasRole('MODERADOR')")
     @GetMapping("/{id}")
-    public ResponseEntity<?> getUserById(@PathVariable Long id) {
+    public ResponseEntity<UserResponseDTO> getUserById(@PathVariable Long id) {
         try {
             return userService.getUserById(id)
                     .map(ResponseEntity::ok)
                     .orElse(ResponseEntity.notFound().build());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(error("Error al obtener usuario", e.getMessage()));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
-    /**
-     * Listar solo usuarios con rol ADMINISTRADOR
-     * Para asignar administradores a negocios
-     * Solo accesible por MODERADOR
-     */
+
     // @PreAuthorize("hasRole('MODERADOR')")
     @GetMapping("/administradores")
     public ResponseEntity<List<UserResponseDTO>> getAdministrators() {
@@ -195,15 +182,11 @@ public class UserController {
         }
     }
 
-    /**
-     * Cambiar el rol de un usuario
-     * Permite cambiar entre USER, ADMINISTRADOR y MODERADOR
-     * Solo accesible por MODERADOR
-     */
+
     // @PreAuthorize("hasRole('MODERADOR')")
     @PatchMapping("/{id}/role")
     public ResponseEntity<?> changeUserRole(
-            @PathVariable Long id,
+            @PathVariable @NonNull Long id,
             @RequestBody Map<String, String> payload) {
         try {
             String newRoleName = payload.get("role");
@@ -224,10 +207,31 @@ public class UserController {
         }
     }
 
-    /**
-     * Crear usuario con rol específico (solo MODERADOR)
-     * Permite crear usuarios con cualquier rol y los crea con email verificado
-     */
+    // @PreAuthorize("hasRole('MODERADOR')")
+    @PatchMapping("/{id}/estado")
+    public ResponseEntity<?> changeUserStatus(
+            @PathVariable @NonNull Long id,
+            @RequestBody Map<String, Boolean> payload) {
+        try {
+            Boolean activo = payload.get("activo");
+            if (activo == null) {
+                return ResponseEntity.badRequest()
+                        .body(error("Error", "El estado activo es obligatorio"));
+            }
+
+            UserResponseDTO updated = userService.changeUserStatus(id, activo);
+            return ResponseEntity.ok(updated);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                    .body(error("Error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(error("Error al cambiar estado", e.getMessage()));
+        }
+    }
+
+
+
     // @PreAuthorize("hasRole('MODERADOR')")
     @PostMapping("/moderador/create")
     public ResponseEntity<?> createUserWithRole(@Valid @RequestBody UserRegistrationDTO dto) {
@@ -235,17 +239,11 @@ public class UserController {
             String roleName = dto.getRole() != null ? dto.getRole().toUpperCase() : "USER";
             RolName rolName = RolName.valueOf(roleName);
 
-            Long roleId;
-            switch (rolName) {
-                case MODERADOR:
-                    roleId = 1L;
-                    break;
-                case ADMINISTRADOR:
-                    roleId = 2L;
-                    break;
-                default:
-                    roleId = 3L;
-            }
+            Long roleId = switch (rolName) {
+                case MODERADOR -> 1L;
+                case ADMINISTRADOR -> 2L;
+                default -> 3L;
+            };
 
             Role role = new Role(roleId, rolName);
             UserResponseDTO response = userService.registerByModerator(dto, role);
@@ -260,13 +258,10 @@ public class UserController {
 
     // ==================== PROFILE ENDPOINTS ====================
 
-    /**
-     * Actualizar perfil del usuario (nombre, apellido, direccion)
-     * Cualquier usuario autenticado puede actualizar su propio perfil
-     */
+
     @PutMapping("/{id}/profile")
     public ResponseEntity<?> updateProfile(
-            @PathVariable Long id,
+            @PathVariable @NonNull  Long id,
             @RequestBody UpdateProfileDTO dto) {
         try {
             UserResponseDTO updated = userService.updateProfile(id, dto);
@@ -280,10 +275,8 @@ public class UserController {
         }
     }
 
-    /**
-     * Cambiar contraseña del usuario
-     * Requiere contraseña actual para verificación
-     */
+  
+
     @PutMapping("/{id}/password")
     public ResponseEntity<?> changePassword(
             @PathVariable Long id,
@@ -308,4 +301,16 @@ public class UserController {
         error.put("detalle", detalle);
         return error;
     }
+
+    @GetMapping("/role/{id}")
+    public String getRol (@PathVariable String param) {
+        try {
+            Long id = Long.valueOf(param);
+             String role = userService.getRoleByUserId(id);
+             return role;
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("ID de usuario inválido");
+        }     
+    }
 }
+    

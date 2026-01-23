@@ -1,10 +1,22 @@
 package com.tapalque.comercio.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tapalque.comercio.Exceptions.ComercioNotFoundException;
-import com.tapalque.comercio.dto.ComercioRequestDTO;
-import com.tapalque.comercio.dto.ComercioResponseDTO;
-import com.tapalque.comercio.service.ComercioService;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.Arrays;
+import java.util.Collections;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -16,14 +28,11 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Arrays;
-import java.util.Collections;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tapalque.comercio.Exceptions.ComercioNotFoundException;
+import com.tapalque.comercio.dto.ComercioRequestDTO;
+import com.tapalque.comercio.dto.ComercioResponseDTO;
+import com.tapalque.comercio.service.ComercioService;
 
 @WebMvcTest(ComercioController.class)
 @DisplayName("ComercioController Tests")
@@ -46,7 +55,7 @@ class ComercioControllerTest {
         testResponseDTO = new ComercioResponseDTO();
         testResponseDTO.setId(1L);
         testResponseDTO.setTitulo("Tienda Test");
-        testResponseDTO.setDescription("Una tienda de prueba");
+        testResponseDTO.setDescripcion("Una tienda de prueba");
         testResponseDTO.setDireccion("Calle Principal 123");
         testResponseDTO.setHorario("9:00 - 18:00");
         testResponseDTO.setTelefono("123456789");

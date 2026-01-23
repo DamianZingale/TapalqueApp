@@ -2,7 +2,6 @@ package com.tapalque.eventos.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -20,25 +19,22 @@ import com.tapalque.eventos.dto.EventoImagenRequestDTO;
 import com.tapalque.eventos.dto.ImagenResponseDTO;
 import com.tapalque.eventos.service.EventoImagenService;
 
-import jakarta.annotation.PostConstruct;
-
 @RestController
-@RequestMapping("/api/evento")
+@RequestMapping("/evento")
 public class EventoImagenController {
 
-    @Autowired
-    private EventoImagenService cImagenService;
-
-    @GetMapping("/test")
-    public ResponseEntity<String> eliminarImagen() {
-        return ResponseEntity.ok("EL TEST ANDA");
+    
+    private final EventoImagenService cImagenService;
+    public EventoImagenController(EventoImagenService cImagenService) {
+        this.cImagenService = cImagenService;
     }
+
+
     // Agregar imagen
     @PostMapping(value = "/{eventoId}/imagenes", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ImagenResponseDTO> agregarImagen(
             @PathVariable Long eventoId,
             @RequestParam("file") MultipartFile file) {
-        System.out.println("📸 Imagen recibida para evento ID: " + eventoId);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(cImagenService.agregarImagen(eventoId, file));
     }
@@ -54,14 +50,9 @@ public class EventoImagenController {
     @DeleteMapping("/{eventoId}/imagenes")
     public ResponseEntity<Void> eliminarImagen(@PathVariable Long eventoId,
             @RequestBody EventoImagenRequestDTO dto) {
-
-        System.out.println("LLega a endpoint");
         cImagenService.eliminarImagen(eventoId, dto);
         return ResponseEntity.noContent().build();
     }
 
-    @PostConstruct
-    public void init() {
-        System.out.println("✅ EventoImagenController inicializado");
-    }
+
 }

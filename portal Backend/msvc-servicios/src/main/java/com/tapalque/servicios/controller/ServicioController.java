@@ -20,7 +20,7 @@ import com.tapalque.servicios.dto.ServicioResponseDTO;
 import com.tapalque.servicios.service.ServicioService;
 
 @RestController
-@RequestMapping("api/servicio")
+@RequestMapping("/servicio")
 public class ServicioController {
     @Autowired
     private ServicioService servicioService;

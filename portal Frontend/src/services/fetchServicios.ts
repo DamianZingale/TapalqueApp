@@ -41,13 +41,11 @@ export async function fetchServicios(): Promise<Servicio[]> {
 
 export async function fetchServicioById(id: string): Promise<Servicio | null> {
     try {
-        // El gateway requiere autenticación para detalles individuales
-        const token = localStorage.getItem('token');
+        // El endpoint es público para GET
         const response = await fetch(`/api/servicio/${id}`, {
             method: 'GET',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': token ? `Bearer ${token}` : ''
+                'Content-Type': 'application/json'
             }
         });
 

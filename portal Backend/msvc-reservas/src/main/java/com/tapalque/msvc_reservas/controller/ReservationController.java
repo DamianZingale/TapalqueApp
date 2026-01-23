@@ -40,7 +40,7 @@ public class ReservationController {
         this.reservationService = reservationService;
     }
 
-    @PostMapping("mew")
+    @PostMapping("/new")
     @ResponseStatus(HttpStatus.CREATED)
     public Mono<ReservationDTO> createNewReservation(@RequestBody ReservationDTO entity) {
         Objects.requireNonNull(entity, "Entity cannot be null");

@@ -1,23 +1,32 @@
 package com.tapalque.hosteleria.demo.servicio;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
+import com.tapalque.hosteleria.demo.dto.DisponibilidadResponseDTO;
 import com.tapalque.hosteleria.demo.dto.HospedajeDTO;
 import com.tapalque.hosteleria.demo.dto.HospedajeRequestDTO;
+import com.tapalque.hosteleria.demo.entidades.Habitacion;
 import com.tapalque.hosteleria.demo.entidades.Hospedaje;
 import com.tapalque.hosteleria.demo.entidades.HospedajeImagen;
+import com.tapalque.hosteleria.demo.repositorio.HabitacionRepository;
 import com.tapalque.hosteleria.demo.repositorio.HospedajeRepository;
+
 @Service
 public class HospedajeService {
 
     @Autowired
     private HospedajeRepository hospedajeRepository;
+
+    @Autowired
+    private HabitacionRepository habitacionRepository;
 
     public List<HospedajeDTO> obtenerTodos() {
         return hospedajeRepository.findAll().stream()
@@ -98,5 +107,45 @@ public class HospedajeService {
             hospedaje.setImagenes(imagenes);
         }
         return hospedaje;
+    }
+
+    public DisponibilidadResponseDTO consultarDisponibilidad(
+            @NonNull Long hospedajeId,
+            String fechaInicio,
+            String fechaFin,
+            Integer personas) {
+
+        // Verificar que el hospedaje existe
+        Optional<Hospedaje> hospedaje = hospedajeRepository.findById(hospedajeId);
+        if (hospedaje.isEmpty()) {
+            return new DisponibilidadResponseDTO(false, null);
+        }
+
+        // Buscar habitaciones disponibles que puedan alojar la cantidad de personas
+        List<Habitacion> habitacionesDisponibles = habitacionRepository
+                .findByHospedajeIdAndDisponibleTrue(hospedajeId);
+
+        if (habitacionesDisponibles.isEmpty()) {
+            return new DisponibilidadResponseDTO(false, null);
+        }
+
+        // Buscar una habitación que pueda alojar la cantidad de personas solicitada
+        Optional<Habitacion> habitacionAdecuada = habitacionesDisponibles.stream()
+                .filter(h -> h.getMaxPersonas() >= (personas != null ? personas : 1))
+                .findFirst();
+
+        if (habitacionAdecuada.isEmpty()) {
+            return new DisponibilidadResponseDTO(false, null);
+        }
+
+        // Calcular precio (simplificado - se podría mejorar con lógica de fechas)
+        Habitacion habitacion = habitacionAdecuada.get();
+        BigDecimal precioTotal = habitacion.getPrecio();
+
+        if (habitacion.getTipoPrecio() == Habitacion.TipoPrecio.POR_PERSONA && personas != null) {
+            precioTotal = habitacion.getPrecio().multiply(BigDecimal.valueOf(personas));
+        }
+
+        return new DisponibilidadResponseDTO(true, precioTotal);
     }
 }

@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.lang.NonNull;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -18,10 +19,8 @@ import com.tapalque.user.repository.RoleRepository;
 import com.tapalque.user.repository.UserRepository;
 import com.tapalque.user.util.PasswordValidator;
 
-import lombok.RequiredArgsConstructor;
-
 @Service
-@RequiredArgsConstructor
+
 public class UserService {
 
     private final UserRepository userRepo;
@@ -30,7 +29,17 @@ public class UserService {
     private final EmailVerificationService emailVerificationService;
     private final EmailService emailService;
 
-    public UserResponseDTO register(UserRegistrationDTO dto, Role role) {  // ← Retorna UserResponseDTO
+    public UserService(UserRepository userRepo, RoleRepository roleRepo, PasswordEncoder passwordEncoder,
+            EmailVerificationService emailVerificationService, EmailService emailService) {
+        this.userRepo = userRepo;
+        this.roleRepo = roleRepo;
+        this.passwordEncoder = passwordEncoder;
+        this.emailVerificationService = emailVerificationService;
+        this.emailService = emailService;
+    }
+
+
+    public UserResponseDTO register(UserRegistrationDTO dto, Role role) {  
         // Validar fortaleza de contraseña
         PasswordValidator.validate(dto.getPassword());
 
@@ -70,9 +79,8 @@ public class UserService {
         return UserResponseDTO.fromEntity(user);  // ← Sin password
     }
 
-    /**
-     * Registrar usuario desde el panel del moderador con email verificado automáticamente
-     */
+ 
+    // Registrar usuario desde el panel del moderador con email verificado automáticamente
     public UserResponseDTO registerByModerator(UserRegistrationDTO dto, Role role) {
         // Validar fortaleza de contraseña
         PasswordValidator.validate(dto.getPassword());
@@ -94,10 +102,8 @@ public class UserService {
                 .role(role)
                 .build();
 
-        user.setEmailVerified(true); // Verificado automáticamente por moderador
+        user.setEmailVerified(true); // Verificado por moderador
         userRepo.save(user);
-
-        // No enviar email de verificación ya que el moderador ya validó al usuario
 
         return UserResponseDTO.fromEntity(user);
     }
@@ -118,9 +124,7 @@ public class UserService {
 
     // ==================== MODERADOR METHODS ====================
 
-    /**
-     * Obtener todos los usuarios del sistema
-     */
+
     public List<UserResponseDTO> getAllUsers() {
         return userRepo.findAll()
                 .stream()
@@ -128,17 +132,13 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Obtener un usuario por ID
-     */
-    public java.util.Optional<UserResponseDTO> getUserById(Long id) {
+
+    public java.util.Optional<UserResponseDTO> getUserById(@NonNull Long id) {
         return userRepo.findById(id)
                 .map(UserResponseDTO::fromEntity);
     }
 
-    /**
-     * Obtener usuarios por rol
-     */
+
     public List<UserResponseDTO> getUsersByRole(RolName rolName) {
         return userRepo.findAll()
                 .stream()
@@ -147,11 +147,8 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Cambiar el rol de un usuario
-     * No permite cambiar a MODERADOR
-     */
-    public UserResponseDTO changeUserRole(Long userId, RolName newRolName) {
+
+    public UserResponseDTO changeUserRole(@NonNull  Long userId, RolName newRolName) {
         User user = userRepo.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
 
@@ -165,12 +162,17 @@ public class UserService {
         return UserResponseDTO.fromEntity(user);
     }
 
-    // ==================== PROFILE METHODS ====================
+    public UserResponseDTO changeUserStatus(@NonNull Long userId, @NonNull Boolean activo) {
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
 
-    /**
-     * Actualizar perfil del usuario (nombre, apellido, direccion)
-     */
-    public UserResponseDTO updateProfile(Long userId, UpdateProfileDTO dto) {
+        user.setActivo(activo);
+        userRepo.save(user);
+
+        return UserResponseDTO.fromEntity(user);
+    }
+
+    public UserResponseDTO updateProfile(@NonNull  Long userId, UpdateProfileDTO dto) {
         User user = userRepo.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
 
@@ -191,7 +193,7 @@ public class UserService {
     /**
      * Cambiar contraseña del usuario
      */
-    public void changePassword(Long userId, ChangePasswordDTO dto) {
+    public void changePassword(@NonNull  Long userId, ChangePasswordDTO dto) {
         User user = userRepo.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
 
@@ -207,4 +209,21 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(dto.getPasswordNueva()));
         userRepo.save(user);
     }
+
+    
+    public String getRoleByUserId(@NonNull  Long userId) {
+        try{
+            if (!userRepo.existsById(userId)){
+                throw new IllegalArgumentException("El usuario con el ID proporcionado no existe");
+            }else{
+                        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+        return user.getRole().getName().name();
+            }
+        }
+        catch (IllegalArgumentException e){
+            throw new IllegalArgumentException("Error al procesar el ID de usuario");
+        }
+        
+    }   
 }

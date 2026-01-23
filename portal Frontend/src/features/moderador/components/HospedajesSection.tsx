@@ -57,6 +57,7 @@ export function HospedajesSection() {
     texto: string;
   } | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [currentBusiness, setCurrentBusiness] = useState<any>(null);
 
   useEffect(() => {
     cargarDatos();
@@ -104,21 +105,46 @@ export function HospedajesSection() {
     }
   };
 
-  const handleSelect = (item: Hospedaje) => {
+  const handleSelect = async (item: Hospedaje) => {
     console.log('Hospedaje seleccionado:', item);
     setSelected(item);
     setIsNew(false);
     setFormData({ ...item });
+    await loadBusinessData(item.id);
   };
 
   const handleNew = () => {
     setSelected(null);
     setIsNew(true);
     setFormData({ ...emptyItem });
+    setCurrentBusiness(null);
   };
 
   const handleChange = (field: keyof Hospedaje, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const loadBusinessData = async (hospedajeId: number) => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`/api/business/external/${hospedajeId}/type/HOSPEDAJE`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (res.ok) {
+        const business = await res.json();
+        setCurrentBusiness(business);
+        setFormData(prev => ({ ...prev, userId: business.ownerId }));
+      } else {
+        setCurrentBusiness(null);
+      }
+    } catch (err) {
+      console.error('Error loading business:', err);
+      setCurrentBusiness(null);
+    }
   };
 
   const handleSave = async () => {
@@ -180,6 +206,28 @@ export function HospedajesSection() {
 
           if (!businessRes.ok) {
             console.warn('No se pudo asignar el administrador al negocio');
+          }
+        }
+
+        // Si es edición y hay un cambio en el administrador, actualizar el Business
+        if (!isNew && currentBusiness && formData.userId && formData.userId !== currentBusiness.ownerId) {
+          const updatePayload = { ownerId: formData.userId };
+          
+          const businessRes = await fetch(`/api/business/${currentBusiness.id}/owner`, {
+            method: 'PATCH',
+            headers: { 
+              'Content-Type': 'application/json', 
+              Authorization: `Bearer ${token}` 
+            },
+            body: JSON.stringify(updatePayload)
+          });
+
+          if (!businessRes.ok) {
+            console.warn('No se pudo actualizar el administrador del negocio');
+          } else {
+            // Actualizar el business actual con los nuevos datos
+            const updatedBusiness = await businessRes.json();
+            setCurrentBusiness(updatedBusiness);
           }
         }
 
@@ -306,27 +354,25 @@ export function HospedajesSection() {
                 </Col>
               </Row>
             )}
-            {isNew && (
-              <Row className="mb-2">
-                <Col md={12}>
-                  <Form.Group>
-                    <Form.Label className="small mb-0">Administrador/Dueño</Form.Label>
-                    <Form.Select
-                      size="sm"
-                      value={formData.userId || ''}
-                      onChange={(e) => handleChange('userId', e.target.value)}
-                    >
-                      <option value="">Seleccionar administrador...</option>
-                      {administradores.map((admin) => (
-                        <option key={admin.id} value={admin.id}>
-                          {admin.firstName} {admin.lastName} ({admin.email})
-                        </option>
-                      ))}
-                    </Form.Select>
-                  </Form.Group>
-                </Col>
-              </Row>
-            )}
+            <Row className="mb-2">
+              <Col md={12}>
+                <Form.Group>
+                  <Form.Label className="small mb-0">Administrador/Dueño</Form.Label>
+                  <Form.Select
+                    size="sm"
+                    value={formData.userId || ''}
+                    onChange={(e) => handleChange('userId', e.target.value)}
+                  >
+                    <option value="">Seleccionar administrador...</option>
+                    {administradores.map((admin) => (
+                      <option key={admin.id} value={admin.id}>
+                        {admin.firstName} {admin.lastName} ({admin.email})
+                      </option>
+                    ))}
+                  </Form.Select>
+                </Form.Group>
+              </Col>
+            </Row>
             <Row>
               <Col md={6}>
                 <Form.Group className="mb-2">

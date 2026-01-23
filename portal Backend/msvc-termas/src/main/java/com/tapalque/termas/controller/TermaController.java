@@ -2,7 +2,6 @@ package com.tapalque.termas.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -20,10 +19,14 @@ import com.tapalque.termas.dto.TermaResponseDTO;
 import com.tapalque.termas.service.TermaService;
 
 @RestController
-@RequestMapping("/api/terma")
+@RequestMapping("/terma")
 public class TermaController {
-    @Autowired
-    private TermaService termaService;
+    
+    private final TermaService termaService;
+
+    public TermaController(TermaService termaService) {
+        this.termaService = termaService;
+    }
 
     // Crear terma
     @PostMapping

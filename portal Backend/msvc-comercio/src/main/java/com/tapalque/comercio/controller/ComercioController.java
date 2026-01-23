@@ -52,7 +52,7 @@ public class ComercioController {
     }
 
     // Actualizar parcial (PATCH)
-    @PatchMapping("/patch/{id}")
+    @PatchMapping("/{id}")
     public ResponseEntity<ComercioResponseDTO> actualizarParcial(@PathVariable Long id,
             @RequestBody ComercioRequestDTO dto) {
         return ResponseEntity.ok(comercioService.actualizarParcial(id, dto));

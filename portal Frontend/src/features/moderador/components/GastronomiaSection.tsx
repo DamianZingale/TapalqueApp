@@ -41,13 +41,14 @@ export function GastronomiaSection() {
     const [saving, setSaving] = useState(false);
     const [mensaje, setMensaje] = useState<{ tipo: "success" | "danger"; texto: string } | null>(null);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [currentBusiness, setCurrentBusiness] = useState<any>(null);
 
     useEffect(() => { cargarDatos(); cargarAdministradores(); }, []);
 
     const cargarDatos = async () => {
         try {
             setLoading(true);
-            const res = await fetch("/api/gastronomia/findAll", {
+            const res = await fetch("/api/gastronomia/restaurants", {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -78,9 +79,37 @@ export function GastronomiaSection() {
         } catch (err) { console.error("Error cargando administradores:", err); }
     };
 
-    const handleSelect = (item: Restaurant) => { setSelected(item); setIsNew(false); setFormData({ ...item }); };
-    const handleNew = () => { setSelected(null); setIsNew(true); setFormData({ ...emptyItem }); setMensaje(null); };
+    const handleSelect = async (item: Restaurant) => { 
+        setSelected(item); 
+        setIsNew(false); 
+        setFormData({ ...item });
+        await loadBusinessData(item.id);
+    };
+    const handleNew = () => { setSelected(null); setIsNew(true); setFormData({ ...emptyItem }); setMensaje(null); setCurrentBusiness(null); };
     const handleChange = (field: keyof Restaurant, value: string | number | boolean) => { setFormData(prev => ({ ...prev, [field]: value })); };
+
+    const loadBusinessData = async (restaurantId: number) => {
+        try {
+            const token = localStorage.getItem("token");
+            const res = await fetch(`/api/business/external/${restaurantId}/type/RESTAURANT`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            if (res.ok) {
+                const business = await res.json();
+                setCurrentBusiness(business);
+                setFormData(prev => ({ ...prev, userId: business.ownerId }));
+            } else {
+                setCurrentBusiness(null);
+            }
+        } catch (err) {
+            console.error("Error loading business:", err);
+            setCurrentBusiness(null);
+        }
+    };
 
 const handleSave = async () => {
         if (!formData.name) { setMensaje({ tipo: "danger", texto: "Nombre requerido" }); return; }
@@ -114,7 +143,7 @@ const handleSave = async () => {
                     const businessPayload = {
                         ownerId: formData.userId,
                         name: formData.name,
-                        businessType: "GASTRONOMIA",
+                        businessType: "RESTAURANT",
                         externalBusinessId: createdData.id
                     };
 
@@ -126,6 +155,25 @@ const handleSave = async () => {
 
                     if (!businessRes.ok) {
                         console.warn("No se pudo asignar el administrador al negocio");
+                    }
+                }
+
+                // Si es edición y hay un cambio en el administrador, actualizar el Business
+                if (!isNew && currentBusiness && formData.userId && formData.userId !== currentBusiness.ownerId) {
+                    const updatePayload = { ownerId: formData.userId };
+                    
+                    const businessRes = await fetch(`/api/business/${currentBusiness.id}/owner`, {
+                        method: "PATCH",
+                        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+                        body: JSON.stringify(updatePayload)
+                    });
+
+                    if (!businessRes.ok) {
+                        console.warn("No se pudo actualizar el administrador del negocio");
+                    } else {
+                        // Actualizar el business actual con los nuevos datos
+                        const updatedBusiness = await businessRes.json();
+                        setCurrentBusiness(updatedBusiness);
                     }
                 }
 
@@ -189,27 +237,25 @@ const handleSave = async () => {
                                 </Col>
                             </Row>
                         )}
-                        {isNew && (
-                            <Row className="mb-2">
-                                <Col md={12}>
-                                    <Form.Group>
-                                        <Form.Label className="small mb-0">Administrador/Dueño</Form.Label>
-                                        <Form.Select
-                                            size="sm"
-                                            value={formData.userId || ""}
-                                            onChange={e => handleChange("userId", parseInt(e.target.value) || 0)}
-                                        >
-                                            <option value="">Seleccionar administrador...</option>
-                                            {administradores.map(admin => (
-                                                <option key={admin.id} value={admin.id}>
-                                                    {admin.firstName} {admin.lastName} ({admin.email})
-                                                </option>
-                                            ))}
-                                        </Form.Select>
-                                    </Form.Group>
-                                </Col>
-                            </Row>
-                        )}
+                        <Row className="mb-2">
+                            <Col md={12}>
+                                <Form.Group>
+                                    <Form.Label className="small mb-0">Administrador/Dueño</Form.Label>
+                                    <Form.Select
+                                        size="sm"
+                                        value={formData.userId || ""}
+                                        onChange={e => handleChange("userId", parseInt(e.target.value) || 0)}
+                                    >
+                                        <option value="">Seleccionar administrador...</option>
+                                        {administradores.map(admin => (
+                                            <option key={admin.id} value={admin.id}>
+                                                {admin.firstName} {admin.lastName} ({admin.email})
+                                            </option>
+                                        ))}
+                                    </Form.Select>
+                                </Form.Group>
+                            </Col>
+                        </Row>
                         <Row>
                             <Col md={6}><Form.Group className="mb-2"><Form.Label className="small mb-0">Nombre *</Form.Label><Form.Control size="sm" value={formData.name || ""} onChange={e => handleChange("name", e.target.value)} /></Form.Group></Col>
                             <Col md={6}><Form.Group className="mb-2"><Form.Label className="small mb-0">Email</Form.Label><Form.Control size="sm" type="email" value={formData.email || ""} onChange={e => handleChange("email", e.target.value)} /></Form.Group></Col>
