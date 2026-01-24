@@ -1,0 +1,5 @@
+# Dockerfile.dev
+FROM maven:3.9.6-eclipse-temurin-17
+WORKDIR /app
+# No copiamos nada porque en override montamos el código fuente
+# El comando lo define docker-compose.override.yml -> mvn spring-boot:run
