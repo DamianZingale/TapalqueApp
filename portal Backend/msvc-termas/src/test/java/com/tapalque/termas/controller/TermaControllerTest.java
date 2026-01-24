@@ -65,7 +65,7 @@ class TermaControllerTest {
     }
 
     @Nested
-    @DisplayName("Tests de POST /api/terma")
+    @DisplayName("Tests de POST /terma")
     class CrearTests {
 
         @Test
@@ -75,7 +75,7 @@ class TermaControllerTest {
             when(termaService.crear(any(TermaRequestDTO.class))).thenReturn(testResponseDTO);
 
             // When & Then
-            mockMvc.perform(post("/api/terma")
+            mockMvc.perform(post("/terma")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(testRequestDTO)))
                     .andExpect(status().isCreated())
@@ -87,7 +87,7 @@ class TermaControllerTest {
     }
 
     @Nested
-    @DisplayName("Tests de GET /api/terma")
+    @DisplayName("Tests de GET /terma")
     class ListarTests {
 
         @Test
@@ -102,7 +102,7 @@ class TermaControllerTest {
             when(termaService.obtenerTodos()).thenReturn(Arrays.asList(testResponseDTO, dto2));
 
             // When & Then
-            mockMvc.perform(get("/api/terma"))
+            mockMvc.perform(get("/terma"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$[0].titulo").value("Termas del Sol"))
                     .andExpect(jsonPath("$[1].titulo").value("Termas Naturales"));
@@ -110,7 +110,7 @@ class TermaControllerTest {
     }
 
     @Nested
-    @DisplayName("Tests de GET /api/terma/{id}")
+    @DisplayName("Tests de GET /terma/{id}")
     class ObtenerPorIdTests {
 
         @Test
@@ -120,7 +120,7 @@ class TermaControllerTest {
             when(termaService.obtenerPorId(1L)).thenReturn(testResponseDTO);
 
             // When & Then
-            mockMvc.perform(get("/api/terma/1"))
+            mockMvc.perform(get("/terma/1"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.id").value(1))
                     .andExpect(jsonPath("$.titulo").value("Termas del Sol"));
@@ -133,13 +133,13 @@ class TermaControllerTest {
             when(termaService.obtenerPorId(999L)).thenThrow(new TermaNotFoundException(999L));
 
             // When & Then
-            mockMvc.perform(get("/api/terma/999"))
+            mockMvc.perform(get("/terma/999"))
                     .andExpect(status().isNotFound());
         }
     }
 
     @Nested
-    @DisplayName("Tests de PUT /api/terma/{id}")
+    @DisplayName("Tests de PUT /terma/{id}")
     class ActualizarTests {
 
         @Test
@@ -150,7 +150,7 @@ class TermaControllerTest {
                     .thenReturn(testResponseDTO);
 
             // When & Then
-            mockMvc.perform(put("/api/terma/1")
+            mockMvc.perform(put("/terma/1")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(testRequestDTO)))
                     .andExpect(status().isOk());
@@ -158,7 +158,7 @@ class TermaControllerTest {
     }
 
     @Nested
-    @DisplayName("Tests de DELETE /api/terma/{id}")
+    @DisplayName("Tests de DELETE /terma/{id}")
     class EliminarTests {
 
         @Test
@@ -168,7 +168,7 @@ class TermaControllerTest {
             doNothing().when(termaService).eliminar(1L);
 
             // When & Then
-            mockMvc.perform(delete("/api/terma/1"))
+            mockMvc.perform(delete("/terma/1"))
                     .andExpect(status().isNoContent());
 
             verify(termaService).eliminar(1L);
@@ -181,7 +181,7 @@ class TermaControllerTest {
             doThrow(new TermaNotFoundException(999L)).when(termaService).eliminar(999L);
 
             // When & Then
-            mockMvc.perform(delete("/api/terma/999"))
+            mockMvc.perform(delete("/terma/999"))
                     .andExpect(status().isNotFound());
         }
     }

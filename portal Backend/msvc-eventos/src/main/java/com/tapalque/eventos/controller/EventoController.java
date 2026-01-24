@@ -2,7 +2,6 @@ package com.tapalque.eventos.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -22,8 +21,12 @@ import com.tapalque.eventos.service.EventoService;
 @RestController
 @RequestMapping("/evento")
 public class EventoController {
-    @Autowired
-    private EventoService eventoService;
+    
+    private final EventoService eventoService;
+
+    public EventoController(EventoService eventoService) {
+        this.eventoService = eventoService;
+    }
 
     // Crear evento
     @PostMapping

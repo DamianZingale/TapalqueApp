@@ -88,7 +88,7 @@ export async function updateEstadoPedido(
   nuevoEstado: EstadoPedido
 ): Promise<boolean> {
   try {
-    const response = await fetch(`/api/pedidos/${pedidoId}/estado`, {
+    const response = await fetch(`/api/pedidos/orders/${pedidoId}/estado`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',

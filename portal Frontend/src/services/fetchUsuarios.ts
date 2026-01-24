@@ -55,7 +55,7 @@ export const getRoleName = (rol: number): string => {
 
 export async function fetchUsuarios(): Promise<Usuario[]> {
   try {
-    const response = await api.get<Usuario[]>('/user/all');
+    const response = await api.get<Usuario[]>('/api/user/all');
     return response;
   } catch (error) {
     console.error('Error en fetchUsuarios:', error);
@@ -65,7 +65,7 @@ export async function fetchUsuarios(): Promise<Usuario[]> {
 
 export async function fetchUsuarioById(id: number): Promise<Usuario | null> {
   try {
-    const response = await api.get<Usuario>(`/user/${id}`);
+    const response = await api.get<Usuario>(`/api/user/${id}`);
     return response;
   } catch (error) {
     console.error('Error en fetchUsuarioById:', error);
@@ -77,7 +77,10 @@ export async function crearUsuario(
   usuario: NuevoUsuario
 ): Promise<Usuario | null> {
   try {
-    const response = await api.post<Usuario>('/user/public/register', usuario);
+    const response = await api.post<Usuario>(
+      '/api/user/public/register',
+      usuario
+    );
     return response;
   } catch (error) {
     console.error('Error en crearUsuario:', error);
@@ -90,7 +93,7 @@ export async function actualizarUsuario(
   data: Partial<Usuario>
 ): Promise<Usuario | null> {
   try {
-    const response = await api.put<Usuario>(`/user/${id}`, data);
+    const response = await api.put<Usuario>(`/api/user/${id}`, data);
     return response;
   } catch (error) {
     console.error('Error en actualizarUsuario:', error);
@@ -116,7 +119,7 @@ export async function cambiarRolUsuario(
   rol: string
 ): Promise<boolean> {
   try {
-    await api.patch(`/user/${id}/role`, { role: rol });
+    await api.patch(`/api/user/${id}/role`, { role: rol });
     return true;
   } catch (error) {
     console.error('Error en cambiarRolUsuario:', error);
@@ -126,7 +129,7 @@ export async function cambiarRolUsuario(
 
 export async function eliminarUsuario(id: number): Promise<boolean> {
   try {
-    await api.delete(`/user/${id}`);
+    await api.delete(`/api/user/${id}`);
     return true;
   } catch (error) {
     console.error('Error en eliminarUsuario:', error);

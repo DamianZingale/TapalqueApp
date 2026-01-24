@@ -31,7 +31,7 @@ public class TermaImagenController {
 
 
     }
-    // Agregar imagen
+
     @PostMapping(value = "/{termaId}/imagenes", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ImagenResponseDTO> agregarImagen(
             @PathVariable Long termaId,
@@ -41,14 +41,12 @@ public class TermaImagenController {
                 .body(cImagenService.agregarImagen(termaId, file));
     }
 
-    // Listar imágenes
     @GetMapping("/{termaId}/imagenes")
     public ResponseEntity<List<ImagenResponseDTO>> listarImagenes(@PathVariable Long termaId) {
         return ResponseEntity.ok(cImagenService.listarImagenes(termaId));
     }
     
 
-    // Eliminar imagen
     @DeleteMapping("/{termaId}/imagenes")
     public ResponseEntity<Void> eliminarImagen(@PathVariable Long termaId,
             @RequestBody TermaImagenRequestDTO dto) {

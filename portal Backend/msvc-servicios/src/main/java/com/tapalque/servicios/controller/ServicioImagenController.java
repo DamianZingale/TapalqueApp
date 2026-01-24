@@ -30,7 +30,6 @@ public class ServicioImagenController {
     }
 
 
-    // Agregar imagen
     @PostMapping(value = "/{servicioId}/imagenes", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ImagenResponseDTO> agregarImagen(
             @PathVariable Long servicioId,
@@ -40,14 +39,12 @@ public class ServicioImagenController {
                 .body(cImagenService.agregarImagen(servicioId, file));
     }
 
-    // Listar imágenes
     @GetMapping("/{servicioId}/imagenes")
     public ResponseEntity<List<ImagenResponseDTO>> listarImagenes(@PathVariable Long servicioId) {
         return ResponseEntity.ok(cImagenService.listarImagenes(servicioId));
     }
     
 
-    // Eliminar imagen
     @DeleteMapping("/{servicioId}/imagenes")
     public ResponseEntity<Void> eliminarImagen(@PathVariable Long servicioId,
             @RequestBody ServicioImagenRequestDTO dto) {

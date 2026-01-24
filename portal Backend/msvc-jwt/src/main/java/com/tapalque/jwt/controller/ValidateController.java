@@ -12,14 +12,16 @@ import org.springframework.web.bind.annotation.RestController;
 import com.tapalque.jwt.service.JwtService;
 
 import io.jsonwebtoken.Claims;
-import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/jwt/public")
-@RequiredArgsConstructor
+
 public class ValidateController {
 
     private final JwtService jwtService;
+    public ValidateController(JwtService jwtService) {
+        this.jwtService = jwtService;
+    }   
 
     @PostMapping("/validate")
     public ResponseEntity<?> validarToken(@RequestHeader("Authorization") String authHeader) {

@@ -60,8 +60,8 @@ public class OrderController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta) {
 
         if (desde != null && hasta != null) {
-            LocalDateTime desdeDateTime = desde.atStartOfDay();
-            LocalDateTime hastaDateTime = hasta.atTime(LocalTime.MAX);
+            LocalDateTime desdeDateTime = Objects.requireNonNull(desde).atStartOfDay();
+            LocalDateTime hastaDateTime = Objects.requireNonNull(hasta).atTime(LocalTime.MAX);
             return orderService.getOrdersByRestaurantAndDateRange(restaurantId, desdeDateTime, hastaDateTime)
                     .map(this::mapToDTO);
         }

@@ -22,6 +22,7 @@ import com.tapalque.espaciospublicos.service.EspacioPublicoService;
 @RestController
 @RequestMapping("/espacio-publico")
 public class EspacioPublicoController {
+    
     private final EspacioPublicoService espacioPublicoService;
 
     public EspacioPublicoController(EspacioPublicoService espacioPublicoService) {

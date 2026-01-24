@@ -25,15 +25,11 @@ import com.tapalque.msvc_reservas.service.ReservationService;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-
-
-
-
 @RestController
 @RequestMapping("/reservations")
 public class ReservationController {
 
-    private final System.Logger logger = System.getLogger(ReservationController.class.getName());
+    private static final System.Logger logger = System.getLogger(ReservationController.class.getName());
     private final ReservationService reservationService;
 
     public ReservationController(ReservationService reservationService) {
@@ -47,7 +43,7 @@ public class ReservationController {
         
         return reservationService.createReservation(entity)
             .onErrorResume(e -> {
-                logger.log(System.Logger.Level.ERROR, "Error creating reservation: " + e.getMessage());
+                logger.log(System.Logger.Level.ERROR, () -> "Error creating reservation: " + e.getMessage());
                 return Mono.empty();
             });
     }
@@ -56,7 +52,7 @@ public class ReservationController {
     public Flux<ReservationDTO> getReservationById(@NonNull @PathVariable String id)  {
     return reservationService.getReservationById(id)
             .onErrorResume(e -> {
-                logger.log(System.Logger.Level.ERROR, "Error fetching reservation by ID: " + e.getMessage());
+                logger.log(System.Logger.Level.ERROR, () -> "Error fetching reservation by ID: " + e.getMessage());
                 return Flux.empty();
             });
 }
@@ -66,7 +62,7 @@ public class ReservationController {
         Objects.requireNonNull(id, "ID cannot be null");
             return reservationService.updateReservation(entity)
             .onErrorResume(e ->{
-                logger.log(System.Logger.Level.ERROR, "Error updating reservation: " + e.getMessage());
+                logger.log(System.Logger.Level.ERROR, () -> "Error updating reservation: " + e.getMessage());
                 return Mono.empty();
             });
         
@@ -78,7 +74,7 @@ public class ReservationController {
         Objects.requireNonNull(id, "ID cannot be null");
         return reservationService.deleteReservation(id)
             .onErrorResume(e -> {
-                logger.log(System.Logger.Level.ERROR, "Error deleting reservation: " + e.getMessage());
+                logger.log(System.Logger.Level.ERROR, () -> "Error deleting reservation: " + e.getMessage());
                 return Mono.empty();
             });
 }
@@ -96,14 +92,14 @@ public class ReservationController {
             LocalDateTime hastaDateTime = hasta.atTime(LocalTime.MAX);
             return reservationService.getReservationsByHotelAndDateRange(hotelId, desdeDateTime, hastaDateTime)
                 .onErrorResume(e -> {
-                    logger.log(System.Logger.Level.ERROR, "Error fetching reservations by hotel and date range: " + e.getMessage());
+                    logger.log(System.Logger.Level.ERROR, () -> "Error fetching reservations by hotel and date range: " + e.getMessage());
                     return Flux.empty();
                 });
         }
 
         return reservationService.getReservationsByHotel(hotelId)
             .onErrorResume(e -> {
-                logger.log(System.Logger.Level.ERROR, "Error fetching reservations by hotel: " + e.getMessage());
+                logger.log(System.Logger.Level.ERROR, () -> "Error fetching reservations by hotel: " + e.getMessage());
                 return Flux.empty();
             });
     }
@@ -120,14 +116,14 @@ public class ReservationController {
             LocalDateTime hastaDateTime = hasta.atTime(LocalTime.MAX);
             return reservationService.getReservationsByCustomerAndDateRange(customerId, desdeDateTime, hastaDateTime)
                 .onErrorResume(e -> {
-                    logger.log(System.Logger.Level.ERROR, "Error fetching reservations by customer and date range: " + e.getMessage());
+                    logger.log(System.Logger.Level.ERROR, () -> "Error fetching reservations by customer and date range: " + e.getMessage());
                     return Flux.empty();
                 });
         }
 
         return reservationService.getReservationsByCustomer(customerId)
             .onErrorResume(e -> {
-                logger.log(System.Logger.Level.ERROR, "Error fetching reservations by customer: " + e.getMessage());
+                logger.log(System.Logger.Level.ERROR, () -> "Error fetching reservations by customer: " + e.getMessage());
                 return Flux.empty();
             });
     }

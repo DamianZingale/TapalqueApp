@@ -64,7 +64,7 @@ class HospedajeControllerTest {
     }
 
     @Nested
-    @DisplayName("Tests de GET /api/hospedajes")
+    @DisplayName("Tests de GET /hospedajes")
     class ListarTests {
 
         @Test
@@ -81,7 +81,7 @@ class HospedajeControllerTest {
                     .thenReturn(Arrays.asList(testHospedajeDTO, dto2));
 
             // When & Then
-            mockMvc.perform(get("/api/hospedajes"))
+            mockMvc.perform(get("/hospedajes"))
                     .andExpect(status().isOk())
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                     .andExpect(jsonPath("$[0].titulo").value("Hotel Test"))
@@ -97,7 +97,7 @@ class HospedajeControllerTest {
             when(hospedajeService.obtenerTodos()).thenReturn(Collections.emptyList());
 
             // When & Then
-            mockMvc.perform(get("/api/hospedajes"))
+            mockMvc.perform(get("/hospedajes"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$").isArray())
                     .andExpect(jsonPath("$").isEmpty());
@@ -107,7 +107,7 @@ class HospedajeControllerTest {
     }
 
     @Nested
-    @DisplayName("Tests de GET /api/hospedajes/{id}")
+    @DisplayName("Tests de GET /hospedajes/{id}")
     class ObtenerPorIdTests {
 
         @Test
@@ -118,7 +118,7 @@ class HospedajeControllerTest {
                     .thenReturn(ResponseEntity.ok(testHospedajeDTO));
 
             // When & Then
-            mockMvc.perform(get("/api/hospedajes/1"))
+            mockMvc.perform(get("/hospedajes/1"))
                     .andExpect(status().isOk())
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                     .andExpect(jsonPath("$.id").value(1))
@@ -135,7 +135,7 @@ class HospedajeControllerTest {
                     .thenReturn(ResponseEntity.notFound().build());
 
             // When & Then
-            mockMvc.perform(get("/api/hospedajes/999"))
+            mockMvc.perform(get("/hospedajes/999"))
                     .andExpect(status().isNotFound());
 
             verify(hospedajeService).obtenerPorId(999L);
@@ -143,7 +143,7 @@ class HospedajeControllerTest {
     }
 
     @Nested
-    @DisplayName("Tests de POST /api/hospedajes")
+    @DisplayName("Tests de POST /hospedajes")
     class CrearTests {
 
         @Test
@@ -154,7 +154,7 @@ class HospedajeControllerTest {
                     .thenReturn(testHospedajeDTO);
 
             // When & Then
-            mockMvc.perform(post("/api/hospedajes")
+            mockMvc.perform(post("/hospedajes")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(testRequestDTO)))
                     .andExpect(status().isOk())
@@ -166,7 +166,7 @@ class HospedajeControllerTest {
     }
 
     @Nested
-    @DisplayName("Tests de PUT /api/hospedajes/{id}")
+    @DisplayName("Tests de PUT /hospedajes/{id}")
     class ActualizarTests {
 
         @Test
@@ -178,7 +178,7 @@ class HospedajeControllerTest {
                     .thenReturn(ResponseEntity.ok(testHospedajeDTO));
 
             // When & Then
-            mockMvc.perform(put("/api/hospedajes/1")
+            mockMvc.perform(put("/hospedajes/1")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(testRequestDTO)))
                     .andExpect(status().isOk())
@@ -195,7 +195,7 @@ class HospedajeControllerTest {
                     .thenReturn(ResponseEntity.notFound().build());
 
             // When & Then
-            mockMvc.perform(put("/api/hospedajes/999")
+            mockMvc.perform(put("/hospedajes/999")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(testRequestDTO)))
                     .andExpect(status().isNotFound());
@@ -203,7 +203,7 @@ class HospedajeControllerTest {
     }
 
     @Nested
-    @DisplayName("Tests de DELETE /api/hospedajes/{id}")
+    @DisplayName("Tests de DELETE /hospedajes/{id}")
     class EliminarTests {
 
         @Test
@@ -214,7 +214,7 @@ class HospedajeControllerTest {
                     .thenReturn(ResponseEntity.noContent().build());
 
             // When & Then
-            mockMvc.perform(delete("/api/hospedajes/1"))
+            mockMvc.perform(delete("/hospedajes/1"))
                     .andExpect(status().isNoContent());
 
             verify(hospedajeService).eliminarPorId(1L);
@@ -228,7 +228,7 @@ class HospedajeControllerTest {
                     .thenReturn(ResponseEntity.notFound().build());
 
             // When & Then
-            mockMvc.perform(delete("/api/hospedajes/999"))
+            mockMvc.perform(delete("/hospedajes/999"))
                     .andExpect(status().isNotFound());
 
             verify(hospedajeService).eliminarPorId(999L);

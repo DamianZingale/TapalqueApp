@@ -1,4 +1,4 @@
-CREATE DATABASE IF NOT EXISTS termas;
+CREATE DATABASE IF NOT EXISTS termas CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE termas;
 
 -- Tabla de termas

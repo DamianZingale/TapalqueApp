@@ -27,7 +27,7 @@ export default function GastronomiaDetailPage() {
       const fetchRestaurantDetail = async () => {
         try {
           const response = await api.get<IRestaurantInfo>(
-            `/gastronomia/restaurants/${id}`
+            `/api/gastronomia/restaurants/${id}`
           );
           setRestaurante(response);
         } catch (error) {
@@ -47,7 +47,9 @@ export default function GastronomiaDetailPage() {
 
     try {
       setLoadingMenu(true);
-      const response = await api.get<MenuResponseDTO>(`/gastronomia/menu/restaurant/${id}`);
+      const response = await api.get<MenuResponseDTO>(
+        `/api/gastronomia/menu/restaurant/${id}`
+      );
       console.log('Menu response:', response);
       // Transformar la respuesta del backend al formato del frontend
       const transformedMenu = transformMenuResponse(response);

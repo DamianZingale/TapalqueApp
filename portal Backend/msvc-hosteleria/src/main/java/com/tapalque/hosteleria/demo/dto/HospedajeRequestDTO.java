@@ -2,8 +2,6 @@ package com.tapalque.hosteleria.demo.dto;
 
 import java.util.List;
 
-import org.springframework.lang.NonNull;
-
 import com.tapalque.hosteleria.demo.entidades.TipoHospedaje;
 
 import jakarta.validation.constraints.NotBlank;
@@ -13,18 +11,15 @@ import jakarta.validation.constraints.Size;
 
 public class HospedajeRequestDTO {
 
-    @NonNull
     @NotBlank(message = "El título es obligatorio")
     private String titulo;
 
     @Size(min = 10, message = "La descripción debe tener al menos 10 caracteres")
     private String description;
 
-    @NonNull
     @NotBlank(message = "La ubicación es obligatoria")
     private String ubicacion;
 
-    @NonNull
     @NotBlank(message = "La URL de Google Maps es obligatoria")
     @Pattern(regexp = "https?://.*", message = "Debe ser una URL válida")
     private String googleMapsUrl;
@@ -32,7 +27,6 @@ public class HospedajeRequestDTO {
     @Pattern(regexp = "^\\+?[0-9]{7,15}$", message = "Número de WhatsApp inválido")
     private String numWhatsapp;
 
-    @NonNull
     @NotNull(message = "Debe especificar el tipo de hospedaje")
     private TipoHospedaje tipoHospedaje;
 

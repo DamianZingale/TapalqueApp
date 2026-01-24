@@ -28,16 +28,24 @@ import com.tapalque.user.service.EmailVerificationService;
 import com.tapalque.user.service.UserService;
 
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
+
 
 @RestController
 @RequestMapping("/user")  
-@RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
     private final EmailVerificationService emailVerificationService;
     private final EmailService emailService;
+
+    public UserController(
+            UserService userService,
+            EmailVerificationService emailVerificationService,
+            EmailService emailService) {
+        this.userService = userService;
+        this.emailVerificationService = emailVerificationService;
+        this.emailService = emailService;
+    }
 
     @PostMapping("/public/register")
     public ResponseEntity<?> register(@Valid @RequestBody UserRegistrationDTO dto) {
@@ -303,9 +311,9 @@ public class UserController {
     }
 
     @GetMapping("/role/{id}")
-    public String getRol (@PathVariable String param) {
+    public String getRol (@PathVariable @NonNull String param) {
         try {
-            Long id = Long.valueOf(param);
+             Long id = Long.valueOf(param);
              String role = userService.getRoleByUserId(id);
              return role;
         } catch (NumberFormatException e) {

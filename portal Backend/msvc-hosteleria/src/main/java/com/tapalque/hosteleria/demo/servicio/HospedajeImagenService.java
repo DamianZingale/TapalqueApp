@@ -21,6 +21,7 @@ import com.tapalque.hosteleria.demo.entidades.HospedajeImagen;
 import com.tapalque.hosteleria.demo.repositorio.HospedajeImagenRepository;
 import com.tapalque.hosteleria.demo.repositorio.HospedajeRepository;
 
+
 @Service
 public class HospedajeImagenService {
 

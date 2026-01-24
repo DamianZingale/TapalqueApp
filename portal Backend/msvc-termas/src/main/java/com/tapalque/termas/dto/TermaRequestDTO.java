@@ -1,7 +1,5 @@
 package com.tapalque.termas.dto;
 
-import org.springframework.lang.NonNull;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,15 +8,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TermaRequestDTO {
-    @NonNull
     private String titulo;
 
     private String descripcion;
 
-    @NonNull
     private String direccion;
 
-    @NonNull
     private String horario;
 
     private String telefono;

@@ -11,6 +11,9 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: admin
       RABBITMQ_DEFAULT_PASS: admin
+      RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS: -rabbitmq_management load_definitions "/etc/rabbitmq/definitions.json"
+    volumes:
+      - ./portal Backend/init-scripts/RabbitMQ/definitions.json:/etc/rabbitmq/definitions.json:ro
     tmpfs:
       - /var/lib/rabbitmq
     healthcheck:
@@ -227,9 +230,9 @@ services:
     build: ./portal Backend/msvc-gateway-server
     container_name: msvc-gateway-server
     ports:
-      - '8090:8090' # ← CAMBIO 1: De "expose" a "ports"
+      - '8090:8090'
     restart: always
-    depends_on: # ← CAMBIO 2: Agregar depends_on
+    depends_on:
       eureka-server:
         condition: service_healthy
     networks:
@@ -239,7 +242,7 @@ services:
     build: ./portal Backend/msvc-jwt
     container_name: msvc-jwt
     restart: always
-    depends_on: # ← CAMBIO 3: Agregar depends_on
+    depends_on:
       - eureka-server
       - jwt-db
     networks:
@@ -250,7 +253,7 @@ services:
     container_name: msvc-user
     depends_on:
       - user-db
-      - eureka-server # ← CAMBIO 4: Agregar eureka
+      - eureka-server
     restart: always
     env_file:
       - .env
@@ -300,7 +303,7 @@ services:
     container_name: msvc-gastronomia
     depends_on:
       - gastronomia-db
-      - eureka-server # ← CAMBIO 7: Agregar eureka
+      - eureka-server
     volumes:
       - gastronomia_uploads:/app/uploads
     restart: always
@@ -312,7 +315,7 @@ services:
     container_name: msvc-hosteleria
     depends_on:
       - hosteleria-db
-      - eureka-server # ← CAMBIO 8: Agregar eureka
+      - eureka-server
     volumes:
       - hosteleria_uploads:/app/uploads
 
@@ -346,7 +349,7 @@ services:
     container_name: msvc-comercio
     depends_on:
       - comercio-db
-      - eureka-server # ← CAMBIO 10: Agregar eureka
+      - eureka-server
     volumes:
       - comercio_uploads:/app/uploads
     restart: always

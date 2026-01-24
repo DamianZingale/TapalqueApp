@@ -6,7 +6,6 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-// import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -20,18 +19,17 @@ import com.tapalque.user.dto.BusinessDTO;
 import com.tapalque.user.dto.BusinessRequestDTO;
 import com.tapalque.user.service.BusinessService;
 
-import lombok.RequiredArgsConstructor;
+
 
 @RestController
 @RequestMapping("/business")
-@RequiredArgsConstructor
 public class BusinessController {
 
     private final BusinessService businessService;
+    public BusinessController(BusinessService businessService) {
+        this.businessService = businessService;
+    }
 
-    /**
-     * Obtiene todos los negocios de un usuario (administrador)
-     */
     // @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'MODERADOR')")
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<BusinessDTO>> getBusinessesByUserId(@PathVariable Long userId) {
@@ -39,9 +37,6 @@ public class BusinessController {
         return ResponseEntity.ok(businesses);
     }
 
-    /**
-     * Obtiene un negocio por ID
-     */
     // @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'MODERADOR')")
     @GetMapping("/{businessId}")
     public ResponseEntity<BusinessDTO> getBusinessById(@PathVariable Long businessId) {
@@ -52,9 +47,6 @@ public class BusinessController {
         return ResponseEntity.notFound().build();
     }
 
-    /**
-     * Obtiene un negocio por externalBusinessId y businessType
-     */
     // @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'MODERADOR')")
     @GetMapping("/external/{externalBusinessId}/type/{businessType}")
     public ResponseEntity<BusinessDTO> getBusinessByExternalIdAndType(
@@ -69,10 +61,6 @@ public class BusinessController {
 
     // ==================== MODERADOR ENDPOINTS ====================
 
-    /**
-     * Listar todos los negocios del sistema
-     * Solo accesible por MODERADOR
-     */
     // @PreAuthorize("hasRole('MODERADOR')")
     @GetMapping("/all")
     public ResponseEntity<List<BusinessDTO>> getAllBusinesses() {
@@ -84,11 +72,6 @@ public class BusinessController {
         }
     }
 
-    /**
-     * Asignar un administrador a un negocio existente
-     * El MODERADOR puede asignar cualquier usuario con rol ADMINISTRADOR a un negocio
-     * Solo accesible por MODERADOR
-     */
     // @PreAuthorize("hasRole('MODERADOR')")
     @PostMapping
     public ResponseEntity<?> assignBusinessToAdmin(@RequestBody BusinessRequestDTO dto) {
@@ -103,10 +86,6 @@ public class BusinessController {
         }
     }
 
-    /**
-     * Cambiar el propietario de un negocio
-     * Solo accesible por MODERADOR
-     */
     // @PreAuthorize("hasRole('MODERADOR')")
     @PatchMapping("/{businessId}/owner")
     public ResponseEntity<?> changeBusinessOwner(
@@ -129,10 +108,6 @@ public class BusinessController {
         }
     }
 
-    /**
-     * Eliminar asignación de negocio
-     * Solo accesible por MODERADOR
-     */
     // @PreAuthorize("hasRole('MODERADOR')")
     @DeleteMapping("/{businessId}")
     public ResponseEntity<?> removeBusinessAssignment(@PathVariable Long businessId) {

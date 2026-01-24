@@ -2,7 +2,6 @@ package com.tapalque.comercio.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -22,8 +21,11 @@ import com.tapalque.comercio.service.ComercioService;
 @RestController
 @RequestMapping("/comercio")
 public class ComercioController {
-    @Autowired
-    private ComercioService comercioService;
+    
+    private final ComercioService comercioService;
+    public ComercioController(ComercioService comercioService) {
+        this.comercioService = comercioService;
+    }
 
     // Crear comercio
     @PostMapping

@@ -67,7 +67,7 @@ class EventoControllerTest {
     }
 
     @Nested
-    @DisplayName("Tests de POST /api/evento")
+    @DisplayName("Tests de POST /evento")
     class CrearTests {
 
         @Test
@@ -77,7 +77,7 @@ class EventoControllerTest {
             when(eventoService.crear(any(EventoRequestDTO.class))).thenReturn(testResponseDTO);
 
             // When & Then
-            mockMvc.perform(post("/api/evento")
+            mockMvc.perform(post("/evento")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(testRequestDTO)))
                     .andExpect(status().isCreated())
@@ -89,7 +89,7 @@ class EventoControllerTest {
     }
 
     @Nested
-    @DisplayName("Tests de GET /api/evento")
+    @DisplayName("Tests de GET /evento")
     class ListarTests {
 
         @Test
@@ -104,7 +104,7 @@ class EventoControllerTest {
             when(eventoService.obtenerTodos()).thenReturn(Arrays.asList(testResponseDTO, dto2));
 
             // When & Then
-            mockMvc.perform(get("/api/evento"))
+            mockMvc.perform(get("/evento"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$[0].nombreEvento").value("Festival de Verano"))
                     .andExpect(jsonPath("$[1].nombreEvento").value("Concierto Rock"));
@@ -112,7 +112,7 @@ class EventoControllerTest {
     }
 
     @Nested
-    @DisplayName("Tests de GET /api/evento/{id}")
+    @DisplayName("Tests de GET /evento/{id}")
     class ObtenerPorIdTests {
 
         @Test
@@ -122,7 +122,7 @@ class EventoControllerTest {
             when(eventoService.obtenerPorId(1L)).thenReturn(testResponseDTO);
 
             // When & Then
-            mockMvc.perform(get("/api/evento/1"))
+            mockMvc.perform(get("/evento/1"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.id").value(1))
                     .andExpect(jsonPath("$.nombreEvento").value("Festival de Verano"));
@@ -135,13 +135,13 @@ class EventoControllerTest {
             when(eventoService.obtenerPorId(999L)).thenThrow(new EventoNotFoundException(999L));
 
             // When & Then
-            mockMvc.perform(get("/api/evento/999"))
+            mockMvc.perform(get("/evento/999"))
                     .andExpect(status().isNotFound());
         }
     }
 
     @Nested
-    @DisplayName("Tests de PUT /api/evento/{id}")
+    @DisplayName("Tests de PUT /evento/{id}")
     class ActualizarTests {
 
         @Test
@@ -152,7 +152,7 @@ class EventoControllerTest {
                     .thenReturn(testResponseDTO);
 
             // When & Then
-            mockMvc.perform(put("/api/evento/1")
+            mockMvc.perform(put("/evento/1")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(testRequestDTO)))
                     .andExpect(status().isOk());
@@ -160,7 +160,7 @@ class EventoControllerTest {
     }
 
     @Nested
-    @DisplayName("Tests de PATCH /api/evento/{id}")
+    @DisplayName("Tests de PATCH /evento/{id}")
     class ActualizarParcialTests {
 
         @Test
@@ -171,7 +171,7 @@ class EventoControllerTest {
                     .thenReturn(testResponseDTO);
 
             // When & Then
-            mockMvc.perform(patch("/api/evento/1")
+            mockMvc.perform(patch("/evento/1")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(testRequestDTO)))
                     .andExpect(status().isOk());
@@ -179,7 +179,7 @@ class EventoControllerTest {
     }
 
     @Nested
-    @DisplayName("Tests de DELETE /api/evento/{id}")
+    @DisplayName("Tests de DELETE /evento/{id}")
     class EliminarTests {
 
         @Test
@@ -189,7 +189,7 @@ class EventoControllerTest {
             doNothing().when(eventoService).eliminar(1L);
 
             // When & Then
-            mockMvc.perform(delete("/api/evento/1"))
+            mockMvc.perform(delete("/evento/1"))
                     .andExpect(status().isNoContent());
 
             verify(eventoService).eliminar(1L);
@@ -202,7 +202,7 @@ class EventoControllerTest {
             doThrow(new EventoNotFoundException(999L)).when(eventoService).eliminar(999L);
 
             // When & Then
-            mockMvc.perform(delete("/api/evento/999"))
+            mockMvc.perform(delete("/evento/999"))
                     .andExpect(status().isNotFound());
         }
     }

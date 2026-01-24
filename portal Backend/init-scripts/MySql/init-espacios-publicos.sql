@@ -1,4 +1,4 @@
-CREATE DATABASE IF NOT EXISTS espacios_publicos;
+CREATE DATABASE IF NOT EXISTS espacios_publicos CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE espacios_publicos;
 
 -- Tabla de espacios públicos

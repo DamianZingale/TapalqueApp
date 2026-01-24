@@ -59,7 +59,7 @@ class EspacioPublicoControllerTest {
     }
 
     @Nested
-    @DisplayName("Tests de POST /api/espacio-publico")
+    @DisplayName("Tests de POST /espacio-publico")
     class CrearTests {
 
         @Test
@@ -69,7 +69,7 @@ class EspacioPublicoControllerTest {
             when(espacioPublicoService.crear(any(EspacioPublicoRequestDTO.class))).thenReturn(testResponseDTO);
 
             // When & Then
-            mockMvc.perform(post("/api/espacio-publico")
+            mockMvc.perform(post("/espacio-publico")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(testRequestDTO)))
                     .andExpect(status().isCreated())
@@ -81,7 +81,7 @@ class EspacioPublicoControllerTest {
     }
 
     @Nested
-    @DisplayName("Tests de GET /api/espacio-publico")
+    @DisplayName("Tests de GET /espacio-publico")
     class ListarTests {
 
         @Test
@@ -96,7 +96,7 @@ class EspacioPublicoControllerTest {
             when(espacioPublicoService.obtenerTodos()).thenReturn(Arrays.asList(testResponseDTO, dto2));
 
             // When & Then
-            mockMvc.perform(get("/api/espacio-publico"))
+            mockMvc.perform(get("/espacio-publico"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$[0].titulo").value("Plaza Principal"))
                     .andExpect(jsonPath("$[1].titulo").value("Parque Norte"));
@@ -110,7 +110,7 @@ class EspacioPublicoControllerTest {
                     .thenReturn(Arrays.asList(testResponseDTO));
 
             // When & Then
-            mockMvc.perform(get("/api/espacio-publico").param("categoria", "PLAZA"))
+            mockMvc.perform(get("/espacio-publico").param("categoria", "PLAZA"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$[0].categoria").value("PLAZA"));
 
@@ -119,7 +119,7 @@ class EspacioPublicoControllerTest {
     }
 
     @Nested
-    @DisplayName("Tests de GET /api/espacio-publico/{id}")
+    @DisplayName("Tests de GET /espacio-publico/{id}")
     class ObtenerPorIdTests {
 
         @Test
@@ -129,7 +129,7 @@ class EspacioPublicoControllerTest {
             when(espacioPublicoService.obtenerPorId(1L)).thenReturn(testResponseDTO);
 
             // When & Then
-            mockMvc.perform(get("/api/espacio-publico/1"))
+            mockMvc.perform(get("/espacio-publico/1"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.id").value(1))
                     .andExpect(jsonPath("$.titulo").value("Plaza Principal"));
@@ -143,13 +143,13 @@ class EspacioPublicoControllerTest {
                     .thenThrow(new EspacioPublicoNotFoundException(999L));
 
             // When & Then
-            mockMvc.perform(get("/api/espacio-publico/999"))
+            mockMvc.perform(get("/espacio-publico/999"))
                     .andExpect(status().isNotFound());
         }
     }
 
     @Nested
-    @DisplayName("Tests de PUT /api/espacio-publico/{id}")
+    @DisplayName("Tests de PUT /espacio-publico/{id}")
     class ActualizarTests {
 
         @Test
@@ -160,7 +160,7 @@ class EspacioPublicoControllerTest {
                     .thenReturn(testResponseDTO);
 
             // When & Then
-            mockMvc.perform(put("/api/espacio-publico/1")
+            mockMvc.perform(put("/espacio-publico/1")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(testRequestDTO)))
                     .andExpect(status().isOk());
@@ -168,7 +168,7 @@ class EspacioPublicoControllerTest {
     }
 
     @Nested
-    @DisplayName("Tests de DELETE /api/espacio-publico/{id}")
+    @DisplayName("Tests de DELETE /espacio-publico/{id}")
     class EliminarTests {
 
         @Test
@@ -178,7 +178,7 @@ class EspacioPublicoControllerTest {
             doNothing().when(espacioPublicoService).eliminar(1L);
 
             // When & Then
-            mockMvc.perform(delete("/api/espacio-publico/1"))
+            mockMvc.perform(delete("/espacio-publico/1"))
                     .andExpect(status().isNoContent());
 
             verify(espacioPublicoService).eliminar(1L);
@@ -192,7 +192,7 @@ class EspacioPublicoControllerTest {
                     .when(espacioPublicoService).eliminar(999L);
 
             // When & Then
-            mockMvc.perform(delete("/api/espacio-publico/999"))
+            mockMvc.perform(delete("/espacio-publico/999"))
                     .andExpect(status().isNotFound());
         }
     }

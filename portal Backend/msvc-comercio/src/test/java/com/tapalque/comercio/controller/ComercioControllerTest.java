@@ -237,7 +237,7 @@ class ComercioControllerTest {
                     .thenReturn(testResponseDTO);
 
             // When & Then
-            mockMvc.perform(patch("/comercio/patch/1")
+            mockMvc.perform(patch("/comercio/1")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(testRequestDTO)))
                     .andExpect(status().isOk());

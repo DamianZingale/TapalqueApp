@@ -1,4 +1,4 @@
-CREATE DATABASE IF NOT EXISTS user;
+CREATE DATABASE IF NOT EXISTS user CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE user;
 
 -- =====================
@@ -46,33 +46,8 @@ CREATE TABLE IF NOT EXISTS business_tb (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- =====================
--- ROLES BASE
+-- NOTA: Los roles y el usuario moderador se crean
+-- automaticamente via DataInitializer en msvc-user
+-- usando variables de entorno del archivo .env
 -- =====================
-INSERT INTO roles (id, name) VALUES
-    (1, 'MODERADOR'),
-    (2, 'ADMINISTRADOR'),
-    (3, 'USER')
-ON DUPLICATE KEY UPDATE name = name;
-
--- =====================
--- USUARIO MODERADOR DEFAULT
--- =====================
--- Email: go@tapalque.com
--- Password: T4p4lqu3!
--- Email verificado: true
-INSERT INTO usuarios_tb (email, first_name, password, email_verified, activo,roles_id, registration_date)
-VALUES (
-    'go@tapalque.com',
-    'Moderador Tapalque',
-    '$2a$10$gC0M/qqLxsjfAKNCWepxh.rPkvrtGD.hOQgR/d1rUhO6RqsSOGYAO',
-    1,
-    1,
-    1,
-    NOW()
-)
-
-ON DUPLICATE KEY UPDATE
-    password = VALUES(password),
-    email_verified = VALUES(email_verified),
-    roles_id = VALUES(roles_id);
 

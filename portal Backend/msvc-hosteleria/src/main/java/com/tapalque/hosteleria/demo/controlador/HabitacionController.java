@@ -6,7 +6,6 @@ import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -26,7 +25,6 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/habitaciones")
-@CrossOrigin(origins = "*")
 public class HabitacionController {
 
     private final HabitacionService habitacionService;
@@ -89,7 +87,6 @@ public class HabitacionController {
         }
     }
 
-    // DELETE /api/habitaciones/{id}
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable @NonNull Long id) {
         try {
@@ -102,7 +99,7 @@ public class HabitacionController {
         }
     }
 
-    // PATCH /api/habitaciones/{id}/disponibilidad
+
     @PatchMapping("/habitaciones/{id}/disponibilidad")
     public ResponseEntity<HabitacionDTO> cambiarDisponibilidad(
             @PathVariable @NonNull Long id,

@@ -66,7 +66,7 @@ class ServicioControllerTest {
     }
 
     @Nested
-    @DisplayName("Tests de POST /api/servicio")
+    @DisplayName("Tests de POST /servicio")
     class CrearTests {
 
         @Test
@@ -76,7 +76,7 @@ class ServicioControllerTest {
             when(servicioService.crear(any(ServicioRequestDTO.class))).thenReturn(testResponseDTO);
 
             // When & Then
-            mockMvc.perform(post("/api/servicio")
+            mockMvc.perform(post("/servicio")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(testRequestDTO)))
                     .andExpect(status().isCreated())
@@ -88,7 +88,7 @@ class ServicioControllerTest {
     }
 
     @Nested
-    @DisplayName("Tests de GET /api/servicio")
+    @DisplayName("Tests de GET /servicio")
     class ListarTests {
 
         @Test
@@ -103,7 +103,7 @@ class ServicioControllerTest {
             when(servicioService.obtenerTodos()).thenReturn(Arrays.asList(testResponseDTO, dto2));
 
             // When & Then
-            mockMvc.perform(get("/api/servicio"))
+            mockMvc.perform(get("/servicio"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$[0].titulo").value("Servicio de Plomería"))
                     .andExpect(jsonPath("$[1].titulo").value("Electricista"));
@@ -111,7 +111,7 @@ class ServicioControllerTest {
     }
 
     @Nested
-    @DisplayName("Tests de GET /api/servicio/{id}")
+    @DisplayName("Tests de GET /servicio/{id}")
     class ObtenerPorIdTests {
 
         @Test
@@ -121,7 +121,7 @@ class ServicioControllerTest {
             when(servicioService.obtenerPorId(1L)).thenReturn(testResponseDTO);
 
             // When & Then
-            mockMvc.perform(get("/api/servicio/1"))
+            mockMvc.perform(get("/servicio/1"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.id").value(1))
                     .andExpect(jsonPath("$.titulo").value("Servicio de Plomería"));
@@ -134,13 +134,13 @@ class ServicioControllerTest {
             when(servicioService.obtenerPorId(999L)).thenThrow(new ServicioNotFoundException(999L));
 
             // When & Then
-            mockMvc.perform(get("/api/servicio/999"))
+            mockMvc.perform(get("/servicio/999"))
                     .andExpect(status().isNotFound());
         }
     }
 
     @Nested
-    @DisplayName("Tests de PUT /api/servicio/{id}")
+    @DisplayName("Tests de PUT /servicio/{id}")
     class ActualizarTests {
 
         @Test
@@ -151,7 +151,7 @@ class ServicioControllerTest {
                     .thenReturn(testResponseDTO);
 
             // When & Then
-            mockMvc.perform(put("/api/servicio/1")
+            mockMvc.perform(put("/servicio/1")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(testRequestDTO)))
                     .andExpect(status().isOk());
@@ -159,7 +159,7 @@ class ServicioControllerTest {
     }
 
     @Nested
-    @DisplayName("Tests de DELETE /api/servicio/{id}")
+    @DisplayName("Tests de DELETE /servicio/{id}")
     class EliminarTests {
 
         @Test
@@ -169,7 +169,7 @@ class ServicioControllerTest {
             doNothing().when(servicioService).eliminar(1L);
 
             // When & Then
-            mockMvc.perform(delete("/api/servicio/1"))
+            mockMvc.perform(delete("/servicio/1"))
                     .andExpect(status().isNoContent());
 
             verify(servicioService).eliminar(1L);
@@ -182,7 +182,7 @@ class ServicioControllerTest {
             doThrow(new ServicioNotFoundException(999L)).when(servicioService).eliminar(999L);
 
             // When & Then
-            mockMvc.perform(delete("/api/servicio/999"))
+            mockMvc.perform(delete("/servicio/999"))
                     .andExpect(status().isNotFound());
         }
     }
