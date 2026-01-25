@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 import java.time.LocalDateTime;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -17,7 +18,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.tapalque.msvc_reservas.dto.CustomerDTO;
 import com.tapalque.msvc_reservas.dto.HotelDTO;
+import com.tapalque.msvc_reservas.dto.PaymentDTO;
 import com.tapalque.msvc_reservas.dto.ReservationDTO;
+import com.tapalque.msvc_reservas.dto.StayPeriodDTO;
 import com.tapalque.msvc_reservas.entity.Reservation;
 import com.tapalque.msvc_reservas.repository.ReservationRepositoryInterface;
 
@@ -27,6 +30,7 @@ import reactor.test.StepVerifier;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ReservationServiceImpl Tests")
+
 class ReservationServiceImplTest {
 
     @Mock
@@ -43,16 +47,29 @@ class ReservationServiceImplTest {
         Reservation.Customer customer = new Reservation.Customer();
         customer.setCustomerId("cust1");
         customer.setCustomerName("Juan Pérez");
-        
 
         Reservation.Hotel hotel = new Reservation.Hotel();
         hotel.setHotelId("hotel1");
         hotel.setHotelName("Hotel Test");
 
+        Reservation.StayPeriod stayPeriod = new Reservation.StayPeriod();
+        stayPeriod.setCheckInDate(LocalDateTime.now().plusDays(1));
+        stayPeriod.setCheckOutDate(LocalDateTime.now().plusDays(3));
+
+        Reservation.Payment payment = new Reservation.Payment();
+        payment.setTotalAmount(1000.0);
+        payment.setAmountPaid(0.0);
+        payment.setRemainingAmount(1000.0);
+        payment.setIsPaid(false);
+        payment.setHasPendingAmount(true);
+        payment.setIsDeposit(false);
+
         testReservation = new Reservation();
         testReservation.setId("res123");
         testReservation.setCustomer(customer);
         testReservation.setHotel(hotel);
+        testReservation.setStayPeriod(stayPeriod);
+        testReservation.setPayment(payment);
         testReservation.setIsActive(true);
         testReservation.setIsCancelled(false);
         testReservation.setDateCreated(LocalDateTime.now());
@@ -61,17 +78,30 @@ class ReservationServiceImplTest {
         CustomerDTO customerDTO = new CustomerDTO();
         customerDTO.setCustomerId("cust1");
         customerDTO.setCustomerName("Juan Pérez");
-        
 
         HotelDTO hotelDTO = new HotelDTO();
         hotelDTO.setHotelId("hotel1");
         hotelDTO.setHotelName("Hotel Test");
 
+        StayPeriodDTO stayPeriodDTO = new StayPeriodDTO();
+        stayPeriodDTO.setCheckInDate(LocalDateTime.now().plusDays(1));
+        stayPeriodDTO.setCheckOutDate(LocalDateTime.now().plusDays(3));
+
+        PaymentDTO paymentDTO = new PaymentDTO();
+        paymentDTO.setTotalAmount(1000.0);
+        paymentDTO.setAmountPaid(0.0);
+        paymentDTO.setRemainingAmount(1000.0);
+        paymentDTO.setIsPaid(false);
+        paymentDTO.setHasPendingAmount(true);
+        paymentDTO.setIsDeposit(false);
+
         testReservationDTO = new ReservationDTO();
         testReservationDTO.setId("res123");
         testReservationDTO.setCustomer(customerDTO);
         testReservationDTO.setHotel(hotelDTO);
-        
+        testReservationDTO.setStayPeriod(stayPeriodDTO);
+        testReservationDTO.setPayment(paymentDTO);
+
     }
 
     @Nested

@@ -322,7 +322,9 @@ public void setFechaPago(LocalDateTime fechaPago) {
 
     public void setTotalAmount(Double totalAmount) {
         this.totalAmount = totalAmount;
-        this.remainingAmount = this.totalAmount - this.amountPaid;
+        if (this.totalAmount != null && this.amountPaid != null) {
+            this.remainingAmount = this.totalAmount - this.amountPaid;
+        }
     }
 }
 
