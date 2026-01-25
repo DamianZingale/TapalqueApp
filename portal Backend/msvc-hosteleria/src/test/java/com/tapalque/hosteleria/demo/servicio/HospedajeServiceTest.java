@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -49,7 +50,7 @@ class HospedajeServiceTest {
         testHospedaje.setGoogleMapsUrl("https://maps.google.com/test");
         testHospedaje.setNumWhatsapp("+5491234567890");
         testHospedaje.setTipoHospedaje(TipoHospedaje.HOTEL);
-        testHospedaje.setImagenes(Collections.emptyList());
+        testHospedaje.setImagenes(new ArrayList<>());
 
         testRequestDTO = new HospedajeRequestDTO();
         testRequestDTO.setTitulo("Hotel Test");
