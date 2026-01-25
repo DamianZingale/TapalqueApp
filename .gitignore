@@ -4,3 +4,4 @@ target/
 *.env
 .md
 *.md
+env.*
