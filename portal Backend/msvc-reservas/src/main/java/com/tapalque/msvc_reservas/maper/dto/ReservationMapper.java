@@ -34,6 +34,7 @@ public class ReservationMapper {
     }
 
     public static StayPeriodDTO toDto(Reservation.StayPeriod s) {
+        if (s == null) return null;
         StayPeriodDTO dto = new StayPeriodDTO();
         dto.setCheckInDate(s.getCheckInDate());
         dto.setCheckOutDate(s.getCheckOutDate());
@@ -41,17 +42,18 @@ public class ReservationMapper {
     }
 
     public static PaymentDTO toDto(Reservation.Payment p) {
-    PaymentDTO dto = new PaymentDTO();
-    dto.setTotalAmount(p.getTotalAmount());
-    dto.setAmountPaid(p.getAmountPaid());
-    dto.setRemainingAmount(p.getRemainingAmount());
-    dto.setIsPaid(p.getIsPaid());
-    dto.setHasPendingAmount(p.getHasPendingAmount());
-    dto.setIsDeposit(p.getIsDeposit());
-    dto.setPaymentType(p.getPaymentType());
-    dto.setPaymentReceiptPath(p.getPaymentReceiptPath());
-    return dto;
-}
+        if (p == null) return null;
+        PaymentDTO dto = new PaymentDTO();
+        dto.setTotalAmount(p.getTotalAmount());
+        dto.setAmountPaid(p.getAmountPaid());
+        dto.setRemainingAmount(p.getRemainingAmount());
+        dto.setIsPaid(p.getIsPaid());
+        dto.setHasPendingAmount(p.getHasPendingAmount());
+        dto.setIsDeposit(p.getIsDeposit());
+        dto.setPaymentType(p.getPaymentType());
+        dto.setPaymentReceiptPath(p.getPaymentReceiptPath());
+        return dto;
+    }
 
     public static Reservation toEntity(ReservationDTO dto) {
         Reservation r = new Reservation();
@@ -78,6 +80,7 @@ public class ReservationMapper {
     }
 
     public static Reservation.StayPeriod toEntity(StayPeriodDTO dto) {
+        if (dto == null) return null;
         Reservation.StayPeriod s = new Reservation.StayPeriod();
         s.setCheckInDate(dto.getCheckInDate());
         s.setCheckOutDate(dto.getCheckOutDate());
@@ -85,15 +88,18 @@ public class ReservationMapper {
     }
 
     public static Reservation.Payment toEntity(PaymentDTO dto) {
-    Reservation.Payment p = new Reservation.Payment();
-    p.setTotalAmount(dto.getTotalAmount());
-    p.setAmountPaid(dto.getAmountPaid());
-    p.setRemainingAmount(p.getTotalAmount() - p.getAmountPaid());
-    p.setIsPaid(p.getRemainingAmount() <= 0);
-    p.setHasPendingAmount(p.getRemainingAmount() > 0);
-    p.setIsDeposit(dto.getIsDeposit());
-    p.setPaymentType(dto.getPaymentType());
-    p.setPaymentReceiptPath(dto.getPaymentReceiptPath());
-    return p;
-}
+        if (dto == null) return null;
+        Reservation.Payment p = new Reservation.Payment();
+        Double totalAmount = dto.getTotalAmount() != null ? dto.getTotalAmount() : 0.0;
+        Double amountPaid = dto.getAmountPaid() != null ? dto.getAmountPaid() : 0.0;
+        p.setTotalAmount(totalAmount);
+        p.setAmountPaid(amountPaid);
+        p.setRemainingAmount(totalAmount - amountPaid);
+        p.setIsPaid(p.getRemainingAmount() <= 0);
+        p.setHasPendingAmount(p.getRemainingAmount() > 0);
+        p.setIsDeposit(dto.getIsDeposit());
+        p.setPaymentType(dto.getPaymentType());
+        p.setPaymentReceiptPath(dto.getPaymentReceiptPath());
+        return p;
+    }
 }

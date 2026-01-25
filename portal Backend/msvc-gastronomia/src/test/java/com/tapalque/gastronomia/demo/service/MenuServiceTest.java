@@ -70,8 +70,8 @@ class MenuServiceTest {
         }
 
         @Test
-        @DisplayName("Debe retornar null cuando no existe menú para el restaurante")
-        void getMenuByRestaurantId_ConIdNoExistente_RetornaNull() {
+        @DisplayName("Debe retornar menú vacío cuando no existe menú para el restaurante")
+        void getMenuByRestaurantId_ConIdNoExistente_RetornaMenuVacio() {
             // Given
             when(menuRepository.findByRestaurantIdRestaurant(999L))
                     .thenReturn(Optional.empty());
@@ -80,7 +80,9 @@ class MenuServiceTest {
             MenuDTO result = menuService.getMenuByRestaurantId(999L);
 
             // Then
-            assertNull(result);
+            assertNotNull(result);
+            assertEquals("Menú no disponible", result.getDescription());
+            assertTrue(result.getDishes().isEmpty());
             verify(menuRepository).findByRestaurantIdRestaurant(999L);
         }
 
@@ -102,7 +104,7 @@ class MenuServiceTest {
         }
 
         @Test
-        @DisplayName("Debe manejar menú con platos nulos")
+        @DisplayName("Debe manejar menú con platos nulos retornando lista vacía")
         void getMenuByRestaurantId_MenuConPlatosNulos_RetornaMenuDTO() {
             // Given
             testMenu.setDishes(null);
@@ -114,7 +116,8 @@ class MenuServiceTest {
 
             // Then
             assertNotNull(result);
-            assertNull(result.getDishes());
+            assertNotNull(result.getDishes());
+            assertTrue(result.getDishes().isEmpty());
         }
     }
 }
