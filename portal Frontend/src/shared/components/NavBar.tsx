@@ -41,7 +41,7 @@ export default function NavBar() {
         <Navbar.Collapse id="main-navbar">
           <Nav className="ms-auto">
             <Nav.Link as={Link} to="/termas">
-              Termas
+              Termas tapalque
             </Nav.Link>
             <Nav.Link as={Link} to="/gastronomia">
               Gastronomía

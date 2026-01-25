@@ -45,13 +45,11 @@ export async function fetchComercios(): Promise<Comercio[]> {
 
 export async function fetchComercioById(id: string | number): Promise<Comercio | null> {
     try {
-        // El gateway requiere autenticación para detalles individuales
-        const token = localStorage.getItem('token');
+        // El endpoint es público para GET
         const response = await fetch(`/api/comercio/${id}`, {
             method: 'GET',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': token ? `Bearer ${token}` : ''
+                'Content-Type': 'application/json'
             }
         });
 

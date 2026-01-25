@@ -2,7 +2,6 @@ package com.tapalque.espaciospublicos.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -21,10 +20,14 @@ import com.tapalque.espaciospublicos.dto.EspacioPublicoResponseDTO;
 import com.tapalque.espaciospublicos.service.EspacioPublicoService;
 
 @RestController
-@RequestMapping("api/espacio-publico")
+@RequestMapping("/espacio-publico")
 public class EspacioPublicoController {
-    @Autowired
-    private EspacioPublicoService espacioPublicoService;
+    
+    private final EspacioPublicoService espacioPublicoService;
+
+    public EspacioPublicoController(EspacioPublicoService espacioPublicoService) {
+        this.espacioPublicoService = espacioPublicoService;
+    }
 
     // Crear espacio público
     @PostMapping

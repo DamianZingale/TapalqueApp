@@ -16,6 +16,11 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: admin
       RABBITMQ_DEFAULT_PASS: admin
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - tapalque-net
     deploy:
@@ -191,8 +196,14 @@ services:
     deploy:
       resources:
         limits:
-          memory: 128M
-          cpus: '0.2'
+          memory: 256M
+          cpus: '0.5'
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8761"]
+      interval: 15s
+      timeout: 10s
+      retries: 8
+      start_period: 90s
     restart: unless-stopped
 
   msvc-gateway-server:
@@ -201,7 +212,8 @@ services:
     ports:
       - '8090:8090'
     depends_on:
-      - eureka-server
+      eureka-server:
+        condition: service_healthy
     networks:
       - tapalque-net
     deploy:
@@ -278,10 +290,18 @@ services:
   msvc-pedidos:
     build: ./portal Backend/msvc-pedidos
     container_name: msvc-pedidos
+    environment:
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: admin
+      SPRING_RABBITMQ_PASSWORD: admin
     depends_on:
-      - pedidos-db
-      - rabbitmq
-      - eureka-server
+      pedidos-db:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
     networks:
       - tapalque-net
     deploy:
@@ -294,10 +314,18 @@ services:
   msvc-reservas:
     build: ./portal Backend/msvc-reservas
     container_name: msvc-reservas
+    environment:
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: admin
+      SPRING_RABBITMQ_PASSWORD: admin
     depends_on:
-      - reservas-db
-      - rabbitmq
-      - eureka-server
+      reservas-db:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
     networks:
       - tapalque-net
     deploy:
@@ -310,9 +338,16 @@ services:
   msvc-mercado-pago:
     build: ./portal Backend/msvc-mercado-pago
     container_name: msvc-mercado-pago
+    environment:
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: admin
+      SPRING_RABBITMQ_PASSWORD: admin
     depends_on:
-      - mercado-pago-db
-      - eureka-server
+      mercado-pago-db:
+        condition: service_started
+      eureka-server:
+        condition: service_healthy
     networks:
       - tapalque-net
     deploy:

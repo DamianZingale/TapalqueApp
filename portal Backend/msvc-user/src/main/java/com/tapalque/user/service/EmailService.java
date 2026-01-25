@@ -26,9 +26,9 @@ public class EmailService {
     @Value("${app.base.url}")
     private String baseUrl;
 
-    /**
-     * Envía un email HTML
-     */
+    
+     // Envía un email HTML
+    
     public void sendHtmlEmail(String to, String subject, String htmlContent) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
@@ -50,9 +50,9 @@ public class EmailService {
         }
     }
 
-    /**
-     * Envía email de verificación de cuenta
-     */
+    
+     // Envía email de verificación de cuenta
+     
     public void sendVerificationEmail(String to, String userName, String verificationToken) {
         String verificationUrl = baseUrl + "/verify-email?token=" + verificationToken;
 
@@ -62,9 +62,9 @@ public class EmailService {
         sendHtmlEmail(to, subject, htmlContent);
     }
 
-    /**
-     * Template HTML para email de verificación
-     */
+    
+     // Template HTML para email de verificación
+     
     private String buildVerificationEmailTemplate(String userName, String verificationUrl) {
         return """
             <!DOCTYPE html>

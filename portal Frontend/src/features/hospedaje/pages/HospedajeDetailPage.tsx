@@ -37,8 +37,8 @@ export default function HospedajeDetailPage() {
 
     if (!data) return <p className="text-center py-5">Hospedaje no encontrado</p>;
 
-    // Convertir imágenes al formato esperado
-    const imagenes = data.imagenes?.map(img => img.imagenUrl) || [];
+    // Backend devuelve imagenes como array de strings directamente
+    const imagenes = data.imagenes || [];
 
     // Obtener tipo de hospedaje legible
     const tipoLabel = {
@@ -62,7 +62,7 @@ export default function HospedajeDetailPage() {
             {data.numWhatsapp && <WhatsAppButton num={data.numWhatsapp} />}
 
             <Subtitle text="¡Reserva ahora!" />
-            <Calendario />
+            <Calendario idHabitacion={String(data.id)} />
 
             {data.googleMapsUrl && (
                 <div className="text-center my-4">

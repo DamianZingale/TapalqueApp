@@ -1,0 +1,216 @@
+version: '3.8'
+
+services:
+  # ===========================
+  # FRONTEND DEV
+  # ===========================
+  frontend:
+    image: node:20
+    container_name: frontend-dev
+    working_dir: /app
+    volumes:
+      - ./portal Frontend:/app
+    command: sh -c "npm install && npm run dev -- --host"
+    ports:
+      - "5173:5173"
+    networks:
+      - tapalque-net
+
+  # ===========================
+  # BACKEND MICROSERVICIOS DEV
+  # ===========================
+  eureka-server:
+    build:
+      context: ./portal Backend/eureka-server
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./portal Backend/eureka-server:/app
+      - ~/.m2:/root/.m2
+    working_dir: /app
+    command: mvn spring-boot:run
+    ports:
+      - "8761:8761"
+    networks:
+      - tapalque-net
+
+  msvc-gateway-server:
+    build:
+      context: ./portal Backend/msvc-gateway-server
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./portal Backend/msvc-gateway-server:/app
+      - ~/.m2:/root/.m2
+    working_dir: /app
+    command: mvn spring-boot:run
+    ports:
+      - "8090:8090"
+    networks:
+      - tapalque-net
+
+  msvc-jwt:
+    build:
+      context: ./portal Backend/msvc-jwt
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./portal Backend/msvc-jwt:/app
+      - ~/.m2:/root/.m2
+    working_dir: /app
+    command: mvn spring-boot:run
+    ports:
+      - "8084:8080"
+    networks:
+      - tapalque-net
+
+  msvc-user:
+    build:
+      context: ./portal Backend/msvc-user
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./portal Backend/msvc-user:/app
+      - ~/.m2:/root/.m2
+    working_dir: /app
+    command: mvn spring-boot:run
+    ports:
+      - "8081:8080"
+    networks:
+      - tapalque-net
+
+  msvc-pedidos:
+    build:
+      context: ./portal Backend/msvc-pedidos
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./portal Backend/msvc-pedidos:/app
+      - ~/.m2:/root/.m2
+    working_dir: /app
+    command: mvn spring-boot:run
+    ports:
+      - "8082:8080"
+    networks:
+      - tapalque-net
+
+  msvc-reservas:
+    build:
+      context: ./portal Backend/msvc-reservas
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./portal Backend/msvc-reservas:/app
+      - ~/.m2:/root/.m2
+    working_dir: /app
+    command: mvn spring-boot:run
+    ports:
+      - "8083:8080"
+    networks:
+      - tapalque-net
+
+  msvc-gastronomia:
+    build:
+      context: ./portal Backend/msvc-gastronomia
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./portal Backend/msvc-gastronomia:/app
+      - ~/.m2:/root/.m2
+    working_dir: /app
+    command: mvn spring-boot:run
+    ports:
+      - "8085:8080"
+    networks:
+      - tapalque-net
+
+  msvc-hosteleria:
+    build:
+      context: ./portal Backend/msvc-hosteleria
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./portal Backend/msvc-hosteleria:/app
+      - ~/.m2:/root/.m2
+    working_dir: /app
+    command: mvn spring-boot:run
+    ports:
+      - "8086:8080"
+    networks:
+      - tapalque-net
+
+  msvc-mercado-pago:
+    build:
+      context: ./portal Backend/msvc-mercado-pago
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./portal Backend/msvc-mercado-pago:/app
+      - ~/.m2:/root/.m2
+    working_dir: /app
+    command: mvn spring-boot:run
+    ports:
+      - "8087:8080"
+    networks:
+      - tapalque-net
+
+  msvc-comercio:
+    build:
+      context: ./portal Backend/msvc-comercio
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./portal Backend/msvc-comercio:/app
+      - ~/.m2:/root/.m2
+    working_dir: /app
+    command: mvn spring-boot:run
+    ports:
+      - "8088:8080"
+    networks:
+      - tapalque-net
+
+  msvc-eventos:
+    build:
+      context: ./portal Backend/msvc-eventos
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./portal Backend/msvc-eventos:/app
+      - ~/.m2:/root/.m2
+    working_dir: /app
+    command: mvn spring-boot:run
+    ports:
+      - "8089:8080"
+    networks:
+      - tapalque-net
+
+  msvc-servicios:
+    build:
+      context: ./portal Backend/msvc-servicios
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./portal Backend/msvc-servicios:/app
+      - ~/.m2:/root/.m2
+    working_dir: /app
+    command: mvn spring-boot:run
+    ports:
+      - "8091:8080"
+    networks:
+      - tapalque-net
+
+  msvc-termas:
+    build:
+      context: ./portal Backend/msvc-termas
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./portal Backend/msvc-termas:/app
+      - ~/.m2:/root/.m2
+    working_dir: /app
+    command: mvn spring-boot:run
+    ports:
+      - "8092:8080"
+    networks:
+      - tapalque-net
+
+  msvc-espacios-publicos:
+    build:
+      context: ./portal Backend/msvc-espacios-publicos
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./portal Backend/msvc-espacios-publicos:/app
+      - ~/.m2:/root/.m2
+    working_dir: /app
+    command: mvn spring-boot:run
+    ports:
+      - "8093:8080"
+    networks:
+      - tapalque-net

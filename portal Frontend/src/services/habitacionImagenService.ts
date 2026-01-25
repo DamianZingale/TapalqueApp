@@ -1,11 +1,13 @@
 // Servicios para gestión de imágenes de habitaciones
-import { api } from '../config/api';
 
 interface ImagenResponse {
   imagenUrl: string;
 }
 
-export async function subirImagenHabitacion(hospedajeId: string, file: File): Promise<string> {
+export async function subirImagenHabitacion(
+  hospedajeId: string,
+  file: File
+): Promise<string> {
   try {
     const formData = new FormData();
     formData.append('file', file);
@@ -14,9 +16,9 @@ export async function subirImagenHabitacion(hospedajeId: string, file: File): Pr
     const response = await fetch(`/api/hospedajes/${hospedajeId}/imagenes`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
       },
-      body: formData
+      body: formData,
     });
 
     if (!response.ok) {
@@ -31,20 +33,26 @@ export async function subirImagenHabitacion(hospedajeId: string, file: File): Pr
   }
 }
 
-export async function eliminarImagenHabitacion(hospedajeId: string, imagenUrl: string): Promise<void> {
+export async function eliminarImagenHabitacion(
+  hospedajeId: string,
+  imagenUrl: string
+): Promise<void> {
   try {
     const token = localStorage.getItem('token');
     const response = await fetch(`/api/hospedajes/${hospedajeId}/imagenes`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ imagenUrl })
+      body: JSON.stringify({ imagenUrl }),
     });
 
     if (!response.ok) {
-      console.warn('No se pudo eliminar la imagen del servidor:', response.status);
+      console.warn(
+        'No se pudo eliminar la imagen del servidor:',
+        response.status
+      );
     }
   } catch (error) {
     console.error('Error al eliminar imagen de habitación:', error);

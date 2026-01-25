@@ -11,12 +11,13 @@ public class UserResponseDTO {
     private String direccion;
     private String rol;
     private boolean emailVerified;
+    private boolean activo;
 
     public UserResponseDTO() {
     }
 
     public UserResponseDTO(Long id, String email, String nombre, String apellido,
-                           String direccion, String rol, boolean emailVerified) {
+                           String direccion, String rol, boolean emailVerified, boolean activo) {
         this.id = id;
         this.email = email;
         this.nombre = nombre;
@@ -24,6 +25,7 @@ public class UserResponseDTO {
         this.direccion = direccion;
         this.rol = rol;
         this.emailVerified = emailVerified;
+        this.activo = activo;
     }
 
     // Getters y Setters
@@ -83,6 +85,14 @@ public class UserResponseDTO {
         this.emailVerified = emailVerified;
     }
 
+    public boolean isActivo() {
+        return activo;
+    }
+
+    public void setActivo(boolean activo) {
+        this.activo = activo;
+    }
+
     // Método estático para convertir
     public static UserResponseDTO fromEntity(User user) {
         return new UserResponseDTO(
@@ -92,7 +102,8 @@ public class UserResponseDTO {
             user.getLastName(),
             user.getDireccion(),
             user.getRole().getName().toString(),
-            user.isEmailVerified()
+            user.isEmailVerified(),
+            user.isActivo()
         );
     }
 }

@@ -39,7 +39,7 @@ public class OrderController {
     }
 
     // --- Crear pedido ---
-    @PostMapping ("new")
+    @PostMapping ("/new")
     @ResponseStatus(HttpStatus.CREATED)
     public Mono<OrderDTO> createOrder(@RequestBody OrderDTO orderDto) {
         Objects.requireNonNull(orderDto, "Order must not be null");
@@ -60,8 +60,8 @@ public class OrderController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta) {
 
         if (desde != null && hasta != null) {
-            LocalDateTime desdeDateTime = desde.atStartOfDay();
-            LocalDateTime hastaDateTime = hasta.atTime(LocalTime.MAX);
+            LocalDateTime desdeDateTime = Objects.requireNonNull(desde).atStartOfDay();
+            LocalDateTime hastaDateTime = Objects.requireNonNull(hasta).atTime(LocalTime.MAX);
             return orderService.getOrdersByRestaurantAndDateRange(restaurantId, desdeDateTime, hastaDateTime)
                     .map(this::mapToDTO);
         }
@@ -87,7 +87,6 @@ public class OrderController {
     // --- Actualizar pedido ---
     @PutMapping("/{id}")
     public Mono<OrderDTO> updateOrder(@PathVariable @NonNull String id, @RequestBody @NonNull OrderDTO orderDTO) {
-        //orderDTO.setId(id);
         return orderService.updateOrder(orderDTO).map(this::mapToDTO);
     }
 

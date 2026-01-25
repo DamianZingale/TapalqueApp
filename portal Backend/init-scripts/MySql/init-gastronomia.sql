@@ -1,4 +1,4 @@
-CREATE DATABASE IF NOT EXISTS gastronomia;
+CREATE DATABASE IF NOT EXISTS gastronomia CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE gastronomia;
 
 -- Tabla de categorías de restaurantes
@@ -47,11 +47,11 @@ CREATE TABLE IF NOT EXISTS schedule (
 
 -- Tabla de teléfonos
 CREATE TABLE IF NOT EXISTS phone_number (
-    id_phone BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_phone_number BIGINT AUTO_INCREMENT PRIMARY KEY,
     number VARCHAR(50) NOT NULL,
-    phone_type ENUM('FIJO', 'CELULAR', 'WHATSAPP') NOT NULL,
-    restaurant_id BIGINT,
-    FOREIGN KEY (restaurant_id) REFERENCES restaurant(id_restaurant) ON DELETE CASCADE
+    type ENUM('FIJO', 'CELULAR', 'WHATSAPP') NOT NULL,
+    idRestaurant BIGINT,
+    FOREIGN KEY (idRestaurant) REFERENCES restaurant(id_restaurant) ON DELETE CASCADE
 );
 
 -- Tabla de menú
@@ -185,7 +185,7 @@ INSERT INTO schedule (day_of_week, opening_time, closing_time, restaurant_id) VA
 ('DOMINGO', '12:00:00', '17:00:00', 3);
 
 -- Teléfonos
-INSERT INTO phone_number (number, phone_type, restaurant_id) VALUES
+INSERT INTO phone_number (number, type, idRestaurant) VALUES
 ('2283-426001', 'FIJO', 1),
 ('+542283426001', 'WHATSAPP', 1),
 ('2283-426002', 'FIJO', 2),

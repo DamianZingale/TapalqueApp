@@ -15,6 +15,10 @@ public class MenuDTO {
     public MenuDTO() {}
 
     public static MenuDTO fromEntity(Menu menu) {
+        if (menu == null) {
+            return null;
+        }
+
         MenuDTO dto = new MenuDTO();
         dto.setId(menu.getIdMenu());
         dto.setDescription(menu.getDescription());
@@ -23,11 +27,14 @@ public class MenuDTO {
             dto.setRestaurantId(menu.getRestaurant().getIdRestaurant());
         }
 
-        if (menu.getDishes() != null) {
+        if (menu.getDishes() != null && !menu.getDishes().isEmpty()) {
             dto.setDishes(menu.getDishes()
                               .stream()
+                              .filter(dish -> dish != null)
                               .map(DishDTO::fromEntity)
                               .collect(Collectors.toList()));
+        } else {
+            dto.setDishes(new java.util.ArrayList<>());
         }
 
         return dto;

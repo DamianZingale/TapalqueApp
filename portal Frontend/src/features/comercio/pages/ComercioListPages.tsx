@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card } from "../../../shared/components/Card";
 import { SECCION_TYPE } from "../../../shared/constants/constSecciones";
 import { fetchComercios, type Comercio } from "../../../services/fetchComercios";
@@ -7,6 +8,7 @@ export default function ComercioListPage() {
     const [comercios, setComercios] = useState<Comercio[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const loadComercios = async () => {
@@ -22,6 +24,12 @@ export default function ComercioListPage() {
         };
         loadComercios();
     }, []);
+
+    const handleCardClick = (comercio: Comercio) => {
+        navigate(`/comercio/${comercio.id}`, {
+            state: { comercio },
+        });
+    };
 
     if (loading) {
         return (
@@ -51,6 +59,7 @@ export default function ComercioListPage() {
                             imagenUrl={comercio.imagenes?.[0]?.imagenUrl || "https://via.placeholder.com/400x200.png?text=Sin+Imagen"}
                             direccion_local={comercio.direccion}
                             tipo={SECCION_TYPE.COMERCIO}
+                            onClick={() => handleCardClick(comercio)}
                         />
                     ))
                 ) : (

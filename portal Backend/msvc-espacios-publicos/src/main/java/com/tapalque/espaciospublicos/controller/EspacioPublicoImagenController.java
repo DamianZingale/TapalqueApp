@@ -2,7 +2,6 @@ package com.tapalque.espaciospublicos.controller;
 
 import java.io.IOException;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -18,13 +17,16 @@ import com.tapalque.espaciospublicos.entity.EspacioPublicoImagen;
 import com.tapalque.espaciospublicos.service.EspacioPublicoImagenService;
 
 @RestController
-@RequestMapping("api/espacio-publico/imagen")
+@RequestMapping("/espacio-publico")
 public class EspacioPublicoImagenController {
 
-    @Autowired
-    private EspacioPublicoImagenService imagenService;
+    
+    private final EspacioPublicoImagenService imagenService;
+    public EspacioPublicoImagenController( EspacioPublicoImagenService imagenService) {
+        this.imagenService = imagenService;
+    }
 
-    @PostMapping("/{espacioPublicoId}")
+    @PostMapping("/{espacioPublicoId}/imagenes")
     public ResponseEntity<ImagenResponseDTO> subirImagen(
             @PathVariable Long espacioPublicoId,
             @RequestParam("file") MultipartFile file) throws IOException {
@@ -32,7 +34,7 @@ public class EspacioPublicoImagenController {
         return ResponseEntity.status(HttpStatus.CREATED).body(new ImagenResponseDTO(imagen.getImagenUrl()));
     }
 
-    @DeleteMapping("/{imagenId}")
+    @DeleteMapping("/{imagenId}/imagenes")
     public ResponseEntity<Void> eliminarImagen(@PathVariable Long imagenId) throws IOException {
         imagenService.eliminarImagen(imagenId);
         return ResponseEntity.noContent().build();

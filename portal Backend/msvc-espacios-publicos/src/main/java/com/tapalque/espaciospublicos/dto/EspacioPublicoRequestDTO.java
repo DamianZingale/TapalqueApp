@@ -9,8 +9,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class EspacioPublicoRequestDTO {
     private String titulo;
+
     private String descripcion;
+
     private String direccion;
+
     private String telefono;
     private Double latitud;
     private Double longitud;

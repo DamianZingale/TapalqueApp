@@ -6,7 +6,6 @@ import java.util.Map;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -17,15 +16,14 @@ import com.tapalque.jwt.dto.AuthRequestDTO;
 import com.tapalque.jwt.dto.TokenResponse;
 import com.tapalque.jwt.service.AuthService;
 
-import lombok.RequiredArgsConstructor;
-
 @RestController
 @RequestMapping("/jwt/public")
-@CrossOrigin("*")
-@RequiredArgsConstructor
 public class AuthController {
 
     private final AuthService service;
+    public AuthController(AuthService service) {
+        this.service = service;
+    }
 
     @PostMapping("/login")
     public ResponseEntity<?> authenticate(@RequestBody AuthRequestDTO request) {

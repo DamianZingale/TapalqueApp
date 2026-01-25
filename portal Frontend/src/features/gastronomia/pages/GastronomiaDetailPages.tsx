@@ -4,7 +4,7 @@ import { api } from '../../../config/api';
 import { WhatsAppButton } from '../../../shared/components/WhatsAppButton';
 import { MenuCard } from '../components/MenuCard';
 import { Info } from '../components/RestaurantCard';
-import { Imenu } from '../types/Imenu';
+import { Imenu, MenuResponseDTO, transformMenuResponse } from '../types/Imenu';
 import { IRestaurantInfo } from '../types/IrestaurantInfo';
 
 export default function GastronomiaDetailPage() {
@@ -27,9 +27,9 @@ export default function GastronomiaDetailPage() {
       const fetchRestaurantDetail = async () => {
         try {
           const response = await api.get<IRestaurantInfo>(
-            `/gastronomia/findById/${id}`
+            `/api/gastronomia/restaurants/${id}`
           );
-          setRestaurante(response.data);
+          setRestaurante(response);
         } catch (error) {
           console.error('Error fetching restaurant detail:', error);
           navigate('/gastronomia');
@@ -47,10 +47,16 @@ export default function GastronomiaDetailPage() {
 
     try {
       setLoadingMenu(true);
-      const response = await api.get(`/gastronomia/menu/getMenu/${id}`);
-      setMenu(response.data);
+      const response = await api.get<MenuResponseDTO>(
+        `/api/gastronomia/menu/restaurant/${id}`
+      );
+      console.log('Menu response:', response);
+      // Transformar la respuesta del backend al formato del frontend
+      const transformedMenu = transformMenuResponse(response);
+      setMenu(transformedMenu);
     } catch (error) {
       console.error('Error fetching menu:', error);
+      setMenu([]);
     } finally {
       setLoadingMenu(false);
     }
@@ -108,29 +114,38 @@ export default function GastronomiaDetailPage() {
         showMenu={showMenu}
         name={restaurante.name}
         address={restaurante.address}
-        phone={restaurante.phone}
+        phones={restaurante.phones}
         email={restaurante.email}
         delivery={restaurante.delivery}
         imageUrl={restaurante.imageUrl}
         schedule={restaurante.schedule}
-        category={restaurante.category}
-        destination={{
-          lat: restaurante.destination.lat,
-          lng: restaurante.destination.lng,
-        }}
+        categories={restaurante.categories}
+        latitude={restaurante.latitude}
+        longitude={restaurante.longitude}
       />
 
-      {showMenu &&
-        (loadingMenu ? (
-          <div className="text-center my-3">
-            <div className="spinner-border" role="status" />
-          </div>
-        ) : (
-          <MenuCard items={menu} />
-        ))}
+      {showMenu && (
+        <>
+          {loadingMenu ? (
+            <div className="text-center my-3">
+              <div className="spinner-border" role="status" />
+            </div>
+          ) : (
+            <>
+              {menu.length > 0 ? (
+                <MenuCard items={menu} />
+              ) : (
+                <div className="alert alert-info text-center">
+                  No hay elementos disponibles en el menú de este restaurante.
+                </div>
+              )}
+            </>
+          )}
+        </>
+      )}
 
       {/* Botón WhatsApp - usar teléfono real */}
-      <WhatsAppButton num={restaurante.phone?.split(',')[0] || ''} />
+      <WhatsAppButton num={restaurante.phones?.split(',')[0] || ''} />
     </div>
   );
 }

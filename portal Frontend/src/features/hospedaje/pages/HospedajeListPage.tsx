@@ -1,6 +1,7 @@
 import { Card } from "../../../shared/components/Card";
 import { SECCION_TYPE } from "../../../shared/constants/constSecciones";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { fetchHospedajes } from "../../../services/fetchHospedajes";
 import type { Hospedaje } from "../../../services/fetchHospedajes";
 
@@ -9,6 +10,7 @@ export default function HospedajeListPage() {
     const [hospedajes, setHospedajes] = useState<Hospedaje[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetchHospedajes()
@@ -19,6 +21,12 @@ export default function HospedajeListPage() {
         })
         .finally(() => setLoading(false));
     }, []);
+
+    const handleCardClick = (hospedaje: Hospedaje) => {
+        navigate(`/hospedaje/${hospedaje.id}`, {
+            state: { hospedaje },
+        });
+    };
 
     if (loading) return <p className="text-center my-5">Cargando hospedajes...</p>;
     if (error) return <p className="text-center text-danger my-5">{error}</p>;
@@ -35,6 +43,7 @@ export default function HospedajeListPage() {
                 imagenUrl={hospedaje.imagenes?.[0] || "https://via.placeholder.com/400x200.png?text=Sin+Imagen"}
                 tipo={SECCION_TYPE.HOSPEDAJES}
                 direccion_local={hospedaje.ubicacion}
+                onClick={() => handleCardClick(hospedaje)}
             />
             ))}
             {hospedajes.length === 0 && (

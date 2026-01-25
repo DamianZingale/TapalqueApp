@@ -2,11 +2,9 @@ package com.tapalque.hosteleria.demo.controlador;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,16 +20,16 @@ import com.tapalque.hosteleria.demo.dto.ImagenResponseDTO;
 import com.tapalque.hosteleria.demo.servicio.HospedajeImagenService;
 
 @RestController
-@RequestMapping("/api/hospedajes")
-@CrossOrigin(origins = "*")
+@RequestMapping("/hospedajes")
 public class HospedajeImagenController {
 
-    @Autowired
-    private HospedajeImagenService imagenService;
+   
+    private final HospedajeImagenService imagenService;
+    public HospedajeImagenController(HospedajeImagenService imagenService) {
+        this.imagenService = imagenService;
+    }
 
-    /**
-     * Agregar imagen a un hospedaje
-     */
+
     @PostMapping(value = "/{hospedajeId}/imagenes", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ImagenResponseDTO> agregarImagen(
             @PathVariable Long hospedajeId,
@@ -41,17 +39,13 @@ public class HospedajeImagenController {
                 .body(imagenService.agregarImagen(hospedajeId, file));
     }
 
-    /**
-     * Listar imágenes de un hospedaje
-     */
+
     @GetMapping("/{hospedajeId}/imagenes")
     public ResponseEntity<List<ImagenResponseDTO>> listarImagenes(@PathVariable Long hospedajeId) {
         return ResponseEntity.ok(imagenService.listarImagenes(hospedajeId));
     }
 
-    /**
-     * Eliminar imagen de un hospedaje
-     */
+
     @DeleteMapping("/{hospedajeId}/imagenes")
     public ResponseEntity<Void> eliminarImagen(
             @PathVariable Long hospedajeId,

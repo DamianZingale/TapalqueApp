@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ServicioRequestDTO {
     private String titulo;
+
     private String descripcion;
     private String direccion;
     private String horario;

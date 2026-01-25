@@ -24,7 +24,7 @@ import com.tapalque.gastronomia.demo.Repository.RestaurantImageRepository;
 @Service
 public class RestaurantImageService {
 
-    @Value("${upload.dir:uploads}")
+    @Value("${upload.dir}")
     private String uploadDir;
 
     @Autowired

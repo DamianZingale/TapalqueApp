@@ -2,7 +2,6 @@ package com.tapalque.eventos.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -20,48 +19,52 @@ import com.tapalque.eventos.dto.EventoResponseDTO;
 import com.tapalque.eventos.service.EventoService;
 
 @RestController
-@RequestMapping("/api/evento")
+@RequestMapping("/evento")
 public class EventoController {
-    @Autowired
-    private EventoService comercioService;
+    
+    private final EventoService eventoService;
 
-    // Crear comercio
+    public EventoController(EventoService eventoService) {
+        this.eventoService = eventoService;
+    }
+
+    // Crear evento
     @PostMapping
-    public ResponseEntity<EventoResponseDTO> crearComercio(@RequestBody EventoRequestDTO dto) {
-        EventoResponseDTO creado = comercioService.crear(dto);
+    public ResponseEntity<EventoResponseDTO> crearEvento(@RequestBody EventoRequestDTO dto) {
+        EventoResponseDTO creado = eventoService.crear(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(creado);
     }
 
     // Listar todos
     @GetMapping
-    public ResponseEntity<List<EventoResponseDTO>> listarComercios() {
-        return ResponseEntity.ok(comercioService.obtenerTodos());
+    public ResponseEntity<List<EventoResponseDTO>> listarEventos() {
+        return ResponseEntity.ok(eventoService.obtenerTodos());
     }
 
     // Obtener por ID
     @GetMapping("/{id}")
     public ResponseEntity<EventoResponseDTO> obtenerPorId(@PathVariable Long id) {
-        return ResponseEntity.ok(comercioService.obtenerPorId(id));
+        return ResponseEntity.ok(eventoService.obtenerPorId(id));
     }
 
     // Actualizar completo (PUT)
     @PutMapping("/{id}")
     public ResponseEntity<EventoResponseDTO> actualizar(@PathVariable Long id,
             @RequestBody EventoRequestDTO dto) {
-        return ResponseEntity.ok(comercioService.actualizarCompleto(id, dto));
+        return ResponseEntity.ok(eventoService.actualizarCompleto(id, dto));
     }
 
     // Actualizar parcial (PATCH)
     @PatchMapping("/{id}")
     public ResponseEntity<EventoResponseDTO> actualizarParcial(@PathVariable Long id,
             @RequestBody EventoRequestDTO dto) {
-        return ResponseEntity.ok(comercioService.actualizarParcial(id, dto));
+        return ResponseEntity.ok(eventoService.actualizarParcial(id, dto));
     }
 
-    // Eliminar comercio
+    // Eliminar evento
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
-        comercioService.eliminar(id);
+        eventoService.eliminar(id);
         return ResponseEntity.noContent().build();
     }
 }

@@ -9,8 +9,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ComercioRequestDTO {
     private String titulo;
+
     private String descripcion;
+
     private String direccion;
+
     private String horario;
     private String telefono;
     private Double latitud;

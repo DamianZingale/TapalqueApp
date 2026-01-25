@@ -37,9 +37,10 @@ public class TermaResponseDTO {
         this.longitud = c.getLongitud();
         this.facebook = c.getFacebook();
         this.instagram = c.getInstagram();
-        this.imagenes = c.getImagenes()
-                .stream()
-                .map(img -> new ImagenResponseDTO(img.getImagenUrl()))
-                .collect(Collectors.toList());
+        this.imagenes = c.getImagenes() != null
+                ? c.getImagenes().stream()
+                        .map(img -> new ImagenResponseDTO(img.getImagenUrl()))
+                        .collect(Collectors.toList())
+                : List.of();
     }
 }

@@ -1,5 +1,7 @@
 package com.tapalque.user.dto;
 
+import org.springframework.lang.NonNull;
+
 import com.tapalque.user.enu.BusinessType;
 
 import jakarta.validation.constraints.NotBlank;
@@ -7,15 +9,19 @@ import jakarta.validation.constraints.NotNull;
 
 public class BusinessRequestDTO {
 
+    @NonNull
     @NotNull(message = "El ID del propietario es obligatorio")
     private Long ownerId;
 
+    @NonNull
     @NotBlank(message = "El nombre del negocio es obligatorio")
     private String name;
 
+    @NonNull
     @NotNull(message = "El tipo de negocio es obligatorio")
     private BusinessType businessType;
 
+    @NonNull
     @NotNull(message = "El ID del negocio externo es obligatorio")
     private Long externalBusinessId;
 

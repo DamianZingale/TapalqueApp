@@ -10,249 +10,571 @@ spring:
 
   cloud:
     gateway:
-      server:
-        webflux:
-          routes:
-            # ========== RUTAS PÚBLICAS ==========
-            - id: msvc-user-public
-              uri: lb://msvc-user
-              predicates:
-                - Path=/api/user/public/**
-              filters:
-                - RewritePath=/api/(?<segment>.*), /$\{segment}
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins:
+              - http://localhost:3000
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - PATCH
+              - DELETE
+              - OPTIONS
+            allowedHeaders:
+              - Authorization
+              - Content-Type
+              - Accept
+            exposedHeaders:
+              - Authorization
+            allowCredentials: true
 
-            - id: msvc-jwt-login
-              uri: lb://msvc-jwt
-              predicates:
-                - Path=/api/jwt/public/login, /api/jwt/public/refresh-token
-              filters:
-                - RewritePath=/api/(?<segment>.*), /$\{segment}
+      routes:
+        # ========== RUTAS PÚBLICAS ==========
+        - id: msvc-user-public
+          uri: lb://msvc-user
+          predicates:
+            - Path=/api/user/public/register, /api/user/public/verify-email, /api/user/public/resend-verification
+          filters:
+            - RewritePath=/api/(?<segment>.*), /${segment}
 
-            # ========== RUTAS PÚBLICAS - LISTADOS (GET) ==========
-            - id: msvc-hosteleria-list-public
-              uri: lb://msvc-hosteleria
-              predicates:
-                - Path=/api/hospedajes
-                - Method=GET
-              filters:
-                - RewritePath=/api/(?<segment>.*), /api/$\{segment}
+        - id: msvc-jwt-login
+          uri: lb://msvc-jwt
+          predicates:
+            - Path=/api/jwt/public/login, /api/jwt/public/refresh-token
+          filters:
+            - RewritePath=/api/(?<segment>.*), /${segment}
 
-            - id: msvc-gastronomia-list-public
-              uri: lb://msvc-gastronomia
-              predicates:
-                - Path=/api/gastronomia/findAll
-                - Method=GET
-              filters:
-                - RewritePath=/api/gastronomia/(?<segment>.*), /restaurante/$\{segment}
+        # ========== RUTAS PÚBLICAS - LISTADOS (GET) ==========
+        # Hostelería
+        - id: msvc-hosteleria-list-public
+          uri: lb://msvc-hosteleria
+          predicates:
+            - Path=/api/hospedajes
+            - Method=GET
+          filters:
+            - RewritePath=/api/hospedajes, /hospedajes
 
-            - id: msvc-eventos-list-public
-              uri: lb://msvc-eventos
-              predicates:
-                - Path=/api/eventos
-                - Method=GET
-              filters:
-                - RewritePath=/api/eventos(?<segment>.*), /api/evento$\{segment}
+        - id: msvc-hosteleria-detail-public
+          uri: lb://msvc-hosteleria
+          predicates:
+            - Path=/api/hospedajes/{id}
+            - Method=GET
+          filters:
+            - RewritePath=/api/hospedajes/(?<id>[0-9]+), /hospedajes/${id}
 
-            - id: msvc-servicios-list-public
-              uri: lb://msvc-servicios
-              predicates:
-                - Path=/api/servicio
-                - Method=GET
-              filters:
-                - RewritePath=/api/(?<segment>.*), /api/$\{segment}
+          #disponibilidad y habitaciones de un hospedaje
+        - id: msvc-hosteleria-disponibilidad-public
+          uri: lb://msvc-hosteleria
+          predicates:
+            - Path=/api/hospedajes/{id:[0-9]+}/disponibilidad/**
+            - Method=GET
+          filters:
+            - RewritePath=/api/hospedajes/(?<id>[0-9]+)/disponibilidad(?<rest>.*), /hospedajes/${id}/disponibilidad${rest}
 
-            - id: msvc-termas-list-public
-              uri: lb://msvc-termas
-              predicates:
-                - Path=/api/terma
-                - Method=GET
-              filters:
-                - RewritePath=/api/(?<segment>.*), /api/$\{segment}
+        - id: msvc-hosteleria-habitaciones-list-public
+          uri: lb://msvc-hosteleria
+          predicates:
+            - Path=/api/hospedajes/{id}/habitaciones
+            - Method=GET
+          filters:
+            - RewritePath=/api/hospedajes/(?<id>[0-9]+)/habitaciones, /hospedajes/${id}/habitaciones
 
-            - id: msvc-espacios-publicos-list-public
-              uri: lb://msvc-espacios-publicos
-              predicates:
-                - Path=/api/espacio-publico
-                - Method=GET
-              filters:
-                - RewritePath=/api/(?<segment>.*), /api/$\{segment}
-            - id: msvc-comercio-list-public
-              uri: lb://msvc-comercio
-              predicates:
-                - Path=/api/comercio/list
-                - Method=GET
-              filters:
-                - RewritePath=/api/(?<segment>.*), /$\{segment}
+        # Gastronomía
+        #findAll
+        - id: msvc-gastronomia-list-public
+          uri: lb://msvc-gastronomia
+          predicates:
+            - Path=/api/gastronomia/restaurants
+            - Method=GET
+          filters:
+            - RewritePath=/api/gastronomia/restaurants, /restaurante/findAll
+          #findById
+        - id: msvc-gastronomia-detail-public
+          uri: lb://msvc-gastronomia
+          predicates:
+            - Path=/api/gastronomia/restaurants/{id}
+            - Method=GET
+          filters:
+            - RewritePath=/api/gastronomia/restaurants/(?<id>[0-9]+), /restaurante/findById/${id}
 
-            - id: msvc-comercio-public
-              uri: lb://msvc-comercio
-              predicates:
-                - Path=/api/comercio, /api/comercio/{id}
-                - Method=GET
-              filters:
-                - RewritePath=/api/(?<segment>.*), /$\{segment}
-                - JwtAuth
+          # Ruta alternativa /api/gastronomia/{id}
+        - id: msvc-gastronomia-by-id-public
+          uri: lb://msvc-gastronomia
+          predicates:
+            - Path=/api/gastronomia/{id}
+            - Method=GET
+          filters:
+            - RewritePath=/api/gastronomia/(?<id>[0-9]+), /restaurante/findById/${id}
+          #menu de un restaurante
+        - id: msvc-gastronomia-menu-public
+          uri: lb://msvc-gastronomia
+          predicates:
+            - Path=/api/gastronomia/menu/restaurant/{id}
+            - Method=GET
+          filters:
+            - RewritePath=/api/gastronomia/menu/restaurant/(?<id>[0-9]+), /gastronomia/menu/restaurant/${id}
+          #filtros de un restaurante
+        - id: msvc-gastronomia-menu-filter-public
+          uri: lb://msvc-gastronomia
+          predicates:
+            - Path=/api/gastronomia/menu/restaurant/{id}/filter
+            - Method=GET
+          filters:
+            - RewritePath=/api/gastronomia/menu/restaurant/(?<id>[0-9]+)/filter, /gastronomia/menu/restaurant/${id}/filter
+          #categories
+        - id: msvc-gastronomia-menu-categories-public
+          uri: lb://msvc-gastronomia
+          predicates:
+            - Path=/api/gastronomia/menu/categories
+            - Method=GET
+          filters:
+            - RewritePath=/api/gastronomia/menu/categories, /gastronomia/menu/categories
+          #restrictions
+        - id: msvc-gastronomia-menu-restrictions-public
+          uri: lb://msvc-gastronomia
+          predicates:
+            - Path=/api/gastronomia/menu/restrictions
+            - Method=GET
+          filters:
+            - RewritePath=/api/gastronomia/menu/restrictions, /gastronomia/menu/restrictions
 
-            - id: msvc-comercio-imagen
-              uri: lb://msvc-comercio
-              predicates:
-                - Path=/api/comercio/imagen/**
-              filters:
-                - RewritePath=/api/comercio/imagen/(?<segment>.*), /api/comercio/$\{segment}
-                - JwtAuth
+        # Eventos
+        - id: msvc-eventos-list-public
+          uri: lb://msvc-eventos
+          predicates:
+            - Path=/api/eventos
+            - Method=GET
+          filters:
+            - RewritePath=/api/eventos, /evento
 
-            - id: msvc-comercio
-              uri: lb://msvc-comercio
-              predicates:
-                - Path=/api/comercio/**
-                - Method=POST,PUT,PATCH,DELETE
-              filters:
-                - RewritePath=/api/(?<segment>.*), /$\{segment}
-                - JwtAuth
+        - id: msvc-eventos-detail-public
+          uri: lb://msvc-eventos
+          predicates:
+            - Path=/api/eventos/{id}
+            - Method=GET
+          filters:
+            - RewritePath=/api/eventos/(?<id>[0-9]+), /evento/${id}
+        # Servicios
+        - id: msvc-servicios-list-public
+          uri: lb://msvc-servicios
+          predicates:
+            - Path=/api/servicio
+            - Method=GET
+          filters:
+            - RewritePath=/api/servicio, /servicio
 
-            - id: msvc-hospedaje-imagen
-              uri: lb://msvc-hosteleria
-              predicates:
-                - Path=/api/hospedaje/imagen/**
-              filters:
-                - RewritePath=/api/hospedaje/imagen/(?<segment>.*), /api/hospedaje/$\{segment}
-                - JwtAuth
+        - id: msvc-servicios-detail-public
+          uri: lb://msvc-servicios
+          predicates:
+            - Path=/api/servicio/{id}
+            - Method=GET
+          filters:
+            - RewritePath=/api/servicio/(?<id>[0-9]+), /servicio/${id}
 
-            - id: msvc-hosteleria
-              uri: lb://msvc-hosteleria
-              predicates:
-                - Path=/api/hospedajes/**
-                - Method=POST,PUT,PATCH,DELETE
-              filters:
-                - RewritePath=/api/(?<segment>.*), /api/$\{segment}
-                - JwtAuth
+        # Termas
+        - id: msvc-termas-list-public
+          uri: lb://msvc-termas
+          predicates:
+            - Path=/api/terma
+            - Method=GET
+          filters:
+            - RewritePath=/api/terma, /terma
 
-            - id: msvc-gastronomia-imagen
-              uri: lb://msvc-gastronomia
-              predicates:
-                - Path=/api/gastronomia/imagen/**
-              filters:
-                - RewritePath=/api/gastronomia/imagen/(?<segment>.*), /restaurante/$\{segment}
-                - JwtAuth
+        - id: msvc-termas-detail-public
+          uri: lb://msvc-termas
+          predicates:
+            - Path=/api/terma/{id}
+            - Method=GET
+          filters:
+            - RewritePath=/api/terma/(?<id>[0-9]+), /terma/${id}
+        # Espacios Públicos
+        - id: msvc-espacios-publicos-list-public
+          uri: lb://msvc-espacios-publicos
+          predicates:
+            - Path=/api/espacio-publico,
+            - Method=GET
+          filters:
+            - RewritePath=/api/espacio-publico, /espacio-publico
 
-            - id: msvc-gastronomia
-              uri: lb://msvc-gastronomia
-              predicates:
-                - Path=/api/gastronomia/**
-                - Method=POST,PUT,PATCH,DELETE
-              filters:
-                - RewritePath=/api/gastronomia/(?<segment>.*), /restaurante/$\{segment}
-                - JwtAuth
+        - id: msvc-espacios-publicos-detail-public
+          uri: lb://msvc-espacios-publicos
+          predicates:
+            - Path=/api/espacio-publico/{id}
+            - Method=GET
+          filters:
+            - RewritePath=/api/espacio-publico/(?<id>[0-9]+), /espacio-publico/${id}
 
-            - id: msvc-mercado-pago
-              uri: lb://msvc-mercado-pago
-              predicates:
-                - Path=/api/mercadopago/**
-              filters:
-                - RewritePath=/api/(?<segment>.*), /$\{segment}
-                - JwtAuth
+        # Comercio
+        - id: msvc-comercio-list-public
+          uri: lb://msvc-comercio
+          predicates:
+            - Path=/api/comercio/list
+            - Method=GET
+          filters:
+            - RewritePath=/api/comercio/list, /comercio/list
 
-            - id: msvc-pedidos
-              uri: lb://msvc-pedidos
-              predicates:
-                - Path=/api/pedidos/**
-              filters:
-                - RewritePath=/api/(?<segment>.*), /$\{segment}
-                - JwtAuth
+        - id: msvc-comercio-detail-public
+          uri: lb://msvc-comercio
+          predicates:
+            - Path=/api/comercio/{id}
+            - Method=GET
+          filters:
+            - RewritePath=/api/(?<id>[0-9]+), /comercio/${id}
 
-            - id: msvc-reservas
-              uri: lb://msvc-reservas
-              predicates:
-                - Path=/api/reservas/**
-              filters:
-                - RewritePath=/api/(?<segment>.*), /$\{segment}
-                - JwtAuth
+        # ========== RUTAS PRIVADAS (CON AUTENTICACIÓN) ==========
+        - id: msvc-comercio-imagen
+          uri: lb://msvc-comercio
+          predicates:
+            - Path=/api/comercio/imagen/**
+            - Method=GET, DELETE, POST
+          filters:
+            - RewritePath=/api/comercio/imagen/(?<id>[0-9]+), /comercio/${id}/imagenes
+            - JwtAuth
 
-            - id: msvc-eventos-imagen
-              uri: lb://msvc-eventos
-              predicates:
-                - Path=/api/eventos/imagen/**
-              filters:
-                - RewritePath=/api/eventos/imagen/(?<segment>.*), /api/evento/$\{segment}
-                - JwtAuth
+        - id: msvc-comercio
+          uri: lb://msvc-comercio
+          predicates:
+            - Path=/api/comercio/**
+            - Method=POST,PUT,PATCH,DELETE
+          filters:
+            - RewritePath=/api/(?<id>[0-9]+), /comercio/${id}
+            - JwtAuth
 
-            - id: msvc-eventos
-              uri: lb://msvc-eventos
-              predicates:
-                - Path=/api/eventos/**
-                - Method=POST,PUT,PATCH,DELETE
-              filters:
-                - RewritePath=/api/eventos(?<segment>.*), /api/evento$\{segment}
-                - JwtAuth
+        - id: msvc-hospedaje-imagen
+          uri: lb://msvc-hosteleria
+          predicates:
+            - Path=/api/hospedaje/imagen/{id}
+            - Method=GET, DELETE, POST
+          filters:
+            - RewritePath=/api/hospedaje/imagen/(?<id>[0-9]+), /hospedaje/${id}/imagenes
+            - JwtAuth
 
-            - id: msvc-servicios-imagen
-              uri: lb://msvc-servicios
-              predicates:
-                - Path=/api/servicio/imagen/**
-              filters:
-                - RewritePath=/api/servicio/imagen/(?<segment>.*), /api/servicio/$\{segment}
-                - JwtAuth
+        - id: msvc-hosteleria
+          uri: lb://msvc-hosteleria
+          predicates:
+            - Path=/api/hospedajes/{id}
+            - Method=POST,PUT,DELETE
+          filters:
+            - RewritePath=/api/hospedajes/(?<id>[0-9]+), /hospedaje/${id}
+            - JwtAuth
 
-            - id: msvc-servicios
-              uri: lb://msvc-servicios
-              predicates:
-                - Path=/api/servicio/**
-                - Method=POST,PUT,PATCH,DELETE
-              filters:
-                - RewritePath=/api/(?<segment>.*), /api/$\{segment}
-                - JwtAuth
+        - id: msvc-hosteleria-habitaciones
+          uri: lb://msvc-hosteleria
+          predicates:
+            - Path=/api/habitaciones/{id}
+            - Method=GET,PUT,DELETE,PATCH
+          filters:
+            - RewritePath=/api/(?<id>[0-9]+), /habitaciones/hospedajes/${id}
+            - JwtAuth
 
-            - id: msvc-termas-imagen
-              uri: lb://msvc-termas
-              predicates:
-                - Path=/api/terma/imagen/**
-              filters:
-                - RewritePath=/api/terma/imagen/(?<segment>.*), /api/terma/$\{segment}
-                - JwtAuth
+        - id: msvc-hosteleria-habitaciones-disponibilidad-update
+          uri: lb://msvc-hosteleria
+          predicates:
+            - Path=/api/habitaciones/{id}/disponibilidad
+            - Method=PATCH
+          filters:
+            - RewritePath=/api/(?<id>[0-9]+), /habitaciones/${id}/disponibilidad
+            - JwtAuth
 
-            - id: msvc-termas
-              uri: lb://msvc-termas
-              predicates:
-                - Path=/api/terma/**
-                - Method=POST,PUT,PATCH,DELETE
-              filters:
-                - RewritePath=/api/(?<segment>.*), /api/$\{segment}
-                - JwtAuth
+        - id: msvc-gastronomia-imagen
+          uri: lb://msvc-gastronomia
+          predicates:
+            - Path=/api/gastronomia/imagen/**
+            - Method=GET
+          filters:
+            - RewritePath=/api/gastronomia/imagen/(?<segment>.*), /restaurante/$\{segment}
+            - JwtAuth
 
-            - id: msvc-espacios-publicos-imagen
-              uri: lb://msvc-espacios-publicos
-              predicates:
-                - Path=/api/espacio-publico/imagen/**
-              filters:
-                - RewritePath=/api/espacio-publico/imagen/(?<segment>.*), /api/espacio-publico/$\{segment}
-                - JwtAuth
+        - id: msvc-gastronomia-create
+          uri: lb://msvc-gastronomia
+          predicates:
+            - Path=/api/gastronomia
+            - Method=POST
+          filters:
+            - RewritePath=/api/gastronomia, /restaurante/save
+            - JwtAuth
 
-            - id: msvc-espacios-publicos
-              uri: lb://msvc-espacios-publicos
-              predicates:
-                - Path=/api/espacio-publico/**
-                - Method=POST,PUT,PATCH,DELETE
-              filters:
-                - RewritePath=/api/(?<segment>.*), /api/$\{segment}
-                - JwtAuth
+        # PUT /api/gastronomia/{id} -> /restaurante/update/{id}
+        - id: msvc-gastronomia-update
+          uri: lb://msvc-gastronomia
+          predicates:
+            - Path=/api/gastronomia/{id}
+            - Method=PUT
+          filters:
+            - RewritePath=/api/gastronomia/(?<id>[0-9]+), /restaurante/update/${id}
+            - JwtAuth
 
-            # ========== USUARIOS (MODERADOR) ==========
-            - id: msvc-user-moderador
-              uri: lb://msvc-user
-              predicates:
-                - Path=/api/user/all, /api/user/administradores, /api/user/{id}, /api/user/{id}/role, /api/user/moderador/create
-              filters:
-                - RewritePath=/api/(?<segment>.*), /$\{segment}
-                - JwtAuth
+        - id: msvc-gastronomia-delete
+          uri: lb://msvc-gastronomia
+          predicates:
+            - Path=/api/gastronomia/delete/{id}
+            - Method=DELETE
+          filters:
+            - RewritePath=/api/gastronomia/delete/(?<id>[0-9]+), /restaurante/delete/${id}
+            - JwtAuth
+        # MERCADO PAGO
+        - id: msvc-mercado-pago
+          uri: lb://msvc-mercado-pago
+          predicates:
+            - Path=/api/mercadopago/pagos/crear
+            - Method=POST
+          filters:
+            - RewritePath=/api/(?<segment>.*), /${segment}
+            - JwtAuth
 
-            # ========== BUSINESS (MODERADOR) ==========
-            - id: msvc-business
-              uri: lb://msvc-user
-              predicates:
-                - Path=/api/business, /api/business/**, /api/business/all, /api/business/user/{userId}
-              filters:
-                - RewritePath=/api/(?<segment>.*), /$\{segment}
-                - JwtAuth
+        - id: msvc-mercado-pago
+          uri: lb://msvc-mercado-pago
+          predicates:
+            - Path=/api/mercadopago/webhook
+            - Method=POST
+          filters:
+            - RewritePath=/api/(?<segment>.*), /${segment}
+
+        - id: msvc-mercado-pago
+          uri: lb://msvc-mercado-pago
+          predicates:
+            - Path=/api/mercadopago/Oauth/callback
+            - Method=GET
+          filters:
+            - RewritePath=/api/(?<segment>.*), /${segment}
+
+        - id: msvc-mercado-pago
+          uri: lb://msvc-mercado-pago
+          predicates:
+            - Path=/api/mercadopago/Oauth/init
+            - Method=GET
+          filters:
+            - RewritePath=/api/(?<segment>.*), /${segment}
+
+        - id: msvc-mercado-pago
+          uri: lb://msvc-mercado-pago
+          predicates:
+            - Path=/api/mercado-pago/webhook
+            - Method=POST
+          filters:
+            - RewritePath=/api/(?<segment>.*), /${segment}
+
+        - id: msvc-mercado-pago
+          uri: lb://msvc-mercado-pago
+          predicates:
+            - Path=/api/mercado-pago/pagos/crear
+            - Method=POST
+          filters:
+            - RewritePath=/api/(?<segment>.*), /${segment}
+
+        # PEDIDOS
+        - id: msvc-pedidos
+          uri: lb://msvc-pedidos
+          predicates:
+            - Path=/api/pedidos/orders/new
+            - Method=POST
+          filters:
+            - RewritePath=/api/pedidos/(?<segment>.*), /${segment}
+            - JwtAuth
+
+        - id: msvc-pedidos
+          uri: lb://msvc-pedidos
+          predicates:
+            - Path=/api/pedidos/orders/{id}
+            - Method=GET
+          filters:
+            - RewritePath=/api/pedidos/(?<id>[0-9]+), /${id}
+            - JwtAuth
+
+        - id: msvc-pedidos
+          uri: lb://msvc-pedidos
+          predicates:
+            - Path=/api/pedidos/orders/restaurant/{restaurantId}
+            - Method=GET
+          filters:
+            - RewritePath=/api/pedidos/(?<segment>.*),  /${segment}
+            - JwtAuth
+
+        - id: msvc-pedidos
+          uri: lb://msvc-pedidos
+          predicates:
+            - Path=/api/pedidos/orders/user/{userId}
+            - Method=GET
+          filters:
+            - RewritePath=/api/pedidos/(?<segment>.*), /${segment}
+            - JwtAuth
+
+        - id: msvc-pedidos
+          uri: lb://msvc-pedidos
+          predicates:
+            - Path=/api/pedidos/orders/{id:[0-9]+}
+            - Method=PUT
+          filters:
+            - RewritePath=/api/pedidos/orders/(?<id>[0-9]+), /orders/${id}
+            - JwtAuth
+
+        - id: msvc-pedidos
+          uri: lb://msvc-pedidos
+          predicates:
+            - Path=/api/pedidos/orders/{id:[0-9]+}
+            - Method=DELETE
+          filters:
+            - RewritePath=/api/pedidos/orders/(?<id>[0-9]+), /orders/${id}
+            - JwtAuth
+
+        - id: msvc-pedidos
+          uri: lb://msvc-pedidos
+          predicates:
+            - Path=/api/pedidos/orders/{id:[0-9]+}/estado
+            - Method=PATCH
+          filters:
+            - RewritePath=/api/pedidos/orders/(?<id>[0-9]+), /orders/${id}/estado
+            - JwtAuth
+
+        # RESERVAS
+        - id: msvc-reservas
+          uri: lb://msvc-reservas
+          predicates:
+            - Path=/api/reservas/reservations/new
+            - Method=POST
+          filters:
+            - RewritePath=/api/reservas/(?<segment>.*), /${segment}
+            - JwtAuth
+
+        - id: msvc-reservas
+          uri: lb://msvc-reservas
+          predicates:
+            - Path=/api/reservas/reservations/by-id/{id:[0-9]+}
+            - Method=GET
+          filters:
+            - RewritePath=/api/reservas/reservations/by-id/(?<id>[0-9]+), /reservations/by-id/${id}
+            - JwtAuth
+
+        - id: msvc-reservas
+          uri: lb://msvc-reservas
+          predicates:
+            - Path=/api/reservas/reservations/update/{id:[0-9]+}
+            - Method=PUT
+          filters:
+            - RewritePath=/api/reservas/reservations/update/(?<id>[0-9]+), /reservations/update/${id}
+            - JwtAuth
+
+        - id: msvc-reservas
+          uri: lb://msvc-reservas
+          predicates:
+            - Path=/api/reservas/reservations/delete/{id:[0-9]+}
+            - Method=DELETE
+          filters:
+            - RewritePath=/api/reservas/reservations/delete/(?<id>[0-9]+), /reservations/delete/${id}
+            - JwtAuth
+
+        - id: msvc-reservas
+          uri: lb://msvc-reservas
+          predicates:
+            - Path=/api/reservas/reservations/by-hotel/{id:[0-9]+}
+            - Method=GET
+          filters:
+            - RewritePath=/api/reservas/reservations/by-hotel/(?<id>[0-9]+), /reservations/by-hotel/${id}
+            - JwtAuth
+
+        - id: msvc-reservas
+          uri: lb://msvc-reservas
+          predicates:
+            - Path=/api/reservas/reservations/by-customer/{id:[0-9]+}
+            - Method=GET
+          filters:
+            - RewritePath=/api/reservas/reservations/by-customer/(?<id>[0-9]+), /reservations/by-customer/${id}
+            - JwtAuth
+
+          # EVENTOS
+        - id: msvc-eventos-imagen
+          uri: lb://msvc-eventos
+          predicates:
+            - Path=/api/evento/{id:[0-9]+}/imagenes
+            - Method=POST,DELETE
+          filters:
+            - RewritePath=/api/(?<segment>.*), /${segment}
+            - JwtAuth
+
+        - id: msvc-eventos
+          uri: lb://msvc-eventos
+          predicates:
+            - Path=/api/evento/{id:[0-9]+}
+            - Method=POST,PUT,PATCH,DELETE
+          filters:
+            - RewritePath=/api/evento/(?<id>[0-9]+), /evento/${id}
+            - JwtAuth
+
+        # SERVICIOS
+        - id: msvc-servicios-imagen
+          uri: lb://msvc-servicios
+          predicates:
+            - Path=/api/servicio/{id:[0-9]+}/imagenes
+            - Method=GET
+          filters:
+            - RewritePath=/api/(?<segment>.*), /servicio/${segment}
+
+        - id: msvc-servicios
+          uri: lb://msvc-servicios
+          predicates:
+            - Path=/api/servicio/{id:[0-9]+}/imagenes
+            - Method=POST, DELETE
+          filters:
+            - RewritePath=/api/(?<segment>.*), /${segment}
+            - JwtAuth
+
+        # TERMAS
+        - id: msvc-termas
+          uri: lb://msvc-termas
+          predicates:
+            - Path=/api/terma/{id:[0-9]+}/imagenes
+            - Method=POST,PUT,PATCH,DELETE
+          filters:
+            - RewritePath=/api/terma/(?<id>[0-9]+), /terma/${id}/imagenes
+            - JwtAuth
+
+        # ESPACIOS PÚBLICOS
+        - id: msvc-espacios-publicos-imagen
+          uri: lb://msvc-espacios-publicos
+          predicates:
+            - Path=/api/espacio-publico/{id:[0-9]+}/imagenes
+            - Method=DELETE, POST
+          filters:
+            - RewritePath=/api/espacio-publico/(?<id>[0-9]+), /espacio-publico/${id}/imagenes
+            - JwtAuth
+
+        - id: msvc-espacios-publicos
+          uri: lb://msvc-espacios-publicos
+          predicates:
+            - Path=/api/espacio-publico/{id:[0-9]+}
+            - Method=POST
+          filters:
+            - RewritePath=/api/espacio-publico/(?<id>[0-9]+), /espacio-publico/${id}
+            - JwtAuth
+
+        - id: msvc-espacios-publicos
+          uri: lb://msvc-espacios-publicos
+          predicates:
+            - Path=/api/espacio-publico/{id:[0-9]+}
+            - Method=PUT,PATCH,DELETE
+          filters:
+            - RewritePath=/api/espacio-publico/(?<id>[0-9]+), /espacio-publico/${id}
+            - JwtAuth
+
+        # ========== USUARIOS (MODERADOR) ==========
+        - id: msvc-user-moderador
+          uri: lb://msvc-user
+          predicates:
+            - Path=/api/user/all, /api/user/administradores, /api/user/{id}, /api/user/{id}/role, /api/user/{id}/estado, /api/user/moderador/create
+          filters:
+            - RewritePath=/api/(?<segment>.*), /${segment}
+            - JwtAuth
+
+        # ========== BUSINESS (MODERADOR) ==========
+        - id: msvc-business
+          uri: lb://msvc-user
+          predicates:
+            - Path=/api/business, /api/business/**, /api/business/all, /api/business/user/{userId}, /api/business/external/{externalBusinessId}/type/{businessType}
+          filters:
+            - RewritePath=/api/(?<segment>.*), /${segment}
+            - JwtAuth
 
 eureka:
   client:

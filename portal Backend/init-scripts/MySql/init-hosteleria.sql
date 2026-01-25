@@ -1,4 +1,4 @@
-CREATE DATABASE IF NOT EXISTS hosteleria;
+CREATE DATABASE IF NOT EXISTS hosteleria CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE hosteleria;
 
 -- Tabla de hospedajes

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Table, Button, Badge, Form, Row, Col, Modal, InputGroup, Alert } from 'react-bootstrap';
 import {
     fetchMenuByRestaurant,
@@ -6,10 +6,14 @@ import {
     actualizarMenuItem,
     eliminarMenuItem,
     cambiarDisponibilidadItem,
+    fetchDishCategories,
+    fetchDishRestrictions,
     MenuItem,
-    CATEGORIAS_MENU,
-    RESTRICCIONES_MENU
 } from '../../../../services/fetchMenu';
+import { DishCategoryDTO, DishRestrictionDTO } from '../../types/Imenu';
+import { CategoryTags } from '../CategoryTags';
+import { RestrictionsTags } from '../RestrictionsTags';
+import { useFilterByCategory } from '../../hooks/useFilterByCategory';
 
 interface NuevoPlatoForm {
     dish_name: string;
@@ -34,7 +38,6 @@ const initialNuevoPlato: NuevoPlatoForm = {
 export const GestionMenuTab = () => {
     const [menu, setMenu] = useState<MenuItem[]>([]);
     const [loading, setLoading] = useState(true);
-    const [filtroCategoria, setFiltroCategoria] = useState<string>('TODAS');
     const [filtroDisponibilidad, setFiltroDisponibilidad] = useState<'TODOS' | 'DISPONIBLE' | 'NO_DISPONIBLE'>('TODOS');
     const [busqueda, setBusqueda] = useState<string>('');
     const [modalAgregar, setModalAgregar] = useState(false);
@@ -45,32 +48,56 @@ export const GestionMenuTab = () => {
     const [guardando, setGuardando] = useState(false);
     const [errorForm, setErrorForm] = useState<string | null>(null);
     const [mensaje, setMensaje] = useState<{ tipo: "success" | "danger", texto: string } | null>(null);
+    const [categoriasMenu, setCategoriasMenu] = useState<DishCategoryDTO[]>([]);
+    const [restriccionesMenu, setRestriccionesMenu] = useState<DishRestrictionDTO[]>([]);
+
+    // Hook para filtrar por categoría
+    const { filteredItems: menuPorCategoria, activeCategory, setActiveCategory } = useFilterByCategory(menu);
 
     // TODO: Obtener restaurantId del usuario logueado
     const restaurantId = '1';
 
     useEffect(() => {
-        cargarMenu();
+        cargarDatos();
     }, []);
 
-    const cargarMenu = async () => {
+    const cargarDatos = async () => {
         setLoading(true);
-        const data = await fetchMenuByRestaurant(restaurantId);
-        // Si no hay datos del backend, usar los items con available = true por defecto
-        setMenu(data.map(item => ({ ...item, available: item.available ?? true })));
+        await Promise.all([
+            cargarMenu(),
+            cargarCategorias(),
+            cargarRestricciones(),
+        ]);
         setLoading(false);
     };
 
-    const categorias = [...new Set(menu.map(m => m.category))];
+    const cargarCategorias = async () => {
+        const data = await fetchDishCategories();
+        setCategoriasMenu(data);
+    };
 
-    const menuFiltrado = menu
-        .filter(item => {
-            if (filtroCategoria !== 'TODAS' && item.category !== filtroCategoria) return false;
+    const cargarRestricciones = async () => {
+        const data = await fetchDishRestrictions();
+        setRestriccionesMenu(data);
+    };
+
+    const cargarMenu = async () => {
+        const data = await fetchMenuByRestaurant(restaurantId);
+        // Si no hay datos del backend, usar los items con available = true por defecto
+        setMenu(data.map(item => ({ ...item, available: (item as MenuItem).available ?? true })));
+    };
+
+    // Categorías únicas del menú
+    const categorias = useMemo(() => [...new Set(menu.map(m => m.category))], [menu]);
+
+    // Filtrado adicional (disponibilidad y búsqueda) sobre el resultado del hook
+    const menuFiltrado = useMemo(() =>
+        (menuPorCategoria as MenuItem[]).filter(item => {
             if (filtroDisponibilidad === 'DISPONIBLE' && !item.available) return false;
             if (filtroDisponibilidad === 'NO_DISPONIBLE' && item.available) return false;
             if (busqueda && !item.dish_name.toLowerCase().includes(busqueda.toLowerCase())) return false;
             return true;
-        });
+        }), [menuPorCategoria, filtroDisponibilidad, busqueda]);
 
     const handleCambiarDisponibilidad = async (item: MenuItem) => {
         const nuevoEstado = !item.available;
@@ -210,12 +237,11 @@ export const GestionMenuTab = () => {
                 <Col md={3}>
                     <Form.Group>
                         <Form.Label>Categoría</Form.Label>
-                        <Form.Select value={filtroCategoria} onChange={(e) => setFiltroCategoria(e.target.value)}>
-                            <option value="TODAS">Todas las categorías</option>
-                            {categorias.map(cat => (
-                                <option key={cat} value={cat}>{cat}</option>
-                            ))}
-                        </Form.Select>
+                        <CategoryTags
+                            categories={categorias}
+                            activeCategory={activeCategory}
+                            onSelect={setActiveCategory}
+                        />
                     </Form.Group>
                 </Col>
 
@@ -433,15 +459,11 @@ export const GestionMenuTab = () => {
                         <Col md={6}>
                             <Form.Group className="mb-3">
                                 <Form.Label>Categoría *</Form.Label>
-                                <Form.Select
-                                    value={nuevoPlato.category}
-                                    onChange={(e) => setNuevoPlato(prev => ({ ...prev, category: e.target.value }))}
-                                >
-                                    <option value="">Seleccionar categoría...</option>
-                                    {CATEGORIAS_MENU.map(cat => (
-                                        <option key={cat} value={cat}>{cat}</option>
-                                    ))}
-                                </Form.Select>
+                                <CategoryTags
+                                    categories={categoriasMenu.map(cat => cat.name)}
+                                    activeCategory={nuevoPlato.category || null}
+                                    onSelect={(cat) => setNuevoPlato(prev => ({ ...prev, category: cat || '' }))}
+                                />
                             </Form.Group>
                         </Col>
                         <Col md={6}>
@@ -470,19 +492,12 @@ export const GestionMenuTab = () => {
 
                     <Form.Group className="mb-3">
                         <Form.Label>Restricciones alimentarias</Form.Label>
-                        <div className="d-flex flex-wrap gap-2">
-                            {RESTRICCIONES_MENU.map(rest => (
-                                <Badge
-                                    key={rest}
-                                    bg={nuevoPlato.restrictions.includes(rest) ? "warning" : "secondary"}
-                                    style={{ cursor: "pointer", padding: "8px 12px" }}
-                                    onClick={() => handleToggleRestriccion(rest)}
-                                >
-                                    {nuevoPlato.restrictions.includes(rest) ? "✓ " : ""}{rest}
-                                </Badge>
-                            ))}
-                        </div>
-                        <Form.Text className="text-muted">Click para seleccionar/deseleccionar</Form.Text>
+                        <RestrictionsTags
+                            tags={restriccionesMenu.map(rest => rest.name)}
+                            selectedTags={nuevoPlato.restrictions}
+                            toggleTag={handleToggleRestriccion}
+                            clearTags={() => setNuevoPlato(prev => ({ ...prev, restrictions: [] }))}
+                        />
                     </Form.Group>
                 </Modal.Body>
                 <Modal.Footer>

@@ -2,7 +2,6 @@ package com.tapalque.comercio.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -20,19 +19,17 @@ import com.tapalque.comercio.dto.ComercioImagenRequestDTO;
 import com.tapalque.comercio.dto.ImagenResponseDTO;
 import com.tapalque.comercio.service.ComercioImagenService;
 
-import jakarta.annotation.PostConstruct;
-
 @RestController
-@RequestMapping("/api/comercio")
+@RequestMapping("/comercio")
 public class ComercioImagenController {
 
-    @Autowired
-    private ComercioImagenService cImagenService;
-
-    @GetMapping("/test")
-    public ResponseEntity<String> eliminarImagen() {
-        return ResponseEntity.ok("EL TEST ANDA");
+  
+    private final ComercioImagenService cImagenService;
+    public ComercioImagenController(ComercioImagenService cImagenService) {
+        this.cImagenService = cImagenService;
     }
+
+
     // Agregar imagen
     @PostMapping(value = "/{comercioId}/imagenes", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ImagenResponseDTO> agregarImagen(
@@ -55,13 +52,8 @@ public class ComercioImagenController {
     public ResponseEntity<Void> eliminarImagen(@PathVariable Long comercioId,
             @RequestBody ComercioImagenRequestDTO dto) {
 
-        System.out.println("LLega a endpoint");
         cImagenService.eliminarImagen(comercioId, dto);
-        return ResponseEntity.noContent().build();
-    }
+        return ResponseEntity.noContent().build();  
+            }
 
-    @PostConstruct
-    public void init() {
-        System.out.println("✅ ComercioImagenController inicializado");
-    }
 }

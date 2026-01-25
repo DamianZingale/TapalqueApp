@@ -2,7 +2,6 @@ package com.tapalque.gastronomia.demo.Controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -24,12 +23,15 @@ import com.tapalque.gastronomia.demo.Service.RestaurantImageService;
 @RequestMapping("/restaurante")
 public class RestaurantImageController {
 
-    @Autowired
-    private RestaurantImageService imageService;
 
-    /**
-     * Agregar imagen a un restaurante
-     */
+
+    private final RestaurantImageService imageService;
+
+    public RestaurantImageController(RestaurantImageService imageService) {
+        this.imageService = imageService;
+    }
+
+
     @PostMapping(value = "/{restaurantId}/imagenes", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ImagenResponseDTO> agregarImagen(
             @PathVariable Long restaurantId,
@@ -39,17 +41,13 @@ public class RestaurantImageController {
                 .body(imageService.agregarImagen(restaurantId, file));
     }
 
-    /**
-     * Listar imágenes de un restaurante
-     */
+
     @GetMapping("/{restaurantId}/imagenes")
     public ResponseEntity<List<ImagenResponseDTO>> listarImagenes(@PathVariable Long restaurantId) {
         return ResponseEntity.ok(imageService.listarImagenes(restaurantId));
     }
 
-    /**
-     * Eliminar imagen de un restaurante
-     */
+ 
     @DeleteMapping("/{restaurantId}/imagenes")
     public ResponseEntity<Void> eliminarImagen(
             @PathVariable Long restaurantId,

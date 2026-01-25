@@ -3,11 +3,28 @@ services:
   # INFRAESTRUCTURA
   # ==========================================
   rabbitmq:
-    image: rabbitmq:3-management
+    image: rabbitmq:3.9-management-alpine
     container_name: rabbitmq
     ports:
       - '15672:15672' # Panel de gestión
       - '5672:5672' # Comunicación interna
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+      RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS: -rabbitmq_management load_definitions "/etc/rabbitmq/definitions.json"
+    volumes:
+      - ./portal Backend/init-scripts/RabbitMQ/definitions.json:/etc/rabbitmq/definitions.json:ro
+    tmpfs:
+      - /var/lib/rabbitmq
+    healthcheck:
+      test: ['CMD', 'rabbitmq-diagnostics', '-q', 'ping']
+      interval: 15s
+      timeout: 10s
+      retries: 6
+    deploy:
+      resources:
+        limits:
+          memory: 256M
     networks:
       - tapalque-net
 
@@ -20,6 +37,10 @@ services:
     volumes:
       - pedidos_data:/data/db
       - ./portal Backend/init-scripts/Mongo/init-pedidos.js:/docker-entrypoint-initdb.d/init-pedidos.js:ro
+    deploy:
+      resources:
+        limits:
+          memory: 256M
     networks:
       - tapalque-net
 
@@ -31,6 +52,10 @@ services:
     volumes:
       - reservas_data:/data/db
       - ./portal Backend/init-scripts/Mongo/init-reservas.js:/docker-entrypoint-initdb.d/init-reservas.js:ro
+    deploy:
+      resources:
+        limits:
+          memory: 256M
     networks:
       - tapalque-net
 
@@ -184,6 +209,20 @@ services:
     ports:
       - '8761:8761'
     restart: always
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'wget',
+          '--quiet',
+          '--tries=1',
+          '--spider',
+          'http://localhost:8761',
+        ]
+      interval: 15s
+      timeout: 10s
+      retries: 8
+      start_period: 90s
     networks:
       - tapalque-net
 
@@ -191,10 +230,11 @@ services:
     build: ./portal Backend/msvc-gateway-server
     container_name: msvc-gateway-server
     ports:
-      - '8090:8090' # ← CAMBIO 1: De "expose" a "ports"
+      - '8090:8090'
     restart: always
-    depends_on: # ← CAMBIO 2: Agregar depends_on
-      - eureka-server
+    depends_on:
+      eureka-server:
+        condition: service_healthy
     networks:
       - tapalque-net
 
@@ -202,7 +242,7 @@ services:
     build: ./portal Backend/msvc-jwt
     container_name: msvc-jwt
     restart: always
-    depends_on: # ← CAMBIO 3: Agregar depends_on
+    depends_on:
       - eureka-server
       - jwt-db
     networks:
@@ -213,7 +253,7 @@ services:
     container_name: msvc-user
     depends_on:
       - user-db
-      - eureka-server # ← CAMBIO 4: Agregar eureka
+      - eureka-server
     restart: always
     env_file:
       - .env
@@ -223,10 +263,18 @@ services:
   msvc-pedidos:
     build: ./portal Backend/msvc-pedidos
     container_name: msvc-pedidos
+    environment:
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: admin
+      SPRING_RABBITMQ_PASSWORD: admin
     depends_on:
-      - pedidos-db
-      - rabbitmq
-      - eureka-server # ← CAMBIO 5: Agregar eureka
+      pedidos-db:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
     restart: always
     networks:
       - tapalque-net
@@ -234,10 +282,18 @@ services:
   msvc-reservas:
     build: ./portal Backend/msvc-reservas
     container_name: msvc-reservas
+    environment:
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: admin
+      SPRING_RABBITMQ_PASSWORD: admin
     depends_on:
-      - reservas-db
-      - rabbitmq
-      - eureka-server # ← CAMBIO 6: Agregar eureka
+      reservas-db:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
     restart: always
     networks:
       - tapalque-net
@@ -247,7 +303,7 @@ services:
     container_name: msvc-gastronomia
     depends_on:
       - gastronomia-db
-      - eureka-server # ← CAMBIO 7: Agregar eureka
+      - eureka-server
     volumes:
       - gastronomia_uploads:/app/uploads
     restart: always
@@ -259,9 +315,10 @@ services:
     container_name: msvc-hosteleria
     depends_on:
       - hosteleria-db
-      - eureka-server # ← CAMBIO 8: Agregar eureka
+      - eureka-server
     volumes:
       - hosteleria_uploads:/app/uploads
+
     restart: always
     networks:
       - tapalque-net
@@ -269,10 +326,18 @@ services:
   msvc-mercado-pago:
     build: ./portal Backend/msvc-mercado-pago
     container_name: msvc-mercado-pago
+    environment:
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: admin
+      SPRING_RABBITMQ_PASSWORD: admin
     depends_on:
-      - mercado-pago-db
-      - rabbitmq
-      - eureka-server # ← CAMBIO 9: Agregar eureka
+      mercado-pago-db:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
     env_file:
       - .env
     restart: always
@@ -284,7 +349,7 @@ services:
     container_name: msvc-comercio
     depends_on:
       - comercio-db
-      - eureka-server # ← CAMBIO 10: Agregar eureka
+      - eureka-server
     volumes:
       - comercio_uploads:/app/uploads
     restart: always
