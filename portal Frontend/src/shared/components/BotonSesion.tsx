@@ -8,16 +8,16 @@ interface BotonSesionProps {
   onLogout: () => void;
 }
 
-// Roles: 1 = Moderador, 2 = Administrador, 3 = Usuario
+// Roles como strings (según backend)
 const ROLES = {
-  MODERADOR: 1,
-  ADMINISTRADOR: 2,
-  USUARIO: 3
+  MODERADOR: 'MODERADOR',
+  ADMINISTRADOR: 'ADMINISTRADOR',
+  USUARIO: 'USUARIO',
 };
 
 export const BotonSesion = ({ isLoggedIn, onLogout }: BotonSesionProps) => {
   const user = authService.getUser();
-  const userRol = authService.getRolUsuario();
+  const userRol = String(authService.getRolUsuario() ?? '');
 
   // Verificar roles
   const esModerador = userRol === ROLES.MODERADOR;
@@ -59,11 +59,11 @@ export const BotonSesion = ({ isLoggedIn, onLogout }: BotonSesionProps) => {
           </>
         )}
 
-        {/* Mi Perfil solo para usuarios comunes y admin, no moderador */}
-        {!esModerador && (
+        {/* Moderador ve acceso al panel de moderador */}
+        {esModerador && (
           <>
-            <NavDropdown.Item as={Link} to="/perfil">
-              👤 Mi Perfil
+            <NavDropdown.Item as={Link} to="/moderador">
+              ⚙️ Panel Administrador Gral
             </NavDropdown.Item>
             <NavDropdown.Divider />
           </>

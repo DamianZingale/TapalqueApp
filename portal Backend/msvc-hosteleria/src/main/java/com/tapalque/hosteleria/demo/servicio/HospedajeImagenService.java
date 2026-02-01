@@ -60,7 +60,7 @@ public class HospedajeImagenService {
             Files.write(filePath, file.getBytes());
 
             HospedajeImagen imagen = new HospedajeImagen();
-            imagen.setImagenUrl("/uploads/" + fileName);
+            imagen.setImagenUrl("/api/hospedaje/uploads/" + fileName);
             imagen.setHospedaje(hospedaje);
             imagenRepository.save(imagen);
 
@@ -98,7 +98,10 @@ public class HospedajeImagenService {
         imagenRepository.delete(imagen);
 
         try {
-            Path filePath = Paths.get(uploadDir, dto.getImagenUrl().replace("/uploads/", ""));
+            String fileName = dto.getImagenUrl()
+                    .replace("/api/hospedaje/uploads/", "")
+                    .replace("/uploads/", "");
+            Path filePath = Paths.get(uploadDir, fileName);
             Files.deleteIfExists(filePath);
         } catch (IOException e) {
             throw new RuntimeException("Error al eliminar archivo físico", e);

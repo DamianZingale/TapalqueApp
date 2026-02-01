@@ -59,7 +59,7 @@ public class RestaurantImageService {
             Files.write(filePath, file.getBytes());
 
             RestaurantImage imagen = new RestaurantImage();
-            imagen.setImageUrl("/uploads/" + fileName);
+            imagen.setImageUrl("/api/gastronomia/uploads/" + fileName);
             imagen.setRestaurant(restaurant);
             imageRepository.save(imagen);
 
@@ -97,7 +97,10 @@ public class RestaurantImageService {
         imageRepository.delete(imagen);
 
         try {
-            Path filePath = Paths.get(uploadDir, dto.getImagenUrl().replace("/uploads/", ""));
+            String fileName = dto.getImagenUrl()
+                    .replace("/api/gastronomia/uploads/", "")
+                    .replace("/uploads/", "");
+            Path filePath = Paths.get(uploadDir, fileName);
             Files.deleteIfExists(filePath);
         } catch (IOException e) {
             throw new RuntimeException("Error al eliminar archivo físico", e);

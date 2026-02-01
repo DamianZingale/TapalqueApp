@@ -17,7 +17,7 @@ export default function GastronomiaListPage() {
   const fetchRestaurantList = async () => {
     try {
       const data = await api.get<IRestaurantInfo[]>(
-        '/api/gastronomia/restaurants'
+        '/gastronomia/restaurants'
       );
       setLocales(data || []);
     } catch (error) {

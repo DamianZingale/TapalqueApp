@@ -13,7 +13,9 @@ export interface Evento {
 
 export async function fetchEventos(): Promise<Evento[]> {
   try {
-    const response = await fetch('/api/evento');
+    const response = await fetch('/api/evento', {
+      method: 'GET',
+    });
 
     if (!response.ok) {
       throw new Error(`Error al obtener eventos: ${response.status}`);
@@ -29,8 +31,9 @@ export async function fetchEventos(): Promise<Evento[]> {
 
 export async function fetchEventoById(id: string): Promise<Evento | null> {
   try {
-    const response = await fetch(`/api/evento/${id}`);
-
+    const response = await fetch(`/api/evento/${id}`, {
+      method: 'GET',
+    });
     if (!response.ok) {
       throw new Error(`Error al obtener evento: ${response.status}`);
     }

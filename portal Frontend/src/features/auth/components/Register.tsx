@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { UserData } from '../../../services/authService';
+import { authAPI } from '../api/authApi';
 
 interface RegisterResponse {
   token?: string;
@@ -92,44 +93,13 @@ export const Register = () => {
     setLoading(true);
 
     try {
-      const response = await fetch('/api/user/public/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          nombre: formData.nombre,
-          correo: formData.email,
-          contrasenia: formData.password,
-        }),
+      const response = await authAPI.register({
+        nombre: formData.nombre,
+        correo: formData.email,
+        contrasenia: formData.password,
       });
-
-      // Verificar si la respuesta es JSON antes de parsear
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        if (!response.ok) {
-          throw new Error(`Error del servidor: ${response.status} ${response.statusText}`);
-        }
-        throw new Error('El servidor no devolvió una respuesta válida');
-      }
-
-      const data: RegisterResponse = await response.json();
-
-      if (!response.ok) {
-        // Manejar errores específicos del backend
-        const errorData = data as any;
-        if (
-          errorData.detalle &&
-          errorData.detalle.includes('email ya está registrado')
-        ) {
-          throw new Error(
-            'Este email ya está registrado. Por favor, usa otro o inicia sesión.'
-          );
-        }
-        throw new Error(
-          errorData.detalle || errorData.message || 'Error al registrar'
-        );
-      }
+      
+      const data: RegisterResponse = response.data;
 
       // Mostrar mensaje de verificación de email
       alert(

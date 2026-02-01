@@ -53,7 +53,7 @@ public class EspacioPublicoImagenService {
         Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
         EspacioPublicoImagen imagen = new EspacioPublicoImagen();
-        imagen.setImagenUrl("/uploads/espacios-publicos/" + newFilename);
+        imagen.setImagenUrl("/api/espacio-publico/uploads/" + newFilename);
         imagen.setEspacioPublico(espacioPublico);
 
         return imagenRepository.save(imagen);

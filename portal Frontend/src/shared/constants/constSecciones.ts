@@ -4,6 +4,8 @@ export const SECCION_TYPE = {
   HOSPEDAJES: 'hospedaje',
   SERVICIOS: 'servicios',
   ESP_PUBLICOS: 'espublicos',
+  EVENTOS: 'eventos',
+  TERMAS: 'termas',
 } as const;
 
 // Roles: 1 = Moderador, 2 = Administrador, 3 = Usuario

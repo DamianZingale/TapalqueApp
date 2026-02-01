@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Row, Col, Button, Form, Alert, Spinner, ListGroup, Modal } from "react-bootstrap";
 import { ImageManager } from "../../../shared/components/ImageManager";
+import api from "../../../shared/utils/api";
 
 interface Evento {
     id: number;
@@ -28,50 +29,61 @@ export function EventosSection() {
     const [saving, setSaving] = useState(false);
     const [mensaje, setMensaje] = useState<{ tipo: "success" | "danger"; texto: string } | null>(null);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [pendingFiles, setPendingFiles] = useState<File[]>([]);
 
     useEffect(() => { cargarDatos(); }, []);
 
     const cargarDatos = async () => {
         try {
             setLoading(true);
-            const res = await fetch("/api/eventos", {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
-                },
-            });
-            if (res.ok) setItems(await res.json());
+            const res = await api.get("/evento");
+            setItems(res.data || []);
         } catch (err) { console.error("Error:", err); }
         finally { setLoading(false); }
     };
 
-    const handleSelect = (item: Evento) => { setSelected(item); setIsNew(false); setFormData({ ...item }); };
-    const handleNew = () => { setSelected(null); setIsNew(true); setFormData({ ...emptyItem }); };
+    const handleSelect = (item: Evento) => { setSelected(item); setIsNew(false); setFormData({ ...item }); setPendingFiles([]); };
+    const handleNew = () => { setSelected(null); setIsNew(true); setFormData({ ...emptyItem }); setPendingFiles([]); };
     const handleChange = (field: keyof Evento, value: string) => { setFormData(prev => ({ ...prev, [field]: value })); };
 
     const handleSave = async () => {
         if (!formData.nombreEvento) { setMensaje({ tipo: "danger", texto: "Nombre requerido" }); return; }
         setSaving(true);
         try {
-            const token = localStorage.getItem("token");
-            const url = isNew ? "/api/eventos" : `/api/eventos/${selected?.id}`;
-            
+            const url = isNew ? "/evento" : `/evento/${selected?.id}`;
+
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { id: _id, imagenes: _imagenes, ...dataWithoutIdAndImages } = formData;
             const cleanedData = {
-                ...formData,
-                imagenes: (formData.imagenes?.length ?? 0) > 0 ? formData.imagenes : undefined,
+                ...(isNew ? dataWithoutIdAndImages : { ...dataWithoutIdAndImages, id: formData.id }),
             };
-            
-            const res = await fetch(url, {
-                method: isNew ? "POST" : "PUT",
-                headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
-                body: JSON.stringify(cleanedData)
-            });
-            if (res.ok) {
-                setMensaje({ tipo: "success", texto: isNew ? "Creado" : "Actualizado" });
-                cargarDatos();
-                if (isNew) { setIsNew(false); setFormData(emptyItem); }
-            } else { setMensaje({ tipo: "danger", texto: "Error al guardar" }); }
+
+            const res = isNew
+                ? await api.post(url, cleanedData)
+                : await api.put(url, cleanedData);
+
+            const responseData = res.data;
+            const eventoId = isNew ? responseData.id : selected?.id;
+
+            // Subir imágenes pendientes al endpoint de imágenes
+            if (pendingFiles.length > 0 && eventoId) {
+                for (const file of pendingFiles) {
+                    const imageFormData = new FormData();
+                    imageFormData.append('file', file);
+                    try {
+                        await api.post(`/evento/${eventoId}/imagenes`, imageFormData, {
+                            headers: { 'Content-Type': 'multipart/form-data' },
+                        });
+                    } catch (imgError) {
+                        console.error('Error subiendo imagen:', imgError);
+                    }
+                }
+                setPendingFiles([]);
+            }
+
+            setMensaje({ tipo: "success", texto: isNew ? "Creado" : "Actualizado" });
+            cargarDatos();
+            if (isNew) { setIsNew(false); setFormData(emptyItem); }
         } catch { setMensaje({ tipo: "danger", texto: "Error de conexión" }); }
         finally { setSaving(false); setTimeout(() => setMensaje(null), 3000); }
     };
@@ -79,9 +91,11 @@ export function EventosSection() {
     const handleDelete = async () => {
         if (!selected) return;
         try {
-            const token = localStorage.getItem("token");
-            const res = await fetch(`/api/eventos/${selected.id}`, { method: "DELETE", headers: { "Authorization": `Bearer ${token}` } });
-            if (res.ok) { setMensaje({ tipo: "success", texto: "Eliminado" }); setSelected(null); setFormData(emptyItem); cargarDatos(); }
+            await api.delete(`/evento/${selected.id}`);
+            setMensaje({ tipo: "success", texto: "Eliminado" });
+            setSelected(null);
+            setFormData(emptyItem);
+            cargarDatos();
         } catch { setMensaje({ tipo: "danger", texto: "Error al eliminar" }); }
         finally { setShowDeleteModal(false); setTimeout(() => setMensaje(null), 3000); }
     };
@@ -133,15 +147,20 @@ export function EventosSection() {
                             <Col md={6}><Form.Group className="mb-2"><Form.Label className="small mb-0">Nombre Contacto *</Form.Label><Form.Control size="sm" value={formData.nombreContacto || ""} onChange={e => handleChange("nombreContacto", e.target.value)} /></Form.Group></Col>
                             <Col md={6}><Form.Group className="mb-2"><Form.Label className="small mb-0">Teléfono Contacto *</Form.Label><Form.Control size="sm" value={formData.telefonoContacto || ""} onChange={e => handleChange("telefonoContacto", e.target.value)} /></Form.Group></Col>
                         </Row>
-                        <ImageManager 
+                        <ImageManager
                             images={formData.imagenes || []}
-                            onChange={(images) => setFormData(prev => ({ 
-                                ...prev, 
-                                imagenes: images.map(url => ({ imagenUrl: url })) 
+                            onChange={(images) => setFormData(prev => ({
+                                ...prev,
+                                imagenes: images.map(url => ({ imagenUrl: url }))
                             }))}
                             maxImages={5}
                             entityType="evento"
                             entityId={selected?.id}
+                            pendingFiles={pendingFiles}
+                            onPendingFile={(file) => setPendingFiles((prev) => [...prev, file])}
+                            onRemovePendingFile={(index) =>
+                                setPendingFiles((prev) => prev.filter((_, i) => i !== index))
+                            }
                         />
                         <div className="d-flex gap-2 mt-3">
                             <Button size="sm" variant="primary" onClick={handleSave} disabled={saving}>{saving ? <Spinner size="sm" /> : (isNew ? "Crear" : "Guardar")}</Button>

@@ -43,10 +43,19 @@ public class TermaService {
     public TermaResponseDTO actualizarCompleto(Long id, TermaRequestDTO dto) {
         Terma terma = termaRepository.findById(id)
                 .orElseThrow(() -> new TermaNotFoundException(id));
-        Terma actualizado = new Terma(dto);
-        actualizado.setId(terma.getId());
-        termaRepository.save(actualizado);
-        return new TermaResponseDTO(actualizado);
+        // Actualizar campos sin perder las imágenes existentes
+        terma.setTitulo(dto.getTitulo());
+        terma.setDescripcion(dto.getDescripcion());
+        terma.setDireccion(dto.getDireccion());
+        terma.setHorario(dto.getHorario());
+        terma.setTelefono(dto.getTelefono());
+        terma.setLatitud(dto.getLatitud());
+        terma.setLongitud(dto.getLongitud());
+        terma.setFacebook(dto.getFacebook());
+        terma.setInstagram(dto.getInstagram());
+        // No tocamos terma.imagenes para preservarlas
+        termaRepository.save(terma);
+        return new TermaResponseDTO(terma);
     }
 
     public TermaResponseDTO actualizarParcial(Long id, TermaRequestDTO dto) {

@@ -55,7 +55,7 @@ export const getRoleName = (rol: number): string => {
 
 export async function fetchUsuarios(): Promise<Usuario[]> {
   try {
-    const response = await api.get<Usuario[]>('/api/user/all');
+    const response = await api.get<Usuario[]>('/user/all');
     return response;
   } catch (error) {
     console.error('Error en fetchUsuarios:', error);
@@ -78,7 +78,7 @@ export async function crearUsuario(
 ): Promise<Usuario | null> {
   try {
     const response = await api.post<Usuario>(
-      '/api/user/public/register',
+      '/user/public/register',
       usuario
     );
     return response;

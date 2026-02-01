@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { FaMapMarkerAlt } from 'react-icons/fa';
 import { useParams } from 'react-router-dom';
 import { Comercio, fetchComercioById } from '../../../services/fetchComercios';
 import { Carrusel } from '../../../shared/components/Carrusel';
@@ -56,14 +57,15 @@ export default function ComercioDetailPage() {
           href={`https://www.google.com/maps?q=${data.latitud},${data.longitud}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-block w-[11rem] h-[2rem] bg-black text-white rounded-3xl text-[1rem] cursor-pointer flex justify-center items-center transition-all duration-300 hover:bg-[#333]"
+          className="inline-block w-[11rem] h-[2rem] text-black rounded-3xl text-[1rem] cursor-pointer flex justify-center items-center transition-all duration-300 hover:bg-[#333]"
         >
+          <FaMapMarkerAlt size={18} color="#E53935" className="me-2" />
           Cómo Llegar
         </a>
       </div>
 
-      <Description description={data.descripcion || ""} />
-      <Horarios horarios={data.horario || "No hay horarios disponibles"} />
+      <Description description={data.descripcion || ''} />
+      <Horarios horarios={data.horario || 'No hay horarios disponibles'} />
 
       <WhatsAppButton num={data.telefono} />
       <div className="text-center my-3"></div>

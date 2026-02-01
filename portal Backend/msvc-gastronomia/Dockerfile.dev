@@ -1,5 +1,20 @@
-# Dockerfile.dev
-FROM maven:3.9.6-eclipse-temurin-17
+# Dockerfile.dev - Gastronomia Service
+FROM maven:3.9.6-eclipse-temurin-21
+
+# Instalar herramientas para healthcheck y debug
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
-# No copiamos nada porque en override montamos el código fuente
-# El comando lo define docker-compose.override.yml -> mvn spring-boot:run
+
+# Variables de entorno para desarrollo
+ENV SPRING_PROFILES_ACTIVE=dev
+ENV SPRING_DEVTOOLS_RESTART_ENABLED=true
+ENV SPRING_DEVTOOLS_LIVERELOAD_ENABLED=true
+
+# Exponer puertos: aplicacion + debug
+EXPOSE 8080 5005
+
+# El código fuente se monta via docker-compose.override.yml
+# El comando se define en docker-compose.override.yml -> mvn spring-boot:run

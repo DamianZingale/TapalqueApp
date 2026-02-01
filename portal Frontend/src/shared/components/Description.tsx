@@ -14,7 +14,9 @@ export const Description: React.FC<DescriptionProps> = ({ description }) => {
         marginBottom: '1.5rem',
       }}
     >
-      {`Sobre nosotros:\n${description}`}
+      {<strong>Sobre nosotros:</strong>}
+      {'\n'}
+      {description}
     </p>
   );
 };

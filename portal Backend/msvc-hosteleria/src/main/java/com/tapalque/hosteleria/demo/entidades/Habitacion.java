@@ -29,6 +29,7 @@ public class Habitacion {
     @Column(nullable = false)
     private String titulo;
 
+    @Column(columnDefinition = "TEXT")
     private String descripcion;
 
     @Column(name = "max_personas", nullable = false)

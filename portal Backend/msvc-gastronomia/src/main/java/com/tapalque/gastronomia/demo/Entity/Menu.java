@@ -24,8 +24,8 @@ public class Menu {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idMenu;
 
-   
-    @Column(nullable = true)
+
+    @Column(nullable = true, columnDefinition = "TEXT")
     private String description;
 
     // Relación con Restaurant

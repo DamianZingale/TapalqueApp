@@ -10,6 +10,7 @@ import {
   Spinner,
 } from 'react-bootstrap';
 import { ImageManager } from '../../../shared/components/ImageManager';
+import api from '../../../shared/utils/api';
 
 type TipoHospedaje = 'HOTEL' | 'DEPARTAMENTO' | 'CABAÑA' | 'CASA' | 'OTRO';
 
@@ -58,6 +59,7 @@ export function HospedajesSection() {
   } | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [currentBusiness, setCurrentBusiness] = useState<any>(null);
+  const [pendingFiles, setPendingFiles] = useState<File[]>([]);
 
   useEffect(() => {
     cargarDatos();
@@ -67,18 +69,9 @@ export function HospedajesSection() {
   const cargarDatos = async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/hospedajes', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setItems(data);
-        console.log('Hospedajes cargados desde API:', data);
-      }
+      const res = await api.get('/hospedajes');
+      setItems(res.data || []);
+      console.log('Hospedajes cargados desde API:', res.data);
     } catch (err) {
       console.error('Error cargando hospedajes:', err);
       setItems([]);
@@ -89,17 +82,8 @@ export function HospedajesSection() {
 
   const cargarAdministradores = async () => {
     try {
-      const res = await fetch('/api/user/administradores', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setAdministradores(data || []);
-      }
+      const res = await api.get('/user/administradores');
+      setAdministradores(res.data || []);
     } catch (err) {
       console.error('Error cargando administradores:', err);
     }
@@ -110,6 +94,7 @@ export function HospedajesSection() {
     setSelected(item);
     setIsNew(false);
     setFormData({ ...item });
+    setPendingFiles([]);
     await loadBusinessData(item.id);
   };
 
@@ -118,6 +103,7 @@ export function HospedajesSection() {
     setIsNew(true);
     setFormData({ ...emptyItem });
     setCurrentBusiness(null);
+    setPendingFiles([]);
   };
 
   const handleChange = (field: keyof Hospedaje, value: string) => {
@@ -126,21 +112,9 @@ export function HospedajesSection() {
 
   const loadBusinessData = async (hospedajeId: number) => {
     try {
-      const token = localStorage.getItem('token');
-      const res = await fetch(`/api/business/external/${hospedajeId}/type/HOSPEDAJE`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (res.ok) {
-        const business = await res.json();
-        setCurrentBusiness(business);
-        setFormData(prev => ({ ...prev, userId: business.ownerId }));
-      } else {
-        setCurrentBusiness(null);
-      }
+      const res = await api.get(`/business/external/${hospedajeId}/type/HOSPEDAJE`);
+      setCurrentBusiness(res.data);
+      setFormData(prev => ({ ...prev, userId: res.data.ownerId }));
     } catch (err) {
       console.error('Error loading business:', err);
       setCurrentBusiness(null);
@@ -154,106 +128,107 @@ export function HospedajesSection() {
     }
     setSaving(true);
     try {
-      const token = localStorage.getItem('token');
-      const url = isNew ? '/api/hospedajes' : `/api/hospedajes/${selected?.id}`;
-      const method = isNew ? 'POST' : 'PUT';
+      const url = isNew ? '/hospedajes' : `/hospedajes/${selected?.id}`;
 
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { id: _id, imagenes: _imagenes, ...dataWithoutIdAndImages } = formData;
       const cleanedData = {
-        ...formData,
+        ...(isNew ? dataWithoutIdAndImages : { ...dataWithoutIdAndImages, id: formData.id }),
         description: formData.description?.trim() || '',
         ubicacion: formData.ubicacion?.trim() || undefined,
         googleMapsUrl: formData.googleMapsUrl?.trim() || undefined,
         numWhatsapp: formData.numWhatsapp?.trim() || undefined,
-        imagenes:
-          (formData.imagenes ?? []).length > 0 ? formData.imagenes : undefined,
       };
 
       console.log('Enviando hospedaje:', cleanedData);
       console.log('URL:', url);
-      console.log('Método:', method);
 
-      const res = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(cleanedData),
-      });
+      const res = isNew
+        ? await api.post(url, cleanedData)
+        : await api.put(url, cleanedData);
 
-      console.log('Respuesta status:', res.status);
+      console.log('Respuesta:', res.data);
 
-      if (res.ok) {
-        const createdData = await res.json();
+      const createdData = res.data;
+      const hospedajeId = isNew ? createdData.id : selected?.id;
 
-        // Si es nuevo y se seleccionó un administrador, crear el Business
-        if (isNew && formData.userId) {
-          const businessPayload = {
-            ownerId: formData.userId,
-            name: formData.titulo,
-            businessType: 'HOSPEDAJE',
-            externalBusinessId: createdData.id,
-          };
-
-          const businessRes = await fetch('/api/business', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify(businessPayload),
-          });
-
-          if (!businessRes.ok) {
-            console.warn('No se pudo asignar el administrador al negocio');
+      // Subir imágenes pendientes al endpoint de imágenes
+      if (pendingFiles.length > 0 && hospedajeId) {
+        for (const file of pendingFiles) {
+          const imageFormData = new FormData();
+          imageFormData.append('file', file);
+          try {
+            await api.post(`/hospedaje/imagen/${hospedajeId}`, imageFormData, {
+              headers: { 'Content-Type': 'multipart/form-data' },
+            });
+          } catch (imgError) {
+            console.error('Error subiendo imagen:', imgError);
           }
         }
-
-        // Si es edición y hay un cambio en el administrador, actualizar el Business
-        if (!isNew && currentBusiness && formData.userId && formData.userId !== currentBusiness.ownerId) {
-          const updatePayload = { ownerId: formData.userId };
-          
-          const businessRes = await fetch(`/api/business/${currentBusiness.id}/owner`, {
-            method: 'PATCH',
-            headers: { 
-              'Content-Type': 'application/json', 
-              Authorization: `Bearer ${token}` 
-            },
-            body: JSON.stringify(updatePayload)
-          });
-
-          if (!businessRes.ok) {
-            console.warn('No se pudo actualizar el administrador del negocio');
-          } else {
-            // Actualizar el business actual con los nuevos datos
-            const updatedBusiness = await businessRes.json();
-            setCurrentBusiness(updatedBusiness);
-          }
-        }
-
-        setMensaje({
-          tipo: 'success',
-          texto: isNew ? 'Creado' : 'Actualizado',
-        });
-        cargarDatos();
-        if (isNew) {
-          setIsNew(false);
-          setFormData(emptyItem);
-        }
-      } else {
-        const errorData = await res.json().catch(() => ({}));
-        console.error('Error del servidor:', errorData);
-        setMensaje({
-          tipo: 'danger',
-          texto:
-            errorData.message ||
-            errorData.error ||
-            `Error ${res.status}: ${res.statusText}`,
-        });
+        setPendingFiles([]);
       }
-    } catch (error) {
+
+      // Si es nuevo y se seleccionó un administrador, crear el Business
+      if (isNew && formData.userId) {
+        const businessPayload = {
+          ownerId: formData.userId,
+          name: formData.titulo,
+          businessType: 'HOSPEDAJE',
+          externalBusinessId: createdData.id,
+        };
+
+        try {
+          await api.post('/business', businessPayload);
+        } catch {
+          console.warn('No se pudo asignar el administrador al negocio');
+        }
+      }
+
+      // Si es edición y hay un cambio en el administrador, actualizar el Business
+      if (!isNew && currentBusiness && formData.userId && formData.userId !== currentBusiness.ownerId) {
+        const updatePayload = { ownerId: formData.userId };
+
+        try {
+          const businessRes = await api.patch(`/business/${currentBusiness.id}/owner`, updatePayload);
+          setCurrentBusiness(businessRes.data);
+        } catch {
+          console.warn('No se pudo actualizar el administrador del negocio');
+        }
+      }
+
+      // Si es edición, NO hay business existente, pero se seleccionó un administrador, crear nuevo Business
+      if (!isNew && !currentBusiness && formData.userId && selected?.id) {
+        const businessPayload = {
+          ownerId: formData.userId,
+          name: formData.titulo,
+          businessType: 'HOSPEDAJE',
+          externalBusinessId: selected.id
+        };
+
+        try {
+          const businessRes = await api.post('/business', businessPayload);
+          setCurrentBusiness(businessRes.data);
+        } catch {
+          console.warn('No se pudo crear el administrador del negocio');
+        }
+      }
+
+      setMensaje({
+        tipo: 'success',
+        texto: isNew ? 'Creado' : 'Actualizado',
+      });
+      cargarDatos();
+      if (isNew) {
+        setIsNew(false);
+        setFormData(emptyItem);
+      }
+    } catch (error: any) {
       console.error('Error en handleSave de hospedaje:', error);
-      setMensaje({ tipo: 'danger', texto: 'Error de conexión' });
+      const errorData = error.response?.data || {};
+      setMensaje({
+        tipo: 'danger',
+        texto: errorData.message || errorData.error || 'Error de conexión',
+      });
     } finally {
       setSaving(false);
       setTimeout(() => setMensaje(null), 3000);
@@ -263,26 +238,18 @@ export function HospedajesSection() {
   const handleDelete = async () => {
     if (!selected) return;
     try {
-      const token = localStorage.getItem('token');
-      const res = await fetch(`/api/hospedajes/${selected.id}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        setMensaje({ tipo: 'success', texto: 'Eliminado' });
-        setSelected(null);
-        setFormData(emptyItem);
-        cargarDatos();
-      } else {
-        const errorData = await res.json().catch(() => ({}));
-        setMensaje({
-          tipo: 'danger',
-          texto: errorData.message || errorData.error || 'Error al eliminar',
-        });
-      }
-    } catch (error) {
+      await api.delete(`/hospedajes/${selected.id}`);
+      setMensaje({ tipo: 'success', texto: 'Eliminado' });
+      setSelected(null);
+      setFormData(emptyItem);
+      cargarDatos();
+    } catch (error: any) {
       console.error('Error en handleDelete de hospedaje:', error);
-      setMensaje({ tipo: 'danger', texto: 'Error de conexión al eliminar' });
+      const errorData = error.response?.data || {};
+      setMensaje({
+        tipo: 'danger',
+        texto: errorData.message || errorData.error || 'Error al eliminar',
+      });
     } finally {
       setShowDeleteModal(false);
       setTimeout(() => setMensaje(null), 3000);
@@ -458,6 +425,11 @@ export function HospedajesSection() {
               maxImages={5}
               entityType="hospedaje"
               entityId={selected?.id}
+              pendingFiles={pendingFiles}
+              onPendingFile={(file) => setPendingFiles((prev) => [...prev, file])}
+              onRemovePendingFile={(index) =>
+                setPendingFiles((prev) => prev.filter((_, i) => i !== index))
+              }
             />
 
             <div className="d-flex gap-2 mt-3">

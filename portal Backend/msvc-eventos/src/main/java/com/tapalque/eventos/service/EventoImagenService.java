@@ -54,7 +54,7 @@ public class EventoImagenService {
             Files.write(filePath, file.getBytes());
 
             EventoImagen imagen = new EventoImagen();
-            imagen.setImagenUrl("/uploads/" + fileName);
+            imagen.setImagenUrl("/api/evento/uploads/" + fileName);
             imagen.setEvento(evento);
             eventoImagenRepository.save(imagen);
 
@@ -95,7 +95,10 @@ public class EventoImagenService {
         eventoImagenRepository.delete(imagen);
 
         try {
-            Path filePath = Paths.get(uploadDir, dto.getImagenUrl().replace("/uploads/", ""));
+            String fileName = dto.getImagenUrl()
+                    .replace("/api/evento/uploads/", "")
+                    .replace("/uploads/", "");
+            Path filePath = Paths.get(uploadDir, fileName);
             Files.deleteIfExists(filePath);
         } catch (IOException e) {
             throw new RuntimeException("Error al eliminar archivo físico", e);

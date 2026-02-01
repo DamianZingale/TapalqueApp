@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Accordion, Badge, Container } from 'react-bootstrap';
 import { ComerciosSection } from '../components/ComerciosSection';
+import { ConfigHomeSection } from '../components/ConfigHomeSection';
 import { EspaciosPublicosSection } from '../components/EspaciosPublicosSection';
 import { EventosSection } from '../components/EventosSection';
 import { GastronomiaSection } from '../components/GastronomiaSection';
@@ -10,6 +11,7 @@ import { TermasSection } from '../components/TermasSection';
 import { UsuariosSection } from '../components/UsuariosSection';
 
 const secciones = [
+  { key: 'config-home', titulo: 'Imágenes del Home', componente: <ConfigHomeSection /> },
   { key: 'usuarios', titulo: 'Usuarios', componente: <UsuariosSection /> },
   { key: 'comercios', titulo: 'Comercios', componente: <ComerciosSection /> },
   { key: 'servicios', titulo: 'Servicios', componente: <ServiciosSection /> },

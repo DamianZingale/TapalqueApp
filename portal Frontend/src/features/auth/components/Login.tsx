@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import authService, { UserData } from '../../../services/authService';
+import { authAPI } from '../api/authApi';
 
 interface LoginResponse {
   accessToken: string;
@@ -28,28 +29,8 @@ export const Login = () => {
     setLoading(true);
 
     try {
-      const response = await fetch('/api/jwt/public/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        const errorMessage =
-          (errorData as ApiErrorResponse).detalle ||
-          (errorData as ApiErrorResponse).message ||
-          (errorData as ApiErrorResponse).error ||
-          'Credenciales inválidas. Por favor verifica tu email y contraseña.';
-        throw new Error(errorMessage);
-      }
-
-      const data: LoginResponse = await response.json();
+      const response = await authAPI.login({ email, password });
+      const data: LoginResponse = response.data;
 
       authService.setToken(data.accessToken);
       authService.setUser(data.user);
@@ -72,13 +53,14 @@ export const Login = () => {
           navigate('/HomePage');
         }
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error al iniciar sesión:', err);
 
       setError(
-        err instanceof Error
-          ? err.message
-          : 'Error al iniciar sesión. Verifica tus credenciales.'
+        err.response?.data?.detalle || 
+        err.response?.data?.message ||
+        err.message ||
+        'Error al iniciar sesión. Verifica tus credenciales.'
       );
     } finally {
       setLoading(false);

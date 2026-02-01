@@ -1,13 +1,28 @@
-import React from "react";
+import React, { useId } from "react";
 import type { CarruselProps } from "../types/PropsGeneralesVerMas";
 
-export const Carrusel: React.FC<CarruselProps> = ({ images }) => {
-    const carouselId = "carouselTapalque"; // puede ser dinámico si querés
+interface CarruselExtendedProps extends CarruselProps {
+    interval?: number; // Tiempo en ms entre slides (default: 4000)
+    autoPlay?: boolean; // Activar/desactivar autoplay (default: true)
+}
+
+export const Carrusel: React.FC<CarruselExtendedProps> = ({
+    images,
+    interval = 4000,
+    autoPlay = true
+}) => {
+    const uniqueId = useId();
+    const carouselId = `carousel-${uniqueId.replace(/:/g, '')}`;
 
     if (images.length === 0) return null;
 
     return (
-        <div id={carouselId} className="carousel slide" data-bs-ride="carousel">
+        <div
+            id={carouselId}
+            className="carousel slide"
+            data-bs-ride={autoPlay ? "carousel" : "false"}
+            data-bs-interval={interval}
+        >
             {/* Indicadores */}
             <div className="carousel-indicators">
                 {images.map((_, index) => (

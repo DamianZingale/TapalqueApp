@@ -64,6 +64,15 @@ spring:
           filters:
             - RewritePath=/api/hospedajes/(?<id>[0-9]+), /hospedajes/${id}
 
+        # Hostelería - Archivos estáticos (imágenes)
+        - id: msvc-hosteleria-uploads
+          uri: lb://msvc-hosteleria
+          predicates:
+            - Path=/api/hospedaje/uploads/**
+            - Method=GET
+          filters:
+            - RewritePath=/api/hospedaje/uploads/(?<file>.*), /uploads/${file}
+
           #disponibilidad y habitaciones de un hospedaje
         - id: msvc-hosteleria-disponibilidad-public
           uri: lb://msvc-hosteleria
@@ -107,6 +116,16 @@ spring:
             - Method=GET
           filters:
             - RewritePath=/api/gastronomia/(?<id>[0-9]+), /restaurante/findById/${id}
+
+        # Gastronomía - Archivos estáticos (imágenes)
+        - id: msvc-gastronomia-uploads
+          uri: lb://msvc-gastronomia
+          predicates:
+            - Path=/api/gastronomia/uploads/**
+            - Method=GET
+          filters:
+            - RewritePath=/api/gastronomia/uploads/(?<file>.*), /uploads/${file}
+
           #menu de un restaurante
         - id: msvc-gastronomia-menu-public
           uri: lb://msvc-gastronomia
@@ -144,18 +163,28 @@ spring:
         - id: msvc-eventos-list-public
           uri: lb://msvc-eventos
           predicates:
-            - Path=/api/eventos
+            - Path=/api/evento
             - Method=GET
           filters:
-            - RewritePath=/api/eventos, /evento
+            - RewritePath=/api/evento, /evento
 
         - id: msvc-eventos-detail-public
           uri: lb://msvc-eventos
           predicates:
-            - Path=/api/eventos/{id}
+            - Path=/api/evento/{id}
             - Method=GET
           filters:
-            - RewritePath=/api/eventos/(?<id>[0-9]+), /evento/${id}
+            - RewritePath=/api/evento/(?<id>[0-9]+), /evento/${id}
+
+        # Eventos - Archivos estáticos (imágenes)
+        - id: msvc-eventos-uploads
+          uri: lb://msvc-eventos
+          predicates:
+            - Path=/api/evento/uploads/**
+            - Method=GET
+          filters:
+            - RewritePath=/api/evento/uploads/(?<file>.*), /uploads/${file}
+
         # Servicios
         - id: msvc-servicios-list-public
           uri: lb://msvc-servicios
@@ -173,6 +202,15 @@ spring:
           filters:
             - RewritePath=/api/servicio/(?<id>[0-9]+), /servicio/${id}
 
+        # Servicios - Archivos estáticos (imágenes)
+        - id: msvc-servicios-uploads
+          uri: lb://msvc-servicios
+          predicates:
+            - Path=/api/servicio/uploads/**
+            - Method=GET
+          filters:
+            - RewritePath=/api/servicio/uploads/(?<file>.*), /uploads/${file}
+
         # Termas
         - id: msvc-termas-list-public
           uri: lb://msvc-termas
@@ -189,6 +227,16 @@ spring:
             - Method=GET
           filters:
             - RewritePath=/api/terma/(?<id>[0-9]+), /terma/${id}
+
+        # Termas - Archivos estáticos (imágenes)
+        - id: msvc-termas-uploads
+          uri: lb://msvc-termas
+          predicates:
+            - Path=/api/terma/uploads/**
+            - Method=GET
+          filters:
+            - RewritePath=/api/terma/uploads/(?<file>.*), /uploads/${file}
+
         # Espacios Públicos
         - id: msvc-espacios-publicos-list-public
           uri: lb://msvc-espacios-publicos
@@ -206,6 +254,15 @@ spring:
           filters:
             - RewritePath=/api/espacio-publico/(?<id>[0-9]+), /espacio-publico/${id}
 
+        # Espacios Públicos - Archivos estáticos (imágenes)
+        - id: msvc-espacios-publicos-uploads
+          uri: lb://msvc-espacios-publicos
+          predicates:
+            - Path=/api/espacio-publico/uploads/**
+            - Method=GET
+          filters:
+            - RewritePath=/api/espacio-publico/uploads/(?<file>.*), /uploads/${file}
+
         # Comercio
         - id: msvc-comercio-list-public
           uri: lb://msvc-comercio
@@ -221,7 +278,16 @@ spring:
             - Path=/api/comercio/{id}
             - Method=GET
           filters:
-            - RewritePath=/api/(?<id>[0-9]+), /comercio/${id}
+            - RewritePath=/api/comercio/(?<id>[0-9]+), /comercio/${id}
+
+        # Comercio - Archivos estáticos (imágenes)
+        - id: msvc-comercio-uploads
+          uri: lb://msvc-comercio
+          predicates:
+            - Path=/api/comercio/uploads/**
+            - Method=GET
+          filters:
+            - RewritePath=/api/comercio/uploads/(?<file>.*), /uploads/${file}
 
         # ========== RUTAS PRIVADAS (CON AUTENTICACIÓN) ==========
         - id: msvc-comercio-imagen
@@ -233,13 +299,22 @@ spring:
             - RewritePath=/api/comercio/imagen/(?<id>[0-9]+), /comercio/${id}/imagenes
             - JwtAuth
 
-        - id: msvc-comercio
+        - id: msvc-comercio-create
           uri: lb://msvc-comercio
           predicates:
-            - Path=/api/comercio/**
-            - Method=POST,PUT,PATCH,DELETE
+            - Path=/api/comercio
+            - Method=POST
           filters:
-            - RewritePath=/api/(?<id>[0-9]+), /comercio/${id}
+            - RewritePath=/api/comercio, /comercio
+            - JwtAuth
+
+        - id: msvc-comercio-update
+          uri: lb://msvc-comercio
+          predicates:
+            - Path=/api/comercio/{id:[0-9]+}
+            - Method=PUT,PATCH,DELETE
+          filters:
+            - RewritePath=/api/comercio/(?<id>[0-9]+), /comercio/${id}
             - JwtAuth
 
         - id: msvc-hospedaje-imagen
@@ -251,13 +326,22 @@ spring:
             - RewritePath=/api/hospedaje/imagen/(?<id>[0-9]+), /hospedaje/${id}/imagenes
             - JwtAuth
 
+        - id: msvc-hosteleria-create
+          uri: lb://msvc-hosteleria
+          predicates:
+            - Path=/api/hospedajes
+            - Method=POST
+          filters:
+            - RewritePath=/api/hospedajes, /hospedajes
+            - JwtAuth
+
         - id: msvc-hosteleria
           uri: lb://msvc-hosteleria
           predicates:
             - Path=/api/hospedajes/{id}
-            - Method=POST,PUT,DELETE
+            - Method=PUT,DELETE
           filters:
-            - RewritePath=/api/hospedajes/(?<id>[0-9]+), /hospedaje/${id}
+            - RewritePath=/api/hospedajes/(?<id>[0-9]+), /hospedajes/${id}
             - JwtAuth
 
         - id: msvc-hosteleria-habitaciones
@@ -281,10 +365,10 @@ spring:
         - id: msvc-gastronomia-imagen
           uri: lb://msvc-gastronomia
           predicates:
-            - Path=/api/gastronomia/imagen/**
-            - Method=GET
+            - Path=/api/restaurante/{id:[0-9]+}/imagenes
+            - Method=GET,POST,DELETE
           filters:
-            - RewritePath=/api/gastronomia/imagen/(?<segment>.*), /restaurante/$\{segment}
+            - RewritePath=/api/(?<segment>.*), /${segment}
             - JwtAuth
 
         - id: msvc-gastronomia-create
@@ -493,11 +577,20 @@ spring:
             - RewritePath=/api/(?<segment>.*), /${segment}
             - JwtAuth
 
+        - id: msvc-eventos-create
+          uri: lb://msvc-eventos
+          predicates:
+            - Path=/api/evento
+            - Method=POST
+          filters:
+            - RewritePath=/api/evento, /evento
+            - JwtAuth
+
         - id: msvc-eventos
           uri: lb://msvc-eventos
           predicates:
             - Path=/api/evento/{id:[0-9]+}
-            - Method=POST,PUT,PATCH,DELETE
+            - Method=PUT,PATCH,DELETE
           filters:
             - RewritePath=/api/evento/(?<id>[0-9]+), /evento/${id}
             - JwtAuth
@@ -507,27 +600,55 @@ spring:
           uri: lb://msvc-servicios
           predicates:
             - Path=/api/servicio/{id:[0-9]+}/imagenes
-            - Method=GET
-          filters:
-            - RewritePath=/api/(?<segment>.*), /servicio/${segment}
-
-        - id: msvc-servicios
-          uri: lb://msvc-servicios
-          predicates:
-            - Path=/api/servicio/{id:[0-9]+}/imagenes
-            - Method=POST, DELETE
+            - Method=GET,POST,DELETE
           filters:
             - RewritePath=/api/(?<segment>.*), /${segment}
             - JwtAuth
 
+        - id: msvc-servicios-create
+          uri: lb://msvc-servicios
+          predicates:
+            - Path=/api/servicio
+            - Method=POST
+          filters:
+            - RewritePath=/api/servicio, /servicio
+            - JwtAuth
+
+        - id: msvc-servicios-update
+          uri: lb://msvc-servicios
+          predicates:
+            - Path=/api/servicio/{id:[0-9]+}
+            - Method=PUT,PATCH,DELETE
+          filters:
+            - RewritePath=/api/servicio/(?<id>[0-9]+), /servicio/${id}
+            - JwtAuth
+
         # TERMAS
-        - id: msvc-termas
+        - id: msvc-termas-imagen
           uri: lb://msvc-termas
           predicates:
             - Path=/api/terma/{id:[0-9]+}/imagenes
-            - Method=POST,PUT,PATCH,DELETE
+            - Method=POST,DELETE
           filters:
-            - RewritePath=/api/terma/(?<id>[0-9]+), /terma/${id}/imagenes
+            - RewritePath=/api/(?<segment>.*), /${segment}
+            - JwtAuth
+
+        - id: msvc-termas-create
+          uri: lb://msvc-termas
+          predicates:
+            - Path=/api/terma
+            - Method=POST
+          filters:
+            - RewritePath=/api/terma, /terma
+            - JwtAuth
+
+        - id: msvc-termas-update
+          uri: lb://msvc-termas
+          predicates:
+            - Path=/api/terma/{id:[0-9]+}
+            - Method=PUT,PATCH,DELETE
+          filters:
+            - RewritePath=/api/terma/(?<id>[0-9]+), /terma/${id}
             - JwtAuth
 
         # ESPACIOS PÚBLICOS
@@ -535,21 +656,21 @@ spring:
           uri: lb://msvc-espacios-publicos
           predicates:
             - Path=/api/espacio-publico/{id:[0-9]+}/imagenes
-            - Method=DELETE, POST
+            - Method=DELETE,POST
           filters:
-            - RewritePath=/api/espacio-publico/(?<id>[0-9]+), /espacio-publico/${id}/imagenes
+            - RewritePath=/api/(?<segment>.*), /${segment}
             - JwtAuth
 
-        - id: msvc-espacios-publicos
+        - id: msvc-espacios-publicos-create
           uri: lb://msvc-espacios-publicos
           predicates:
-            - Path=/api/espacio-publico/{id:[0-9]+}
+            - Path=/api/espacio-publico
             - Method=POST
           filters:
-            - RewritePath=/api/espacio-publico/(?<id>[0-9]+), /espacio-publico/${id}
+            - RewritePath=/api/espacio-publico, /espacio-publico
             - JwtAuth
 
-        - id: msvc-espacios-publicos
+        - id: msvc-espacios-publicos-update
           uri: lb://msvc-espacios-publicos
           predicates:
             - Path=/api/espacio-publico/{id:[0-9]+}
@@ -557,6 +678,44 @@ spring:
           filters:
             - RewritePath=/api/espacio-publico/(?<id>[0-9]+), /espacio-publico/${id}
             - JwtAuth
+
+        # ========== HOME CONFIG (PÚBLICO) ==========
+        - id: msvc-home-config-public
+          uri: lb://msvc-user
+          predicates:
+            - Path=/api/home-config, /api/home-config/active, /api/home-config/seccion/{seccion}
+            - Method=GET
+          filters:
+            - RewritePath=/api/(?<segment>.*), /${segment}
+
+        # ========== HOME CONFIG (MODERADOR) ==========
+        - id: msvc-home-config-update
+          uri: lb://msvc-user
+          predicates:
+            - Path=/api/home-config/{id}, /api/home-config/seccion/{seccion}
+            - Method=PUT
+          filters:
+            - RewritePath=/api/(?<segment>.*), /${segment}
+            - JwtAuth
+
+        # ========== HOME CONFIG - UPLOAD IMAGEN (MODERADOR) ==========
+        - id: msvc-home-config-upload
+          uri: lb://msvc-user
+          predicates:
+            - Path=/api/home-config/seccion/{seccion}/imagen
+            - Method=POST
+          filters:
+            - RewritePath=/api/(?<segment>.*), /${segment}
+            - JwtAuth
+
+        # ========== USER UPLOADS (PÚBLICO) ==========
+        - id: msvc-user-uploads
+          uri: lb://msvc-user
+          predicates:
+            - Path=/api/user/uploads/**
+            - Method=GET
+          filters:
+            - RewritePath=/api/user/uploads/(?<file>.*), /uploads/${file}
 
         # ========== USUARIOS (MODERADOR) ==========
         - id: msvc-user-moderador

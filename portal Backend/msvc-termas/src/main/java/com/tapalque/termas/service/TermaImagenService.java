@@ -54,7 +54,7 @@ public class TermaImagenService {
             Files.write(filePath, file.getBytes());
 
             TermaImagen imagen = new TermaImagen();
-            imagen.setImagenUrl("/uploads/" + fileName);
+            imagen.setImagenUrl("/api/terma/uploads/" + fileName);
             imagen.setTerma(terma);
             cImagenRepository.save(imagen);
 
@@ -95,7 +95,10 @@ public class TermaImagenService {
         cImagenRepository.delete(imagen);
 
         try {
-            Path filePath = Paths.get(uploadDir, dto.getImagenUrl().replace("/uploads/", ""));
+            String fileName = dto.getImagenUrl()
+                    .replace("/api/terma/uploads/", "")
+                    .replace("/uploads/", "");
+            Path filePath = Paths.get(uploadDir, fileName);
             Files.deleteIfExists(filePath);
         } catch (IOException e) {
             throw new RuntimeException("Error al eliminar archivo físico", e);

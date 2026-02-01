@@ -1,27 +1,5 @@
 {
   "rabbit_version": "3.9.0",
-  "users": [
-    {
-      "name": "admin",
-      "password_hash": "EXKCgP1O6rQPqMHPLsXMQ6FQMYY5k5z0rLjZl1T0oDA8cQqC",
-      "hashing_algorithm": "rabbit_password_hashing_sha256",
-      "tags": "administrator"
-    }
-  ],
-  "vhosts": [
-    {
-      "name": "/"
-    }
-  ],
-  "permissions": [
-    {
-      "user": "admin",
-      "vhost": "/",
-      "configure": ".*",
-      "write": ".*",
-      "read": ".*"
-    }
-  ],
   "exchanges": [
     {
       "name": "pagos.exchange",

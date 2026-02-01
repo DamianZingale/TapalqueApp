@@ -19,8 +19,7 @@ public class JwtAuthGatewayFilterFactory extends AbstractGatewayFilterFactory<Jw
         return (exchange, chain) -> {
             String path = exchange.getRequest().getURI().getPath();
             
-            System.out.println("=== JWT FILTER ===");
-            System.out.println("Path recibido: " + path);
+  
 
             // Rutas públicas que debe permitir el gateway
             List<String> publicPaths = List.of(

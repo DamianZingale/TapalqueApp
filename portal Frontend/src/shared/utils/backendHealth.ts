@@ -113,8 +113,8 @@ export const BackendHealthCheck = {
     const commonEndpoints = [
       '/api/servicio',
       '/api/comercio/list',
-      '/api/usuarios',
-      '/api/eventos',
+      '/api/user/all',
+      '/api/evento',
       '/api/hospedajes'
     ];
 

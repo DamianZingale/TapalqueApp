@@ -10,6 +10,8 @@ import {
   Spinner,
 } from 'react-bootstrap';
 import { ImageManager } from '../../../shared/components/ImageManager';
+import { comercioAPI } from '../api/comercioApi';
+import api from '../../../shared/utils/api';
 
 interface Comercio {
   id: number;
@@ -50,6 +52,7 @@ export function ComerciosSection() {
     texto: string;
   } | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [pendingFiles, setPendingFiles] = useState<File[]>([]);
 
   useEffect(() => {
     cargarDatos();
@@ -58,22 +61,9 @@ export function ComerciosSection() {
   const cargarDatos = async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/comercio/list', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        setItems(data);
-        console.log('Datos cargados desde API:', data);
-      } else {
-        console.warn('API respondió con error:', res.status, res.statusText);
-        setItems([]);
-      }
+      const res = await comercioAPI.getComercios();
+      setItems(res.data);
+      console.log('Datos cargados desde API:', res.data);
     } catch (err) {
       console.error('Error cargando datos:', err);
       setItems([]);
@@ -87,12 +77,14 @@ export function ComerciosSection() {
     setSelected(item);
     setIsNew(false);
     setFormData({ ...item });
+    setPendingFiles([]);
   };
 
   const handleNew = () => {
     setSelected(null);
     setIsNew(true);
     setFormData({ ...emptyComercio });
+    setPendingFiles([]);
   };
 
   const handleChange = (field: keyof Comercio, value: string | number) => {
@@ -106,66 +98,65 @@ export function ComerciosSection() {
     }
     setSaving(true);
     try {
-      const token = localStorage.getItem('token');
-      const url = isNew
-        ? '/api/comercio'
-        : `/api/comercio/patch/${selected?.id}`;
-      const method = isNew ? 'POST' : 'PATCH';
+      const url = isNew ? '/comercio' : `/comercio/${selected?.id}`;
 
       // Limpiar datos antes de enviar - no enviar undefined para descripción
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { id: _id, imagenes: _imagenes, ...dataWithoutIdAndImages } = formData;
       const cleanedData = {
-        ...formData,
+        ...(isNew ? dataWithoutIdAndImages : { ...dataWithoutIdAndImages, id: formData.id }),
         descripcion: formData.descripcion?.trim() || '',
         telefono: formData.telefono?.trim() || undefined,
         facebook: formData.facebook?.trim() || undefined,
         instagram: formData.instagram?.trim() || undefined,
         latitud: formData.latitud || undefined,
         longitud: formData.longitud || undefined,
-        imagenes:
-          formData.imagenes && formData.imagenes.length > 0
-            ? formData.imagenes
-            : undefined,
       };
 
       console.log('Enviando datos:', cleanedData);
       console.log('URL:', url);
-      console.log('Método:', method);
 
-      const res = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(cleanedData),
-      });
+      const res = isNew
+        ? await api.post(url, cleanedData)
+        : await api.patch(url, cleanedData);
 
-      console.log('Respuesta status:', res.status);
+      console.log('Respuesta:', res.data);
 
-      if (res.ok) {
-        setMensaje({
-          tipo: 'success',
-          texto: isNew ? 'Creado' : 'Actualizado',
-        });
-        cargarDatos();
-        if (isNew) {
-          setIsNew(false);
-          setFormData(emptyComercio);
+      const responseData = res.data;
+      const comercioId = isNew ? responseData.id : selected?.id;
+
+      // Subir imágenes pendientes al endpoint de imágenes
+      if (pendingFiles.length > 0 && comercioId) {
+        for (const file of pendingFiles) {
+          const imageFormData = new FormData();
+          imageFormData.append('file', file);
+          try {
+            await api.post(`/comercio/imagen/${comercioId}`, imageFormData, {
+              headers: { 'Content-Type': 'multipart/form-data' },
+            });
+          } catch (imgError) {
+            console.error('Error subiendo imagen:', imgError);
+          }
         }
-      } else {
-        const errorData = await res.json().catch(() => ({}));
-        console.error('Error del servidor:', errorData);
-        setMensaje({
-          tipo: 'danger',
-          texto:
-            errorData.message ||
-            errorData.error ||
-            `Error ${res.status}: ${res.statusText}`,
-        });
+        setPendingFiles([]);
       }
-    } catch (error) {
+
+      setMensaje({
+        tipo: 'success',
+        texto: isNew ? 'Creado' : 'Actualizado',
+      });
+      cargarDatos();
+      if (isNew) {
+        setIsNew(false);
+        setFormData(emptyComercio);
+      }
+    } catch (error: any) {
       console.error('Error en handleSave:', error);
-      setMensaje({ tipo: 'danger', texto: 'Error de conexión' });
+      const errorData = error.response?.data || {};
+      setMensaje({
+        tipo: 'danger',
+        texto: errorData.message || errorData.error || 'Error de conexión',
+      });
     } finally {
       setSaving(false);
       setTimeout(() => setMensaje(null), 3000);
@@ -175,26 +166,18 @@ export function ComerciosSection() {
   const handleDelete = async () => {
     if (!selected) return;
     try {
-      const token = localStorage.getItem('token');
-      const res = await fetch(`/api/comercio/${selected.id}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        setMensaje({ tipo: 'success', texto: 'Eliminado' });
-        setSelected(null);
-        setFormData(emptyComercio);
-        cargarDatos();
-      } else {
-        const errorData = await res.json().catch(() => ({}));
-        setMensaje({
-          tipo: 'danger',
-          texto: errorData.message || errorData.error || 'Error al eliminar',
-        });
-      }
-    } catch (error) {
+      await api.delete(`/comercio/${selected.id}`);
+      setMensaje({ tipo: 'success', texto: 'Eliminado' });
+      setSelected(null);
+      setFormData(emptyComercio);
+      cargarDatos();
+    } catch (error: any) {
       console.error('Error en handleDelete:', error);
-      setMensaje({ tipo: 'danger', texto: 'Error de conexión al eliminar' });
+      const errorData = error.response?.data || {};
+      setMensaje({
+        tipo: 'danger',
+        texto: errorData.message || errorData.error || 'Error al eliminar',
+      });
     } finally {
       setShowDeleteModal(false);
       setTimeout(() => setMensaje(null), 3000);
@@ -382,6 +365,11 @@ export function ComerciosSection() {
               maxImages={5}
               entityType="comercio"
               entityId={selected?.id}
+              pendingFiles={pendingFiles}
+              onPendingFile={(file) => setPendingFiles((prev) => [...prev, file])}
+              onRemovePendingFile={(index) =>
+                setPendingFiles((prev) => prev.filter((_, i) => i !== index))
+              }
             />
 
             <div className="d-flex gap-2 mt-3">

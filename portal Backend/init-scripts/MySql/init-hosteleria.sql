@@ -1,3 +1,7 @@
+-- Forzar UTF-8 para caracteres especiales (ñ, acentos, etc.)
+SET NAMES utf8mb4;
+SET CHARACTER SET utf8mb4;
+
 CREATE DATABASE IF NOT EXISTS hosteleria CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE hosteleria;
 
@@ -10,7 +14,7 @@ CREATE TABLE IF NOT EXISTS hospedajes (
     google_maps_url VARCHAR(500),
     num_whatsapp VARCHAR(50),
     tipo_hospedaje ENUM('HOTEL', 'DEPARTAMENTO', 'CABAÑA', 'CASA', 'OTRO') NOT NULL
-);
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- Tabla de imágenes de hospedajes
 CREATE TABLE IF NOT EXISTS hospedaje_imagen (

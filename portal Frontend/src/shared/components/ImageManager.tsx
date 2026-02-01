@@ -7,9 +7,12 @@ interface ImageManagerProps {
   maxImages?: number;
   entityType?: string; // 'comercio', 'servicio', etc.
   entityId?: number;
+  onPendingFile?: (file: File) => void; // Callback para archivos pendientes cuando no hay entityId
+  pendingFiles?: File[]; // Archivos pendientes de subir
+  onRemovePendingFile?: (index: number) => void; // Callback para eliminar archivo pendiente
 }
 
-export function ImageManager({ images, onChange, maxImages = 5, entityType = 'comercio', entityId }: ImageManagerProps) {
+export function ImageManager({ images, onChange, maxImages = 5, entityType = 'comercio', entityId, onPendingFile, pendingFiles = [], onRemovePendingFile }: ImageManagerProps) {
   const [newImageUrl, setNewImageUrl] = useState('');
   const [uploading, setUploading] = useState(false);
 
@@ -28,7 +31,7 @@ export function ImageManager({ images, onChange, maxImages = 5, entityType = 'co
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
-    if (!files || files.length === 0 || currentImages.length >= maxImages) return;
+    if (!files || files.length === 0 || (currentImages.length + pendingFiles.length) >= maxImages) return;
 
     const file = files[0];
     if (!file.type.match(/image\/(jpeg|jpg|png)/)) {
@@ -46,31 +49,23 @@ export function ImageManager({ images, onChange, maxImages = 5, entityType = 'co
         const formData = new FormData();
         formData.append('imagen', file);
         
-        // Usar endpoints específicos para cada tipo de entidad
+        // Usar endpoints específicos para cada tipo de entidad (según gateway)
         if (entityId && entityType) {
           let endpoint = '';
-          if (entityType === 'hospedaje') {
-            endpoint = `/api/hospedajes/${entityId}/imagenes`;
-          } else if (entityType === 'gastronomia') {
-            endpoint = `/restaurante/${entityId}/imagenes`;
-          } else {
-            // Endpoints genéricos para otras entidades
-            const endpointMap: { [key: string]: string } = {
-              'comercio': '/api/comercio/imagen',
-              'servicio': '/api/servicio/imagen',
-              'evento': '/api/eventos/imagen',
-              'espacio-publico': '/api/espacio-publico/imagen',
-              'terma': '/api/terma/imagen'
-            };
-            endpoint = endpointMap[entityType] || '/api/comercio/imagen';
-            endpoint = `${endpoint}/${entityId}`;
-          }
-          
+          const endpointMap: { [key: string]: string } = {
+            'comercio': `/api/comercio/imagen/${entityId}`,
+            'hospedaje': `/api/hospedaje/imagen/${entityId}`,
+            'gastronomia': `/api/restaurante/${entityId}/imagenes`,
+            'terma': `/api/terma/${entityId}/imagenes`,
+            'servicio': `/api/servicio/${entityId}/imagenes`,
+            'evento': `/api/evento/${entityId}/imagenes`,
+            'espacio-publico': `/api/espacio-publico/${entityId}/imagenes`
+          };
+          endpoint = endpointMap[entityType] || `/api/comercio/imagen/${entityId}`;
+
           // Ajustar el nombre del campo del archivo según el backend
-          if (entityType === 'hospedaje' || entityType === 'gastronomia') {
-            formData.delete('imagen');
-            formData.append('file', file);
-          }
+          formData.delete('imagen');
+          formData.append('file', file);
           
           console.log('Subiendo imagen a:', endpoint);
           
@@ -97,8 +92,11 @@ export function ImageManager({ images, onChange, maxImages = 5, entityType = 'co
             const error = await response.json().catch(() => ({}));
             alert(`Error al subir imagen: ${error.message || error.error || `Error ${response.status}`}`);
           }
+        } else if (onPendingFile) {
+          // Para nuevas entidades sin ID, guardar archivo como pendiente
+          onPendingFile(file);
         } else {
-          // Para nuevas entidades sin ID, mostramos error
+          // Para nuevas entidades sin ID y sin callback, mostramos error
           alert('Debe guardar el registro primero antes de subir imágenes');
         }
     } catch (error) {
@@ -117,22 +115,16 @@ export function ImageManager({ images, onChange, maxImages = 5, entityType = 'co
     // Si tenemos ID y tipo de entidad, intentamos eliminar del backend
     if (entityId && entityType) {
       try {
-        let endpoint = '';
-        if (entityType === 'hospedaje') {
-          endpoint = `/api/hospedajes/${entityId}/imagenes`;
-        } else if (entityType === 'gastronomia') {
-          endpoint = `/restaurante/${entityId}/imagenes`;
-        } else {
-          const endpointMap: { [key: string]: string } = {
-            'comercio': '/api/comercio/imagen',
-            'servicio': '/api/servicio/imagen',
-            'evento': '/api/eventos/imagen',
-            'espacio-publico': '/api/espacio-publico/imagen',
-            'terma': '/api/terma/imagen'
-          };
-          endpoint = endpointMap[entityType] || '/api/comercio/imagen';
-          endpoint = `${endpoint}/${entityId}`;
-        }
+        const endpointMap: { [key: string]: string } = {
+          'comercio': `/api/comercio/imagen/${entityId}`,
+          'hospedaje': `/api/hospedaje/imagen/${entityId}`,
+          'gastronomia': `/api/restaurante/${entityId}/imagenes`,
+          'terma': `/api/terma/${entityId}/imagenes`,
+          'servicio': `/api/servicio/${entityId}/imagenes`,
+          'evento': `/api/evento/${entityId}/imagenes`,
+          'espacio-publico': `/api/espacio-publico/${entityId}/imagenes`
+        };
+        const endpoint = endpointMap[entityType] || `/api/comercio/imagen/${entityId}`;
         
         const response = await fetch(endpoint, {
           method: 'DELETE',
@@ -158,7 +150,7 @@ export function ImageManager({ images, onChange, maxImages = 5, entityType = 'co
 
   return (
     <div className="mb-3">
-      <Form.Label className="small mb-2">Imágenes ({currentImages.length}/{maxImages})</Form.Label>
+      <Form.Label className="small mb-2">Imágenes ({currentImages.length + pendingFiles.length}/{maxImages})</Form.Label>
       
       {/* Imágenes actuales */}
       {currentImages.length > 0 && (
@@ -195,8 +187,46 @@ export function ImageManager({ images, onChange, maxImages = 5, entityType = 'co
         </Row>
       )}
 
+      {/* Archivos pendientes de subir */}
+      {pendingFiles.length > 0 && (
+        <>
+          <Form.Label className="small mb-2 text-warning">
+            Archivos pendientes ({pendingFiles.length}) - Se subirán al guardar
+          </Form.Label>
+          <Row className="mb-3 g-2">
+            {pendingFiles.map((file, index) => (
+              <Col key={`pending-${index}`} xs={6} md={4} lg={3}>
+                <div className="position-relative border border-warning rounded p-1">
+                  <Image
+                    src={URL.createObjectURL(file)}
+                    alt={`Pendiente ${index + 1}`}
+                    fluid
+                    className="w-100 h-100"
+                    style={{ objectFit: 'cover', maxHeight: '120px' }}
+                  />
+                  {onRemovePendingFile && (
+                    <Button
+                      variant="warning"
+                      size="sm"
+                      className="position-absolute top-0 end-0 m-1"
+                      onClick={() => onRemovePendingFile(index)}
+                      style={{ fontSize: '0.7rem', padding: '0.2rem 0.4rem' }}
+                    >
+                      ×
+                    </Button>
+                  )}
+                  <small className="d-block text-center text-muted text-truncate" style={{ fontSize: '0.65rem' }}>
+                    {file.name}
+                  </small>
+                </div>
+              </Col>
+            ))}
+          </Row>
+        </>
+      )}
+
       {/* Agregar nuevas imágenes */}
-      {currentImages.length < maxImages && (
+      {(currentImages.length + pendingFiles.length) < maxImages && (
         <Row className="g-2">
           <Col md={6}>
             <div className="d-flex gap-2">
@@ -233,7 +263,7 @@ export function ImageManager({ images, onChange, maxImages = 5, entityType = 'co
         </Row>
       )}
 
-      {currentImages.length >= maxImages && (
+      {(currentImages.length + pendingFiles.length) >= maxImages && (
         <Alert variant="info" className="py-2 small">
           Máximo de {maxImages} imágenes alcanzado
         </Alert>

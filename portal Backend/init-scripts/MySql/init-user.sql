@@ -1,3 +1,7 @@
+-- Forzar UTF-8 para caracteres especiales (ñ, acentos, etc.)
+SET NAMES utf8mb4;
+SET CHARACTER SET utf8mb4;
+
 CREATE DATABASE IF NOT EXISTS user CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE user;
 
@@ -44,6 +48,30 @@ CREATE TABLE IF NOT EXISTS business_tb (
     KEY FK_business_owner (owner_id),
     CONSTRAINT FK_business_usuarios FOREIGN KEY (owner_id) REFERENCES usuarios_tb (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- =====================
+-- TABLA HOME_CONFIG (Configuración de imágenes del Home)
+-- =====================
+CREATE TABLE IF NOT EXISTS home_config (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    seccion VARCHAR(50) NOT NULL UNIQUE,
+    imagen_url VARCHAR(500),
+    titulo VARCHAR(255),
+    activo BIT(1) NOT NULL DEFAULT 1,
+    updated_at DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+    PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Datos iniciales de configuración del Home
+INSERT INTO home_config (seccion, imagen_url, titulo, activo) VALUES
+('COMERCIO', NULL, 'Comercios', 1),
+('GASTRONOMIA', NULL, 'Gastronomía', 1),
+('HOSPEDAJE', NULL, 'Hospedajes', 1),
+('SERVICIOS', NULL, 'Servicios', 1),
+('ESPACIOS', NULL, 'Espacios Públicos', 1),
+('EVENTOS', NULL, 'Eventos', 1),
+('TERMAS', NULL, 'Termas', 1)
+ON DUPLICATE KEY UPDATE seccion = seccion;
 
 -- =====================
 -- NOTA: Los roles y el usuario moderador se crean

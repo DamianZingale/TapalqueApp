@@ -15,6 +15,7 @@ import lombok.Getter;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import jakarta.persistence.Column;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 
@@ -31,6 +32,7 @@ public class Terma {
 
     private String titulo;
 
+    @Column(columnDefinition = "TEXT")
     private String descripcion;
 
     private String direccion;
