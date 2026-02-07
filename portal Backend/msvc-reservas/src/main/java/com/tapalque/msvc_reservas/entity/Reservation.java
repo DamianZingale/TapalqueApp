@@ -30,6 +30,9 @@ public class Reservation {
     private String mercadoPagoId; // ID del pago en Mercado Pago
     private LocalDateTime fechaPago; // Fecha en que se aprobó el pago
 
+    // Notas adicionales del administrador
+    private String notas;
+
     public Reservation() {}
 
     public Reservation(Customer customer, Hotel hotel, StayPeriod stayPeriod, Payment payment, Double totalPrice) {
@@ -149,17 +152,43 @@ public void setFechaPago(LocalDateTime fechaPago) {
     this.fechaPago = fechaPago;
 }
 
+public String getNotas() {
+    return notas;
+}
+
+public void setNotas(String notas) {
+    this.notas = notas;
+}
+
     // --- Inner classes --- //
 
     public static class Customer {
         private String customerId;
         private String customerName;
+        private String customerPhone;
+        private String customerEmail;
+        private String customerDni;
 
         public Customer() {}
 
         public Customer(String customerId, String customerName) {
             this.customerId = customerId;
             this.customerName = customerName;
+        }
+
+        public Customer(String customerId, String customerName, String customerPhone, String customerEmail) {
+            this.customerId = customerId;
+            this.customerName = customerName;
+            this.customerPhone = customerPhone;
+            this.customerEmail = customerEmail;
+        }
+
+        public Customer(String customerId, String customerName, String customerPhone, String customerEmail, String customerDni) {
+            this.customerId = customerId;
+            this.customerName = customerName;
+            this.customerPhone = customerPhone;
+            this.customerEmail = customerEmail;
+            this.customerDni = customerDni;
         }
 
         public String getCustomerId() {
@@ -176,6 +205,30 @@ public void setFechaPago(LocalDateTime fechaPago) {
 
         public void setCustomerName(String customerName) {
             this.customerName = customerName;
+        }
+
+        public String getCustomerPhone() {
+            return customerPhone;
+        }
+
+        public void setCustomerPhone(String customerPhone) {
+            this.customerPhone = customerPhone;
+        }
+
+        public String getCustomerEmail() {
+            return customerEmail;
+        }
+
+        public void setCustomerEmail(String customerEmail) {
+            this.customerEmail = customerEmail;
+        }
+
+        public String getCustomerDni() {
+            return customerDni;
+        }
+
+        public void setCustomerDni(String customerDni) {
+            this.customerDni = customerDni;
         }
     }
 

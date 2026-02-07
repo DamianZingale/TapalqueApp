@@ -80,6 +80,16 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public Mono<Order> updateOrderStatus(@NonNull String id, @NonNull String status) {
+        return orderRepository.findById(id)
+            .flatMap(order -> {
+                order.setStatus(Order.OrderStatus.valueOf(status.toUpperCase()));
+                order.setDateUpdated(LocalDateTime.now());
+                return orderRepository.save(order);
+            });
+    }
+
+    @Override
     @Scheduled(cron = "0 0 3 * * ?") // limpieza automática a las 3AM
     public void cleanUnpaidOrders() {
         orderRepository.deleteByPaidWithMercadoPagoFalseAndPaidWithCashFalse()
@@ -90,7 +100,7 @@ public class OrderServiceImpl implements OrderService {
     public void confirmarPagoPedido(@NonNull String pedidoId, @NonNull PagoEventoDTO evento) {
         orderRepository.findById(pedidoId)
             .flatMap(order -> {
-                order.setStatus(Order.OrderStatus.PAID);
+                order.setStatus(Order.OrderStatus.RECIBIDO);
                 order.setPaidWithMercadoPago(true);
                 order.setTransaccionId(evento.getTransaccionId());
                 order.setMercadoPagoId(evento.getMercadoPagoId());
@@ -107,7 +117,7 @@ public class OrderServiceImpl implements OrderService {
     public void rechazarPagoPedido(@NonNull String pedidoId, @NonNull PagoEventoDTO evento) {
         orderRepository.findById(pedidoId)
             .flatMap(order -> {
-                order.setStatus(Order.OrderStatus.PENDING); // Mantener como pendiente o agregar un estado RECHAZADO
+                order.setStatus(Order.OrderStatus.RECIBIDO); // Mantener como recibido para reintentar pago
                 order.setPaidWithMercadoPago(false);
                 order.setTransaccionId(evento.getTransaccionId());
                 order.setMercadoPagoId(evento.getMercadoPagoId());
@@ -121,69 +131,83 @@ public class OrderServiceImpl implements OrderService {
 
     // mapeos
     private Order mapToEntity(OrderDTO dto) {
-    Order order = new Order();
-    
-    // Campos básicos
-    order.setId(dto.getId()); // opcional si es creación nueva
-    order.setTotalPrice(dto.getTotalPrice());
-    order.setPaidWithMercadoPago(dto.getPaidWithMercadoPago());
-    order.setPaidWithCash(dto.getPaidWithCash());
-    order.setStatus(dto.getStatus() != null 
-        ? Order.OrderStatus.valueOf(dto.getStatus().toUpperCase()) 
-        : Order.OrderStatus.PENDING);
+        Order order = new Order();
 
-    // Items
-    order.setItems(dto.getItems().stream()
-        .map(i -> new Order.Item(
-            i.getProductId(),
-            i.getItemName(),
-            i.getItemPrice(),
-            i.getItemQuantity()))
-        .toList());
+        // Campos básicos
+        order.setId(dto.getId());
+        order.setUserId(dto.getUserId());
+        order.setUserName(dto.getUserName());
+        order.setUserPhone(dto.getUserPhone());
+        order.setTotalPrice(dto.getTotalPrice());
+        order.setPaidWithMercadoPago(dto.getPaidWithMercadoPago());
+        order.setPaidWithCash(dto.getPaidWithCash());
+        order.setStatus(dto.getStatus() != null
+            ? Order.OrderStatus.valueOf(dto.getStatus().toUpperCase())
+            : Order.OrderStatus.RECIBIDO);
 
-    // Restaurant
-    var restaurantDto = dto.getRestaurant();
-    if (restaurantDto != null) {
-        order.setRestaurant(new Order.Restaurant(
-            restaurantDto.getRestaurantId(),
-            restaurantDto.getRestaurantName()
-        ));
+        // Delivery
+        order.setIsDelivery(dto.getIsDelivery());
+        order.setDeliveryAddress(dto.getDeliveryAddress());
+
+        // Items
+        order.setItems(dto.getItems().stream()
+            .map(i -> new Order.Item(
+                i.getProductId(),
+                i.getItemName(),
+                i.getItemPrice(),
+                i.getItemQuantity()))
+            .toList());
+
+        // Restaurant
+        var restaurantDto = dto.getRestaurant();
+        if (restaurantDto != null) {
+            order.setRestaurant(new Order.Restaurant(
+                restaurantDto.getRestaurantId(),
+                restaurantDto.getRestaurantName()
+            ));
+        }
+
+        return order;
     }
-
-    return order;
-}
 
     @SuppressWarnings("unused")
     private OrderDTO mapToDTO(Order order) {
-    OrderDTO dto = new OrderDTO();
-    
-    dto.setId(order.getId());
-    dto.setTotalPrice(order.getTotalPrice());
-    dto.setPaidWithMercadoPago(order.getPaidWithMercadoPago());
-    dto.setPaidWithCash(order.getPaidWithCash());
-    dto.setStatus(order.getStatus().name());
-    dto.setDateCreated(order.getDateCreated());
-    dto.setDateUpdated(order.getDateUpdated());
+        OrderDTO dto = new OrderDTO();
 
-    // Items
-    dto.setItems(order.getItems().stream()
-        .map(i -> {
-            var itemDto = new ItemDTO();
-            itemDto.setProductId(i.getProductId());
-            itemDto.setItemName(i.getItemName());
-            itemDto.setItemPrice(i.getItemPrice());
-            itemDto.setItemQuantity(i.getItemQuantity());
-            return itemDto;
-        }).toList());
+        dto.setId(order.getId());
+        dto.setUserId(order.getUserId());
+        dto.setUserName(order.getUserName());
+        dto.setUserPhone(order.getUserPhone());
+        dto.setTotalPrice(order.getTotalPrice());
+        dto.setPaidWithMercadoPago(order.getPaidWithMercadoPago());
+        dto.setPaidWithCash(order.getPaidWithCash());
+        dto.setStatus(order.getStatus().name());
+        dto.setDateCreated(order.getDateCreated());
+        dto.setDateUpdated(order.getDateUpdated());
 
-    // Restaurant
-    if (order.getRestaurant() != null) {
-        var restaurantDto = new RestaurantDTO();
-        restaurantDto.setRestaurantId(order.getRestaurant().getRestaurantId());
-        restaurantDto.setRestaurantName(order.getRestaurant().getRestaurantName());
-        dto.setRestaurant(restaurantDto);
+        // Delivery
+        dto.setIsDelivery(order.getIsDelivery());
+        dto.setDeliveryAddress(order.getDeliveryAddress());
+
+        // Items
+        dto.setItems(order.getItems().stream()
+            .map(i -> {
+                var itemDto = new ItemDTO();
+                itemDto.setProductId(i.getProductId());
+                itemDto.setItemName(i.getItemName());
+                itemDto.setItemPrice(i.getItemPrice());
+                itemDto.setItemQuantity(i.getItemQuantity());
+                return itemDto;
+            }).toList());
+
+        // Restaurant
+        if (order.getRestaurant() != null) {
+            var restaurantDto = new RestaurantDTO();
+            restaurantDto.setRestaurantId(order.getRestaurant().getRestaurantId());
+            restaurantDto.setRestaurantName(order.getRestaurant().getRestaurantName());
+            dto.setRestaurant(restaurantDto);
+        }
+
+        return dto;
     }
-
-    return dto;
-}
 }

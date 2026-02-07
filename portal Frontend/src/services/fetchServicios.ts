@@ -11,6 +11,7 @@ export interface Servicio {
     longitud?: number;
     facebook?: string;
     instagram?: string;
+    tag?: string;
     imagenes?: { imagenUrl: string }[];
 }
 

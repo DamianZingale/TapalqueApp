@@ -54,7 +54,7 @@ export function ImageManager({ images, onChange, maxImages = 5, entityType = 'co
           let endpoint = '';
           const endpointMap: { [key: string]: string } = {
             'comercio': `/api/comercio/imagen/${entityId}`,
-            'hospedaje': `/api/hospedaje/imagen/${entityId}`,
+            'hospedaje': `/api/hospedajes/${entityId}/imagenes`,
             'gastronomia': `/api/restaurante/${entityId}/imagenes`,
             'terma': `/api/terma/${entityId}/imagenes`,
             'servicio': `/api/servicio/${entityId}/imagenes`,
@@ -117,7 +117,7 @@ export function ImageManager({ images, onChange, maxImages = 5, entityType = 'co
       try {
         const endpointMap: { [key: string]: string } = {
           'comercio': `/api/comercio/imagen/${entityId}`,
-          'hospedaje': `/api/hospedaje/imagen/${entityId}`,
+          'hospedaje': `/api/hospedajes/${entityId}/imagenes`,
           'gastronomia': `/api/restaurante/${entityId}/imagenes`,
           'terma': `/api/terma/${entityId}/imagenes`,
           'servicio': `/api/servicio/${entityId}/imagenes`,

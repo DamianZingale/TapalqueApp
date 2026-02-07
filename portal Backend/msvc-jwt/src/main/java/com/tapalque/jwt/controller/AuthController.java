@@ -15,23 +15,48 @@ import org.springframework.web.bind.annotation.RestController;
 import com.tapalque.jwt.dto.AuthRequestDTO;
 import com.tapalque.jwt.dto.TokenResponse;
 import com.tapalque.jwt.service.AuthService;
+import com.tapalque.jwt.service.LoginAttemptService;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/jwt/public")
 public class AuthController {
 
     private final AuthService service;
-    public AuthController(AuthService service) {
+    private final LoginAttemptService loginAttemptService;
+
+    public AuthController(AuthService service, LoginAttemptService loginAttemptService) {
         this.service = service;
+        this.loginAttemptService = loginAttemptService;
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> authenticate(@RequestBody AuthRequestDTO request) {
+    public ResponseEntity<?> authenticate(@RequestBody AuthRequestDTO request, HttpServletRequest httpRequest) {
+        String clientIp = extractClientIp(httpRequest);
+
+        if (loginAttemptService.isBlocked(clientIp)) {
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                    .header("Retry-After", "300")
+                    .body(error("Demasiados intentos",
+                            "Tu IP ha sido bloqueada temporalmente por multiples intentos fallidos. Intenta de nuevo en 5 minutos."));
+        }
+
         try {
             TokenResponse response = service.authenticate(request);
-            return ResponseEntity.ok(response);
+            loginAttemptService.loginSucceeded(clientIp);
+            return ResponseEntity.ok()
+                    .header("X-RateLimit-Remaining", String.valueOf(loginAttemptService.getRemainingAttempts(clientIp)))
+                    .body(response);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error("Error en login", e.getMessage()));
+            loginAttemptService.loginFailed(clientIp);
+            int remaining = loginAttemptService.getRemainingAttempts(clientIp);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .header("X-RateLimit-Remaining", String.valueOf(remaining))
+                    .body(error("Error en login",
+                            e.getMessage() + (remaining > 0
+                                    ? ". Intentos restantes: " + remaining
+                                    : ". IP bloqueada por 5 minutos.")));
         }
     }
 
@@ -43,6 +68,14 @@ public class AuthController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error("Token inválido", e.getMessage()));
         }
+    }
+
+    private String extractClientIp(HttpServletRequest request) {
+        String xForwardedFor = request.getHeader("X-Forwarded-For");
+        if (xForwardedFor != null && !xForwardedFor.isBlank()) {
+            return xForwardedFor.split(",")[0].trim();
+        }
+        return request.getRemoteAddr();
     }
 
     private Map<String, String> error(String mensaje, String detalle) {

@@ -31,18 +31,59 @@ spring:
             allowCredentials: true
 
       routes:
-        # ========== RUTAS PÚBLICAS ==========
-        - id: msvc-user-public
-          uri: lb://msvc-user
-          predicates:
-            - Path=/api/user/public/register, /api/user/public/verify-email, /api/user/public/resend-verification
-          filters:
-            - RewritePath=/api/(?<segment>.*), /${segment}
-
+        # ========== RUTAS PÚBLICAS (CON RATE LIMITING) ==========
         - id: msvc-jwt-login
           uri: lb://msvc-jwt
           predicates:
-            - Path=/api/jwt/public/login, /api/jwt/public/refresh-token
+            - Path=/api/jwt/public/login
+          filters:
+            - RewritePath=/api/(?<segment>.*), /${segment}
+            - RateLimiting=5, 300
+
+        - id: msvc-jwt-refresh
+          uri: lb://msvc-jwt
+          predicates:
+            - Path=/api/jwt/public/refresh-token
+          filters:
+            - RewritePath=/api/(?<segment>.*), /${segment}
+            - RateLimiting=10, 60
+
+        - id: msvc-user-register
+          uri: lb://msvc-user
+          predicates:
+            - Path=/api/user/public/register
+          filters:
+            - RewritePath=/api/(?<segment>.*), /${segment}
+            - RateLimiting=5, 1800
+
+        - id: msvc-user-forgot-password
+          uri: lb://msvc-user
+          predicates:
+            - Path=/api/user/public/forgot-password
+          filters:
+            - RewritePath=/api/(?<segment>.*), /${segment}
+            - RateLimiting=3, 1800
+
+        - id: msvc-user-reset-password
+          uri: lb://msvc-user
+          predicates:
+            - Path=/api/user/public/reset-password, /api/user/public/validate-reset-token
+          filters:
+            - RewritePath=/api/(?<segment>.*), /${segment}
+            - RateLimiting=5, 1800
+
+        - id: msvc-user-resend-verification
+          uri: lb://msvc-user
+          predicates:
+            - Path=/api/user/public/resend-verification
+          filters:
+            - RewritePath=/api/(?<segment>.*), /${segment}
+            - RateLimiting=3, 1800
+
+        - id: msvc-user-verify-email
+          uri: lb://msvc-user
+          predicates:
+            - Path=/api/user/public/verify-email
           filters:
             - RewritePath=/api/(?<segment>.*), /${segment}
 
@@ -85,10 +126,10 @@ spring:
         - id: msvc-hosteleria-habitaciones-list-public
           uri: lb://msvc-hosteleria
           predicates:
-            - Path=/api/hospedajes/{id}/habitaciones
+            - Path=/api/habitaciones/hospedajes/{id}
             - Method=GET
           filters:
-            - RewritePath=/api/hospedajes/(?<id>[0-9]+)/habitaciones, /hospedajes/${id}/habitaciones
+            - RewritePath=/api/habitaciones/hospedajes/(?<id>[0-9]+), /habitaciones/hospedajes/${id}
 
         # Gastronomía
         #findAll
@@ -158,6 +199,22 @@ spring:
             - Method=GET
           filters:
             - RewritePath=/api/gastronomia/menu/restrictions, /gastronomia/menu/restrictions
+          #common ingredients
+        - id: msvc-gastronomia-menu-ingredients-common-public
+          uri: lb://msvc-gastronomia
+          predicates:
+            - Path=/api/gastronomia/menu/ingredients/common
+            - Method=GET
+          filters:
+            - RewritePath=/api/gastronomia/menu/ingredients/common, /gastronomia/menu/ingredients/common
+          #search ingredients
+        - id: msvc-gastronomia-menu-ingredients-search-public
+          uri: lb://msvc-gastronomia
+          predicates:
+            - Path=/api/gastronomia/menu/ingredients/search
+            - Method=GET
+          filters:
+            - RewritePath=/api/gastronomia/menu/ingredients/search, /gastronomia/menu/ingredients/search
 
         # Eventos
         - id: msvc-eventos-list-public
@@ -320,10 +377,10 @@ spring:
         - id: msvc-hospedaje-imagen
           uri: lb://msvc-hosteleria
           predicates:
-            - Path=/api/hospedaje/imagen/{id}
-            - Method=GET, DELETE, POST
+            - Path=/api/hospedajes/{id}/imagenes
+            - Method=GET,DELETE,POST
           filters:
-            - RewritePath=/api/hospedaje/imagen/(?<id>[0-9]+), /hospedaje/${id}/imagenes
+            - RewritePath=/api/hospedajes/(?<id>[0-9]+)/imagenes, /hospedajes/${id}/imagenes
             - JwtAuth
 
         - id: msvc-hosteleria-create
@@ -344,13 +401,24 @@ spring:
             - RewritePath=/api/hospedajes/(?<id>[0-9]+), /hospedajes/${id}
             - JwtAuth
 
+        # Crear habitación
+        - id: msvc-hosteleria-habitaciones-create
+          uri: lb://msvc-hosteleria
+          predicates:
+            - Path=/api/habitaciones/hospedajes/{id}
+            - Method=POST
+          filters:
+            - RewritePath=/api/habitaciones/hospedajes/(?<id>[0-9]+), /habitaciones/hospedajes/${id}
+            - JwtAuth
+
+        # CRUD habitaciones individuales
         - id: msvc-hosteleria-habitaciones
           uri: lb://msvc-hosteleria
           predicates:
             - Path=/api/habitaciones/{id}
-            - Method=GET,PUT,DELETE,PATCH
+            - Method=GET,PUT,DELETE
           filters:
-            - RewritePath=/api/(?<id>[0-9]+), /habitaciones/hospedajes/${id}
+            - RewritePath=/api/habitaciones/(?<id>[0-9]+), /habitaciones/${id}
             - JwtAuth
 
         - id: msvc-hosteleria-habitaciones-disponibilidad-update
@@ -359,7 +427,7 @@ spring:
             - Path=/api/habitaciones/{id}/disponibilidad
             - Method=PATCH
           filters:
-            - RewritePath=/api/(?<id>[0-9]+), /habitaciones/${id}/disponibilidad
+            - RewritePath=/api/habitaciones/(?<id>[0-9]+)/disponibilidad, /habitaciones/${id}/disponibilidad
             - JwtAuth
 
         - id: msvc-gastronomia-imagen
@@ -398,8 +466,55 @@ spring:
           filters:
             - RewritePath=/api/gastronomia/delete/(?<id>[0-9]+), /restaurante/delete/${id}
             - JwtAuth
+
+        # ===== MENU CRUD =====
+        - id: msvc-gastronomia-menu-create-dish
+          uri: lb://msvc-gastronomia
+          predicates:
+            - Path=/api/gastronomia/menu/restaurant/{restaurantId}/dish
+            - Method=POST
+          filters:
+            - RewritePath=/api/gastronomia/menu/restaurant/(?<restaurantId>[0-9]+)/dish, /gastronomia/menu/restaurant/${restaurantId}/dish
+            - JwtAuth
+
+        - id: msvc-gastronomia-menu-update-dish
+          uri: lb://msvc-gastronomia
+          predicates:
+            - Path=/api/gastronomia/menu/dish/{dishId}
+            - Method=PUT
+          filters:
+            - RewritePath=/api/gastronomia/menu/dish/(?<dishId>[0-9]+), /gastronomia/menu/dish/${dishId}
+            - JwtAuth
+
+        - id: msvc-gastronomia-menu-delete-dish
+          uri: lb://msvc-gastronomia
+          predicates:
+            - Path=/api/gastronomia/menu/dish/{dishId}
+            - Method=DELETE
+          filters:
+            - RewritePath=/api/gastronomia/menu/dish/(?<dishId>[0-9]+), /gastronomia/menu/dish/${dishId}
+            - JwtAuth
+
+        - id: msvc-gastronomia-menu-update-availability
+          uri: lb://msvc-gastronomia
+          predicates:
+            - Path=/api/gastronomia/menu/dish/{dishId}/availability
+            - Method=PATCH
+          filters:
+            - RewritePath=/api/gastronomia/menu/dish/(?<dishId>[0-9]+)/availability, /gastronomia/menu/dish/${dishId}/availability
+            - JwtAuth
+
         # MERCADO PAGO
-        - id: msvc-mercado-pago
+        # Test payment (público - para activar la app)
+        - id: msvc-mercado-pago-test
+          uri: lb://msvc-mercado-pago
+          predicates:
+            - Path=/api/mercadopago/test-payment
+            - Method=GET
+          filters:
+            - RewritePath=/api/(?<segment>.*), /${segment}
+
+        - id: msvc-mercado-pago-crear
           uri: lb://msvc-mercado-pago
           predicates:
             - Path=/api/mercadopago/pagos/crear
@@ -416,18 +531,18 @@ spring:
           filters:
             - RewritePath=/api/(?<segment>.*), /${segment}
 
-        - id: msvc-mercado-pago
+        - id: msvc-mercado-pago-oauth-callback
           uri: lb://msvc-mercado-pago
           predicates:
-            - Path=/api/mercadopago/Oauth/callback
+            - Path=/api/mercadopago/oauth/callback
             - Method=GET
           filters:
             - RewritePath=/api/(?<segment>.*), /${segment}
 
-        - id: msvc-mercado-pago
+        - id: msvc-mercado-pago-oauth-init
           uri: lb://msvc-mercado-pago
           predicates:
-            - Path=/api/mercadopago/Oauth/init
+            - Path=/api/mercadopago/oauth/init
             - Method=GET
           filters:
             - RewritePath=/api/(?<segment>.*), /${segment}
@@ -506,11 +621,20 @@ spring:
         - id: msvc-pedidos
           uri: lb://msvc-pedidos
           predicates:
-            - Path=/api/pedidos/orders/{id:[0-9]+}/estado
+            - Path=/api/pedidos/orders/{id}/estado
             - Method=PATCH
           filters:
-            - RewritePath=/api/pedidos/orders/(?<id>[0-9]+), /orders/${id}/estado
+            - RewritePath=/api/pedidos/orders/(?<id>[^/]+)/estado, /orders/${id}/estado
             - JwtAuth
+
+        # RESERVAS - disponibilidad pública (sin auth)
+        - id: msvc-reservas-disponibilidad-public
+          uri: lb://msvc-reservas
+          predicates:
+            - Path=/api/reservas/disponibilidad/{id:[0-9]+}
+            - Method=GET
+          filters:
+            - RewritePath=/api/reservas/disponibilidad/(?<id>[0-9]+), /disponibilidad/${id}
 
         # RESERVAS
         - id: msvc-reservas
@@ -522,31 +646,31 @@ spring:
             - RewritePath=/api/reservas/(?<segment>.*), /${segment}
             - JwtAuth
 
-        - id: msvc-reservas
+        - id: msvc-reservas-by-id
           uri: lb://msvc-reservas
           predicates:
-            - Path=/api/reservas/reservations/by-id/{id:[0-9]+}
+            - Path=/api/reservas/reservations/by-id/{id}
             - Method=GET
           filters:
-            - RewritePath=/api/reservas/reservations/by-id/(?<id>[0-9]+), /reservations/by-id/${id}
+            - RewritePath=/api/reservas/reservations/by-id/(?<id>.*), /reservations/by-id/${id}
             - JwtAuth
 
-        - id: msvc-reservas
+        - id: msvc-reservas-update
           uri: lb://msvc-reservas
           predicates:
-            - Path=/api/reservas/reservations/update/{id:[0-9]+}
+            - Path=/api/reservas/reservations/update/{id}
             - Method=PUT
           filters:
-            - RewritePath=/api/reservas/reservations/update/(?<id>[0-9]+), /reservations/update/${id}
+            - RewritePath=/api/reservas/reservations/update/(?<id>.*), /reservations/update/${id}
             - JwtAuth
 
-        - id: msvc-reservas
+        - id: msvc-reservas-delete
           uri: lb://msvc-reservas
           predicates:
-            - Path=/api/reservas/reservations/delete/{id:[0-9]+}
+            - Path=/api/reservas/reservations/delete/{id}
             - Method=DELETE
           filters:
-            - RewritePath=/api/reservas/reservations/delete/(?<id>[0-9]+), /reservations/delete/${id}
+            - RewritePath=/api/reservas/reservations/delete/(?<id>.*), /reservations/delete/${id}
             - JwtAuth
 
         - id: msvc-reservas
@@ -716,6 +840,27 @@ spring:
             - Method=GET
           filters:
             - RewritePath=/api/user/uploads/(?<file>.*), /uploads/${file}
+
+        # ========== USUARIOS (PERFIL) ==========
+        # Obtener perfil del usuario autenticado
+        - id: msvc-user-profile-me
+          uri: lb://msvc-user
+          predicates:
+            - Path=/api/user/profile/me
+            - Method=GET
+          filters:
+            - RewritePath=/api/(?<segment>.*), /${segment}
+            - JwtAuth
+
+        # Actualizar perfil
+        - id: msvc-user-profile-update
+          uri: lb://msvc-user
+          predicates:
+            - Path=/api/user/{id}/profile
+            - Method=PUT
+          filters:
+            - RewritePath=/api/(?<segment>.*), /${segment}
+            - JwtAuth
 
         # ========== USUARIOS (MODERADOR) ==========
         - id: msvc-user-moderador

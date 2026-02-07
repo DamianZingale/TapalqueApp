@@ -13,12 +13,15 @@ import HospedajeRoutes from '../../features/hospedaje/routes';
 import PerfilRoutes from '../../features/perfil/routes';
 import ServiciosRoutes from '../../features/servicios/routes';
 import TermasRoutes from '../../features/termas/routes';
+import { PagoRoutes } from '../../features/pago/routes';
 
 // Usuario
 import UserDashboardRoutes from '../../features/user-dashboard/routes';
 
 // Login / Register
 import { VerifyEmail } from '../../features/auth/components/VerifyEmail';
+import { ForgotPassword } from '../../features/auth/components/ForgotPassword';
+import { ResetPassword } from '../../features/auth/components/ResetPassword';
 import LoginPage from '../../features/auth/pages/LoginPage';
 import RegisterPage from '../../features/auth/pages/RegisterPage';
 
@@ -28,6 +31,10 @@ import { AdministradoresRoutes } from '../../features/admin-negocios';
 // Moderador
 import { lazy } from 'react';
 const ModeradorDashboard = lazy(() => import('../../features/moderador/pages/ModeradorDashboard'));
+
+// Páginas legales
+import { TerminosYCondiciones } from '../../shared/pages/TerminosYCondiciones';
+import { Nosotros } from '../../shared/pages/Nosotros';
 
 // Protección
 import {
@@ -58,6 +65,10 @@ export const router = createBrowserRouter([
       { path: 'espublicos/*', element: <EsPublicosRoutes /> },
       { path: 'perfil/*', element: <PerfilRoutes /> },
 
+      { path: 'terminos-y-condiciones', element: <TerminosYCondiciones /> },
+      { path: 'nosotros', element: <Nosotros /> },
+      { path: 'pago/*', element: <PagoRoutes /> },
+
       {
         path: 'dashboard/*',
         element: (
@@ -79,6 +90,8 @@ export const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
   { path: '/register', element: <RegisterPage /> },
   { path: '/verify-email', element: <VerifyEmail /> },
+  { path: '/forgot-password', element: <ForgotPassword /> },
+  { path: '/reset-password', element: <ResetPassword /> },
 
   /**
    * ===============================

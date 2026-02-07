@@ -33,8 +33,35 @@ export const Login = () => {
       const data: LoginResponse = response.data;
 
       authService.setToken(data.accessToken);
-      authService.setUser(data.user);
       authService.setRefreshToken(data.refreshToken);
+
+      // Guardar datos básicos primero
+      authService.setUser(data.user);
+
+      // Obtener perfil completo del usuario (incluyendo telefono, dni, etc.)
+      // Esto evita tener que hacer peticiones adicionales después
+      try {
+        const profileResponse = await fetch(`/api/user/profile/me?email=${encodeURIComponent(email)}`, {
+          headers: {
+            'Authorization': `Bearer ${data.accessToken}`,
+          },
+        });
+        if (profileResponse.ok) {
+          const fullProfile = await profileResponse.json();
+          // Actualizar localStorage con perfil completo
+          authService.setUser({
+            ...data.user,
+            nombre: fullProfile.nombre,
+            apellido: fullProfile.apellido,
+            telefono: fullProfile.telefono,
+            dni: fullProfile.dni,
+            direccion: fullProfile.direccion,
+          });
+        }
+      } catch (profileErr) {
+        console.warn('No se pudo obtener perfil completo:', profileErr);
+        // Continúa con los datos básicos del login
+      }
 
       const userRole = String(data.user.rol);
       console.log('ROL:', data.user.rol);
@@ -95,7 +122,7 @@ export const Login = () => {
             />
           </div>
 
-          <div className="mb-4">
+          <div className="mb-3">
             <label htmlFor="password" className="form-label">
               Contraseña
             </label>
@@ -109,6 +136,15 @@ export const Login = () => {
               required
               disabled={loading}
             />
+          </div>
+
+          <div className="mb-4 text-end">
+            <Link
+              to="/forgot-password"
+              className="text-muted text-decoration-none small"
+            >
+              ¿Olvidaste tu contraseña?
+            </Link>
           </div>
 
           {error && (

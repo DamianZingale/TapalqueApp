@@ -5,6 +5,8 @@ import com.tapalque.user.enu.BusinessType;
 
 public class BusinessDTO {
     private Long id;
+    private Long ownerId;
+    private String ownerName;
     private String name;
     private BusinessType businessType;
     private Long externalBusinessId;
@@ -12,8 +14,10 @@ public class BusinessDTO {
     public BusinessDTO() {
     }
 
-    public BusinessDTO(Long id, String name, BusinessType businessType, Long externalBusinessId) {
+    public BusinessDTO(Long id, Long ownerId, String ownerName, String name, BusinessType businessType, Long externalBusinessId) {
         this.id = id;
+        this.ownerId = ownerId;
+        this.ownerName = ownerName;
         this.name = name;
         this.businessType = businessType;
         this.externalBusinessId = externalBusinessId;
@@ -25,6 +29,22 @@ public class BusinessDTO {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public String getOwnerName() {
+        return ownerName;
+    }
+
+    public void setOwnerName(String ownerName) {
+        this.ownerName = ownerName;
     }
 
     public String getName() {
@@ -54,6 +74,8 @@ public class BusinessDTO {
     public static BusinessDTO fromEntity(Business business) {
         return new BusinessDTO(
             business.getId(),
+            business.getOwner().getId(),
+            business.getOwner().getFirstName() + " " + business.getOwner().getLastName(),
             business.getName(),
             business.getBusinessType(),
             business.getExternalBusinessId()

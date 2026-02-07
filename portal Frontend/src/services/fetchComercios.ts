@@ -16,6 +16,7 @@ export interface Comercio {
     longitud: number;
     facebook?: string;
     instagram?: string;
+    tag?: string;
     imagenes: ComercioImagen[];
 }
 

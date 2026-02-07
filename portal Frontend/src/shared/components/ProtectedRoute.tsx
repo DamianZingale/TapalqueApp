@@ -40,8 +40,9 @@ export const ProtectedRoute = ({
   // Si hay roles permitidos especificados, verificar que el usuario tenga uno de ellos
   if (allowedRoles && allowedRoles.length > 0) {
     // Convertir rol a número si viene como string
-    const numericRol = typeof userRol === 'string' ? 
-      (userRol === 'MODERADOR' ? 1 : userRol === 'ADMINISTRADOR' ? 2 : userRol === 'USUARIO' ? 3 : null) 
+    // Backend envía: USER, MODERADOR, ADMINISTRADOR
+    const numericRol = typeof userRol === 'string' ?
+      (userRol === 'MODERADOR' ? 1 : userRol === 'ADMINISTRADOR' ? 2 : (userRol === 'USER' || userRol === 'USUARIO') ? 3 : null)
       : userRol;
     
     console.log('Verificación de rol:', {

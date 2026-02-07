@@ -80,17 +80,84 @@ export async function fetchDishRestrictions(): Promise<DishRestrictionDTO[]> {
   }
 }
 
+// Obtener todos los ingredientes comunes
+export async function fetchCommonIngredients(): Promise<string[]> {
+  try {
+    const response = await api.get<string[]>(
+      '/gastronomia/menu/ingredients/common'
+    );
+    return response;
+  } catch (error) {
+    console.error('Error en fetchCommonIngredients:', error);
+    return [];
+  }
+}
+
+// Buscar ingredientes por término de búsqueda (para debounce)
+export async function searchIngredients(query: string): Promise<string[]> {
+  try {
+    const response = await api.get<string[]>(
+      `/gastronomia/menu/ingredients/search?query=${encodeURIComponent(query)}`
+    );
+    return response;
+  } catch (error) {
+    console.error('Error en searchIngredients:', error);
+    return [];
+  }
+}
+
+// Convertir MenuItem del frontend a DishDTO del backend
+function menuItemToBackendDTO(item: Omit<MenuItem, 'id'> | Partial<MenuItem>) {
+  const dto: any = {};
+
+  // Solo incluir campos que están definidos
+  if (item.dish_name !== undefined) dto.name = item.dish_name;
+  if (item.price !== undefined) dto.price = item.price;
+  if (item.description !== undefined) dto.description = item.description;
+  if (item.available !== undefined) dto.available = item.available;
+  if (item.picture !== undefined) dto.picture = item.picture;
+
+  // Solo incluir arrays si están definidos
+  if (item.category !== undefined) {
+    dto.categories = [{ name: item.category }];
+  }
+  if (item.ingredients !== undefined) {
+    dto.ingredients = item.ingredients.map(name => ({ name }));
+  }
+  if (item.restrictions !== undefined) {
+    dto.restrictions = item.restrictions.map(name => ({ name }));
+  }
+
+  return dto;
+}
+
 // Crear un nuevo item de menú
 export async function crearMenuItem(
   restaurantId: string,
   data: Omit<MenuItem, 'id'>
 ): Promise<MenuItem | null> {
   try {
-    const response = await api.post<MenuItem>(
+    const backendDTO = menuItemToBackendDTO(data);
+    const response = await api.post(
       `/gastronomia/menu/restaurant/${restaurantId}/dish`,
-      data
+      backendDTO
     );
-    return response;
+
+    // Transformar respuesta del backend a formato frontend
+    if (response) {
+      return {
+        id: response.idDish,
+        dish_name: response.name,
+        price: response.price,
+        description: response.description,
+        available: response.available !== undefined ? response.available : true,
+        picture: response.picture,
+        category: response.categories?.[0]?.name || 'Sin categoría',
+        ingredients: response.ingredients?.map((i: any) => i.name) || [],
+        restrictions: response.restrictions?.map((r: any) => r.name) || [],
+      };
+    }
+    return null;
   } catch (error) {
     console.error('Error en crearMenuItem:', error);
     return null;
@@ -103,11 +170,27 @@ export async function actualizarMenuItem(
   data: Partial<MenuItem>
 ): Promise<MenuItem | null> {
   try {
-    const response = await api.put<MenuItem>(
+    const backendDTO = menuItemToBackendDTO(data);
+    const response = await api.put(
       `/gastronomia/menu/dish/${itemId}`,
-      data
+      backendDTO
     );
-    return response;
+
+    // Transformar respuesta del backend a formato frontend
+    if (response) {
+      return {
+        id: response.idDish,
+        dish_name: response.name,
+        price: response.price,
+        description: response.description,
+        available: response.available !== undefined ? response.available : true,
+        picture: response.picture,
+        category: response.categories?.[0]?.name || 'Sin categoría',
+        ingredients: response.ingredients?.map((i: any) => i.name) || [],
+        restrictions: response.restrictions?.map((r: any) => r.name) || [],
+      };
+    }
+    return null;
   } catch (error) {
     console.error('Error en actualizarMenuItem:', error);
     return null;

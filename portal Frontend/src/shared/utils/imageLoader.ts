@@ -1,3 +1,5 @@
+import { useState, useEffect } from 'react';
+
 /**
  * Sistema de gestión de imágenes con fallbacks robustos
  */

@@ -115,9 +115,15 @@ export function HospedajesSection() {
       const res = await api.get(`/business/external/${hospedajeId}/type/HOSPEDAJE`);
       setCurrentBusiness(res.data);
       setFormData(prev => ({ ...prev, userId: res.data.ownerId }));
-    } catch (err) {
-      console.error('Error loading business:', err);
-      setCurrentBusiness(null);
+    } catch (err: any) {
+      // 404 es esperado cuando el hospedaje aún no tiene administrador asignado
+      if (err?.response?.status === 404) {
+        setCurrentBusiness(null);
+        setFormData((prev) => ({ ...prev, userId: undefined }));
+      } else {
+        console.error('Error loading business:', err);
+        setCurrentBusiness(null);
+      }
     }
   };
 
@@ -131,7 +137,7 @@ export function HospedajesSection() {
       const url = isNew ? '/hospedajes' : `/hospedajes/${selected?.id}`;
 
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { id: _id, imagenes: _imagenes, ...dataWithoutIdAndImages } = formData;
+      const { id: _id, imagenes: _imagenes, userId: _userId, ...dataWithoutIdAndImages } = formData;
       const cleanedData = {
         ...(isNew ? dataWithoutIdAndImages : { ...dataWithoutIdAndImages, id: formData.id }),
         description: formData.description?.trim() || '',
@@ -158,7 +164,7 @@ export function HospedajesSection() {
           const imageFormData = new FormData();
           imageFormData.append('file', file);
           try {
-            await api.post(`/hospedaje/imagen/${hospedajeId}`, imageFormData, {
+            await api.post(`/hospedajes/${hospedajeId}/imagenes`, imageFormData, {
               headers: { 'Content-Type': 'multipart/form-data' },
             });
           } catch (imgError) {
@@ -328,7 +334,10 @@ export function HospedajesSection() {
                   <Form.Select
                     size="sm"
                     value={formData.userId || ''}
-                    onChange={(e) => handleChange('userId', e.target.value)}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      handleChange('userId', value ? parseInt(value) : undefined);
+                    }}
                   >
                     <option value="">Seleccionar administrador...</option>
                     {administradores.map((admin) => (

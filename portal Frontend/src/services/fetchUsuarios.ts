@@ -6,6 +6,7 @@ export interface Usuario {
   apellido?: string;
   email: string;
   telefono?: string;
+  dni?: string;
   direccion?: string;
   rol: string;
   emailVerified: boolean;

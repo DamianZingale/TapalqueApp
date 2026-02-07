@@ -27,9 +27,17 @@ public class Order {
     private String mercadoPagoId; // ID del pago en Mercado Pago
     private LocalDateTime fechaPago; // Fecha en que se aprobó el pago
 
+    // Información de delivery
+    private Boolean isDelivery;
+    private String deliveryAddress;
+
+    // Información del cliente (para que el admin vea quién hizo el pedido)
+    private String userName;
+    private String userPhone;
+
     // --- Constructores ---
     public Order() {
-        this.status = OrderStatus.PENDING;
+        this.status = OrderStatus.RECIBIDO;
         this.dateCreated = LocalDateTime.now();
         this.dateUpdated = LocalDateTime.now();
     }
@@ -40,7 +48,7 @@ public class Order {
         this.totalPrice = totalPrice;
         this.paidWithMercadoPago = paidWithMercadoPago;
         this.paidWithCash = paidWithCash;
-        this.status = OrderStatus.PENDING;
+        this.status = OrderStatus.RECIBIDO;
         this.items = items;
         this.restaurant = restaurant;
         this.dateCreated = LocalDateTime.now();
@@ -91,6 +99,18 @@ public class Order {
     public LocalDateTime getFechaPago() { return fechaPago; }
     public void setFechaPago(LocalDateTime fechaPago) { this.fechaPago = fechaPago; }
 
+    public Boolean getIsDelivery() { return isDelivery; }
+    public void setIsDelivery(Boolean isDelivery) { this.isDelivery = isDelivery; }
+
+    public String getDeliveryAddress() { return deliveryAddress; }
+    public void setDeliveryAddress(String deliveryAddress) { this.deliveryAddress = deliveryAddress; }
+
+    public String getUserName() { return userName; }
+    public void setUserName(String userName) { this.userName = userName; }
+
+    public String getUserPhone() { return userPhone; }
+    public void setUserPhone(String userPhone) { this.userPhone = userPhone; }
+
     // --- Clases internas ---
     public static class Item {
         private String productId;
@@ -138,10 +158,11 @@ public class Order {
 
     // --- Enum para status ---
     public enum OrderStatus {
-        PENDING,
-        PAID,
-        READY,
-        DELIVERED
+        RECIBIDO,        // Pedido recibido
+        EN_PREPARACION,  // En cocina
+        LISTO,           // Listo para retirar/entregar
+        EN_DELIVERY,     // Solo si isDelivery=true
+        ENTREGADO        // Finalizado
     }
 
     

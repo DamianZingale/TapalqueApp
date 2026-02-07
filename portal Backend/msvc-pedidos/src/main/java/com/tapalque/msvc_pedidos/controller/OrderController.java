@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.tapalque.msvc_pedidos.dto.ItemDTO;
 import com.tapalque.msvc_pedidos.dto.OrderDTO;
+import com.tapalque.msvc_pedidos.dto.OrderStatusUpdateDTO;
 import com.tapalque.msvc_pedidos.dto.RestaurantDTO;
 import com.tapalque.msvc_pedidos.entity.Order;
 import com.tapalque.msvc_pedidos.service.OrderService;
@@ -97,16 +99,29 @@ public class OrderController {
         return orderService.deleteOrder(id);
     }
 
+    // --- Actualizar estado del pedido ---
+    @PatchMapping("/{id}/estado")
+    public Mono<OrderDTO> updateOrderStatus(
+            @PathVariable @NonNull String id,
+            @RequestBody @NonNull OrderStatusUpdateDTO update) {
+        return orderService.updateOrderStatus(id, update.getStatus()).map(this::mapToDTO);
+    }
+
     // --- Mapeo DTO <-> Entity ---
     private OrderDTO mapToDTO(Order order) {
         OrderDTO dto = new OrderDTO();
         dto.setId(order.getId());
+        dto.setUserId(order.getUserId());
+        dto.setUserName(order.getUserName());
+        dto.setUserPhone(order.getUserPhone());
         dto.setTotalPrice(order.getTotalPrice());
         dto.setPaidWithMercadoPago(order.getPaidWithMercadoPago());
         dto.setPaidWithCash(order.getPaidWithCash());
         dto.setStatus(order.getStatus().name());
         dto.setDateCreated(order.getDateCreated());
         dto.setDateUpdated(order.getDateUpdated());
+        dto.setIsDelivery(order.getIsDelivery());
+        dto.setDeliveryAddress(order.getDeliveryAddress());
         dto.setItems(order.getItems().stream()
                 .map(i -> {
                     var itemDto = new ItemDTO();
@@ -116,25 +131,35 @@ public class OrderController {
                     itemDto.setItemQuantity(i.getItemQuantity());
                     return itemDto;
                 }).toList());
-        var restaurantDto = new RestaurantDTO();
-        restaurantDto.setRestaurantId(order.getRestaurant().getRestaurantId());
-        restaurantDto.setRestaurantName(order.getRestaurant().getRestaurantName());
-        dto.setRestaurant(restaurantDto);
+        if (order.getRestaurant() != null) {
+            var restaurantDto = new RestaurantDTO();
+            restaurantDto.setRestaurantId(order.getRestaurant().getRestaurantId());
+            restaurantDto.setRestaurantName(order.getRestaurant().getRestaurantName());
+            dto.setRestaurant(restaurantDto);
+        }
         return dto;
     }
 
     @SuppressWarnings("unused")
     private Order mapToEntity(OrderDTO dto) {
         Order order = new Order();
+        order.setId(dto.getId());
+        order.setUserId(dto.getUserId());
+        order.setUserName(dto.getUserName());
+        order.setUserPhone(dto.getUserPhone());
         order.setTotalPrice(dto.getTotalPrice());
         order.setPaidWithMercadoPago(dto.getPaidWithMercadoPago());
         order.setPaidWithCash(dto.getPaidWithCash());
-        order.setStatus(dto.getStatus() != null ? Order.OrderStatus.valueOf(dto.getStatus().toUpperCase()) : Order.OrderStatus.PENDING);
+        order.setStatus(dto.getStatus() != null ? Order.OrderStatus.valueOf(dto.getStatus().toUpperCase()) : Order.OrderStatus.RECIBIDO);
+        order.setIsDelivery(dto.getIsDelivery());
+        order.setDeliveryAddress(dto.getDeliveryAddress());
         order.setItems(dto.getItems().stream()
                 .map(i -> new Order.Item(i.getProductId(), i.getItemName(), i.getItemPrice(), i.getItemQuantity()))
                 .toList());
-        var restaurant = new Order.Restaurant(dto.getRestaurant().getRestaurantId(), dto.getRestaurant().getRestaurantName());
-        order.setRestaurant(restaurant);
+        if (dto.getRestaurant() != null) {
+            var restaurant = new Order.Restaurant(dto.getRestaurant().getRestaurantId(), dto.getRestaurant().getRestaurantName());
+            order.setRestaurant(restaurant);
+        }
         return order;
     }
 }

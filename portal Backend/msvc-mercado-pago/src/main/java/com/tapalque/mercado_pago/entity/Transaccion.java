@@ -24,7 +24,7 @@ public class Transaccion {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long idTransaccion; // ID del pedido o reserva (referenciaId)
+    private String idTransaccion; // ID del pedido o reserva (referenciaId) - MongoDB ObjectId
 
     private String estado; // Pendiente, Pago, Rechazado
 
@@ -41,7 +41,7 @@ public class Transaccion {
 
     private LocalDateTime fechaPago; // Fecha en que se aprobó el pago
 
-    public Transaccion(Long idTransaccion, String estado, Long usuarioId, TipoServicioEnum tipoServicioEnum) {
+    public Transaccion(String idTransaccion, String estado, Long usuarioId, TipoServicioEnum tipoServicioEnum) {
         this.idTransaccion = idTransaccion;
         this.estado = estado;
         this.fecha = LocalDateTime.now();

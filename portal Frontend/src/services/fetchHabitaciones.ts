@@ -8,7 +8,7 @@ export interface Habitacion {
   maxPersonas: number;
   precio: number;
   tipoPrecio: 'por_habitacion' | 'por_persona';
-  foto?: string;
+  fotos?: string[];
   servicios?: string[];
   disponible: boolean;
   hospedajeId: string;
@@ -20,14 +20,14 @@ export interface NuevaHabitacion {
   maxPersonas: number;
   precio: number;
   tipoPrecio: 'por_habitacion' | 'por_persona';
-  foto?: string;
+  fotos?: string[];
   servicios?: string[];
   disponible?: boolean;
 }
 
 export async function fetchHabitacionesByHospedaje(hospedajeId: string): Promise<Habitacion[]> {
   try {
-    const response = await api.get<Habitacion[]>(`/hospedajes/${hospedajeId}/habitaciones`);
+    const response = await api.get<Habitacion[]>(`/habitaciones/hospedajes/${hospedajeId}`);
     return response || [];
   } catch (error) {
     console.error('Error en fetchHabitacionesByHospedaje:', error);
@@ -37,7 +37,7 @@ export async function fetchHabitacionesByHospedaje(hospedajeId: string): Promise
 
 export async function crearHabitacion(hospedajeId: string, habitacion: NuevaHabitacion): Promise<Habitacion | null> {
   try {
-    const response = await api.post<Habitacion>(`/hospedajes/${hospedajeId}/habitaciones`, habitacion);
+    const response = await api.post<Habitacion>(`/habitaciones/hospedajes/${hospedajeId}`, habitacion);
     return response;
   } catch (error) {
     console.error('Error al crear habitación:', error);

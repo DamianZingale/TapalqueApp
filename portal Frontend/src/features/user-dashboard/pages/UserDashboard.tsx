@@ -9,6 +9,10 @@ import authService from "../../../services/authService";
 export default function UserDashboard() {
     const [activeTab, setActiveTab] = useState<string>("perfil");
     const user = authService.getUser();
+    const nombreToken = authService.getNombreUsuario();
+
+    // Buscar nombre en múltiples fuentes: localStorage o token JWT
+    const nombreUsuario = user?.nombre || user?.firtName || nombreToken || "Usuario";
 
     return (
         <Container fluid className="py-4" style={{ backgroundColor: "#f8f9fa", minHeight: "100vh" }}>
@@ -20,7 +24,7 @@ export default function UserDashboard() {
                             <Row className="align-items-center">
                                 <Col md={8}>
                                     <h2 className="mb-2">
-                                        ¡Hola, {user?.nombre || "Usuario"}! 👋
+                                        ¡Hola, {nombreUsuario}! 👋
                                     </h2>
                                     <p className="text-muted mb-0">
                                         Bienvenido a tu panel personal. Aquí puedes ver tus pedidos, reservas y gestionar tu perfil.

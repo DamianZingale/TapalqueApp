@@ -13,7 +13,7 @@ public class HabitacionDTO {
     private Integer maxPersonas;
     private BigDecimal precio;
     private String tipoPrecio;
-    private String foto;
+    private List<String> fotos;
     private List<String> servicios;
     private Boolean disponible;
     private Long hospedajeId;
@@ -30,7 +30,7 @@ public class HabitacionDTO {
         this.tipoPrecio = habitacion.getTipoPrecio() != null
             ? habitacion.getTipoPrecio().name().toLowerCase()
             : "por_habitacion";
-        this.foto = habitacion.getFoto();
+        this.fotos = habitacion.getFotos();
         this.servicios = habitacion.getServicios();
         this.disponible = habitacion.getDisponible();
         this.hospedajeId = habitacion.getHospedaje() != null
@@ -87,12 +87,12 @@ public class HabitacionDTO {
         this.tipoPrecio = tipoPrecio;
     }
 
-    public String getFoto() {
-        return foto;
+    public List<String> getFotos() {
+        return fotos;
     }
 
-    public void setFoto(String foto) {
-        this.foto = foto;
+    public void setFotos(List<String> fotos) {
+        this.fotos = fotos;
     }
 
     public List<String> getServicios() {

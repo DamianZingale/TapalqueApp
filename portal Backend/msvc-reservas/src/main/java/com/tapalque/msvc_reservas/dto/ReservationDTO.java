@@ -1,11 +1,19 @@
 package com.tapalque.msvc_reservas.dto;
 
+import java.time.LocalDateTime;
+
 public class ReservationDTO {
     private String id;
     private CustomerDTO customer;
     private HotelDTO hotel;
     private StayPeriodDTO stayPeriod;
     private PaymentDTO payment;
+    private Double totalPrice;
+    private Boolean isActive;
+    private Boolean isCancelled;
+    private LocalDateTime dateCreated;
+    private LocalDateTime dateUpdated;
+    private String notas;
 
     public ReservationDTO() {}
 
@@ -55,5 +63,53 @@ public class ReservationDTO {
 
     public void setPayment(PaymentDTO payment) {
         this.payment = payment;
+    }
+
+    public Double getTotalPrice() {
+        return totalPrice;
+    }
+
+    public void setTotalPrice(Double totalPrice) {
+        this.totalPrice = totalPrice;
+    }
+
+    public Boolean getIsActive() {
+        return isActive;
+    }
+
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
+    }
+
+    public Boolean getIsCancelled() {
+        return isCancelled;
+    }
+
+    public void setIsCancelled(Boolean isCancelled) {
+        this.isCancelled = isCancelled;
+    }
+
+    public LocalDateTime getDateCreated() {
+        return dateCreated;
+    }
+
+    public void setDateCreated(LocalDateTime dateCreated) {
+        this.dateCreated = dateCreated;
+    }
+
+    public LocalDateTime getDateUpdated() {
+        return dateUpdated;
+    }
+
+    public void setDateUpdated(LocalDateTime dateUpdated) {
+        this.dateUpdated = dateUpdated;
+    }
+
+    public String getNotas() {
+        return notas;
+    }
+
+    public void setNotas(String notas) {
+        this.notas = notas;
     }
 }

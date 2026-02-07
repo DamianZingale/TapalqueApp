@@ -10,8 +10,9 @@ export function BusinessCard({ business }: BusinessCardProps) {
   const navigate = useNavigate();
 
   const handleIngresar = () => {
-    const tipo = business.type.toLowerCase();
-    navigate(`/admin/${tipo}/${business.id}`);
+    // Mapear el tipo de negocio a la ruta correcta
+    const rutaTipo = business.type === 'HOSPEDAJE' ? 'hosteleria' : 'gastronomia';
+    navigate(`/admin/${rutaTipo}/${business.id}`);
   };
 
   const getTypeBadge = () => {

@@ -12,17 +12,27 @@ public class ReservationMapper {
     public static ReservationDTO toDto(Reservation r) {
         ReservationDTO dto = new ReservationDTO();
         dto.setId(r.getId());
-        dto.setCustomer(toDto(r.getCustomer())); // llama al método específico de Customer
+        dto.setCustomer(toDto(r.getCustomer()));
         dto.setHotel(toDto(r.getHotel()));
         dto.setStayPeriod(toDto(r.getStayPeriod()));
         dto.setPayment(toDto(r.getPayment()));
+        dto.setTotalPrice(r.getTotalPrice());
+        dto.setIsActive(r.getIsActive());
+        dto.setIsCancelled(r.getIsCancelled());
+        dto.setDateCreated(r.getDateCreated());
+        dto.setDateUpdated(r.getDateUpdated());
+        dto.setNotas(r.getNotas());
         return dto;
     }
 
     public static CustomerDTO toDto(Reservation.Customer c) {
+        if (c == null) return null;
         CustomerDTO dto = new CustomerDTO();
         dto.setCustomerId(c.getCustomerId());
         dto.setCustomerName(c.getCustomerName());
+        dto.setCustomerPhone(c.getCustomerPhone());
+        dto.setCustomerEmail(c.getCustomerEmail());
+        dto.setCustomerDni(c.getCustomerDni());
         return dto;
     }
 
@@ -62,13 +72,23 @@ public class ReservationMapper {
         r.setHotel(toEntity(dto.getHotel()));
         r.setStayPeriod(toEntity(dto.getStayPeriod()));
         r.setPayment(toEntity(dto.getPayment()));
+        r.setTotalPrice(dto.getTotalPrice());
+        r.setIsActive(dto.getIsActive() != null ? dto.getIsActive() : true);
+        r.setIsCancelled(dto.getIsCancelled() != null ? dto.getIsCancelled() : false);
+        r.setDateCreated(dto.getDateCreated());
+        r.setDateUpdated(dto.getDateUpdated());
+        r.setNotas(dto.getNotas());
         return r;
     }
 
     public static Reservation.Customer toEntity(CustomerDTO dto) {
+        if (dto == null) return null;
         Reservation.Customer c = new Reservation.Customer();
         c.setCustomerId(dto.getCustomerId());
         c.setCustomerName(dto.getCustomerName());
+        c.setCustomerPhone(dto.getCustomerPhone());
+        c.setCustomerEmail(dto.getCustomerEmail());
+        c.setCustomerDni(dto.getCustomerDni());
         return c;
     }
 

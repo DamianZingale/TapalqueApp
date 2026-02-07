@@ -1,3 +1,5 @@
+import { useState, useEffect, CSSProperties } from 'react';
+
 /**
  * Sistema de caché de imágenes para mejorar rendimiento
  */
@@ -285,7 +287,7 @@ export function CachedImage({
   src?: string;
   alt: string;
   className?: string;
-  style?: React.CSSProperties;
+  style?: CSSProperties;
   onCacheHit?: () => void;
   onCacheMiss?: () => void;
 }) {

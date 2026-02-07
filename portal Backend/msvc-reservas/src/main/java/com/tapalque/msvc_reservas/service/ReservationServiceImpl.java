@@ -96,6 +96,13 @@ public Mono<ReservationDTO> updateReservation(ReservationDTO reservationDto) {
     }
 
     @Override
+    public Flux<ReservationDTO> getReservationsByHotelAndStayOverlap(
+            String hotelId, LocalDateTime desde, LocalDateTime hasta) {
+        return reservationRepository.findByHotelAndStayPeriodOverlap(hotelId, desde, hasta)
+                .map(ReservationMapper::toDto);
+    }
+
+    @Override
     public void confirmarPagoReserva(String reservaId, PagoEventoDTO evento) {
         reservationRepository.findById(reservaId)
             .flatMap(reservation -> {

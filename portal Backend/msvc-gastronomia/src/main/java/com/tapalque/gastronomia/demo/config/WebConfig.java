@@ -1,4 +1,4 @@
-package com.tapalque.hosteleria.config;
+package com.tapalque.gastronomia.demo.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
@@ -13,7 +13,13 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        String location = "file:" + uploadDir + "/";
+        System.out.println("Configurando manejador de recursos estaticos:");
+        System.out.println("   Pattern: /uploads/**");
+        System.out.println("   Location: " + location);
+
         registry.addResourceHandler("/uploads/**")
-                .addResourceLocations("file:" + uploadDir + "/");
+                .addResourceLocations(location)
+                .setCachePeriod(3600);
     }
 }

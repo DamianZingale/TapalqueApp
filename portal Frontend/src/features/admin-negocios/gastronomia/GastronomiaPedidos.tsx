@@ -16,8 +16,8 @@ import {
   updateEstadoPedido,
 } from '../../../services/fetchPedidos';
 import { useWebSocket } from '../hooks/useWebSocket';
-import type { EstadoPedido, Pedido } from '../types';
-import { getEstadoPedidoBadge, getSiguienteEstadoPedido } from '../types';
+import { EstadoPedido, type Pedido } from '../types';
+import { getEstadoPedidoBadge, getSiguienteEstadoPedido, getTextoBotonSiguienteEstado } from '../types';
 
 interface GastronomiaPedidosProps {
   businessId: string;
@@ -124,11 +124,11 @@ export function GastronomiaPedidos({
     });
 
   const pedidosActivos = pedidosFiltrados.filter(
-    (p) => p.status !== ('DELIVERED' as EstadoPedido)
+    (p) => p.status !== EstadoPedido.ENTREGADO
   );
 
   const handleCambiarEstado = async (pedido: Pedido) => {
-    const siguienteEstado = getSiguienteEstadoPedido(pedido.status);
+    const siguienteEstado = getSiguienteEstadoPedido(pedido.status, pedido.isDelivery);
     if (!siguienteEstado) return;
 
     try {
@@ -214,9 +214,10 @@ export function GastronomiaPedidos({
                 onChange={(e) => setFiltroEstado(e.target.value as typeof filtroEstado)}
               >
                 <option value="TODOS">Todos los estados</option>
-                <option value="PENDING">Pendiente</option>
-                <option value="PAID">Pagado</option>
-                <option value="READY">Listo</option>
+                <option value="RECIBIDO">Recibido</option>
+                <option value="EN_PREPARACION">En Preparación</option>
+                <option value="LISTO">Listo</option>
+                <option value="EN_DELIVERY">En Delivery</option>
               </Form.Select>
             </Col>
             <Col md={4}>
@@ -278,10 +279,11 @@ export function GastronomiaPedidos({
                     onChange={(e) => setFiltroEstado(e.target.value as typeof filtroEstado)}
                   >
                     <option value="TODOS">Todos los estados</option>
-                    <option value="DELIVERED">Entregados</option>
-                    <option value="READY">Listos</option>
-                    <option value="PAID">Pagados</option>
-                    <option value="PENDING">Pendientes</option>
+                    <option value="ENTREGADO">Entregados</option>
+                    <option value="EN_DELIVERY">En Delivery</option>
+                    <option value="LISTO">Listos</option>
+                    <option value="EN_PREPARACION">En Preparación</option>
+                    <option value="RECIBIDO">Recibidos</option>
                   </Form.Select>
                 </Col>
                 <Col md={3}>
@@ -362,7 +364,8 @@ interface PedidoCardProps {
 
 function PedidoCard({ pedido, onCambiarEstado, showHistorial }: PedidoCardProps) {
   const estadoBadge = getEstadoPedidoBadge(pedido.status);
-  const siguienteEstado = getSiguienteEstadoPedido(pedido.status);
+  const siguienteEstado = getSiguienteEstadoPedido(pedido.status, pedido.isDelivery);
+  const textoBoton = getTextoBotonSiguienteEstado(pedido.status, pedido.isDelivery);
   const total = pedido.totalPrice || pedido.totalAmount || 0;
 
   return (
@@ -442,16 +445,18 @@ function PedidoCard({ pedido, onCambiarEstado, showHistorial }: PedidoCardProps)
         <Card.Footer>
           <Button
             variant={
-              estadoBadge.color === 'secondary'
-                ? 'primary'
+              estadoBadge.color === 'warning'
+                ? 'info'
                 : estadoBadge.color === 'info'
                   ? 'success'
-                  : 'dark'
+                  : estadoBadge.color === 'success'
+                    ? 'primary'
+                    : 'dark'
             }
             className="w-100"
             onClick={() => onCambiarEstado(pedido)}
           >
-            Marcar como {getEstadoPedidoBadge(siguienteEstado).texto}
+            {textoBoton}
           </Button>
         </Card.Footer>
       )}

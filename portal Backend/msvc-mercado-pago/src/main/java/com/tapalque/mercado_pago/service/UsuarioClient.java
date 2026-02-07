@@ -18,7 +18,7 @@ public class UsuarioClient {
     public Mono<UserResponseDTO> obtenerUsuarioPorEmail(String email) {
         return webClientBuilder.build()
             .get()
-            .uri("lb://MSVC-USER/api/user/email/" + email)
+            .uri("lb://MSVC-USER/user/email/" + email)
             .retrieve()
             .bodyToMono(UserResponseDTO.class);
     }

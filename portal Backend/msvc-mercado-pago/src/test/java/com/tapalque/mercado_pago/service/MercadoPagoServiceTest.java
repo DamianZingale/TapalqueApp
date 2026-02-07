@@ -1,28 +1,31 @@
 package com.tapalque.mercado_pago.service;
 
+import java.math.BigDecimal;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import com.tapalque.mercado_pago.dto.ProductoRequestDTO;
 import com.tapalque.mercado_pago.dto.TipoServicioEnum;
 import com.tapalque.mercado_pago.dto.WebhookDTO;
 import com.tapalque.mercado_pago.entity.Transaccion;
 import com.tapalque.mercado_pago.repository.TransaccionRepository;
 import com.tapalque.mercado_pago.util.EncriptadoUtil;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.math.BigDecimal;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("MercadoPagoService Tests")
@@ -56,12 +59,12 @@ class MercadoPagoServiceTest {
         testProductoDTO.setUnitPrice(BigDecimal.valueOf(100.00));
         testProductoDTO.setIdVendedor(1L);
         testProductoDTO.setIdComprador(2L);
-        testProductoDTO.setIdTransaccion(100L);
+        testProductoDTO.setIdTransaccion("100");
         testProductoDTO.setTipoServicio(TipoServicioEnum.GASTRONOMICO);
 
         testTransaccion = new Transaccion();
         testTransaccion.setId(1L);
-        testTransaccion.setIdTransaccion(100L);
+        testTransaccion.setIdTransaccion("100");
         testTransaccion.setEstado("Pendiente");
         testTransaccion.setUsuarioId(2L);
         testTransaccion.setTipoServicio(TipoServicioEnum.GASTRONOMICO);
@@ -80,20 +83,31 @@ class MercadoPagoServiceTest {
     class CrearPreferenciaTests {
 
         @Test
-        @DisplayName("Debe lanzar excepción si access token está vencido")
-        void crearPreferencia_ConTokenVencido_LanzaExcepcion() {
+        @DisplayName("Debe usar fallback si access token está vencido y guardar transacción")
+        void crearPreferencia_ConTokenVencido_UsaFallback() {
             // Given
             when(oauthService.obtenerAccessTokenPorId(1L)).thenReturn("encryptedToken");
             when(encriptadoUtil.desencriptar("encryptedToken")).thenReturn("accessToken");
             when(oauthService.AccessTokenValido("accessToken")).thenReturn(false);
+            when(transaccionRepository.save(any(Transaccion.class))).thenAnswer(invocation -> {
+                Transaccion t = invocation.getArgument(0);
+                t.setId(1L);
+                return t;
+            });
 
-            // When & Then
-            RuntimeException exception = assertThrows(
-                    RuntimeException.class,
-                    () -> mercadoPagoService.crearPreferencia(testProductoDTO)
-            );
-            assertEquals("Access token vencido o revocado por el vendedor", exception.getMessage());
-            verify(transaccionRepository, never()).save(any(Transaccion.class));
+            // When - el servicio hace fallback al appAccessToken y sigue
+            // Fallará al llamar a la SDK de MercadoPago (sin API real)
+            try {
+                mercadoPagoService.crearPreferencia(testProductoDTO);
+            } catch (Exception e) {
+                // Esperamos excepción de MercadoPago SDK ya que no podemos mockearla
+            }
+
+            // Then - verifica que validó el token y guardó la transacción con el fallback
+            verify(oauthService).obtenerAccessTokenPorId(1L);
+            verify(encriptadoUtil).desencriptar("encryptedToken");
+            verify(oauthService).AccessTokenValido("accessToken");
+            verify(transaccionRepository).save(any(Transaccion.class));
         }
 
         @Test
@@ -167,7 +181,7 @@ class MercadoPagoServiceTest {
         void crearTransaccion_DebeCrearConEstadoPendiente() {
             // Given
             Transaccion nuevaTransaccion = new Transaccion(
-                    100L,
+                    "100",
                     "Pendiente",
                     2L,
                     TipoServicioEnum.GASTRONOMICO
@@ -182,7 +196,7 @@ class MercadoPagoServiceTest {
             // Then
             assertNotNull(saved);
             assertEquals("Pendiente", saved.getEstado());
-            assertEquals(100L, saved.getIdTransaccion());
+            assertEquals("100", saved.getIdTransaccion());
             assertEquals(TipoServicioEnum.GASTRONOMICO, saved.getTipoServicio());
         }
 

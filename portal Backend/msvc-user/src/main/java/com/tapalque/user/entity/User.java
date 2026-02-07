@@ -47,6 +47,12 @@ public class User {
     @Column(name = "direccion", nullable = true)
     private String direccion;
 
+    @Column(name = "telefono", nullable = true)
+    private String telefono;
+
+    @Column(name = "dni", nullable = true)
+    private String dni;
+
     private LocalDateTime registrationDate;
 
     @Column(name = "email_verified", nullable = false)
@@ -60,6 +66,12 @@ public class User {
 
     @Column(name = "verification_token_expiry")
     private LocalDateTime verificationTokenExpiry;
+
+    @Column(name = "password_reset_token")
+    private String passwordResetToken;
+
+    @Column(name = "password_reset_token_expiry")
+    private LocalDateTime passwordResetTokenExpiry;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "roles_id")
@@ -139,6 +151,22 @@ public class User {
         this.direccion = direccion;
     }
 
+    public String getTelefono() {
+        return telefono;
+    }
+
+    public void setTelefono(String telefono) {
+        this.telefono = telefono;
+    }
+
+    public String getDni() {
+        return dni;
+    }
+
+    public void setDni(String dni) {
+        this.dni = dni;
+    }
+
     public LocalDateTime getRegistrationDate() {
         return registrationDate;
     }
@@ -177,6 +205,22 @@ public class User {
 
     public void setVerificationTokenExpiry(LocalDateTime verificationTokenExpiry) {
         this.verificationTokenExpiry = verificationTokenExpiry;
+    }
+
+    public String getPasswordResetToken() {
+        return passwordResetToken;
+    }
+
+    public void setPasswordResetToken(String passwordResetToken) {
+        this.passwordResetToken = passwordResetToken;
+    }
+
+    public LocalDateTime getPasswordResetTokenExpiry() {
+        return passwordResetTokenExpiry;
+    }
+
+    public void setPasswordResetTokenExpiry(LocalDateTime passwordResetTokenExpiry) {
+        this.passwordResetTokenExpiry = passwordResetTokenExpiry;
     }
 
     public Role getRole() {

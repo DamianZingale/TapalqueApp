@@ -7,6 +7,7 @@ interface BusinessResponse {
   id: number | string;
   name?: string;
   nombre?: string;
+  titulo?: string; // Para hospedajes
   type?: BusinessType;
   tipo?: string;
   address?: string;
@@ -14,21 +15,23 @@ interface BusinessResponse {
   ubicacion?: string;
   imageUrl?: string;
   imagen?: string;
+  imagenes?: string[];
   email?: string;
   phone?: string;
   telefono?: string;
+  numWhatsapp?: string;
 }
 
 // Normalizar respuesta del backend a Business
 function normalizeBusiness(raw: BusinessResponse, type: BusinessType): Business {
   return {
     id: String(raw.id),
-    name: raw.name || raw.nombre || 'Sin nombre',
+    name: raw.name || raw.nombre || raw.titulo || 'Sin nombre',
     type: type,
     address: raw.address || raw.direccion || raw.ubicacion || '',
-    imageUrl: raw.imageUrl || raw.imagen,
+    imageUrl: raw.imageUrl || raw.imagen || (raw.imagenes && raw.imagenes[0]),
     email: raw.email,
-    phone: raw.phone || raw.telefono
+    phone: raw.phone || raw.telefono || raw.numWhatsapp
   };
 }
 

@@ -58,7 +58,7 @@ class UserControllerTest {
     @BeforeEach
     void setUp() {
         testUserResponse = new UserResponseDTO(
-                1L, "test@example.com", "Test", "User", "Calle 123", "USER", true, true
+                1L, "test@example.com", "Test", "User", "Calle 123", "123456789", "12345678", "USER", true, true
         );
     }
 
@@ -155,7 +155,7 @@ class UserControllerTest {
         void getAdministrators_RetornaListaAdmins() throws Exception {
             // Given
             UserResponseDTO adminResponse = new UserResponseDTO(
-                    2L, "admin@example.com", "Admin", "User", null, "ADMINISTRADOR", true, true
+                    2L, "admin@example.com", "Admin", "User", null, null, null, "ADMINISTRADOR", true, true
             );
             when(userService.getUsersByRole(any())).thenReturn(Arrays.asList(adminResponse));
 

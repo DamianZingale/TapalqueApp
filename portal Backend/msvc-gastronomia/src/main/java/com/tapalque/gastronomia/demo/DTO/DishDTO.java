@@ -10,7 +10,10 @@ public class DishDTO {
     private Long idDish;
     private String name;
     private Double price;
-    private List<DishCategoryDTO> categories;  
+    private String description;
+    private Boolean available;
+    private String picture;
+    private List<DishCategoryDTO> categories;
     private List<IngredientDTO> ingredients;
     private List<DishRestrictionDTO> restrictions;
 
@@ -22,6 +25,9 @@ public class DishDTO {
         dto.setIdDish(dish.getIdDish());
         dto.setName(dish.getName());
         dto.setPrice(dish.getPrice());
+        dto.setDescription(dish.getDescription());
+        dto.setAvailable(dish.getAvailable() != null ? dish.getAvailable() : true);
+        dto.setPicture(dish.getPicture());
 
         if (dish.getCategories() != null) {
             dto.setCategories(
@@ -71,4 +77,13 @@ public class DishDTO {
 
     public List<DishRestrictionDTO> getRestrictions() { return restrictions; }
     public void setRestrictions(List<DishRestrictionDTO> restrictions) { this.restrictions = restrictions; }
+
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+
+    public Boolean getAvailable() { return available; }
+    public void setAvailable(Boolean available) { this.available = available; }
+
+    public String getPicture() { return picture; }
+    public void setPicture(String picture) { this.picture = picture; }
 }

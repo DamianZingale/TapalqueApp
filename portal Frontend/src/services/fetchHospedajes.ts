@@ -9,6 +9,7 @@ export interface Hospedaje {
     numWhatsapp?: string;
     tipoHospedaje: 'HOTEL' | 'DEPARTAMENTO' | 'CABAÑA' | 'CASA' | 'OTRO';
     imagenes: string[];  // Backend returns array of URLs directly
+    userId?: number; // ID del propietario/administrador
 }
 
 export async function fetchHospedajes(): Promise<Hospedaje[]> {

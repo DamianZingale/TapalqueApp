@@ -9,6 +9,8 @@ public class UserResponseDTO {
     private String nombre;
     private String apellido;
     private String direccion;
+    private String telefono;
+    private String dni;
     private String rol;
     private boolean emailVerified;
     private boolean activo;
@@ -17,12 +19,15 @@ public class UserResponseDTO {
     }
 
     public UserResponseDTO(Long id, String email, String nombre, String apellido,
-                           String direccion, String rol, boolean emailVerified, boolean activo) {
+                           String direccion, String telefono, String dni, String rol,
+                           boolean emailVerified, boolean activo) {
         this.id = id;
         this.email = email;
         this.nombre = nombre;
         this.apellido = apellido;
         this.direccion = direccion;
+        this.telefono = telefono;
+        this.dni = dni;
         this.rol = rol;
         this.emailVerified = emailVerified;
         this.activo = activo;
@@ -69,6 +74,22 @@ public class UserResponseDTO {
         this.direccion = direccion;
     }
 
+    public String getTelefono() {
+        return telefono;
+    }
+
+    public void setTelefono(String telefono) {
+        this.telefono = telefono;
+    }
+
+    public String getDni() {
+        return dni;
+    }
+
+    public void setDni(String dni) {
+        this.dni = dni;
+    }
+
     public String getRol() {
         return rol;
     }
@@ -101,6 +122,8 @@ public class UserResponseDTO {
             user.getFirstName(),
             user.getLastName(),
             user.getDireccion(),
+            user.getTelefono(),
+            user.getDni(),
             user.getRole().getName().toString(),
             user.isEmailVerified(),
             user.isActivo()

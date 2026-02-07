@@ -49,7 +49,12 @@ public class HabitacionService {
         habitacion.setMaxPersonas(dto.getMaxPersonas());
         habitacion.setPrecio(dto.getPrecio());
         habitacion.setTipoPrecio(parseTipoPrecio(dto.getTipoPrecio()));
-        habitacion.setFoto(dto.getFoto());
+        // Limitar a máximo 3 fotos
+        if (dto.getFotos() != null && dto.getFotos().size() > 3) {
+            habitacion.setFotos(dto.getFotos().subList(0, 3));
+        } else {
+            habitacion.setFotos(dto.getFotos());
+        }
         habitacion.setServicios(dto.getServicios());
         habitacion.setDisponible(dto.getDisponible() != null ? dto.getDisponible() : true);
         habitacion.setHospedaje(hospedaje);
@@ -77,8 +82,13 @@ public class HabitacionService {
         if (dto.getTipoPrecio() != null) {
             habitacion.setTipoPrecio(parseTipoPrecio(dto.getTipoPrecio()));
         }
-        if (dto.getFoto() != null) {
-            habitacion.setFoto(dto.getFoto());
+        if (dto.getFotos() != null) {
+            // Limitar a máximo 3 fotos
+            if (dto.getFotos().size() > 3) {
+                habitacion.setFotos(dto.getFotos().subList(0, 3));
+            } else {
+                habitacion.setFotos(dto.getFotos());
+            }
         }
         if (dto.getServicios() != null) {
             habitacion.setServicios(dto.getServicios());

@@ -6,6 +6,7 @@ import { authService } from '../../../services/authService';
 import type { Business } from '../types';
 import { GastronomiaMenu } from './GastronomiaMenu';
 import { GastronomiaPedidos } from './GastronomiaPedidos';
+import { GastronomiaConfiguracion } from './GastronomiaConfiguracion';
 
 export function GastronomiaDashboard() {
   const { id } = useParams<{ id: string }>();
@@ -16,12 +17,13 @@ export function GastronomiaDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const getActiveTab = (): 'menu' | 'pedidos' => {
+  const getActiveTab = (): 'menu' | 'pedidos' | 'configuracion' => {
     if (location.pathname.includes('/pedidos')) return 'pedidos';
+    if (location.pathname.includes('/configuracion')) return 'configuracion';
     return 'menu';
   };
 
-  const [activeTab, setActiveTab] = useState<'menu' | 'pedidos'>(getActiveTab());
+  const [activeTab, setActiveTab] = useState<'menu' | 'pedidos' | 'configuracion'>(getActiveTab());
 
   useEffect(() => {
     setActiveTab(getActiveTab());
@@ -66,7 +68,7 @@ export function GastronomiaDashboard() {
   const handleTabChange = (tab: string | null) => {
     if (!tab || !id) return;
 
-    setActiveTab(tab as 'menu' | 'pedidos');
+    setActiveTab(tab as 'menu' | 'pedidos' | 'configuracion');
     navigate(`/admin/gastronomia/${id}/${tab}`);
   };
 
@@ -128,6 +130,12 @@ export function GastronomiaDashboard() {
         <Tab eventKey="pedidos" title="📦 Pedidos">
           {activeTab === 'pedidos' && (
             <GastronomiaPedidos businessId={business.id} businessName={business.name} />
+          )}
+        </Tab>
+
+        <Tab eventKey="configuracion" title="⚙️ Configuración">
+          {activeTab === 'configuracion' && (
+            <GastronomiaConfiguracion businessId={business.id} businessName={business.name} />
           )}
         </Tab>
       </Tabs>

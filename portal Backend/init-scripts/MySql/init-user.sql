@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS usuarios_tb (
 -- =====================
 CREATE TABLE IF NOT EXISTS business_tb (
     id BIGINT NOT NULL AUTO_INCREMENT,
-    business_type ENUM('HOSPEDAJE','RESTAURANT') NOT NULL,
+    business_type ENUM('HOSPEDAJE','GASTRONOMIA') NOT NULL,
     external_business_id BIGINT NOT NULL,
     name VARCHAR(255) NOT NULL,
     owner_id BIGINT NOT NULL,

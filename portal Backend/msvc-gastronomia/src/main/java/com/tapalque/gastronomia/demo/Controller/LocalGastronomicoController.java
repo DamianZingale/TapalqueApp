@@ -45,7 +45,12 @@ public class LocalGastronomicoController {
         RestaurantDTO restaurant = localGastronomicoService.getRestaurantById(id);
         return ResponseEntity.ok(restaurant);
     } catch (EntityNotFoundException ex) {
-        return ResponseEntity.notFound().build(); 
+        System.err.println("Restaurant no encontrado con ID: " + id);
+        return ResponseEntity.notFound().build();
+    } catch (Exception ex) {
+        System.err.println("Error al buscar restaurant con ID " + id + ": " + ex.getMessage());
+        ex.printStackTrace();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
     }
 

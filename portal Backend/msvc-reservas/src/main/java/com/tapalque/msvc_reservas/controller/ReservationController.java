@@ -88,11 +88,13 @@ public class ReservationController {
         Objects.requireNonNull(hotelId, "Hotel ID cannot be null");
 
         if (desde != null && hasta != null) {
-            LocalDateTime desdeDateTime = desde.atStartOfDay();
-            LocalDateTime hastaDateTime = hasta.atTime(LocalTime.MAX);
-            return reservationService.getReservationsByHotelAndDateRange(hotelId, desdeDateTime, hastaDateTime)
+            // Alineado a los horarios de check-in (13:00) y check-out (10:00) del sistema.
+            // Así una reserva que sale a las 10:00 el día que el usuario entra a las 13:00 no se cuenta como ocupada.
+            LocalDateTime desdeDateTime = desde.atTime(13, 0);
+            LocalDateTime hastaDateTime = hasta.atTime(10, 0);
+            return reservationService.getReservationsByHotelAndStayOverlap(hotelId, desdeDateTime, hastaDateTime)
                 .onErrorResume(e -> {
-                    logger.log(System.Logger.Level.ERROR, () -> "Error fetching reservations by hotel and date range: " + e.getMessage());
+                    logger.log(System.Logger.Level.ERROR, () -> "Error fetching reservations by hotel and stay overlap: " + e.getMessage());
                     return Flux.empty();
                 });
         }

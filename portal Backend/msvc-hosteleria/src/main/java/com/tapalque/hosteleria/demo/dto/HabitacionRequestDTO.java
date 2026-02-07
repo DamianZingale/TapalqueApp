@@ -32,7 +32,7 @@ public class HabitacionRequestDTO {
     @NotBlank(message = "El tipo de precio es obligatorio")
     private String tipoPrecio;
 
-    private String foto;
+    private List<String> fotos;
 
     private List<String> servicios;
 
@@ -82,12 +82,12 @@ public class HabitacionRequestDTO {
         this.tipoPrecio = tipoPrecio;
     }
 
-    public String getFoto() {
-        return foto;
+    public List<String> getFotos() {
+        return fotos;
     }
 
-    public void setFoto(String foto) {
-        this.foto = foto;
+    public void setFotos(List<String> fotos) {
+        this.fotos = fotos;
     }
 
     public List<String> getServicios() {

@@ -1,4 +1,4 @@
-package com.tapalque.gastronomia.config;
+package com.tapalque.hosteleria.demo.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;

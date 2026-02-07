@@ -100,7 +100,7 @@ public class HabitacionController {
     }
 
 
-    @PatchMapping("/habitaciones/{id}/disponibilidad")
+    @PatchMapping("/{id}/disponibilidad")
     public ResponseEntity<HabitacionDTO> cambiarDisponibilidad(
             @PathVariable @NonNull Long id,
             @RequestBody Map<String, Boolean> payload) {

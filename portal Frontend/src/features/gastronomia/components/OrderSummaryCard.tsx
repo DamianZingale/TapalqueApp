@@ -4,6 +4,8 @@ import { Button, Form } from 'react-bootstrap';
 import type { PedidoItem } from '../types/Imenu';
 import { ItemCounter } from './ItemCounter';
 
+export type PaymentMethod = 'mercadopago' | 'efectivo';
+
 interface Props {
   initialPedido: PedidoItem[];
   onConfirm: (data: {
@@ -11,6 +13,7 @@ interface Props {
     total: number;
     delivery: boolean;
     address: string;
+    paymentMethod: PaymentMethod;
   }) => void;
   onCancel: () => void;
 }
@@ -23,6 +26,7 @@ export const OrderSummaryCard: FC<Props> = ({
   const [pedido, setPedido] = useState(initialPedido);
   const [delivery, setDelivery] = useState(false);
   const [address, setAddress] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('efectivo');
 
   const handleQuantityChange = (id: number, cantidad: number) =>
     setPedido((prev) =>
@@ -61,7 +65,7 @@ export const OrderSummaryCard: FC<Props> = ({
         }}
       />
       {delivery && (
-        <div>
+        <div className="mb-3">
           <input
             type="text"
             className="form-control"
@@ -73,6 +77,26 @@ export const OrderSummaryCard: FC<Props> = ({
       )}
 
       <div className="mb-3">
+        <label className="form-label fw-bold">Método de pago:</label>
+        <Form.Check
+          type="radio"
+          id="pago-efectivo"
+          name="metodoPago"
+          label="Pago en efectivo al recibir"
+          checked={paymentMethod === 'efectivo'}
+          onChange={() => setPaymentMethod('efectivo')}
+        />
+        <Form.Check
+          type="radio"
+          id="pago-mercadopago"
+          name="metodoPago"
+          label="Pagar con MercadoPago"
+          checked={paymentMethod === 'mercadopago'}
+          onChange={() => setPaymentMethod('mercadopago')}
+        />
+      </div>
+
+      <div className="mb-3">
         <strong>Total: ${total.toFixed(2)}</strong>
       </div>
 
@@ -82,10 +106,10 @@ export const OrderSummaryCard: FC<Props> = ({
         </Button>
         <Button
           variant="primary"
-          onClick={() => onConfirm({ items: pedido, total, delivery, address })}
+          onClick={() => onConfirm({ items: pedido, total, delivery, address, paymentMethod })}
           disabled={delivery && !address.trim()}
         >
-          Aceptar
+          {paymentMethod === 'mercadopago' ? 'Pagar con MercadoPago' : 'Confirmar Pedido'}
         </Button>
       </div>
     </div>

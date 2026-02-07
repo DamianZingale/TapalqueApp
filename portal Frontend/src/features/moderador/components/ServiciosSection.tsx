@@ -14,13 +14,14 @@ interface Servicio {
     longitud?: number;
     facebook?: string;
     instagram?: string;
+    tag?: string;
     imagenes?: { imagenUrl: string }[];
 }
 
 const emptyItem: Partial<Servicio> = {
     titulo: "", descripcion: "", direccion: "", horario: "",
     telefono: "", latitud: undefined, longitud: undefined, facebook: "", instagram: "",
-    imagenes: []
+    tag: "", imagenes: []
 };
 
 export function ServiciosSection() {
@@ -66,6 +67,7 @@ export function ServiciosSection() {
                 instagram: formData.instagram?.trim() || undefined,
                 latitud: formData.latitud || undefined,
                 longitud: formData.longitud || undefined,
+                tag: formData.tag?.trim().toUpperCase() || undefined,
             };
 
             const res = isNew
@@ -144,8 +146,9 @@ export function ServiciosSection() {
                                 </Col>
                             </Row>
                         )}
-                        <Row><Col md={6}><Form.Group className="mb-2"><Form.Label className="small mb-0">Título *</Form.Label><Form.Control size="sm" value={formData.titulo || ""} onChange={e => handleChange("titulo", e.target.value)} /></Form.Group></Col>
-                        <Col md={6}><Form.Group className="mb-2"><Form.Label className="small mb-0">Teléfono</Form.Label><Form.Control size="sm" value={formData.telefono || ""} onChange={e => handleChange("telefono", e.target.value)} /></Form.Group></Col></Row>
+                        <Row><Col md={4}><Form.Group className="mb-2"><Form.Label className="small mb-0">Título *</Form.Label><Form.Control size="sm" value={formData.titulo || ""} onChange={e => handleChange("titulo", e.target.value)} /></Form.Group></Col>
+                        <Col md={4}><Form.Group className="mb-2"><Form.Label className="small mb-0">Tag</Form.Label><Form.Control size="sm" placeholder="Ej: REMIS" value={formData.tag || ""} onChange={e => handleChange("tag", e.target.value.toUpperCase())} /></Form.Group></Col>
+                        <Col md={4}><Form.Group className="mb-2"><Form.Label className="small mb-0">Teléfono</Form.Label><Form.Control size="sm" value={formData.telefono || ""} onChange={e => handleChange("telefono", e.target.value)} /></Form.Group></Col></Row>
                         <Form.Group className="mb-2"><Form.Label className="small mb-0">Descripción</Form.Label><Form.Control size="sm" as="textarea" rows={2} value={formData.descripcion || ""} onChange={e => handleChange("descripcion", e.target.value)} /></Form.Group>
                         <Row><Col md={6}><Form.Group className="mb-2"><Form.Label className="small mb-0">Dirección</Form.Label><Form.Control size="sm" value={formData.direccion || ""} onChange={e => handleChange("direccion", e.target.value)} /></Form.Group></Col>
                         <Col md={6}><Form.Group className="mb-2"><Form.Label className="small mb-0">Horario</Form.Label><Form.Control size="sm" value={formData.horario || ""} onChange={e => handleChange("horario", e.target.value)} /></Form.Group></Col></Row>

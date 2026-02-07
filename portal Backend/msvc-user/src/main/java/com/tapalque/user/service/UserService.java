@@ -185,6 +185,12 @@ public class UserService {
         if (dto.getDireccion() != null) {
             user.setDireccion(dto.getDireccion());
         }
+        if (dto.getTelefono() != null) {
+            user.setTelefono(dto.getTelefono());
+        }
+        if (dto.getDni() != null) {
+            user.setDni(dto.getDni());
+        }
 
         userRepo.save(user);
         return UserResponseDTO.fromEntity(user);

@@ -2,24 +2,18 @@
 import { Nav, NavDropdown } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import authService from '../../services/authService';
+import { ROLES } from '../constants/constSecciones';
 
 interface BotonSesionProps {
   isLoggedIn: boolean;
   onLogout: () => void;
 }
 
-// Roles como strings (según backend)
-const ROLES = {
-  MODERADOR: 'MODERADOR',
-  ADMINISTRADOR: 'ADMINISTRADOR',
-  USUARIO: 'USUARIO',
-};
-
 export const BotonSesion = ({ isLoggedIn, onLogout }: BotonSesionProps) => {
   const user = authService.getUser();
-  const userRol = String(authService.getRolUsuario() ?? '');
+  const userRol = authService.getRolUsuario();
 
-  // Verificar roles
+  // Verificar roles usando números
   const esModerador = userRol === ROLES.MODERADOR;
   const esAdmin = userRol === ROLES.ADMINISTRADOR;
   const esUsuarioComun = userRol === ROLES.USUARIO;
@@ -38,13 +32,7 @@ export const BotonSesion = ({ isLoggedIn, onLogout }: BotonSesionProps) => {
             <NavDropdown.Item as={Link} to="/dashboard">
               📊 Mi Panel
             </NavDropdown.Item>
-            <NavDropdown.Divider />
-            <NavDropdown.Item as={Link} to="/dashboard">
-              📦 Mis Pedidos
-            </NavDropdown.Item>
-            <NavDropdown.Item as={Link} to="/dashboard">
-              📅 Mis Reservas
-            </NavDropdown.Item>
+
             <NavDropdown.Divider />
           </>
         )}

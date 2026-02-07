@@ -5,13 +5,6 @@ import java.util.stream.Collectors;
 
 import com.tapalque.comercio.entity.Comercio;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
-@NoArgsConstructor
-@Setter
-@Getter
 public class ComercioResponseDTO {
     private Long id;
     private String titulo;
@@ -23,9 +16,11 @@ public class ComercioResponseDTO {
     private Double longitud;
     private String facebook;
     private String instagram;
+    private String tag;
     private List<ImagenResponseDTO> imagenes;
 
-    // constructor para mapear de entity a dto
+    public ComercioResponseDTO() {}
+
     public ComercioResponseDTO(Comercio c) {
         this.id = c.getId();
         this.titulo = c.getTitulo();
@@ -37,10 +32,47 @@ public class ComercioResponseDTO {
         this.longitud = c.getLongitud();
         this.facebook = c.getFacebook();
         this.instagram = c.getInstagram();
+        this.tag = c.getTag();
         this.imagenes = c.getImagenes() != null
                 ? c.getImagenes().stream()
                         .map(img -> new ImagenResponseDTO(img.getImagenUrl()))
                         .collect(Collectors.toList())
                 : List.of();
     }
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public String getTitulo() { return titulo; }
+    public void setTitulo(String titulo) { this.titulo = titulo; }
+
+    public String getDescripcion() { return descripcion; }
+    public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
+
+    public String getDireccion() { return direccion; }
+    public void setDireccion(String direccion) { this.direccion = direccion; }
+
+    public String getHorario() { return horario; }
+    public void setHorario(String horario) { this.horario = horario; }
+
+    public String getTelefono() { return telefono; }
+    public void setTelefono(String telefono) { this.telefono = telefono; }
+
+    public Double getLatitud() { return latitud; }
+    public void setLatitud(Double latitud) { this.latitud = latitud; }
+
+    public Double getLongitud() { return longitud; }
+    public void setLongitud(Double longitud) { this.longitud = longitud; }
+
+    public String getFacebook() { return facebook; }
+    public void setFacebook(String facebook) { this.facebook = facebook; }
+
+    public String getInstagram() { return instagram; }
+    public void setInstagram(String instagram) { this.instagram = instagram; }
+
+    public String getTag() { return tag; }
+    public void setTag(String tag) { this.tag = tag; }
+
+    public List<ImagenResponseDTO> getImagenes() { return imagenes; }
+    public void setImagenes(List<ImagenResponseDTO> imagenes) { this.imagenes = imagenes; }
 }

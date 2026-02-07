@@ -38,6 +38,9 @@ public interface OrderService {
 
     Mono<Void> deleteOrder(@NonNull String id);
 
+    // Actualizar solo el estado del pedido
+    Mono<Order> updateOrderStatus(@NonNull String id, @NonNull String status);
+
     // limpieza de pedidos no pagados
     void cleanUnpaidOrders();
 

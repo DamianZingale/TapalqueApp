@@ -18,6 +18,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.mercadopago.MercadoPagoConfig;
 import com.mercadopago.client.payment.PaymentClient;
+import com.mercadopago.client.preference.PreferenceBackUrlsRequest;
 import com.mercadopago.client.preference.PreferenceClient;
 import com.mercadopago.client.preference.PreferenceItemRequest;
 import com.mercadopago.client.preference.PreferenceRequest;
@@ -36,13 +37,21 @@ import com.tapalque.mercado_pago.util.EncriptadoUtil;
 @Service
 public class MercadoPagoService {
 
-    // @Value("${mercadopago.access-token}")
-    // String accessToken;
+    // Access token de la app (fallback para desarrollo cuando no hay OAuth)
+    @Value("${mercadopago.access-token}")
+    String appAccessToken;
+
     @Value("${clientId}")
     String clientId;
 
     @Value("${clientSecret}")
     String clientSecret;
+
+    @Value("${app.frontend.url:http://localhost:3000}")
+    String frontendUrl;
+
+    @Value("${mercadopago.webhook-url}")
+    String webhookUrl;
 
     private final TransaccionRepository transaccionRepository;
     private final OauthService oauthService;
@@ -60,21 +69,34 @@ public class MercadoPagoService {
 
     public String crearPreferencia(ProductoRequestDTO p) throws Exception {
 
-        // me falta obtener el id del vendedor ej: producto.getVendedor.getId() = 1
-        String accessTokenEncriptado = oauthService.obtenerAccessTokenPorId(p.getIdVendedor());
-        String accessToken = encriptadoUtil.desencriptar(accessTokenEncriptado);
+        String accessToken;
 
-        // Verifico que no este vencido ni revocado
-        if (!oauthService.AccessTokenValido(accessToken)) {
-            throw new RuntimeException("Access token vencido o revocado por el vendedor");
+        // Intenta obtener el access token OAuth del vendedor
+        try {
+            String accessTokenEncriptado = oauthService.obtenerAccessTokenPorId(p.getIdVendedor());
+            accessToken = encriptadoUtil.desencriptar(accessTokenEncriptado);
+
+            // Verifico que no este vencido ni revocado
+            if (!oauthService.AccessTokenValido(accessToken)) {
+                System.out.println("Access token del vendedor vencido, usando fallback de la app");
+                accessToken = appAccessToken;
+            }
+        } catch (RuntimeException e) {
+            // Fallback: usar el access token de la app (para desarrollo)
+            System.out.println("Vendedor sin OAuth configurado, usando access token de la app (fallback)");
+            accessToken = appAccessToken;
         }
 
         // Inicializa config
         MercadoPagoConfig.setAccessToken(accessToken);
 
-        // Crea el ítem
+        // Crea el ítem con datos para mejorar tasa de aprobación
+        String categoryId = p.getTipoServicio() == TipoServicioEnum.GASTRONOMICO ? "food" : "services";
         PreferenceItemRequest item = PreferenceItemRequest.builder()
+                .id(String.valueOf(p.getIdProducto()))
                 .title(p.getTitle())
+                .description(p.getDescription() != null ? p.getDescription() : p.getTitle())
+                .categoryId(categoryId)
                 .quantity(p.getQuantity())
                 .currencyId("ARS")
                 .unitPrice(p.getUnitPrice())
@@ -89,15 +111,27 @@ public class MercadoPagoService {
         // Tiempo actual
         OffsetDateTime now = OffsetDateTime.now();
 
-        // Tiempo de expiración: 2 minutos desde ahora
+        // Tiempo de expiración: 30 minutos desde ahora (para testing)
         OffsetDateTime expirationFrom = now;
-        OffsetDateTime expirationTo = now.plusMinutes(2);
+        OffsetDateTime expirationTo = now.plusMinutes(30);
+
+        // URLs de retorno después del pago
+        PreferenceBackUrlsRequest backUrls = PreferenceBackUrlsRequest.builder()
+                .success(frontendUrl + "/pago/exito?transaccion=" + transaccionSave.getId())
+                .failure(frontendUrl + "/pago/error?transaccion=" + transaccionSave.getId())
+                .pending(frontendUrl + "/pago/pendiente?transaccion=" + transaccionSave.getId())
+                .build();
 
         // Arma la preferencia
         PreferenceRequest preferenceRequest = PreferenceRequest.builder()
                 .items(List.of(item))
                 // Aca se manda el id de la transaccion para obtenerlo cuando se haga el pago
                 .externalReference(transaccionSave.getId().toString())
+                // URLs de retorno
+                .backUrls(backUrls)
+                .autoReturn("approved")
+                // URL donde Mercado Pago envía las notificaciones webhook
+                .notificationUrl(webhookUrl)
                 // Aca se setean datos para que la URL expire y no sea comprada mas alla de lo
                 // que dura la reserva
                 .expires(true)

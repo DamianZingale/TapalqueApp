@@ -16,10 +16,11 @@ export interface Business {
 
 // Estados de pedido
 export enum EstadoPedido {
-  PENDING = 'PENDING',
-  PAID = 'PAID',
-  READY = 'READY',
-  DELIVERED = 'DELIVERED'
+  RECIBIDO = 'RECIBIDO',
+  EN_PREPARACION = 'EN_PREPARACION',
+  LISTO = 'LISTO',
+  EN_DELIVERY = 'EN_DELIVERY',
+  ENTREGADO = 'ENTREGADO'
 }
 
 // Estados de reserva con colores
@@ -83,6 +84,7 @@ export interface CustomerReserva {
   customerName: string;
   customerPhone?: string;
   customerEmail?: string;
+  customerDni?: string;
 }
 
 // Hotel de reserva
@@ -152,7 +154,7 @@ export interface NuevoMenuItem {
   picture?: string;
   category: string;
   restrictions: string[];
-  available?: boolean;
+  available: boolean;
 }
 
 // Habitación/Opción de hospedaje
@@ -163,7 +165,7 @@ export interface Habitacion {
   maxPersonas: number;
   precio: number;
   tipoPrecio: 'por_habitacion' | 'por_persona';
-  foto?: string;
+  fotos?: string[];
   servicios?: string[];
   disponible: boolean;
 }
@@ -190,12 +192,13 @@ export interface FormReservaExterna {
   customerName: string;
   customerPhone: string;
   customerEmail: string;
+  customerDni: string;
   checkInDate: string;
   checkOutDate: string;
   roomId?: string;
   totalPrice: number;
   amountPaid: number;
-  paymentType: 'EFECTIVO' | 'TRANSFERENCIA' | 'TARJETA' | 'MERCADOPAGO';
+  paymentType: 'EFECTIVO' | 'TRANSFERENCIA' | 'TARJETA_CREDITO' | 'TARJETA_DEBITO' | 'MERCADO_PAGO';
   notas: string;
 }
 
@@ -247,31 +250,53 @@ export function getColorEstadoReserva(reserva: Reserva): EstadoReservaColor {
 // Helper para obtener badge de estado de pedido
 export function getEstadoPedidoBadge(estado: EstadoPedido): { color: string; texto: string } {
   switch (estado) {
-    case EstadoPedido.PENDING:
-      return { color: 'secondary', texto: 'Pendiente' };
-    case EstadoPedido.PAID:
-      return { color: 'info', texto: 'Pagado' };
-    case EstadoPedido.READY:
+    case EstadoPedido.RECIBIDO:
+      return { color: 'warning', texto: 'Recibido' };
+    case EstadoPedido.EN_PREPARACION:
+      return { color: 'info', texto: 'En Preparación' };
+    case EstadoPedido.LISTO:
       return { color: 'success', texto: 'Listo' };
-    case EstadoPedido.DELIVERED:
-      return { color: 'dark', texto: 'Entregado' };
+    case EstadoPedido.EN_DELIVERY:
+      return { color: 'primary', texto: 'En Delivery' };
+    case EstadoPedido.ENTREGADO:
+      return { color: 'secondary', texto: 'Entregado' };
     default:
       return { color: 'secondary', texto: 'Desconocido' };
   }
 }
 
 // Helper para obtener siguiente estado de pedido
-export function getSiguienteEstadoPedido(estadoActual: EstadoPedido): EstadoPedido | null {
+// Si isDelivery es true y el estado es LISTO, el siguiente es EN_DELIVERY
+// Si isDelivery es false y el estado es LISTO, el siguiente es ENTREGADO directamente
+export function getSiguienteEstadoPedido(estadoActual: EstadoPedido, isDelivery?: boolean): EstadoPedido | null {
   switch (estadoActual) {
-    case EstadoPedido.PENDING:
-      return EstadoPedido.PAID;
-    case EstadoPedido.PAID:
-      return EstadoPedido.READY;
-    case EstadoPedido.READY:
-      return EstadoPedido.DELIVERED;
-    case EstadoPedido.DELIVERED:
+    case EstadoPedido.RECIBIDO:
+      return EstadoPedido.EN_PREPARACION;
+    case EstadoPedido.EN_PREPARACION:
+      return EstadoPedido.LISTO;
+    case EstadoPedido.LISTO:
+      return isDelivery ? EstadoPedido.EN_DELIVERY : EstadoPedido.ENTREGADO;
+    case EstadoPedido.EN_DELIVERY:
+      return EstadoPedido.ENTREGADO;
+    case EstadoPedido.ENTREGADO:
       return null;
     default:
       return null;
+  }
+}
+
+// Helper para obtener texto del botón de siguiente estado
+export function getTextoBotonSiguienteEstado(estadoActual: EstadoPedido, isDelivery?: boolean): string {
+  switch (estadoActual) {
+    case EstadoPedido.RECIBIDO:
+      return 'Comenzar preparación';
+    case EstadoPedido.EN_PREPARACION:
+      return 'Marcar como listo';
+    case EstadoPedido.LISTO:
+      return isDelivery ? 'Enviar a delivery' : 'Marcar entregado';
+    case EstadoPedido.EN_DELIVERY:
+      return 'Marcar entregado';
+    default:
+      return '';
   }
 }

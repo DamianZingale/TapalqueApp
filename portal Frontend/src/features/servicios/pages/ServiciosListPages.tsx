@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "../../../shared/components/Card";
 import { SECCION_TYPE } from "../../../shared/constants/constSecciones";
@@ -9,6 +9,7 @@ export default function ServiciosListPage() {
     const [servicios, setServicios] = useState<Servicio[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [selectedTag, setSelectedTag] = useState<string | null>(null);
     const navigate = useNavigate();
 
     const loadServicios = async () => {
@@ -34,6 +35,18 @@ export default function ServiciosListPage() {
         loadServicios();
     }, []);
 
+    const tags = useMemo(() => {
+        const allTags = servicios
+            .map((s) => s.tag)
+            .filter((t): t is string => !!t);
+        return [...new Set(allTags)].sort();
+    }, [servicios]);
+
+    const filteredServicios = useMemo(() => {
+        if (!selectedTag) return servicios;
+        return servicios.filter((s) => s.tag === selectedTag);
+    }, [servicios, selectedTag]);
+
     if (loading) {
         return (
             <div className="container py-5">
@@ -55,9 +68,32 @@ export default function ServiciosListPage() {
     return (
         <div className="container">
             <h1 className="text-center my-4">Servicios</h1>
+
+            {tags.length > 0 && (
+                <div className="d-flex flex-wrap justify-content-center gap-2 mb-4">
+                    {tags.map((tag) => (
+                        <button
+                            key={tag}
+                            className={`btn btn-sm ${selectedTag === tag ? "btn-secondary" : "btn-outline-secondary"}`}
+                            onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
+                        >
+                            {tag}
+                        </button>
+                    ))}
+                    {selectedTag && (
+                        <button
+                            className="btn btn-sm btn-outline-danger"
+                            onClick={() => setSelectedTag(null)}
+                        >
+                            Limpiar filtros
+                        </button>
+                    )}
+                </div>
+            )}
+
             <div className="row justify-content-center">
-                {servicios.length > 0 ? (
-                    servicios.map((servicio) => (
+                {filteredServicios.length > 0 ? (
+                    filteredServicios.map((servicio) => (
                         <Card
                             key={servicio.id}
                             id={String(servicio.id)}

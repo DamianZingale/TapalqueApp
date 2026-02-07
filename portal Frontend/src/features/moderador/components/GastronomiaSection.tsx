@@ -116,12 +116,18 @@ export function GastronomiaSection() {
 
   const loadBusinessData = async (restaurantId: number) => {
     try {
-      const res = await api.get(`/business/external/${restaurantId}/type/RESTAURANT`);
+      const res = await api.get(`/business/external/${restaurantId}/type/GASTRONOMIA`);
       setCurrentBusiness(res.data);
       setFormData((prev) => ({ ...prev, userId: res.data.ownerId }));
-    } catch (err) {
-      console.error('Error loading business:', err);
-      setCurrentBusiness(null);
+    } catch (err: any) {
+      // 404 es esperado cuando el restaurant aún no tiene administrador asignado
+      if (err?.response?.status === 404) {
+        setCurrentBusiness(null);
+        setFormData((prev) => ({ ...prev, userId: undefined }));
+      } else {
+        console.error('Error loading business:', err);
+        setCurrentBusiness(null);
+      }
     }
   };
 
@@ -138,6 +144,7 @@ export function GastronomiaSection() {
       const {
         id: _id,
         imagenes: _imagenes,
+        userId: _userId, // Excluir userId, se maneja separadamente
         ...dataWithoutIdAndImages
       } = formData;
       const cleanedData = {
@@ -181,7 +188,7 @@ export function GastronomiaSection() {
         const businessPayload = {
           ownerId: formData.userId,
           name: formData.name,
-          businessType: 'RESTAURANT',
+          businessType: 'GASTRONOMIA',
           externalBusinessId: createdData.id,
         };
 
@@ -214,7 +221,7 @@ export function GastronomiaSection() {
         const businessPayload = {
           ownerId: formData.userId,
           name: formData.name,
-          businessType: 'RESTAURANT',
+          businessType: 'GASTRONOMIA',
           externalBusinessId: selected.id,
         };
 
@@ -335,9 +342,10 @@ export function GastronomiaSection() {
                   <Form.Select
                     size="sm"
                     value={formData.userId || ''}
-                    onChange={(e) =>
-                      handleChange('userId', parseInt(e.target.value) || 0)
-                    }
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      handleChange('userId', value ? parseInt(value) : undefined);
+                    }}
                   >
                     <option value="">Seleccionar administrador...</option>
                     {administradores.map((admin) => (

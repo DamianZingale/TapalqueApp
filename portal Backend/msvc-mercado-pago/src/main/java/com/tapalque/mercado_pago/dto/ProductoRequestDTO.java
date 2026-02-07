@@ -18,6 +18,8 @@ public class ProductoRequestDTO {
 
     String title;
 
+    String description;
+
     int quantity;
 
     BigDecimal unitPrice;
@@ -26,7 +28,7 @@ public class ProductoRequestDTO {
 
     Long idComprador;
 
-    Long idTransaccion;
+    String idTransaccion;
 
     @Enumerated(EnumType.STRING)
     private TipoServicioEnum tipoServicio;

@@ -11,10 +11,10 @@ export default function Footer() {
       <Container>
         <Row className="align-items-center">
           <Col md={6} className="text-center text-md-end">
-            <Link to="#" className="text-light text-decoration-none me-3">
+            <Link to="/nosotros" className="text-light text-decoration-none me-3">
               Nosotros
             </Link>
-            <Link to="#" className="text-light text-decoration-none me-3">
+            <Link to="/terminos-y-condiciones" className="text-light text-decoration-none me-3">
               Términos y condiciones
             </Link>
           </Col>

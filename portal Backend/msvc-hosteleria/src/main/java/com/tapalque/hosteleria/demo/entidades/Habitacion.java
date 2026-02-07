@@ -42,7 +42,10 @@ public class Habitacion {
     @Column(name = "tipo_precio", nullable = false)
     private TipoPrecio tipoPrecio = TipoPrecio.POR_HABITACION;
 
-    private String foto;
+    @ElementCollection
+    @CollectionTable(name = "habitacion_fotos", joinColumns = @JoinColumn(name = "habitacion_id"))
+    @Column(name = "foto_url")
+    private List<String> fotos = new ArrayList<>();
 
     @ElementCollection
     @CollectionTable(name = "habitacion_servicios", joinColumns = @JoinColumn(name = "habitacion_id"))
@@ -66,13 +69,13 @@ public class Habitacion {
     }
 
     public Habitacion(String titulo, String descripcion, Integer maxPersonas, BigDecimal precio,
-                      TipoPrecio tipoPrecio, String foto, Hospedaje hospedaje) {
+                      TipoPrecio tipoPrecio, List<String> fotos, Hospedaje hospedaje) {
         this.titulo = titulo;
         this.descripcion = descripcion;
         this.maxPersonas = maxPersonas;
         this.precio = precio;
         this.tipoPrecio = tipoPrecio;
-        this.foto = foto;
+        this.fotos = fotos != null ? fotos : new ArrayList<>();
         this.hospedaje = hospedaje;
         this.disponible = true;
     }
@@ -126,12 +129,12 @@ public class Habitacion {
         this.tipoPrecio = tipoPrecio;
     }
 
-    public String getFoto() {
-        return foto;
+    public List<String> getFotos() {
+        return fotos;
     }
 
-    public void setFoto(String foto) {
-        this.foto = foto;
+    public void setFotos(List<String> fotos) {
+        this.fotos = fotos != null ? fotos : new ArrayList<>();
     }
 
     public List<String> getServicios() {

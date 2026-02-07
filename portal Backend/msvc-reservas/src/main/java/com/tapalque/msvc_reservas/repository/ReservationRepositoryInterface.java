@@ -2,6 +2,7 @@ package com.tapalque.msvc_reservas.repository;
 
 import java.time.LocalDateTime;
 
+import org.springframework.data.mongodb.repository.Query;
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import org.springframework.stereotype.Repository;
 
@@ -23,4 +24,9 @@ public interface ReservationRepositoryInterface extends ReactiveMongoRepository<
     // Reservas de un cliente filtradas por fecha de creación
     public Flux<Reservation> findByCustomer_CustomerIdAndDateCreatedBetween(
             String customerId, LocalDateTime desde, LocalDateTime hasta);
+
+    // Reservas activas cuya estadía se solapa con el rango [desde, hasta].
+    // Solapamiento: checkInDate < hasta  Y  checkOutDate > desde
+    @Query("{ 'hotel.hotelId': ?0, 'stayPeriod.checkInDate': { $lt: ?2 }, 'stayPeriod.checkOutDate': { $gt: ?1 }, 'isActive': true, 'isCancelled': false }")
+    Flux<Reservation> findByHotelAndStayPeriodOverlap(String hotelId, LocalDateTime desde, LocalDateTime hasta);
 }

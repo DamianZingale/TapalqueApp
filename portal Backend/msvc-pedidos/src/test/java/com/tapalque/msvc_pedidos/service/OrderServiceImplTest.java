@@ -48,7 +48,7 @@ class OrderServiceImplTest {
         testOrder.setTotalPrice(3000.0);
         testOrder.setPaidWithMercadoPago(false);
         testOrder.setPaidWithCash(false);
-        testOrder.setStatus(Order.OrderStatus.PENDING);
+        testOrder.setStatus(Order.OrderStatus.RECIBIDO);
         testOrder.setItems(Arrays.asList(item));
         testOrder.setRestaurant(restaurant);
         testOrder.setDateCreated(LocalDateTime.now());
@@ -69,7 +69,7 @@ class OrderServiceImplTest {
         testOrderDTO.setTotalPrice(3000.0);
         testOrderDTO.setPaidWithMercadoPago(false);
         testOrderDTO.setPaidWithCash(false);
-        testOrderDTO.setStatus("PENDING");
+        testOrderDTO.setStatus("RECIBIDO");
         testOrderDTO.setItems(Arrays.asList(itemDTO));
         testOrderDTO.setRestaurant(restaurantDTO);
     }
@@ -88,7 +88,7 @@ class OrderServiceImplTest {
             StepVerifier.create(orderService.createOrder(testOrderDTO))
                     .expectNextMatches(result ->
                         result.getTotalPrice().equals(3000.0) &&
-                        result.getStatus().equals("PENDING"))
+                        result.getStatus().equals("RECIBIDO"))
                     .verifyComplete();
 
             verify(orderRepository).save(any(Order.class));

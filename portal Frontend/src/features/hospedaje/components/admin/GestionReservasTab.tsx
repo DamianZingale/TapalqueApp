@@ -1,5 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Card, Row, Col, Badge, Button, ButtonGroup, Form, Alert, Modal } from 'react-bootstrap';
+import { Card, Row, Col, Badge, Button, ButtonGroup, Form, Alert, Modal, InputGroup } from 'react-bootstrap';
+import { Calendar, DateRange } from 'react-date-range';
+import 'react-date-range/dist/styles.css';
+import 'react-date-range/dist/theme/default.css';
+import { es } from 'date-fns/locale';
 import { fetchReservasByHotel, cancelarReserva, crearReservaExterna, Reserva } from '../../../../services/fetchReservas';
 
 interface FormReservaExterna {
@@ -35,6 +39,12 @@ export const GestionReservasTab = () => {
     const [formData, setFormData] = useState<FormReservaExterna>(initialFormData);
     const [guardando, setGuardando] = useState(false);
     const [errorForm, setErrorForm] = useState<string | null>(null);
+    const [showCalendar, setShowCalendar] = useState(false);
+    const [dateRange, setDateRange] = useState<DateRange>({
+        startDate: undefined,
+        endDate: undefined,
+        key: 'selection'
+    });
 
     // TODO: Obtener hotelId del usuario logueado
     const hotelId = '1';
@@ -154,6 +164,42 @@ export const GestionReservasTab = () => {
     const calcularNoches = (checkIn: string, checkOut: string): number => {
         const diff = new Date(checkOut).getTime() - new Date(checkIn).getTime();
         return Math.ceil(diff / (1000 * 60 * 60 * 24));
+    };
+
+    const handleDateSelect = (ranges: any) => {
+        const { startDate, endDate } = ranges.selection;
+        if (startDate && endDate) {
+            setDateRange({
+                startDate,
+                endDate,
+                key: 'selection'
+            });
+            setFormData(prev => ({
+                ...prev,
+                checkInDate: startDate.toISOString().split('T')[0],
+                checkOutDate: endDate.toISOString().split('T')[0]
+            }));
+        }
+    };
+
+    const formatFecha = (date: Date | undefined): string => {
+        if (!date) return 'Seleccionar fecha';
+        return date.toLocaleDateString('es-AR', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        });
+    };
+
+    const openCalendar = () => {
+        setShowCalendar(true);
+        if (formData.checkInDate && formData.checkOutDate) {
+            setDateRange({
+                startDate: new Date(formData.checkInDate),
+                endDate: new Date(formData.checkOutDate),
+                key: 'selection'
+            });
+        }
     };
 
     if (loading) {
@@ -341,28 +387,80 @@ export const GestionReservasTab = () => {
 
                     <hr />
                     <h6 className="mb-3">Fechas de Estadía</h6>
-                    <Row>
-                        <Col md={6}>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Check-in *</Form.Label>
-                                <Form.Control
-                                    type="date"
-                                    value={formData.checkInDate}
-                                    onChange={(e) => setFormData(prev => ({ ...prev, checkInDate: e.target.value }))}
+                    
+                    <Form.Group className="mb-3">
+                        <Form.Label>Seleccionar fechas *</Form.Label>
+                        <InputGroup>
+                            <Form.Control
+                                type="text"
+                                value={dateRange.startDate && dateRange.endDate ? 
+                                    `${formatFecha(dateRange.startDate)} - ${formatFecha(dateRange.endDate)}` : 
+                                    'Click para seleccionar fechas'
+                                }
+                                readOnly
+                                onClick={openCalendar}
+                                placeholder="Click para seleccionar fechas"
+                                style={{ cursor: 'pointer' }}
+                            />
+                            <Button 
+                                variant="outline-primary" 
+                                onClick={openCalendar}
+                            >
+                                📅 Calendario
+                            </Button>
+                        </InputGroup>
+                        <Form.Text className="text-muted">
+                            Click en el campo o botón para seleccionar check-in y check-out
+                        </Form.Text>
+                    </Form.Group>
+
+                    {showCalendar && (
+                        <Card className="mb-3">
+                            <Card.Body className="p-3">
+                                <div className="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 className="mb-0">Seleccionar Fechas</h6>
+                                    <Button 
+                                        variant="outline-secondary" 
+                                        size="sm"
+                                        onClick={() => setShowCalendar(false)}
+                                    >
+                                        ✕ Cerrar
+                                    </Button>
+                                </div>
+                                <Calendar
+                                    onChange={handleDateSelect}
+                                    ranges={[dateRange]}
+                                    months={2}
+                                    direction="horizontal"
+                                    locale={es}
+                                    minDate={new Date()}
+                                    showDateDisplay={false}
+                                    rangeColors={['#0d6efd', '#3ecf8e', '#fed14c']}
                                 />
-                            </Form.Group>
-                        </Col>
-                        <Col md={6}>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Check-out *</Form.Label>
-                                <Form.Control
-                                    type="date"
-                                    value={formData.checkOutDate}
-                                    onChange={(e) => setFormData(prev => ({ ...prev, checkOutDate: e.target.value }))}
-                                />
-                            </Form.Group>
-                        </Col>
-                    </Row>
+                                {dateRange.startDate && dateRange.endDate && (
+                                    <Alert variant="info" className="mt-3 mb-0">
+                                        <div className="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <strong>Check-in:</strong> {formatFecha(dateRange.startDate)}<br/>
+                                                <strong>Check-out:</strong> {formatFecha(dateRange.endDate)}<br/>
+                                                <strong>Noches:</strong> {calcularNoches(
+                                                    dateRange.startDate.toISOString().split('T')[0],
+                                                    dateRange.endDate.toISOString().split('T')[0]
+                                                )}
+                                            </div>
+                                            <Button 
+                                                variant="success" 
+                                                size="sm"
+                                                onClick={() => setShowCalendar(false)}
+                                            >
+                                                Confirmar fechas
+                                            </Button>
+                                        </div>
+                                    </Alert>
+                                )}
+                            </Card.Body>
+                        </Card>
+                    )}
                     {formData.checkInDate && formData.checkOutDate && (
                         <Alert variant="info" className="py-2">
                             <small>

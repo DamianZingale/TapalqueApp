@@ -7,7 +7,8 @@ const USER_KEY = 'user_data';
 interface JwtPayload {
   sub: string;
   nombre?: string;
-  rol?: number;
+  fullName?: string;
+  rol?: number | string; // Backend envía string, frontend convierte a número
   exp: number;
   iat?: number;
   [key: string]: string | number | boolean | undefined;
@@ -16,7 +17,11 @@ interface JwtPayload {
 interface UserData {
   id?: number | string;
   nombre?: string;
+  apellido?: string;
   email?: string;
+  telefono?: string;
+  dni?: string;
+  direccion?: string;
   rol?: number;
   [key: string]: string | number | boolean | undefined;
 }
@@ -64,14 +69,31 @@ export const authService = {
     return localStorage.getItem('refresh_token');
   },
 
-  // Obtener rol del usuario desde el token
+  // Obtener rol del usuario desde el token (convertido a número)
+  // Backend envía: USER, MODERADOR, ADMINISTRADOR como strings
+  // Frontend usa: 3=USER, 1=MODERADOR, 2=ADMINISTRADOR
   getRolUsuario(): number | null {
     const token = this.getToken();
     if (!token) return null;
 
     try {
       const payload = jwtDecode<JwtPayload>(token);
-      return payload.rol ?? null;
+      const rol = payload.rol;
+
+      // Si ya es número, devolverlo directamente
+      if (typeof rol === 'number') return rol;
+
+      // Si es string, convertir al número correspondiente
+      if (typeof rol === 'string') {
+        switch (rol) {
+          case 'MODERADOR': return 1;
+          case 'ADMINISTRADOR': return 2;
+          case 'USER': return 3;
+          default: return null;
+        }
+      }
+
+      return null;
     } catch (error) {
       console.error('Error decodificando token:', error);
       return null;
@@ -79,13 +101,14 @@ export const authService = {
   },
 
   // Obtener nombre del usuario desde el token
+  // Backend envía fullName (firstName del usuario)
   getNombreUsuario(): string | null {
     const token = this.getToken();
     if (!token) return null;
 
     try {
       const payload = jwtDecode<JwtPayload>(token);
-      return payload.nombre ?? null;
+      return payload.fullName ?? payload.nombre ?? null;
     } catch (error) {
       console.error('Error decodificando token:', error);
       return null;
@@ -137,6 +160,60 @@ export const authService = {
   hasAnyRole(roles: number[]): boolean {
     const userRole = this.getRolUsuario();
     return userRole !== null && roles.includes(userRole);
+  },
+
+  // Verificar si el usuario tiene datos completos para reservas/pedidos
+  hasCompleteProfileForReservations(): boolean {
+    const user = this.getUser();
+    if (!user) return false;
+    return !!(user.nombre && user.telefono && user.dni);
+  },
+
+  // Obtener campos faltantes para reservas
+  getMissingFieldsForReservations(): string[] {
+    const user = this.getUser();
+    if (!user) return ['nombre', 'telefono', 'dni'];
+    const missing: string[] = [];
+    if (!user.nombre) missing.push('nombre');
+    if (!user.telefono) missing.push('teléfono');
+    if (!user.dni) missing.push('DNI');
+    return missing;
+  },
+
+  // Sincronizar datos del usuario desde el backend
+  // Retorna true si los datos están completos para reservas
+  async syncUserFromBackend(): Promise<boolean> {
+    const user = this.getUser();
+    if (!user?.id || !user?.email) return false;
+
+    try {
+      const response = await fetch(`/api/user/profile/me?email=${encodeURIComponent(user.email)}`, {
+        headers: {
+          'Authorization': `Bearer ${this.getToken()}`,
+        },
+      });
+
+      if (!response.ok) return false;
+
+      const userData = await response.json();
+
+      // Actualizar localStorage con datos del backend
+      this.setUser({
+        ...user,
+        nombre: userData.nombre,
+        apellido: userData.apellido,
+        email: userData.email,
+        telefono: userData.telefono,
+        dni: userData.dni,
+        direccion: userData.direccion,
+      });
+
+      // Verificar si ahora tiene datos completos
+      return !!(userData.nombre && userData.telefono && userData.dni);
+    } catch (error) {
+      console.error('Error sincronizando datos del usuario:', error);
+      return false;
+    }
   },
 };
 

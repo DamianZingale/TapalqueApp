@@ -3,6 +3,9 @@
 export interface Customer {
   customerId: string;
   customerName: string;
+  customerPhone?: string;
+  customerEmail?: string;
+  customerDni?: string;
 }
 
 export interface Hotel {
@@ -40,14 +43,33 @@ export interface Reserva {
   transaccionId?: number;
   mercadoPagoId?: string;
   fechaPago?: string;
+  notas?: string;
+}
+
+function getAuthHeaders(): HeadersInit {
+  const token = localStorage.getItem('token');
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
 }
 
 export async function fetchReservasByHotel(
-  hotelId: string
+  hotelId: string,
+  desde?: string,
+  hasta?: string
 ): Promise<Reserva[]> {
   try {
+    const params = new URLSearchParams();
+    if (desde) params.append('desde', desde);
+    if (hasta) params.append('hasta', hasta);
+    const query = params.toString();
+
     const response = await fetch(
-      `/api/reservas/reservations/by-hotel/${hotelId}`
+      `/api/reservas/reservations/by-hotel/${hotelId}${query ? '?' + query : ''}`,
+      {
+        headers: getAuthHeaders(),
+      }
     );
     if (!response.ok) {
       throw new Error(`Error al obtener reservas: ${response.status}`);
@@ -66,6 +88,7 @@ export async function cancelarReserva(reservaId: string): Promise<boolean> {
       `/api/reservas/reservations/delete/${reservaId}`,
       {
         method: 'DELETE',
+        headers: getAuthHeaders(),
       }
     );
     return response.ok;
@@ -78,7 +101,10 @@ export async function cancelarReserva(reservaId: string): Promise<boolean> {
 export async function fetchReservasByUser(userId: string): Promise<Reserva[]> {
   try {
     const response = await fetch(
-      `/api/reservas/reservations/by-customer/${userId}`
+      `/api/reservas/reservations/by-customer/${userId}`,
+      {
+        headers: getAuthHeaders(),
+      }
     );
     if (!response.ok) {
       throw new Error(`Error al obtener reservas: ${response.status}`);
@@ -95,19 +121,63 @@ export async function crearReservaExterna(
   reserva: Partial<Reserva>
 ): Promise<Reserva | null> {
   try {
+    console.log('Enviando reserva:', JSON.stringify(reserva, null, 2));
     const response = await fetch('/api/reservas/reservations/new', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(),
       body: JSON.stringify(reserva),
     });
     if (!response.ok) {
+      const errorBody = await response.text();
+      console.error('Error response body:', errorBody);
       throw new Error(`Error al crear reserva: ${response.status}`);
     }
     return await response.json();
   } catch (error) {
     console.error('Error al crear reserva externa:', error);
     return null;
+  }
+}
+
+// Actualizar reserva (para completar pago, agregar notas, etc.)
+export async function actualizarReserva(
+  reserva: Reserva
+): Promise<Reserva | null> {
+  try {
+    const response = await fetch(`/api/reservas/reservations/update/${reserva.id}`, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(reserva),
+    });
+    if (!response.ok) {
+      throw new Error(`Error al actualizar reserva: ${response.status}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error al actualizar reserva:', error);
+    return null;
+  }
+}
+
+// Consulta pública: habitaciones libres de un hospedaje para un rango de fechas.
+// El backend (msvc-reservas) combina habitaciones de msvc-hosteleria con reservas solapadas.
+import type { Habitacion } from './fetchHabitaciones';
+
+export async function fetchDisponibilidad(
+  hotelId: string,
+  desde: string,
+  hasta: string
+): Promise<Habitacion[]> {
+  try {
+    const response = await fetch(
+      `/api/reservas/disponibilidad/${hotelId}?desde=${desde}&hasta=${hasta}`
+    );
+    if (!response.ok) {
+      throw new Error(`Error al consultar disponibilidad: ${response.status}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error en fetchDisponibilidad:', error);
+    return [];
   }
 }

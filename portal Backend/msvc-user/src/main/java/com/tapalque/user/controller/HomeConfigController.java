@@ -88,6 +88,19 @@ public class HomeConfigController {
             @RequestBody HomeConfigDTO dto) {
         try {
             SectionType sectionType = SectionType.valueOf(seccion.toUpperCase());
+
+            // Si se está actualizando la URL de la imagen, eliminar la imagen anterior
+            if (dto.getImagenUrl() != null) {
+                HomeConfigDTO currentConfig = homeConfigService.getConfigBySeccion(sectionType);
+                if (currentConfig != null && currentConfig.getImagenUrl() != null
+                        && !currentConfig.getImagenUrl().equals(dto.getImagenUrl())) {
+                    // Solo eliminar si la imagen anterior era del servidor (no URL externa)
+                    if (currentConfig.getImagenUrl().contains("/uploads/")) {
+                        homeImageService.eliminarImagen(currentConfig.getImagenUrl());
+                    }
+                }
+            }
+
             HomeConfigDTO updated = homeConfigService.updateConfig(sectionType, dto);
             return ResponseEntity.ok(updated);
         } catch (IllegalArgumentException e) {
@@ -106,6 +119,24 @@ public class HomeConfigController {
             @PathVariable Long id,
             @RequestBody HomeConfigDTO dto) {
         try {
+            // Si se está actualizando la URL de la imagen, eliminar la imagen anterior
+            if (dto.getImagenUrl() != null) {
+                // Obtener configuración actual
+                List<HomeConfigDTO> allConfigs = homeConfigService.getAllConfigs();
+                HomeConfigDTO currentConfig = allConfigs.stream()
+                        .filter(c -> c.getId().equals(id))
+                        .findFirst()
+                        .orElse(null);
+
+                if (currentConfig != null && currentConfig.getImagenUrl() != null
+                        && !currentConfig.getImagenUrl().equals(dto.getImagenUrl())) {
+                    // Solo eliminar si la imagen anterior era del servidor (no URL externa)
+                    if (currentConfig.getImagenUrl().contains("/uploads/")) {
+                        homeImageService.eliminarImagen(currentConfig.getImagenUrl());
+                    }
+                }
+            }
+
             HomeConfigDTO updated = homeConfigService.updateConfigById(id, dto);
             return ResponseEntity.ok(updated);
         } catch (IllegalArgumentException e) {
@@ -126,8 +157,20 @@ public class HomeConfigController {
         try {
             SectionType sectionType = SectionType.valueOf(seccion.toUpperCase());
 
-            // Guardar la imagen
+            // Obtener configuración actual para eliminar imagen anterior si existe
+            HomeConfigDTO currentConfig = homeConfigService.getConfigBySeccion(sectionType);
+            String imagenAnterior = null;
+            if (currentConfig != null && currentConfig.getImagenUrl() != null) {
+                imagenAnterior = currentConfig.getImagenUrl();
+            }
+
+            // Guardar la nueva imagen
             String imagenUrl = homeImageService.guardarImagen(file, seccion);
+
+            // Eliminar imagen anterior del servidor si existía
+            if (imagenAnterior != null && !imagenAnterior.isEmpty()) {
+                homeImageService.eliminarImagen(imagenAnterior);
+            }
 
             // Actualizar la configuración con la nueva URL
             HomeConfigDTO dto = new HomeConfigDTO();

@@ -1,17 +1,28 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
-  Card, Row, Col, Button, Table, Badge, Form, Modal, Alert, Spinner
+  Alert,
+  Badge,
+  Button,
+  Card,
+  Col,
+  Form,
+  Modal,
+  Row,
+  Spinner,
+  Table,
 } from 'react-bootstrap';
 import {
-  fetchMenuByRestaurant,
-  crearMenuItem,
   actualizarMenuItem,
+  cambiarDisponibilidadItem,
+  crearMenuItem,
   eliminarMenuItem,
-  cambiarDisponibilidadItem
+  fetchDishCategories,
+  fetchDishRestrictions,
+  fetchMenuByRestaurant,
+  searchIngredients,
 } from '../../../services/fetchMenu';
 import { subirImagenMenu } from '../../../services/menuImagenService';
 import type { MenuItem, NuevoMenuItem } from '../types';
-import { CATEGORIAS_MENU, RESTRICCIONES_MENU } from '../types';
 
 interface GastronomiaMenuProps {
   businessId: string;
@@ -23,7 +34,7 @@ interface NuevoPlatoForm {
   description: string;
   price: number;
   category: string;
-  ingredients: string;
+  ingredients: string[];
   restrictions: string[];
   picture: string;
 }
@@ -33,32 +44,61 @@ const initialFormState: NuevoPlatoForm = {
   description: '',
   price: 0,
   category: '',
-  ingredients: '',
+  ingredients: [],
   restrictions: [],
-  picture: ''
+  picture: '',
 };
 
 export function GastronomiaMenu({ businessId }: GastronomiaMenuProps) {
   const [menu, setMenu] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [filtroCategoria, setFiltroCategoria] = useState<string>('TODAS');
-  const [filtroDisponibilidad, setFiltroDisponibilidad] = useState<'TODOS' | 'DISPONIBLE' | 'NO_DISPONIBLE'>('TODOS');
+  const [filtroDisponibilidad, setFiltroDisponibilidad] = useState<
+    'TODOS' | 'DISPONIBLE' | 'NO_DISPONIBLE'
+  >('TODOS');
   const [busqueda, setBusqueda] = useState('');
 
   const [modalAgregar, setModalAgregar] = useState(false);
-  const [nuevoPlato, setNuevoPlato] = useState<NuevoPlatoForm>(initialFormState);
+  const [nuevoPlato, setNuevoPlato] =
+    useState<NuevoPlatoForm>(initialFormState);
+  const [precioInput, setPrecioInput] = useState('');
   const [guardando, setGuardando] = useState(false);
   const [errorForm, setErrorForm] = useState<string | null>(null);
 
   const [modalEditar, setModalEditar] = useState(false);
-  const [platoSeleccionado, setPlatoSeleccionado] = useState<MenuItem | null>(null);
-  const [nuevoPrecio, setNuevoPrecio] = useState<number>(0);
+  const [platoSeleccionado, setPlatoSeleccionado] = useState<MenuItem | null>(
+    null
+  );
+  const [nuevoPrecioInput, setNuevoPrecioInput] = useState('0');
 
-  const [mensaje, setMensaje] = useState<{ tipo: 'success' | 'danger'; texto: string } | null>(null);
+  const [mensaje, setMensaje] = useState<{
+    tipo: 'success' | 'danger';
+    texto: string;
+  } | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
+
+  // Estados para datos del backend
+  const [categorias, setCategorias] = useState<string[]>([]);
+  const [restricciones, setRestricciones] = useState<string[]>([]);
+
+  // Estados para ingredientes con autocomplete
+  const [ingredientesDisponibles, setIngredientesDisponibles] = useState<
+    string[]
+  >([]);
+  const [busquedaIngrediente, setBusquedaIngrediente] = useState('');
+  const [mostrarSugerencias, setMostrarSugerencias] = useState(false);
+  const [buscandoIngredientes, setBuscandoIngredientes] = useState(false);
+
+  // Estados para categorías con autocomplete y navegación por teclado
+  const [busquedaCategoria, setBusquedaCategoria] = useState('');
+  const [mostrarSugerenciasCat, setMostrarSugerenciasCat] = useState(false);
+  const [indiceSeleccionadoCat, setIndiceSeleccionadoCat] = useState(-1);
+  const [categoriasFiltradas, setCategoriasFiltradas] = useState<string[]>([]);
 
   useEffect(() => {
     cargarMenu();
+    cargarCategorias();
+    cargarRestricciones();
   }, [businessId]);
 
   useEffect(() => {
@@ -67,6 +107,42 @@ export function GastronomiaMenu({ businessId }: GastronomiaMenuProps) {
       return () => clearTimeout(timer);
     }
   }, [mensaje]);
+
+  // Debounce para búsqueda de ingredientes
+  useEffect(() => {
+    if (busquedaIngrediente.length < 2) {
+      setIngredientesDisponibles([]);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      setBuscandoIngredientes(true);
+      try {
+        const resultados = await searchIngredients(busquedaIngrediente);
+        setIngredientesDisponibles(resultados);
+      } catch (error) {
+        console.error('Error buscando ingredientes:', error);
+      } finally {
+        setBuscandoIngredientes(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [busquedaIngrediente]);
+
+  // Filtrar categorías en tiempo real
+  useEffect(() => {
+    if (busquedaCategoria.length === 0) {
+      setCategoriasFiltradas(categorias);
+      setIndiceSeleccionadoCat(-1);
+    } else {
+      const filtradas = categorias.filter((cat) =>
+        cat.toLowerCase().includes(busquedaCategoria.toLowerCase())
+      );
+      setCategoriasFiltradas(filtradas);
+      setIndiceSeleccionadoCat(-1);
+    }
+  }, [busquedaCategoria, categorias]);
 
   const cargarMenu = async () => {
     try {
@@ -81,11 +157,35 @@ export function GastronomiaMenu({ businessId }: GastronomiaMenuProps) {
     }
   };
 
-  const menuFiltrado = menu.filter(item => {
-    if (filtroCategoria !== 'TODAS' && item.category !== filtroCategoria) return false;
+  const cargarCategorias = async () => {
+    try {
+      const data = await fetchDishCategories();
+      setCategorias(data.map((cat) => cat.name));
+    } catch (error) {
+      console.error('Error cargando categorías:', error);
+    }
+  };
+
+  const cargarRestricciones = async () => {
+    try {
+      const data = await fetchDishRestrictions();
+      setRestricciones(data.map((rest) => rest.name));
+    } catch (error) {
+      console.error('Error cargando restricciones:', error);
+    }
+  };
+
+  const menuFiltrado = menu.filter((item) => {
+    if (filtroCategoria !== 'TODAS' && item.category !== filtroCategoria)
+      return false;
     if (filtroDisponibilidad === 'DISPONIBLE' && !item.available) return false;
-    if (filtroDisponibilidad === 'NO_DISPONIBLE' && item.available) return false;
-    if (busqueda && !item.dish_name.toLowerCase().includes(busqueda.toLowerCase())) return false;
+    if (filtroDisponibilidad === 'NO_DISPONIBLE' && item.available)
+      return false;
+    if (
+      busqueda &&
+      !item.dish_name.toLowerCase().includes(busqueda.toLowerCase())
+    )
+      return false;
     return true;
   });
 
@@ -96,8 +196,9 @@ export function GastronomiaMenu({ businessId }: GastronomiaMenuProps) {
       setErrorForm('El nombre del plato es obligatorio');
       return;
     }
-    if (nuevoPlato.price <= 0) {
-      setErrorForm('El precio debe ser mayor a 0');
+    const precioNumerico = parseFloat(precioInput);
+    if (isNaN(precioNumerico) || precioNumerico <= 0) {
+      setErrorForm('El precio debe ser un numero valido mayor a 0');
       return;
     }
     if (!nuevoPlato.category) {
@@ -111,12 +212,12 @@ export function GastronomiaMenu({ businessId }: GastronomiaMenuProps) {
       const nuevoItem: NuevoMenuItem = {
         dish_name: nuevoPlato.dish_name.trim(),
         description: nuevoPlato.description.trim(),
-        price: nuevoPlato.price,
+        price: precioNumerico,
         category: nuevoPlato.category,
-        ingredients: nuevoPlato.ingredients.split(',').map(i => i.trim()).filter(Boolean),
+        ingredients: nuevoPlato.ingredients,
         restrictions: nuevoPlato.restrictions,
         picture: nuevoPlato.picture,
-        available: true
+        available: true,
       };
 
       const creado = await crearMenuItem(businessId, nuevoItem);
@@ -125,6 +226,12 @@ export function GastronomiaMenu({ businessId }: GastronomiaMenuProps) {
         setMenu([...menu, creado]);
         setModalAgregar(false);
         setNuevoPlato(initialFormState);
+        setPrecioInput('0');
+        setBusquedaIngrediente('');
+        setIngredientesDisponibles([]);
+        setBusquedaCategoria('');
+        setMostrarSugerenciasCat(false);
+        setIndiceSeleccionadoCat(-1);
         setMensaje({ tipo: 'success', texto: 'Plato agregado correctamente' });
       } else {
         setErrorForm('No se pudo crear el plato');
@@ -137,17 +244,80 @@ export function GastronomiaMenu({ businessId }: GastronomiaMenuProps) {
     }
   };
 
+  const agregarIngrediente = (ingrediente: string) => {
+    if (ingrediente && !nuevoPlato.ingredients.includes(ingrediente)) {
+      setNuevoPlato({
+        ...nuevoPlato,
+        ingredients: [...nuevoPlato.ingredients, ingrediente],
+      });
+    }
+    setBusquedaIngrediente('');
+    setMostrarSugerencias(false);
+  };
+
+  const eliminarIngrediente = (ingrediente: string) => {
+    setNuevoPlato({
+      ...nuevoPlato,
+      ingredients: nuevoPlato.ingredients.filter((i) => i !== ingrediente),
+    });
+  };
+
+  const seleccionarCategoria = (categoria: string) => {
+    setNuevoPlato({ ...nuevoPlato, category: categoria });
+    setBusquedaCategoria(categoria);
+    setMostrarSugerenciasCat(false);
+    setIndiceSeleccionadoCat(-1);
+  };
+
+  const handleKeyDownCategoria = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!mostrarSugerenciasCat || categoriasFiltradas.length === 0) return;
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        setIndiceSeleccionadoCat((prev) =>
+          prev < categoriasFiltradas.length - 1 ? prev + 1 : 0
+        );
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        setIndiceSeleccionadoCat((prev) =>
+          prev > 0 ? prev - 1 : categoriasFiltradas.length - 1
+        );
+        break;
+      case 'Enter':
+        e.preventDefault();
+        if (indiceSeleccionadoCat >= 0) {
+          seleccionarCategoria(categoriasFiltradas[indiceSeleccionadoCat]);
+        }
+        break;
+      case 'Escape':
+        e.preventDefault();
+        setMostrarSugerenciasCat(false);
+        setIndiceSeleccionadoCat(-1);
+        break;
+    }
+  };
+
   const handleEditarPrecio = async () => {
-    if (!platoSeleccionado || nuevoPrecio <= 0) return;
+    const precioNumerico = parseFloat(nuevoPrecioInput);
+    if (!platoSeleccionado || isNaN(precioNumerico) || precioNumerico <= 0)
+      return;
 
     try {
       setGuardando(true);
-      const actualizado = await actualizarMenuItem(platoSeleccionado.id, { price: nuevoPrecio });
+      const actualizado = await actualizarMenuItem(platoSeleccionado.id, {
+        price: precioNumerico,
+      });
 
       if (actualizado) {
-        setMenu(menu.map(item =>
-          item.id === platoSeleccionado.id ? { ...item, price: nuevoPrecio } : item
-        ));
+        setMenu(
+          menu.map((item) =>
+            item.id === platoSeleccionado.id
+              ? { ...item, price: precioNumerico }
+              : item
+          )
+        );
         setModalEditar(false);
         setPlatoSeleccionado(null);
         setMensaje({ tipo: 'success', texto: 'Precio actualizado' });
@@ -165,9 +335,11 @@ export function GastronomiaMenu({ businessId }: GastronomiaMenuProps) {
       const result = await cambiarDisponibilidadItem(item.id, !item.available);
 
       if (result) {
-        setMenu(menu.map(m =>
-          m.id === item.id ? { ...m, available: !m.available } : m
-        ));
+        setMenu(
+          menu.map((m) =>
+            m.id === item.id ? { ...m, available: !m.available } : m
+          )
+        );
       }
     } catch (error) {
       console.error('Error cambiando disponibilidad:', error);
@@ -176,18 +348,28 @@ export function GastronomiaMenu({ businessId }: GastronomiaMenuProps) {
   };
 
   const handleEliminarPlato = async (item: MenuItem) => {
-    if (!window.confirm(`¿Estás seguro de eliminar "${item.dish_name}"?`)) return;
+    if (!window.confirm(`¿Estás seguro de eliminar "${item.dish_name}"?`))
+      return;
 
     try {
       const result = await eliminarMenuItem(item.id);
 
       if (result) {
-        setMenu(menu.filter(m => m.id !== item.id));
-        setMensaje({ tipo: 'success', texto: 'Plato eliminado' });
+        // Actualizar el estado local inmediatamente
+        const nuevaLista = menu.filter((m) => m.id !== item.id);
+        setMenu(nuevaLista);
+        setMensaje({ tipo: 'success', texto: 'Plato eliminado correctamente' });
+
+        // Opcional: recargar el menú desde el servidor para asegurar sincronización
+        setTimeout(() => cargarMenu(), 500);
+      } else {
+        setMensaje({ tipo: 'danger', texto: 'No se pudo eliminar el plato' });
       }
     } catch (error) {
       console.error('Error eliminando plato:', error);
       setMensaje({ tipo: 'danger', texto: 'Error al eliminar el plato' });
+      // Recargar el menú en caso de error para sincronizar
+      cargarMenu();
     }
   };
 
@@ -201,7 +383,8 @@ export function GastronomiaMenu({ businessId }: GastronomiaMenuProps) {
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) { // 5MB
+    if (file.size > 5 * 1024 * 1024) {
+      // 5MB
       setErrorForm('El archivo no puede superar los 5MB');
       return;
     }
@@ -218,11 +401,14 @@ export function GastronomiaMenu({ businessId }: GastronomiaMenuProps) {
     }
   };
 
-  const menuPorCategoria = menuFiltrado.reduce((acc, item) => {
-    if (!acc[item.category]) acc[item.category] = [];
-    acc[item.category].push(item);
-    return acc;
-  }, {} as Record<string, MenuItem[]>);
+  const menuPorCategoria = menuFiltrado.reduce(
+    (acc, item) => {
+      if (!acc[item.category]) acc[item.category] = [];
+      acc[item.category].push(item);
+      return acc;
+    },
+    {} as Record<string, MenuItem[]>
+  );
 
   if (loading) {
     return (
@@ -236,7 +422,11 @@ export function GastronomiaMenu({ businessId }: GastronomiaMenuProps) {
   return (
     <div>
       {mensaje && (
-        <Alert variant={mensaje.tipo} dismissible onClose={() => setMensaje(null)}>
+        <Alert
+          variant={mensaje.tipo}
+          dismissible
+          onClose={() => setMensaje(null)}
+        >
           {mensaje.texto}
         </Alert>
       )}
@@ -246,7 +436,11 @@ export function GastronomiaMenu({ businessId }: GastronomiaMenuProps) {
           <Card className="mb-4">
             <Card.Header className="d-flex justify-content-between align-items-center">
               <h5 className="mb-0">Gestión del Menú</h5>
-              <Button variant="success" size="sm" onClick={() => setModalAgregar(true)}>
+              <Button
+                variant="success"
+                size="sm"
+                onClick={() => setModalAgregar(true)}
+              >
                 + Agregar Plato
               </Button>
             </Card.Header>
@@ -266,15 +460,21 @@ export function GastronomiaMenu({ businessId }: GastronomiaMenuProps) {
                     onChange={(e) => setFiltroCategoria(e.target.value)}
                   >
                     <option value="TODAS">Todas las categorías</option>
-                    {CATEGORIAS_MENU.map(cat => (
-                      <option key={cat} value={cat}>{cat}</option>
+                    {categorias.map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
                     ))}
                   </Form.Select>
                 </Col>
                 <Col md={4}>
                   <Form.Select
                     value={filtroDisponibilidad}
-                    onChange={(e) => setFiltroDisponibilidad(e.target.value as typeof filtroDisponibilidad)}
+                    onChange={(e) =>
+                      setFiltroDisponibilidad(
+                        e.target.value as typeof filtroDisponibilidad
+                      )
+                    }
                   >
                     <option value="TODOS">Todos</option>
                     <option value="DISPONIBLE">Disponibles</option>
@@ -303,8 +503,13 @@ export function GastronomiaMenu({ businessId }: GastronomiaMenuProps) {
                           <strong>{item.dish_name}</strong>
                           {item.restrictions.length > 0 && (
                             <div>
-                              {item.restrictions.map(r => (
-                                <Badge key={r} bg="info" className="me-1" style={{ fontSize: '0.7rem' }}>
+                              {item.restrictions.map((r) => (
+                                <Badge
+                                  key={r}
+                                  bg="info"
+                                  className="me-1"
+                                  style={{ fontSize: '0.7rem' }}
+                                >
                                   {r}
                                 </Badge>
                               ))}
@@ -312,7 +517,9 @@ export function GastronomiaMenu({ businessId }: GastronomiaMenuProps) {
                           )}
                         </td>
                         <td>${item.price.toLocaleString()}</td>
-                        <td><Badge bg="secondary">{item.category}</Badge></td>
+                        <td>
+                          <Badge bg="secondary">{item.category}</Badge>
+                        </td>
                         <td>
                           <Form.Check
                             type="switch"
@@ -328,7 +535,7 @@ export function GastronomiaMenu({ businessId }: GastronomiaMenuProps) {
                             className="me-1"
                             onClick={() => {
                               setPlatoSeleccionado(item);
-                              setNuevoPrecio(item.price);
+                              setNuevoPrecioInput(item.price.toString());
                               setModalEditar(true);
                             }}
                           >
@@ -371,20 +578,29 @@ export function GastronomiaMenu({ businessId }: GastronomiaMenuProps) {
               ) : (
                 Object.entries(menuPorCategoria).map(([categoria, items]) => (
                   <div key={categoria} className="mb-4">
-                    <h6 className="border-bottom pb-2 text-primary">{categoria}</h6>
-                    {items.filter(i => i.available).map(item => (
-                      <div key={item.id} className="d-flex justify-content-between mb-2">
-                        <div>
-                          <strong>{item.dish_name}</strong>
-                          {item.description && (
-                            <p className="text-muted small mb-0">{item.description}</p>
-                          )}
+                    <h6 className="border-bottom pb-2 text-primary">
+                      {categoria}
+                    </h6>
+                    {items
+                      .filter((i) => i.available)
+                      .map((item) => (
+                        <div
+                          key={item.id}
+                          className="d-flex justify-content-between mb-2"
+                        >
+                          <div>
+                            <strong>{item.dish_name}</strong>
+                            {item.description && (
+                              <p className="text-muted small mb-0">
+                                {item.description}
+                              </p>
+                            )}
+                          </div>
+                          <span className="text-success fw-bold">
+                            ${item.price.toLocaleString()}
+                          </span>
                         </div>
-                        <span className="text-success fw-bold">
-                          ${item.price.toLocaleString()}
-                        </span>
-                      </div>
-                    ))}
+                      ))}
                   </div>
                 ))
               )}
@@ -394,7 +610,22 @@ export function GastronomiaMenu({ businessId }: GastronomiaMenuProps) {
       </Row>
 
       {/* Modal Agregar Plato */}
-      <Modal show={modalAgregar} onHide={() => setModalAgregar(false)} size="lg">
+      <Modal
+        show={modalAgregar}
+        onHide={() => {
+          setModalAgregar(false);
+          setNuevoPlato(initialFormState);
+          setPrecioInput('0');
+          setBusquedaIngrediente('');
+          setIngredientesDisponibles([]);
+          setMostrarSugerencias(false);
+          setBusquedaCategoria('');
+          setMostrarSugerenciasCat(false);
+          setIndiceSeleccionadoCat(-1);
+          setErrorForm(null);
+        }}
+        size="lg"
+      >
         <Modal.Header closeButton>
           <Modal.Title>Agregar Nuevo Plato</Modal.Title>
         </Modal.Header>
@@ -408,7 +639,9 @@ export function GastronomiaMenu({ businessId }: GastronomiaMenuProps) {
                 <Form.Control
                   type="text"
                   value={nuevoPlato.dish_name}
-                  onChange={(e) => setNuevoPlato({ ...nuevoPlato, dish_name: e.target.value })}
+                  onChange={(e) =>
+                    setNuevoPlato({ ...nuevoPlato, dish_name: e.target.value })
+                  }
                   placeholder="Ej: Milanesa napolitana"
                 />
               </Form.Group>
@@ -417,11 +650,26 @@ export function GastronomiaMenu({ businessId }: GastronomiaMenuProps) {
               <Form.Group className="mb-3">
                 <Form.Label>Precio *</Form.Label>
                 <Form.Control
-                  type="number"
-                  value={nuevoPlato.price}
-                  onChange={(e) => setNuevoPlato({ ...nuevoPlato, price: Number(e.target.value) })}
-                  min={0}
+                  type="text"
+                  inputMode="decimal"
+                  value={precioInput}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    // Solo permitir numeros y un punto decimal
+                    if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                      setPrecioInput(value);
+                    }
+                  }}
+                  placeholder="Ej: 1500.50"
+                  isInvalid={
+                    precioInput !== '' &&
+                    (isNaN(parseFloat(precioInput)) ||
+                      parseFloat(precioInput) < 0)
+                  }
                 />
+                <Form.Text className="text-muted">
+                  Usa punto (.) como separador decimal
+                </Form.Text>
               </Form.Group>
             </Col>
           </Row>
@@ -432,43 +680,160 @@ export function GastronomiaMenu({ businessId }: GastronomiaMenuProps) {
               as="textarea"
               rows={2}
               value={nuevoPlato.description}
-              onChange={(e) => setNuevoPlato({ ...nuevoPlato, description: e.target.value })}
+              onChange={(e) =>
+                setNuevoPlato({ ...nuevoPlato, description: e.target.value })
+              }
               placeholder="Descripción breve del plato"
             />
           </Form.Group>
 
-          <Row>
-            <Col md={6}>
-              <Form.Group className="mb-3">
-                <Form.Label>Categoría *</Form.Label>
-                <Form.Select
-                  value={nuevoPlato.category}
-                  onChange={(e) => setNuevoPlato({ ...nuevoPlato, category: e.target.value })}
+          <Form.Group className="mb-3">
+            <Form.Label>Categoría *</Form.Label>
+            <div className="position-relative">
+              <Form.Control
+                type="text"
+                value={busquedaCategoria}
+                onChange={(e) => {
+                  setBusquedaCategoria(e.target.value);
+                  setMostrarSugerenciasCat(true);
+                }}
+                onKeyDown={handleKeyDownCategoria}
+                onFocus={() => {
+                  setMostrarSugerenciasCat(true);
+                  setCategoriasFiltradas(categorias);
+                }}
+                onBlur={() => {
+                  // Retrasar el cierre para permitir clics
+                  setTimeout(() => setMostrarSugerenciasCat(false), 200);
+                }}
+                placeholder="Buscar categoría... (Ej: pollo)"
+              />
+              {mostrarSugerenciasCat && categoriasFiltradas.length > 0 && (
+                <div
+                  className="position-absolute w-100 bg-white border rounded shadow-sm mt-1"
+                  style={{
+                    maxHeight: '250px',
+                    overflowY: 'auto',
+                    zIndex: 1000,
+                  }}
                 >
-                  <option value="">Seleccionar categoría</option>
-                  {CATEGORIAS_MENU.map(cat => (
-                    <option key={cat} value={cat}>{cat}</option>
+                  {categoriasFiltradas.map((cat, idx) => (
+                    <div
+                      key={cat}
+                      className={`px-3 py-2 ${idx === indiceSeleccionadoCat ? 'bg-primary text-white' : ''}`}
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => seleccionarCategoria(cat)}
+                      onMouseEnter={(e) => {
+                        if (idx !== indiceSeleccionadoCat) {
+                          e.currentTarget.style.backgroundColor = '#f8f9fa';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (idx !== indiceSeleccionadoCat) {
+                          e.currentTarget.style.backgroundColor = 'white';
+                        }
+                      }}
+                    >
+                      {cat}
+                    </div>
                   ))}
-                </Form.Select>
-              </Form.Group>
-            </Col>
-            <Col md={6}>
-              <Form.Group className="mb-3">
-                <Form.Label>Ingredientes</Form.Label>
-                <Form.Control
-                  type="text"
-                  value={nuevoPlato.ingredients}
-                  onChange={(e) => setNuevoPlato({ ...nuevoPlato, ingredients: e.target.value })}
-                  placeholder="Separados por coma"
-                />
-              </Form.Group>
-            </Col>
-          </Row>
+                </div>
+              )}
+            </div>
+            {nuevoPlato.category && (
+              <small className="text-success d-block mt-1">
+                ✓ Seleccionado: <strong>{nuevoPlato.category}</strong>
+              </small>
+            )}
+            <Form.Text className="text-muted">
+              Escribe para buscar o usa ↑↓ para navegar y Enter para seleccionar
+            </Form.Text>
+          </Form.Group>
+
+          <Form.Group className="mb-3">
+            <Form.Label>Ingredientes</Form.Label>
+            <div className="position-relative">
+              <Form.Control
+                type="text"
+                value={busquedaIngrediente}
+                onChange={(e) => {
+                  setBusquedaIngrediente(e.target.value);
+                  setMostrarSugerencias(true);
+                }}
+                onFocus={() => setMostrarSugerencias(true)}
+                placeholder="Buscar ingrediente..."
+              />
+              {buscandoIngredientes && (
+                <div className="position-absolute end-0 top-0 mt-2 me-2">
+                  <Spinner size="sm" animation="border" />
+                </div>
+              )}
+              {mostrarSugerencias && ingredientesDisponibles.length > 0 && (
+                <div
+                  className="position-absolute w-100 bg-white border rounded shadow-sm mt-1"
+                  style={{
+                    maxHeight: '200px',
+                    overflowY: 'auto',
+                    zIndex: 1000,
+                  }}
+                >
+                  {ingredientesDisponibles.map((ing, idx) => (
+                    <div
+                      key={idx}
+                      className="px-3 py-2 hover-bg-light cursor-pointer"
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => agregarIngrediente(ing)}
+                      onMouseEnter={(e) =>
+                        (e.currentTarget.style.backgroundColor = '#f8f9fa')
+                      }
+                      onMouseLeave={(e) =>
+                        (e.currentTarget.style.backgroundColor = 'white')
+                      }
+                    >
+                      {ing}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            {busquedaIngrediente && (
+              <Button
+                variant="link"
+                size="sm"
+                className="mt-1"
+                onClick={() => {
+                  if (busquedaIngrediente.trim()) {
+                    agregarIngrediente(busquedaIngrediente.trim());
+                  }
+                }}
+              >
+                + Agregar "{busquedaIngrediente}" como nuevo ingrediente
+              </Button>
+            )}
+            <div className="mt-2">
+              {nuevoPlato.ingredients.map((ing, idx) => (
+                <Badge
+                  key={idx}
+                  bg="secondary"
+                  className="me-1 mb-1"
+                  style={{ cursor: 'pointer', fontSize: '0.85rem' }}
+                >
+                  {ing}
+                  <span
+                    className="ms-2"
+                    onClick={() => eliminarIngrediente(ing)}
+                  >
+                    ×
+                  </span>
+                </Badge>
+              ))}
+            </div>
+          </Form.Group>
 
           <Form.Group className="mb-3">
             <Form.Label>Restricciones alimentarias</Form.Label>
             <div>
-              {RESTRICCIONES_MENU.map(restriccion => (
+              {restricciones.map((restriccion) => (
                 <Form.Check
                   key={restriccion}
                   inline
@@ -479,12 +844,14 @@ export function GastronomiaMenu({ businessId }: GastronomiaMenuProps) {
                     if (e.target.checked) {
                       setNuevoPlato({
                         ...nuevoPlato,
-                        restrictions: [...nuevoPlato.restrictions, restriccion]
+                        restrictions: [...nuevoPlato.restrictions, restriccion],
                       });
                     } else {
                       setNuevoPlato({
                         ...nuevoPlato,
-                        restrictions: nuevoPlato.restrictions.filter(r => r !== restriccion)
+                        restrictions: nuevoPlato.restrictions.filter(
+                          (r) => r !== restriccion
+                        ),
                       });
                     }
                   }}
@@ -500,7 +867,9 @@ export function GastronomiaMenu({ businessId }: GastronomiaMenuProps) {
                 <Form.Control
                   type="text"
                   value={nuevoPlato.picture}
-                  onChange={(e) => setNuevoPlato({ ...nuevoPlato, picture: e.target.value })}
+                  onChange={(e) =>
+                    setNuevoPlato({ ...nuevoPlato, picture: e.target.value })
+                  }
                   placeholder="https://ejemplo.com/imagen.jpg"
                 />
               </Col>
@@ -522,9 +891,14 @@ export function GastronomiaMenu({ businessId }: GastronomiaMenuProps) {
                   src={nuevoPlato.picture}
                   alt="Preview"
                   className="img-thumbnail"
-                  style={{ maxWidth: '150px', maxHeight: '100px', objectFit: 'cover' }}
+                  style={{
+                    maxWidth: '150px',
+                    maxHeight: '100px',
+                    objectFit: 'cover',
+                  }}
                   onError={(e) => {
-                    e.currentTarget.src = 'https://via.placeholder.com/150x100/cccccc/666666?text=Error';
+                    e.currentTarget.src =
+                      'https://via.placeholder.com/150x100/cccccc/666666?text=Error';
                   }}
                 />
                 <div className="mt-1">
@@ -543,7 +917,11 @@ export function GastronomiaMenu({ businessId }: GastronomiaMenuProps) {
           <Button variant="secondary" onClick={() => setModalAgregar(false)}>
             Cancelar
           </Button>
-          <Button variant="success" onClick={handleAgregarPlato} disabled={guardando}>
+          <Button
+            variant="success"
+            onClick={handleAgregarPlato}
+            disabled={guardando}
+          >
             {guardando ? <Spinner size="sm" /> : 'Agregar Plato'}
           </Button>
         </Modal.Footer>
@@ -557,17 +935,36 @@ export function GastronomiaMenu({ businessId }: GastronomiaMenuProps) {
         <Modal.Body>
           {platoSeleccionado && (
             <>
-              <p><strong>{platoSeleccionado.dish_name}</strong></p>
-              <p className="text-muted">Precio actual: ${platoSeleccionado.price.toLocaleString()}</p>
+              <p>
+                <strong>{platoSeleccionado.dish_name}</strong>
+              </p>
+              <p className="text-muted">
+                Precio actual: ${platoSeleccionado.price.toLocaleString()}
+              </p>
 
               <Form.Group>
                 <Form.Label>Nuevo precio</Form.Label>
                 <Form.Control
-                  type="number"
-                  value={nuevoPrecio}
-                  onChange={(e) => setNuevoPrecio(Number(e.target.value))}
-                  min={0}
+                  type="text"
+                  inputMode="decimal"
+                  value={nuevoPrecioInput}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    // Solo permitir numeros y un punto decimal
+                    if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                      setNuevoPrecioInput(value);
+                    }
+                  }}
+                  placeholder="Ej: 1500.50"
+                  isInvalid={
+                    nuevoPrecioInput !== '' &&
+                    (isNaN(parseFloat(nuevoPrecioInput)) ||
+                      parseFloat(nuevoPrecioInput) < 0)
+                  }
                 />
+                <Form.Text className="text-muted">
+                  Usa punto (.) como separador decimal
+                </Form.Text>
               </Form.Group>
             </>
           )}
@@ -576,7 +973,11 @@ export function GastronomiaMenu({ businessId }: GastronomiaMenuProps) {
           <Button variant="secondary" onClick={() => setModalEditar(false)}>
             Cancelar
           </Button>
-          <Button variant="primary" onClick={handleEditarPrecio} disabled={guardando}>
+          <Button
+            variant="primary"
+            onClick={handleEditarPrecio}
+            disabled={guardando}
+          >
             {guardando ? <Spinner size="sm" /> : 'Guardar'}
           </Button>
         </Modal.Footer>

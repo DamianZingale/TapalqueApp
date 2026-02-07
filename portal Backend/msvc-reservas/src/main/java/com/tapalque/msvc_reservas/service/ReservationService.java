@@ -18,11 +18,15 @@ public interface ReservationService {
     public Flux<ReservationDTO> getReservationsByCustomer(String customerId);
     public void cleanUnpaidReservations();
 
-    // Filtrado por fechas
+    // Filtrado por fechas (fecha de creación)
     public Flux<ReservationDTO> getReservationsByHotelAndDateRange(
             String hotelId, LocalDateTime desde, LocalDateTime hasta);
     public Flux<ReservationDTO> getReservationsByCustomerAndDateRange(
             String customerId, LocalDateTime desde, LocalDateTime hasta);
+
+    // Reservas activas cuya estadía se solapa con un rango de fechas
+    public Flux<ReservationDTO> getReservationsByHotelAndStayOverlap(
+            String hotelId, LocalDateTime desde, LocalDateTime hasta);
 
     // Métodos para RabbitMQ - confirmación de pagos
     void confirmarPagoReserva(String reservaId, PagoEventoDTO evento);

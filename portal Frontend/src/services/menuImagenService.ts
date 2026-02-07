@@ -11,7 +11,7 @@ export async function subirImagenMenu(restaurantId: string, file: File): Promise
     formData.append('file', file);
 
     const token = localStorage.getItem('token');
-    const response = await fetch(`/restaurante/${restaurantId}/imagenes`, {
+    const response = await fetch(`/api/restaurante/${restaurantId}/imagenes`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`
@@ -34,7 +34,7 @@ export async function subirImagenMenu(restaurantId: string, file: File): Promise
 export async function eliminarImagenMenu(restaurantId: string, imagenUrl: string): Promise<void> {
   try {
     const token = localStorage.getItem('token');
-    const response = await fetch(`/restaurante/${restaurantId}/imagenes`, {
+    const response = await fetch(`/api/restaurante/${restaurantId}/imagenes`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',

@@ -15,7 +15,7 @@ public class PagoEventoDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private Long transaccionId;
-    private Long referenciaId; // ID del pedido o reserva
+    private String referenciaId; // ID del pedido o reserva (MongoDB ObjectId)
     private String tipo; // "PEDIDO" o "RESERVA"
     private String estado; // "APROBADO", "RECHAZADO", "PENDIENTE"
     private BigDecimal monto;

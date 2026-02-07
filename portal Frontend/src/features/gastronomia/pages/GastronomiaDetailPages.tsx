@@ -48,7 +48,7 @@ export default function GastronomiaDetailPage() {
     try {
       setLoadingMenu(true);
       const response = await api.get<MenuResponseDTO>(
-        `/api/gastronomia/menu/restaurant/${id}`
+        `/gastronomia/menu/restaurant/${id}`
       );
       console.log('Menu response:', response);
       // Transformar la respuesta del backend al formato del frontend
@@ -133,7 +133,11 @@ export default function GastronomiaDetailPage() {
           ) : (
             <>
               {menu.length > 0 ? (
-                <MenuCard items={menu} />
+                <MenuCard
+                  items={menu}
+                  restaurantId={restaurante.id.toString()}
+                  restaurantName={restaurante.name}
+                />
               ) : (
                 <div className="alert alert-info text-center">
                   No hay elementos disponibles en el menú de este restaurante.

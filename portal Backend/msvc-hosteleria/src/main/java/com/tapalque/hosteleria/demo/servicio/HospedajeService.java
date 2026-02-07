@@ -35,9 +35,16 @@ public class HospedajeService {
     }
 
     public ResponseEntity<HospedajeDTO> obtenerPorId(Long id) {
-        Optional<Hospedaje> hospedaje = hospedajeRepository.findById(id);
-        return hospedaje.map(value -> ResponseEntity.ok(new HospedajeDTO(value)))
-                .orElse(ResponseEntity.notFound().build());
+        try {
+            System.out.println("Buscando hospedaje con ID: " + id);
+            Optional<Hospedaje> hospedaje = hospedajeRepository.findById(id);
+            return hospedaje.map(value -> ResponseEntity.ok(new HospedajeDTO(value)))
+                    .orElse(ResponseEntity.notFound().build());
+        } catch (Exception e) {
+            System.err.println("Error al buscar hospedaje con ID " + id + ": " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     public HospedajeDTO guardar(HospedajeRequestDTO dto) {
@@ -70,11 +77,10 @@ public class HospedajeService {
         hospedaje.setGoogleMapsUrl(dto.getGoogleMapsUrl());
         hospedaje.setNumWhatsapp(dto.getNumWhatsapp());
         hospedaje.setTipoHospedaje(dto.getTipoHospedaje());
-        // Limpiar y actualizar las imágenes
-        //🔴Falta logia para eliminar archivo de imagenes que estan en el servidor❗
-        hospedaje.getImagenes().clear();
-        //🔴falta loguica para guardar archivo en servidor de las nuevas imagenes que tiene el DNO REQUEST, y obtener la url para guardarla en la DB❗
+        // Solo actualizar imágenes si se envían explícitamente en el request.
+        // Las imágenes se gestionan por separado vía /hospedajes/{id}/imagenes
         if (dto.getImagenes() != null) {
+            hospedaje.getImagenes().clear();
             List<HospedajeImagen> nuevasImagenes = dto.getImagenes().stream().map(url -> {
                 HospedajeImagen img = new HospedajeImagen();
                 img.setImagenUrl(url);

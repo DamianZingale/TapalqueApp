@@ -24,6 +24,7 @@ interface Comercio {
   longitud?: number;
   facebook?: string;
   instagram?: string;
+  tag?: string;
   imagenes?: { imagenUrl: string }[];
 }
 
@@ -37,6 +38,7 @@ const emptyComercio: Partial<Comercio> = {
   longitud: undefined,
   facebook: '',
   instagram: '',
+  tag: '',
   imagenes: [],
 };
 
@@ -111,6 +113,7 @@ export function ComerciosSection() {
         instagram: formData.instagram?.trim() || undefined,
         latitud: formData.latitud || undefined,
         longitud: formData.longitud || undefined,
+        tag: formData.tag?.trim().toUpperCase() || undefined,
       };
 
       console.log('Enviando datos:', cleanedData);
@@ -248,7 +251,7 @@ export function ComerciosSection() {
               </Row>
             )}
             <Row>
-              <Col md={6}>
+              <Col md={4}>
                 <Form.Group className="mb-2">
                   <Form.Label className="small mb-0">Título *</Form.Label>
                   <Form.Control
@@ -258,7 +261,18 @@ export function ComerciosSection() {
                   />
                 </Form.Group>
               </Col>
-              <Col md={6}>
+              <Col md={4}>
+                <Form.Group className="mb-2">
+                  <Form.Label className="small mb-0">Tag</Form.Label>
+                  <Form.Control
+                    size="sm"
+                    placeholder="Ej: REMIS"
+                    value={formData.tag || ''}
+                    onChange={(e) => handleChange('tag', e.target.value.toUpperCase())}
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={4}>
                 <Form.Group className="mb-2">
                   <Form.Label className="small mb-0">Teléfono</Form.Label>
                   <Form.Control

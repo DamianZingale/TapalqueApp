@@ -18,6 +18,9 @@ export interface DishDTO {
   idDish: number;
   name: string;
   price: number;
+  description?: string;
+  available?: boolean;
+  picture?: string;
   categories: DishCategoryDTO[];
   ingredients: IngredientDTO[];
   restrictions: DishRestrictionDTO[];
@@ -35,6 +38,8 @@ export interface Imenu {
   id: number;
   dish_name: string;
   price: number;
+  description?: string;
+  available: boolean;
   ingredients: string[];
   picture?: string;
   category: string;
@@ -61,6 +66,9 @@ export function transformMenuResponse(backendResponse: MenuResponseDTO): Imenu[]
     id: dish.idDish,
     dish_name: dish.name,
     price: dish.price,
+    description: dish.description,
+    available: dish.available !== undefined ? dish.available : true,
+    picture: dish.picture,
     ingredients: dish.ingredients?.map((i) => i.name) || [],
     category: dish.categories?.[0]?.name || 'Sin categoría',
     restrictions: dish.restrictions?.map((r) => r.name) || [],

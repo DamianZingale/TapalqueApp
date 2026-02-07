@@ -7,6 +7,7 @@ import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,26 +26,30 @@ import com.tapalque.user.entity.Role;
 import com.tapalque.user.enu.RolName;
 import com.tapalque.user.service.EmailService;
 import com.tapalque.user.service.EmailVerificationService;
+import com.tapalque.user.service.PasswordResetService;
 import com.tapalque.user.service.UserService;
 
 import jakarta.validation.Valid;
 
 
 @RestController
-@RequestMapping("/user")  
+@RequestMapping("/user")
 public class UserController {
 
     private final UserService userService;
     private final EmailVerificationService emailVerificationService;
     private final EmailService emailService;
+    private final PasswordResetService passwordResetService;
 
     public UserController(
             UserService userService,
             EmailVerificationService emailVerificationService,
-            EmailService emailService) {
+            EmailService emailService,
+            PasswordResetService passwordResetService) {
         this.userService = userService;
         this.emailVerificationService = emailVerificationService;
         this.emailService = emailService;
+        this.passwordResetService = passwordResetService;
     }
 
     @PostMapping("/public/register")
@@ -58,24 +63,24 @@ public class UserController {
         }
     }
 
-    // @PreAuthorize("hasRole('MODERADOR')")
+    @PreAuthorize("hasRole('MODERADOR')")
     @PostMapping("/AdminRegistro")
     public ResponseEntity<?> registerAdmin(@Valid @RequestBody UserRegistrationDTO dto) {
         try {
             Role role = new Role(1L, RolName.MODERADOR);
-            UserResponseDTO response = userService.register(dto, role); 
+            UserResponseDTO response = userService.register(dto, role);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (Exception e) {
            return ResponseEntity.badRequest().body(error("Error en registro", e.getMessage()));
         }
     }
 
-    // @PreAuthorize("hasRole('ADMINISTRADOR')")
+    @PreAuthorize("hasRole('MODERADOR')")
     @PostMapping("/GastroRegistro")
     public ResponseEntity<?> registerGastro(@Valid @RequestBody UserRegistrationDTO dto) {
         try {
             Role role = new Role(2L, RolName.ADMINISTRADOR);
-            UserResponseDTO response = userService.register(dto, role); 
+            UserResponseDTO response = userService.register(dto, role);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(error("Error en registro", e.getMessage()));
@@ -89,6 +94,7 @@ public class UserController {
             return userService.getUserByEmailWithPassword(email)
                     .map(user -> {
                         Map<String, Object> response = new HashMap<>();
+                        response.put("id", user.getId());
                         response.put("email", user.getEmail());
                         response.put("firtName", user.getFirstName());
                         response.put("password", user.getPassword());
@@ -153,9 +159,102 @@ public class UserController {
         }
     }
 
+    // ==================== PASSWORD RESET ENDPOINTS ====================
+
+    // Solicitar restablecimiento de contraseña
+    @PostMapping("/public/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> payload) {
+        try {
+            String email = payload.get("email");
+            if (email == null || email.isBlank()) {
+                return ResponseEntity.badRequest()
+                        .body(error("Error", "El email es obligatorio"));
+            }
+
+            String token = passwordResetService.generatePasswordResetToken(email);
+
+            if (token != null) {
+                // Obtener usuario para enviar email
+                userService.getUserByEmailWithPassword(email).ifPresent(user -> {
+                    try {
+                        emailService.sendPasswordResetEmail(user.getEmail(), user.getFirstName(), token);
+                    } catch (Exception e) {
+                        System.err.println("Error al enviar email de reset: " + e.getMessage());
+                        System.out.println("Token de reset para " + email + ": " + token);
+                    }
+                });
+            }
+
+            // Siempre respondemos éxito para no revelar si el email existe o no
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Si el email existe en nuestro sistema, recibirás un correo con instrucciones para restablecer tu contraseña");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(error("Error", "Error al procesar la solicitud"));
+        }
+    }
+
+    // Validar token de reset (para verificar antes de mostrar el formulario)
+    @GetMapping("/public/validate-reset-token")
+    public ResponseEntity<?> validateResetToken(@RequestParam String token) {
+        try {
+            boolean isValid = passwordResetService.isValidResetToken(token);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("valid", isValid);
+
+            if (!isValid) {
+                response.put("message", "El enlace ha expirado o es inválido");
+            }
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(error("Error", "Error al validar el token"));
+        }
+    }
+
+    // Restablecer contraseña con token
+    @PostMapping("/public/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> payload) {
+        try {
+            String token = payload.get("token");
+            String newPassword = payload.get("password");
+
+            if (token == null || token.isBlank()) {
+                return ResponseEntity.badRequest()
+                        .body(error("Error", "Token inválido"));
+            }
+
+            if (newPassword == null || newPassword.isBlank()) {
+                return ResponseEntity.badRequest()
+                        .body(error("Error", "La contraseña es obligatoria"));
+            }
+
+            boolean success = passwordResetService.resetPassword(token, newPassword);
+
+            if (success) {
+                Map<String, String> response = new HashMap<>();
+                response.put("message", "Contraseña actualizada correctamente. Ya puedes iniciar sesión.");
+                return ResponseEntity.ok(response);
+            } else {
+                return ResponseEntity.badRequest()
+                        .body(error("Error", "El enlace ha expirado o es inválido. Solicita uno nuevo."));
+            }
+        } catch (IllegalArgumentException e) {
+            // Error de validación de contraseña
+            return ResponseEntity.badRequest()
+                    .body(error("Error de validación", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(error("Error", "Error al restablecer la contraseña"));
+        }
+    }
+
     // ==================== MODERADOR ENDPOINTS ====================
 
-    // @PreAuthorize("hasRole('MODERADOR')")
+    @PreAuthorize("hasRole('MODERADOR')")
     @GetMapping("/all")
     public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
         try {
@@ -166,7 +265,7 @@ public class UserController {
         }
     }
 
-    // @PreAuthorize("hasRole('MODERADOR')")
+    @PreAuthorize("hasRole('MODERADOR')")
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDTO> getUserById(@PathVariable Long id) {
         try {
@@ -178,8 +277,7 @@ public class UserController {
         }
     }
 
-
-    // @PreAuthorize("hasRole('MODERADOR')")
+    @PreAuthorize("hasRole('MODERADOR')")
     @GetMapping("/administradores")
     public ResponseEntity<List<UserResponseDTO>> getAdministrators() {
         try {
@@ -190,8 +288,7 @@ public class UserController {
         }
     }
 
-
-    // @PreAuthorize("hasRole('MODERADOR')")
+    @PreAuthorize("hasRole('MODERADOR')")
     @PatchMapping("/{id}/role")
     public ResponseEntity<?> changeUserRole(
             @PathVariable @NonNull Long id,
@@ -215,7 +312,7 @@ public class UserController {
         }
     }
 
-    // @PreAuthorize("hasRole('MODERADOR')")
+    @PreAuthorize("hasRole('MODERADOR')")
     @PatchMapping("/{id}/estado")
     public ResponseEntity<?> changeUserStatus(
             @PathVariable @NonNull Long id,
@@ -238,9 +335,7 @@ public class UserController {
         }
     }
 
-
-
-    // @PreAuthorize("hasRole('MODERADOR')")
+    @PreAuthorize("hasRole('MODERADOR')")
     @PostMapping("/moderador/create")
     public ResponseEntity<?> createUserWithRole(@Valid @RequestBody UserRegistrationDTO dto) {
         try {
@@ -266,6 +361,18 @@ public class UserController {
 
     // ==================== PROFILE ENDPOINTS ====================
 
+    // Obtener perfil del usuario autenticado
+    @GetMapping("/profile/me")
+    public ResponseEntity<?> getMyProfile(@RequestParam String email) {
+        try {
+            return userService.getUserByEmail(email)
+                    .map(ResponseEntity::ok)
+                    .orElse(ResponseEntity.notFound().build());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(error("Error al obtener perfil", e.getMessage()));
+        }
+    }
 
     @PutMapping("/{id}/profile")
     public ResponseEntity<?> updateProfile(

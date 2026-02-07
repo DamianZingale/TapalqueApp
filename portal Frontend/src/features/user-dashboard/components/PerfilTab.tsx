@@ -6,11 +6,13 @@ import { api } from "../../../config/api";
 interface UserProfile {
     id: number;
     nombre: string;
+    apellido?: string;
     email: string;
     telefono?: string;
+    dni?: string;
     direccion?: string;
     emailVerified: boolean;
-    rol: number;
+    rol: string | number;
     createdAt?: string;
 }
 
@@ -23,33 +25,41 @@ export const PerfilTab = () => {
 
     // Formulario
     const [nombre, setNombre] = useState("");
+    const [apellido, setApellido] = useState("");
     const [telefono, setTelefono] = useState("");
+    const [dni, setDni] = useState("");
     const [direccion, setDireccion] = useState("");
 
     useEffect(() => {
-        cargarPerfil();
+        cargarPerfilDesdeStorage();
     }, []);
 
-    const cargarPerfil = async () => {
-        try {
-            setLoading(true);
-            const user = authService.getUser();
-            if (!user?.email) {
-                setMensaje({ tipo: "danger", texto: "No se pudo obtener información del usuario" });
-                return;
-            }
-
-            const response = await api.get(`/user/email/${user.email}`);
-            setPerfil(response.data);
-            setNombre(response.data.nombre || "");
-            setTelefono(response.data.telefono || "");
-            setDireccion(response.data.direccion || "");
-        } catch (error) {
-            console.error("Error cargando perfil:", error);
-            setMensaje({ tipo: "danger", texto: "Error al cargar el perfil" });
-        } finally {
+    const cargarPerfilDesdeStorage = () => {
+        const user = authService.getUser();
+        if (!user?.email) {
+            setMensaje({ tipo: "danger", texto: "No se pudo obtener información del usuario" });
             setLoading(false);
+            return;
         }
+
+        // Cargar datos desde localStorage inmediatamente
+        setPerfil({
+            id: Number(user.id) || 0,
+            nombre: user.nombre || "",
+            apellido: user.apellido || "",
+            email: user.email || "",
+            telefono: user.telefono || "",
+            dni: user.dni || "",
+            direccion: user.direccion || "",
+            emailVerified: true,
+            rol: user.rol || "USER",
+        });
+        setNombre(user.nombre || "");
+        setApellido(user.apellido || "");
+        setTelefono(user.telefono || "");
+        setDni(user.dni || "");
+        setDireccion(user.direccion || "");
+        setLoading(false);
     };
 
     const handleGuardar = async () => {
@@ -57,14 +67,27 @@ export const PerfilTab = () => {
             setGuardando(true);
             setMensaje(null);
 
-            const response = await api.put(`/user/${perfil?.id}`, {
+            const updatedPerfil = await api.put<UserProfile>(`/user/${perfil?.id}/profile`, {
                 nombre,
+                apellido,
                 telefono,
+                dni,
                 direccion
             });
 
-            setPerfil(response.data);
-            authService.setUser(response.data);
+            setPerfil(updatedPerfil);
+            // Actualizar localStorage con los datos del perfil
+            const currentUser = authService.getUser();
+            authService.setUser({
+                ...currentUser,
+                id: updatedPerfil.id,
+                nombre: updatedPerfil.nombre,
+                apellido: updatedPerfil.apellido,
+                email: updatedPerfil.email,
+                telefono: updatedPerfil.telefono,
+                dni: updatedPerfil.dni,
+                direccion: updatedPerfil.direccion,
+            });
             setEditando(false);
             setMensaje({ tipo: "success", texto: "Perfil actualizado correctamente" });
         } catch (error) {
@@ -77,19 +100,30 @@ export const PerfilTab = () => {
 
     const handleCancelar = () => {
         setNombre(perfil?.nombre || "");
+        setApellido(perfil?.apellido || "");
         setTelefono(perfil?.telefono || "");
+        setDni(perfil?.dni || "");
         setDireccion(perfil?.direccion || "");
         setEditando(false);
         setMensaje(null);
     };
 
-    const getRoleName = (rol: number): string => {
+    const getRoleName = (rol: string | number): string => {
+        // El backend puede enviar string ("USER", "MODERADOR", "ADMINISTRADOR") o número
+        if (typeof rol === "string") {
+            switch (rol.toUpperCase()) {
+                case "MODERADOR": return "Moderador";
+                case "ADMINISTRADOR": return "Administrador";
+                case "USER": return "Usuario";
+                default: return "Desconocido";
+            }
+        }
         switch (rol) {
             case 1: return "Moderador";
             case 2: return "Administrador";
             case 3: return "Usuario";
             default: return "Desconocido";
-        };
+        }
     };
 
     if (loading) {
@@ -191,15 +225,31 @@ export const PerfilTab = () => {
                         <Row>
                             <Col md={6} className="mb-3">
                                 <Form.Group>
-                                    <Form.Label>Nombre completo</Form.Label>
+                                    <Form.Label>Nombre</Form.Label>
                                     <Form.Control
                                         type="text"
                                         value={nombre}
                                         onChange={(e) => setNombre(e.target.value)}
                                         disabled={!editando}
+                                        placeholder="Ingresa tu nombre"
                                     />
                                 </Form.Group>
                             </Col>
+                            <Col md={6} className="mb-3">
+                                <Form.Group>
+                                    <Form.Label>Apellido</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        value={apellido}
+                                        onChange={(e) => setApellido(e.target.value)}
+                                        disabled={!editando}
+                                        placeholder="Ingresa tu apellido"
+                                    />
+                                </Form.Group>
+                            </Col>
+                        </Row>
+
+                        <Row>
                             <Col md={6} className="mb-3">
                                 <Form.Group>
                                     <Form.Label>Email</Form.Label>
@@ -211,6 +261,18 @@ export const PerfilTab = () => {
                                     <Form.Text className="text-muted">
                                         El email no se puede modificar
                                     </Form.Text>
+                                </Form.Group>
+                            </Col>
+                            <Col md={6} className="mb-3">
+                                <Form.Group>
+                                    <Form.Label>DNI</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        value={dni}
+                                        onChange={(e) => setDni(e.target.value)}
+                                        disabled={!editando}
+                                        placeholder="Ej: 12345678"
+                                    />
                                 </Form.Group>
                             </Col>
                         </Row>

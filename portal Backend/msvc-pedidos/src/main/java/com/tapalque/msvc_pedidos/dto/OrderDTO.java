@@ -5,6 +5,9 @@ import java.util.List;
 
 public class OrderDTO {
     private String id;
+    private String userId;
+    private String userName;
+    private String userPhone;
     private Double totalPrice;
     private Boolean paidWithMercadoPago;
     private Boolean paidWithCash;
@@ -14,6 +17,8 @@ public class OrderDTO {
     private List<ItemDTO> items;
     private RestaurantDTO restaurant;
     private String paymentReceiptPath;
+    private Boolean isDelivery;
+    private String deliveryAddress;
 
     
     public OrderDTO() {}
@@ -53,4 +58,19 @@ public class OrderDTO {
     public void setPaymentReceiptPath(String paymentReceiptPath) {
         this.paymentReceiptPath = paymentReceiptPath;
     }
+
+    public String getUserId() { return userId; }
+    public void setUserId(String userId) { this.userId = userId; }
+
+    public String getUserName() { return userName; }
+    public void setUserName(String userName) { this.userName = userName; }
+
+    public String getUserPhone() { return userPhone; }
+    public void setUserPhone(String userPhone) { this.userPhone = userPhone; }
+
+    public Boolean getIsDelivery() { return isDelivery; }
+    public void setIsDelivery(Boolean isDelivery) { this.isDelivery = isDelivery; }
+
+    public String getDeliveryAddress() { return deliveryAddress; }
+    public void setDeliveryAddress(String deliveryAddress) { this.deliveryAddress = deliveryAddress; }
 }

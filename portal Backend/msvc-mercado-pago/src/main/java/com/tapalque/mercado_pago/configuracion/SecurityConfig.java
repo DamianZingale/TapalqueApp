@@ -26,13 +26,8 @@ public class SecurityConfig {
         return http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/api/webhook",
-                                "/oauth/callback"
-                        ).permitAll()
-                        .anyRequest().authenticated())
-                .addFilterBefore(jwtAuthenticationFilter,
-                        UsernamePasswordAuthenticationFilter.class)
+                        // El Gateway ya valida el JWT, permitir todas las peticiones internas
+                        .anyRequest().permitAll())
                 .build();
     }
 
