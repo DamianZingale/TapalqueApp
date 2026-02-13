@@ -103,13 +103,23 @@ public Mono<ReservationDTO> updateReservation(ReservationDTO reservationDto) {
     }
 
     @Override
+    public Flux<ReservationDTO> getReservationsByHotelAndStayOverlapIncludingPending(
+            String hotelId, LocalDateTime desde, LocalDateTime hasta) {
+        // Incluir reservas pendientes de pago creadas en los últimos 5 minutos
+        LocalDateTime limiteBloqueo = LocalDateTime.now().minusMinutes(5);
+        return reservationRepository.findByHotelAndStayPeriodOverlapIncludingPending(hotelId, desde, hasta, limiteBloqueo)
+                .map(ReservationMapper::toDto);
+    }
+
+    @Override
     public void confirmarPagoReserva(String reservaId, PagoEventoDTO evento) {
         reservationRepository.findById(reservaId)
             .flatMap(reservation -> {
-                // Actualizar estado de pago
+                // Actualizar estado de pago con el monto recibido
                 if (reservation.getPayment() != null) {
-                    reservation.getPayment().setIsPaid(true);
-                    reservation.getPayment().setHasPendingAmount(false);
+                    double montoRecibido = evento.getMonto() != null ? evento.getMonto().doubleValue() : 0.0;
+                    // setAmountPaid recalcula remainingAmount, isPaid y hasPendingAmount
+                    reservation.getPayment().setAmountPaid(montoRecibido);
                 }
                 reservation.setIsActive(true);
                 reservation.setTransaccionId(evento.getTransaccionId());
@@ -120,6 +130,23 @@ public Mono<ReservationDTO> updateReservation(ReservationDTO reservationDto) {
             })
             .doOnSuccess(reservation -> System.out.println("Reserva " + reservaId + " confirmada como PAGADA"))
             .doOnError(error -> System.err.println("Error al confirmar pago de reserva " + reservaId + ": " + error.getMessage()))
+            .subscribe();
+    }
+
+    @Override
+    public void marcarPagoPendienteReserva(String reservaId, PagoEventoDTO evento) {
+        reservationRepository.findById(reservaId)
+            .flatMap(reservation -> {
+                // Pago pendiente: la reserva no se activa aún
+                reservation.setIsActive(false);
+                reservation.setIsCancelled(false);
+                reservation.setTransaccionId(evento.getTransaccionId());
+                reservation.setMercadoPagoId(evento.getMercadoPagoId());
+                reservation.setDateUpdated(LocalDateTime.now());
+                return reservationRepository.save(reservation);
+            })
+            .doOnSuccess(reservation -> System.out.println("Reserva " + reservaId + " marcada como pago PENDIENTE"))
+            .doOnError(error -> System.err.println("Error al marcar pago pendiente de reserva " + reservaId + ": " + error.getMessage()))
             .subscribe();
     }
 

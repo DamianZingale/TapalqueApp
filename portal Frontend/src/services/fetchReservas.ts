@@ -159,6 +159,23 @@ export async function actualizarReserva(
   }
 }
 
+// Obtener una reserva por su ID
+export async function fetchReservaById(reservaId: string): Promise<Reserva | null> {
+  try {
+    const response = await fetch(
+      `/api/reservas/reservations/by-id/${reservaId}`,
+      { headers: getAuthHeaders() }
+    );
+    if (!response.ok) return null;
+    const data = await response.json();
+    // El endpoint retorna un array (Flux), tomamos el primer elemento
+    return Array.isArray(data) ? data[0] || null : data;
+  } catch (error) {
+    console.error('Error en fetchReservaById:', error);
+    return null;
+  }
+}
+
 // Consulta pública: habitaciones libres de un hospedaje para un rango de fechas.
 // El backend (msvc-reservas) combina habitaciones de msvc-hosteleria con reservas solapadas.
 import type { Habitacion } from './fetchHabitaciones';

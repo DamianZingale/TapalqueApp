@@ -14,6 +14,7 @@ import PerfilRoutes from '../../features/perfil/routes';
 import ServiciosRoutes from '../../features/servicios/routes';
 import TermasRoutes from '../../features/termas/routes';
 import { PagoRoutes } from '../../features/pago/routes';
+import MisPedidosPage from '../../features/gastronomia/pages/MisPedidosPage';
 
 // Usuario
 import UserDashboardRoutes from '../../features/user-dashboard/routes';
@@ -68,6 +69,14 @@ export const router = createBrowserRouter([
       { path: 'terminos-y-condiciones', element: <TerminosYCondiciones /> },
       { path: 'nosotros', element: <Nosotros /> },
       { path: 'pago/*', element: <PagoRoutes /> },
+      {
+        path: 'mis-pedidos',
+        element: (
+          <UserOnlyRoute>
+            <MisPedidosPage />
+          </UserOnlyRoute>
+        ),
+      },
 
       {
         path: 'dashboard/*',

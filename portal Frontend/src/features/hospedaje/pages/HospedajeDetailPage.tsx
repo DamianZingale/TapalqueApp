@@ -164,17 +164,21 @@ export default function HospedajeDetailPage() {
       const urlPago = await crearPreferenciaPago({
         idProducto: Number(habitacionSeleccionada.id),
         title: `Seña - ${habitacionSeleccionada.titulo} en ${data!.titulo} (${noches} noche${noches !== 1 ? 's' : ''})`,
+        description: `Reserva de ${habitacionSeleccionada.titulo} en ${data!.titulo}, ${noches} noche(s). Check-in: ${formatDate(start)}, Check-out: ${formatDate(end)}`,
         quantity: 1,
         unitPrice: montoSeña,
-        idVendedor: Number(data!.userId || id), // ID del dueño del hospedaje
+        idVendedor: Number(id), // ID del hospedaje (externalBusinessId)
         idComprador: Number(user.id),
         idTransaccion: reserva.id, // ID de la reserva
         tipoServicio: 'HOSPEDAJE',
+        payerEmail: user.email || undefined,
+        payerName: `${user.nombre || ''} ${user.apellido || ''}`.trim() || undefined,
+        payerIdentificationNumber: user.dni || undefined,
       });
 
       if (urlPago) {
         // 3. Redirigir a Mercado Pago
-        alert(`Reserva creada. Serás redirigido a Mercado Pago para abonar la seña del 50%.\n\nTotal: $${precioTotal.toLocaleString()}\nSeña a pagar: $${montoSeña.toLocaleString()}\nResto al llegar: $${(precioTotal - montoSeña).toLocaleString()}`);
+        alert(`Reserva creada. Serás redirigido a Mercado Pago para abonar la seña del 50%.\n\nTotal: $${precioTotal.toLocaleString()}\nSeña a pagar: $${montoSeña.toLocaleString()}\nResto al llegar: $${(precioTotal - montoSeña).toLocaleString()}\n\nTenés 5 minutos para completar el pago. Pasado ese tiempo, la habitación volverá a estar disponible.`);
         window.location.href = urlPago;
       } else {
         alert(`Reserva creada pero hubo un error al generar el link de pago.\n\nPodés intentar pagar desde "Mis Reservas" en tu perfil.`);

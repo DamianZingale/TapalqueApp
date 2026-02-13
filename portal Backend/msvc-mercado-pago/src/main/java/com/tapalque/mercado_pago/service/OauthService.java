@@ -1,6 +1,7 @@
 package com.tapalque.mercado_pago.service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -17,8 +18,10 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.tapalque.mercado_pago.dto.OauthTokenRequestDTO;
+import com.tapalque.mercado_pago.dto.TipoServicioEnum;
 import com.tapalque.mercado_pago.dto.UserResponseDTO;
 import com.tapalque.mercado_pago.entity.OauthToken;
+import com.tapalque.mercado_pago.entity.StateOauth;
 import com.tapalque.mercado_pago.repository.OauthTokenRepository;
 import com.tapalque.mercado_pago.util.EncriptadoUtil;
 
@@ -47,12 +50,12 @@ public class OauthService {
         this.encriptadoUtil = encriptadoUtil;
     }
 
-    public String UrlAutorizacion(String email) {
+    public String UrlAutorizacion(String email, Long externalBusinessId, TipoServicioEnum tipoServicio) {
         Long idUsuarioLogueado = usuarioClient.obtenerUsuarioPorEmail(email)
                 .map(UserResponseDTO::getId)
                 .block();
         String state = UUID.randomUUID().toString();
-        stateOauthService.guardarStateOauth(idUsuarioLogueado, state);
+        stateOauthService.guardarStateOauth(idUsuarioLogueado, state, externalBusinessId, tipoServicio);
         return "https://auth.mercadopago.com.ar/authorization?response_type=code" +
                 "&client_id=" + clientId +
                 "&redirect_uri=" + redirectUrl +
@@ -83,9 +86,11 @@ public class OauthService {
                 throw new RuntimeException("Error al obtener el token de Mercado Pago");
             }
 
-            Long stateOauth = stateOauthService.obtenerIdUsuarioPorState(state);
+            // Recuperar info del negocio desde el state
+            StateOauth stateOauth = stateOauthService.obtenerStateOauthPorState(state);
 
-            guardarTokenNuevo(response.getBody(), stateOauth);
+            guardarTokenNuevo(response.getBody(), stateOauth.getUsuarioId(),
+                    stateOauth.getExternalBusinessId(), stateOauth.getTipoServicio());
 
         } catch (HttpClientErrorException e) {
             throw new RuntimeException("Error de cliente: " + e.getStatusCode() + " - " + e.getResponseBodyAsString());
@@ -94,9 +99,32 @@ public class OauthService {
         }
     }
 
-    public void actualizarToken(OauthTokenRequestDTO oauthTokenDTO, Long idUsuario) {
-        OauthToken token = oauthRepository.findByUsuarioId(idUsuario)
-                .orElseThrow(() -> new RuntimeException("Error al obtener token para guardar nuevo"));
+    public void actualizarToken(OauthTokenRequestDTO oauthTokenDTO, Long externalBusinessId, TipoServicioEnum tipoServicio) {
+        OauthToken token = oauthRepository.findByExternalBusinessIdAndTipoServicio(externalBusinessId, tipoServicio)
+                .orElseThrow(() -> new RuntimeException("Token no encontrado para el negocio"));
+        token.setAccessToken(encriptadoUtil.encriptar(oauthTokenDTO.getAccessToken()));
+        token.setRefreshToken(encriptadoUtil.encriptar(oauthTokenDTO.getRefreshToken()));
+        token.setPublicKey(encriptadoUtil.encriptar(oauthTokenDTO.getPublicKey()));
+        token.setUserId(oauthTokenDTO.getUserId());
+        token.setLiveMode(oauthTokenDTO.isLiveMode());
+        token.setExpiresAt(LocalDateTime.now().plusSeconds(oauthTokenDTO.getExpiresIn()));
+
+        oauthRepository.save(token);
+    }
+
+    public void guardarTokenNuevo(OauthTokenRequestDTO oauthTokenDTO, Long idUsuario,
+                                   Long externalBusinessId, TipoServicioEnum tipoServicio) {
+        // Si ya existe token para este negocio, actualizarlo (re-autorización)
+        Optional<OauthToken> existing = oauthRepository
+                .findByExternalBusinessIdAndTipoServicio(externalBusinessId, tipoServicio);
+
+        OauthToken token;
+        if (existing.isPresent()) {
+            token = existing.get();
+        } else {
+            token = new OauthToken();
+        }
+
         token.setAccessToken(encriptadoUtil.encriptar(oauthTokenDTO.getAccessToken()));
         token.setRefreshToken(encriptadoUtil.encriptar(oauthTokenDTO.getRefreshToken()));
         token.setPublicKey(encriptadoUtil.encriptar(oauthTokenDTO.getPublicKey()));
@@ -104,26 +132,15 @@ public class OauthService {
         token.setLiveMode(oauthTokenDTO.isLiveMode());
         token.setExpiresAt(LocalDateTime.now().plusSeconds(oauthTokenDTO.getExpiresIn()));
         token.setUsuarioId(idUsuario);
+        token.setExternalBusinessId(externalBusinessId);
+        token.setTipoServicio(tipoServicio);
 
         oauthRepository.save(token);
     }
 
-    public void guardarTokenNuevo(OauthTokenRequestDTO oauthTokenDTO, Long idUsuario) {
-        OauthToken token = new OauthToken();
-        token.setAccessToken(encriptadoUtil.encriptar(oauthTokenDTO.getAccessToken()));
-        token.setRefreshToken(encriptadoUtil.encriptar(oauthTokenDTO.getRefreshToken()));
-        token.setPublicKey(encriptadoUtil.encriptar(oauthTokenDTO.getPublicKey()));
-        token.setUserId(oauthTokenDTO.getUserId());
-        token.setLiveMode(oauthTokenDTO.isLiveMode());
-        token.setExpiresAt(LocalDateTime.now().plusSeconds(oauthTokenDTO.getExpiresIn()));
-        token.setUsuarioId(idUsuario);
-
-        oauthRepository.save(token);
-    }
-
-    public String obtenerAccessTokenPorId(Long id) {
-        return oauthRepository.findByUsuarioId(id)
-                .orElseThrow(() -> new RuntimeException("no se encontro access token"))
+    public String obtenerAccessTokenPorNegocio(Long externalBusinessId, TipoServicioEnum tipoServicio) {
+        return oauthRepository.findByExternalBusinessIdAndTipoServicio(externalBusinessId, tipoServicio)
+                .orElseThrow(() -> new RuntimeException("No se encontro access token para el negocio"))
                 .getAccessToken();
     }
 

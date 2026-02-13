@@ -14,7 +14,8 @@ spring:
         corsConfigurations:
           '[/**]':
             allowedOrigins:
-              - http://localhost:3000
+              - https://www.tapalqueapp.com.ar
+              - https://tapalqueapp.com.ar
             allowedMethods:
               - GET
               - POST

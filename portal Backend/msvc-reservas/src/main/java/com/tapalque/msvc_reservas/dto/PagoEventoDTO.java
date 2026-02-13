@@ -8,7 +8,7 @@ public class PagoEventoDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private Long transaccionId;
-    private Long referenciaId; // ID del pedido o reserva
+    private String referenciaId; // ID del pedido o reserva (MongoDB ObjectId)
     private String tipo; // "PEDIDO" o "RESERVA"
     private String estado; // "APROBADO", "RECHAZADO", "PENDIENTE"
     private BigDecimal monto;
@@ -20,7 +20,7 @@ public class PagoEventoDTO implements Serializable {
     public PagoEventoDTO() {}
 
     // Constructor completo
-    public PagoEventoDTO(Long transaccionId, Long referenciaId, String tipo, String estado,
+    public PagoEventoDTO(Long transaccionId, String referenciaId, String tipo, String estado,
                          BigDecimal monto, String mercadoPagoId, Long userId, LocalDateTime fechaPago) {
         this.transaccionId = transaccionId;
         this.referenciaId = referenciaId;
@@ -36,8 +36,8 @@ public class PagoEventoDTO implements Serializable {
     public Long getTransaccionId() { return transaccionId; }
     public void setTransaccionId(Long transaccionId) { this.transaccionId = transaccionId; }
 
-    public Long getReferenciaId() { return referenciaId; }
-    public void setReferenciaId(Long referenciaId) { this.referenciaId = referenciaId; }
+    public String getReferenciaId() { return referenciaId; }
+    public void setReferenciaId(String referenciaId) { this.referenciaId = referenciaId; }
 
     public String getTipo() { return tipo; }
     public void setTipo(String tipo) { this.tipo = tipo; }

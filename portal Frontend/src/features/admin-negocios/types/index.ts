@@ -75,7 +75,7 @@ export interface Pedido {
   transaccionId?: number;
   mercadoPagoId?: string;
   fechaPago?: string;
-  payment: PagoPedido;
+  payment?: PagoPedido;
 }
 
 // Cliente de reserva

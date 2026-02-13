@@ -81,7 +81,8 @@ export async function fetchPedidosByRestaurant(
 ): Promise<Pedido[]> {
   try {
     const response = await fetch(
-      `/api/pedidos/orders/restaurant/${restaurantId}`
+      `/api/pedidos/orders/restaurant/${restaurantId}`,
+      { headers: getAuthHeaders() }
     );
     if (!response.ok) {
       throw new Error(`Error al obtener pedidos: ${response.status}`);
@@ -96,7 +97,9 @@ export async function fetchPedidosByRestaurant(
 
 export async function fetchPedidosByUser(userId: string): Promise<Pedido[]> {
   try {
-    const response = await fetch(`/api/pedidos/orders/user/${userId}`);
+    const response = await fetch(`/api/pedidos/orders/user/${userId}`, {
+      headers: getAuthHeaders(),
+    });
     if (!response.ok) {
       throw new Error(`Error al obtener pedidos: ${response.status}`);
     }
@@ -105,6 +108,19 @@ export async function fetchPedidosByUser(userId: string): Promise<Pedido[]> {
   } catch (error) {
     console.error('Error en fetchPedidosByUser:', error);
     return [];
+  }
+}
+
+export async function fetchPedidoById(pedidoId: string): Promise<Pedido | null> {
+  try {
+    const response = await fetch(`/api/pedidos/orders/${pedidoId}`, {
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) return null;
+    return await response.json();
+  } catch (error) {
+    console.error('Error en fetchPedidoById:', error);
+    return null;
   }
 }
 

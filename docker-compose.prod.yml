@@ -1,0 +1,345 @@
+# ==========================================
+# PRODUCCION - Optimizado para 16GB RAM
+# Dominio: www.tapalqueapp.com.ar
+# Uso: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+#
+# Servicios criticos con 2 replicas: user, jwt, mercado-pago, pedidos, reservas
+# JVM tuneada con JAVA_TOOL_OPTIONS (funciona sin importar el ENTRYPOINT del Dockerfile)
+# MySQL y MongoDB con caches reducidos
+# ==========================================
+
+x-java-opts-critical: &java-opts-critical
+  JAVA_TOOL_OPTIONS: >-
+    -Xmx192m -Xms96m
+    -XX:+UseG1GC
+    -XX:+UseContainerSupport
+    -XX:MaxRAMPercentage=75.0
+    -XX:+UseStringDeduplication
+    -XX:MaxMetaspaceSize=96m
+    -Xss256k
+
+x-java-opts-light: &java-opts-light
+  JAVA_TOOL_OPTIONS: >-
+    -Xmx128m -Xms64m
+    -XX:+UseSerialGC
+    -XX:+UseContainerSupport
+    -XX:MaxRAMPercentage=75.0
+    -XX:MaxMetaspaceSize=80m
+    -Xss256k
+
+x-java-opts-infra: &java-opts-infra
+  JAVA_TOOL_OPTIONS: >-
+    -Xmx256m -Xms128m
+    -XX:+UseG1GC
+    -XX:+UseContainerSupport
+    -XX:MaxRAMPercentage=75.0
+    -XX:MaxMetaspaceSize=96m
+    -Xss256k
+
+x-mysql-tuned: &mysql-tuned
+  command: >-
+    --innodb-buffer-pool-size=48M
+    --key-buffer-size=8M
+    --max-connections=40
+    --performance-schema=OFF
+    --innodb-log-buffer-size=4M
+    --innodb-flush-method=O_DIRECT
+    --sort-buffer-size=256K
+    --read-buffer-size=256K
+    --thread-cache-size=4
+
+services:
+  # ==========================================
+  # REVERSE PROXY + SSL (Let's Encrypt)
+  # ==========================================
+  nginx-proxy:
+    build:
+      context: ./nginx-proxy
+      dockerfile: Dockerfile
+    container_name: nginx-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - letsencrypt_data:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
+    depends_on:
+      - frontend
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+    networks:
+      - tapalque-net
+
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    volumes:
+      - letsencrypt_data:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
+    # Renueva cada 12 horas si es necesario
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot --quiet; sleep 12h & wait $${!}; done'"
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+    networks:
+      - tapalque-net
+
+  # ==========================================
+  # INFRAESTRUCTURA - Overrides
+  # IMPORTANTE: Los puertos de DB/infra siguen mapeados del base compose.
+  # En el VPS, configurar firewall (ufw) para solo permitir 80, 443 y 22.
+  # ==========================================
+  rabbitmq:
+    deploy:
+      resources:
+        limits:
+          memory: 192M
+
+  pedidos-db:
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    command: --wiredTigerCacheSizeGB=0.1
+
+  reservas-db:
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    command: --wiredTigerCacheSizeGB=0.1
+
+  gastronomia-db:
+    <<: *mysql-tuned
+    deploy:
+      resources:
+        limits:
+          memory: 160M
+
+  hosteleria-db:
+    <<: *mysql-tuned
+    deploy:
+      resources:
+        limits:
+          memory: 160M
+
+  mercado-pago-db:
+    <<: *mysql-tuned
+    deploy:
+      resources:
+        limits:
+          memory: 160M
+
+  jwt-db:
+    <<: *mysql-tuned
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+
+  user-db:
+    <<: *mysql-tuned
+    deploy:
+      resources:
+        limits:
+          memory: 160M
+
+  comercio-db:
+    <<: *mysql-tuned
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+
+  eventos-db:
+    <<: *mysql-tuned
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+
+  servicios-db:
+    <<: *mysql-tuned
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+
+  termas-db:
+    <<: *mysql-tuned
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+
+  espacios-publicos-db:
+    <<: *mysql-tuned
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+
+  # ==========================================
+  # INFRAESTRUCTURA JAVA
+  # ==========================================
+  eureka-server:
+    environment:
+      <<: *java-opts-infra
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+
+  msvc-gateway-server:
+    environment:
+      <<: *java-opts-infra
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+
+  # ==========================================
+  # SERVICIOS CRITICOS - 2 REPLICAS
+  # Sin container_name para permitir replicas
+  # Sin ports de host (acceso solo via gateway)
+  # ==========================================
+  msvc-jwt:
+    environment:
+      <<: *java-opts-critical
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          memory: 256M
+
+  msvc-user:
+    environment:
+      <<: *java-opts-critical
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          memory: 256M
+
+  msvc-pedidos:
+    environment:
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+      <<: *java-opts-critical
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          memory: 256M
+
+  msvc-reservas:
+    environment:
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+      <<: *java-opts-critical
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          memory: 256M
+
+  msvc-mercado-pago:
+    environment:
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+      <<: *java-opts-critical
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          memory: 256M
+
+  # ==========================================
+  # SERVICIOS NO CRITICOS - 1 REPLICA
+  # ==========================================
+  msvc-gastronomia:
+    environment:
+      <<: *java-opts-light
+    deploy:
+      resources:
+        limits:
+          memory: 200M
+
+  msvc-hosteleria:
+    environment:
+      <<: *java-opts-light
+    deploy:
+      resources:
+        limits:
+          memory: 200M
+
+  msvc-comercio:
+    environment:
+      <<: *java-opts-light
+    deploy:
+      resources:
+        limits:
+          memory: 200M
+
+  msvc-eventos:
+    environment:
+      <<: *java-opts-light
+    deploy:
+      resources:
+        limits:
+          memory: 200M
+
+  msvc-servicios:
+    environment:
+      <<: *java-opts-light
+    deploy:
+      resources:
+        limits:
+          memory: 200M
+
+  msvc-termas:
+    environment:
+      <<: *java-opts-light
+    deploy:
+      resources:
+        limits:
+          memory: 200M
+
+  msvc-espacios-publicos:
+    environment:
+      <<: *java-opts-light
+    deploy:
+      resources:
+        limits:
+          memory: 200M
+
+  # ==========================================
+  # FRONTEND - Nginx en produccion (solo red interna)
+  # Accesible unicamente via nginx-proxy
+  # ==========================================
+  frontend:
+    build:
+      context: ./portal Frontend
+      dockerfile: Dockerfile
+    deploy:
+      resources:
+        limits:
+          memory: 96M
+
+# ==========================================
+# VOLUMENES ADICIONALES
+# ==========================================
+volumes:
+  letsencrypt_data:
+  certbot_www:

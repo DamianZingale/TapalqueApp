@@ -306,7 +306,6 @@ services:
 
   msvc-jwt:
     build: ./portal Backend/msvc-jwt
-    container_name: msvc-jwt
     restart: always
     depends_on:
       - eureka-server
@@ -320,7 +319,6 @@ services:
 
   msvc-user:
     build: ./portal Backend/msvc-user
-    container_name: msvc-user
     depends_on:
       - user-db
       - eureka-server
@@ -336,7 +334,6 @@ services:
 
   msvc-pedidos:
     build: ./portal Backend/msvc-pedidos
-    container_name: msvc-pedidos
     environment:
       SPRING_RABBITMQ_HOST: rabbitmq
       SPRING_RABBITMQ_PORT: 5672
@@ -360,7 +357,6 @@ services:
 
   msvc-reservas:
     build: ./portal Backend/msvc-reservas
-    container_name: msvc-reservas
     environment:
       SPRING_RABBITMQ_HOST: rabbitmq
       SPRING_RABBITMQ_PORT: 5672
@@ -418,7 +414,6 @@ services:
 
   msvc-mercado-pago:
     build: ./portal Backend/msvc-mercado-pago
-    container_name: msvc-mercado-pago
     environment:
       SPRING_RABBITMQ_HOST: rabbitmq
       SPRING_RABBITMQ_PORT: 5672

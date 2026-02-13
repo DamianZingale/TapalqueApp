@@ -1,6 +1,7 @@
 package com.tapalque.mercado_pago.service;
 
 import com.tapalque.mercado_pago.dto.OauthTokenRequestDTO;
+import com.tapalque.mercado_pago.dto.TipoServicioEnum;
 import com.tapalque.mercado_pago.entity.OauthToken;
 import com.tapalque.mercado_pago.repository.OauthTokenRepository;
 import com.tapalque.mercado_pago.util.EncriptadoUtil;
@@ -54,6 +55,8 @@ class OauthServiceTest {
         testOauthToken.setUserId(123456L);
         testOauthToken.setLiveMode(false);
         testOauthToken.setExpiresAt(LocalDateTime.now().plusHours(6));
+        testOauthToken.setExternalBusinessId(10L);
+        testOauthToken.setTipoServicio(TipoServicioEnum.GASTRONOMICO);
 
         testTokenDTO = new OauthTokenRequestDTO();
         testTokenDTO.setAccessToken("newAccessToken");
@@ -65,36 +68,38 @@ class OauthServiceTest {
     }
 
     @Nested
-    @DisplayName("Tests de obtenerAccessTokenPorId")
+    @DisplayName("Tests de obtenerAccessTokenPorNegocio")
     class ObtenerAccessTokenTests {
 
         @Test
-        @DisplayName("Debe retornar access token cuando usuario existe")
-        void obtenerAccessTokenPorId_ConUsuarioExistente_RetornaToken() {
+        @DisplayName("Debe retornar access token cuando el negocio existe")
+        void obtenerAccessTokenPorNegocio_ConNegocioExistente_RetornaToken() {
             // Given
-            when(oauthRepository.findByUsuarioId(1L)).thenReturn(Optional.of(testOauthToken));
+            when(oauthRepository.findByExternalBusinessIdAndTipoServicio(10L, TipoServicioEnum.GASTRONOMICO))
+                    .thenReturn(Optional.of(testOauthToken));
 
             // When
-            String result = oauthService.obtenerAccessTokenPorId(1L);
+            String result = oauthService.obtenerAccessTokenPorNegocio(10L, TipoServicioEnum.GASTRONOMICO);
 
             // Then
             assertNotNull(result);
             assertEquals("encryptedAccessToken", result);
-            verify(oauthRepository).findByUsuarioId(1L);
+            verify(oauthRepository).findByExternalBusinessIdAndTipoServicio(10L, TipoServicioEnum.GASTRONOMICO);
         }
 
         @Test
-        @DisplayName("Debe lanzar excepción cuando usuario no existe")
-        void obtenerAccessTokenPorId_ConUsuarioNoExistente_LanzaExcepcion() {
+        @DisplayName("Debe lanzar excepción cuando el negocio no existe")
+        void obtenerAccessTokenPorNegocio_ConNegocioNoExistente_LanzaExcepcion() {
             // Given
-            when(oauthRepository.findByUsuarioId(999L)).thenReturn(Optional.empty());
+            when(oauthRepository.findByExternalBusinessIdAndTipoServicio(999L, TipoServicioEnum.HOSPEDAJE))
+                    .thenReturn(Optional.empty());
 
             // When & Then
             RuntimeException exception = assertThrows(
                     RuntimeException.class,
-                    () -> oauthService.obtenerAccessTokenPorId(999L)
+                    () -> oauthService.obtenerAccessTokenPorNegocio(999L, TipoServicioEnum.HOSPEDAJE)
             );
-            assertEquals("no se encontro access token", exception.getMessage());
+            assertEquals("No se encontro access token para el negocio", exception.getMessage());
         }
     }
 
@@ -103,22 +108,42 @@ class OauthServiceTest {
     class GuardarTokenNuevoTests {
 
         @Test
-        @DisplayName("Debe guardar token nuevo correctamente")
+        @DisplayName("Debe guardar token nuevo correctamente para un negocio")
         void guardarTokenNuevo_ConDatosValidos_GuardaToken() {
             // Given
+            when(oauthRepository.findByExternalBusinessIdAndTipoServicio(10L, TipoServicioEnum.GASTRONOMICO))
+                    .thenReturn(Optional.empty());
             when(encriptadoUtil.encriptar("newAccessToken")).thenReturn("encryptedNewAccessToken");
             when(encriptadoUtil.encriptar("newRefreshToken")).thenReturn("encryptedNewRefreshToken");
             when(encriptadoUtil.encriptar("newPublicKey")).thenReturn("encryptedNewPublicKey");
             when(oauthRepository.save(any(OauthToken.class))).thenReturn(testOauthToken);
 
             // When
-            oauthService.guardarTokenNuevo(testTokenDTO, 1L);
+            oauthService.guardarTokenNuevo(testTokenDTO, 1L, 10L, TipoServicioEnum.GASTRONOMICO);
 
             // Then
             verify(encriptadoUtil).encriptar("newAccessToken");
             verify(encriptadoUtil).encriptar("newRefreshToken");
             verify(encriptadoUtil).encriptar("newPublicKey");
             verify(oauthRepository).save(any(OauthToken.class));
+        }
+
+        @Test
+        @DisplayName("Debe actualizar token existente si el negocio ya tiene uno (re-autorización)")
+        void guardarTokenNuevo_ConNegocioExistente_ActualizaToken() {
+            // Given
+            when(oauthRepository.findByExternalBusinessIdAndTipoServicio(10L, TipoServicioEnum.GASTRONOMICO))
+                    .thenReturn(Optional.of(testOauthToken));
+            when(encriptadoUtil.encriptar("newAccessToken")).thenReturn("encryptedNewAccessToken");
+            when(encriptadoUtil.encriptar("newRefreshToken")).thenReturn("encryptedNewRefreshToken");
+            when(encriptadoUtil.encriptar("newPublicKey")).thenReturn("encryptedNewPublicKey");
+            when(oauthRepository.save(any(OauthToken.class))).thenReturn(testOauthToken);
+
+            // When
+            oauthService.guardarTokenNuevo(testTokenDTO, 1L, 10L, TipoServicioEnum.GASTRONOMICO);
+
+            // Then
+            verify(oauthRepository).save(testOauthToken); // Reutiliza el existente
         }
     }
 
@@ -127,35 +152,37 @@ class OauthServiceTest {
     class ActualizarTokenTests {
 
         @Test
-        @DisplayName("Debe actualizar token existente")
+        @DisplayName("Debe actualizar token existente por negocio")
         void actualizarToken_ConTokenExistente_ActualizaCorrectamente() {
             // Given
-            when(oauthRepository.findByUsuarioId(1L)).thenReturn(Optional.of(testOauthToken));
+            when(oauthRepository.findByExternalBusinessIdAndTipoServicio(10L, TipoServicioEnum.GASTRONOMICO))
+                    .thenReturn(Optional.of(testOauthToken));
             when(encriptadoUtil.encriptar("newAccessToken")).thenReturn("encryptedNewAccessToken");
             when(encriptadoUtil.encriptar("newRefreshToken")).thenReturn("encryptedNewRefreshToken");
             when(encriptadoUtil.encriptar("newPublicKey")).thenReturn("encryptedNewPublicKey");
             when(oauthRepository.save(any(OauthToken.class))).thenReturn(testOauthToken);
 
             // When
-            oauthService.actualizarToken(testTokenDTO, 1L);
+            oauthService.actualizarToken(testTokenDTO, 10L, TipoServicioEnum.GASTRONOMICO);
 
             // Then
-            verify(oauthRepository).findByUsuarioId(1L);
+            verify(oauthRepository).findByExternalBusinessIdAndTipoServicio(10L, TipoServicioEnum.GASTRONOMICO);
             verify(oauthRepository).save(any(OauthToken.class));
         }
 
         @Test
-        @DisplayName("Debe lanzar excepción si token no existe")
+        @DisplayName("Debe lanzar excepción si token del negocio no existe")
         void actualizarToken_ConTokenNoExistente_LanzaExcepcion() {
             // Given
-            when(oauthRepository.findByUsuarioId(999L)).thenReturn(Optional.empty());
+            when(oauthRepository.findByExternalBusinessIdAndTipoServicio(999L, TipoServicioEnum.HOSPEDAJE))
+                    .thenReturn(Optional.empty());
 
             // When & Then
             RuntimeException exception = assertThrows(
                     RuntimeException.class,
-                    () -> oauthService.actualizarToken(testTokenDTO, 999L)
+                    () -> oauthService.actualizarToken(testTokenDTO, 999L, TipoServicioEnum.HOSPEDAJE)
             );
-            assertEquals("Error al obtener token para guardar nuevo", exception.getMessage());
+            assertEquals("Token no encontrado para el negocio", exception.getMessage());
             verify(oauthRepository, never()).save(any(OauthToken.class));
         }
     }

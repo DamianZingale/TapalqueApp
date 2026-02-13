@@ -97,8 +97,8 @@ export const MenuCard: FC<Props> = ({ items, restaurantId, restaurantName }) => 
 
     // Preparar datos del pedido
     const pedidoData = {
-      userId: user.id,
-      userName: `${user.nombre || ''} ${user.apellido || ''}`.trim() || user.email,
+      userId: String(user.id || ''),
+      userName: `${user.nombre || ''} ${user.apellido || ''}`.trim() || String(user.email || ''),
       userPhone: user.telefono || '',
       totalPrice: data.total,
       items: data.items.map((item) => ({
@@ -134,18 +134,20 @@ export const MenuCard: FC<Props> = ({ items, restaurantId, restaurantName }) => 
         title: `Pedido #${result.id.slice(-6).toUpperCase()} - ${restaurantName}`,
         quantity: 1,
         unitPrice: data.total,
-        idVendedor: parseInt(restaurantId) || 0, // ID del vendedor/restaurante
-        idComprador: parseInt(user.id) || 0, // ID del comprador
-        idTransaccion: result.id, // ID del pedido como referencia
+        idVendedor: parseInt(restaurantId) || 0,
+        idComprador: parseInt(String(user.id)) || 0,
+        idTransaccion: result.id,
         tipoServicio: 'GASTRONOMICO' as const,
+        payerEmail: user.email || undefined,
+        payerName: `${user.nombre || ''} ${user.apellido || ''}`.trim() || undefined,
+        payerIdentificationNumber: user.dni || undefined,
       };
 
       const urlPago = await crearPreferenciaPago(productoMP);
 
       if (urlPago) {
-        // Guardar info para volver después del pago
         sessionStorage.setItem('pedidoPendiente', result.id);
-        // Redirigir a MercadoPago
+        alert(`Pedido creado. Seras redirigido a Mercado Pago para realizar el pago.\n\nTotal: $${data.total.toLocaleString()}\n\nTenes 5 minutos para completar el pago. Pasado ese tiempo, el pedido sera cancelado.`);
         window.location.href = urlPago;
         return;
       } else {
@@ -159,13 +161,11 @@ export const MenuCard: FC<Props> = ({ items, restaurantId, restaurantName }) => 
     }
 
     // Si el pago es en efectivo, el pedido ya está creado
-    setSubmitResult({ success: true, message: 'Pedido creado exitosamente. Te avisaremos cuando esté listo.' });
+    setSubmitResult({ success: true, message: 'Pedido creado exitosamente. Te avisaremos cuando este listo.' });
     setIsFinalizing(false);
-    // Limpiar carrito después de éxito
     setTimeout(() => {
-      setSubmitResult(null);
-      window.location.reload(); // Recargar para limpiar el estado
-    }, 3000);
+      navigate('/mis-pedidos');
+    }, 2000);
 
     setIsSubmitting(false);
   };

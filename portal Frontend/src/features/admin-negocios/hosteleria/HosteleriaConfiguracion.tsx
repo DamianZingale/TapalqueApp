@@ -23,7 +23,7 @@ export function HosteleriaConfiguracion({ businessId, businessName }: Props) {
     setError(null);
 
     try {
-      const url = await obtenerUrlOAuthMercadoPago(user.email);
+      const url = await obtenerUrlOAuthMercadoPago(user.email, businessId, 'HOSPEDAJE');
 
       if (url) {
         // Redirigir a Mercado Pago para autorizar

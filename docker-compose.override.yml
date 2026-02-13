@@ -251,6 +251,7 @@ services:
       - "5009:5005"
     environment:
       - SPRING_PROFILES_ACTIVE=dev
+      - PORT=8080
       - SPRING_DATASOURCE_URL=jdbc:mysql://mercado-pago-db:3306/mercado_pago?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=root

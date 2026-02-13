@@ -19,9 +19,11 @@ public class ReservaRabbitListener {
             System.out.println("Recibido evento de pago para reserva ID: " + evento.getReferenciaId());
 
             if ("APROBADO".equals(evento.getEstado())) {
-                reservationService.confirmarPagoReserva(evento.getReferenciaId().toString(), evento);
+                reservationService.confirmarPagoReserva(evento.getReferenciaId(), evento);
             } else if ("RECHAZADO".equals(evento.getEstado())) {
-                reservationService.rechazarPagoReserva(evento.getReferenciaId().toString(), evento);
+                reservationService.rechazarPagoReserva(evento.getReferenciaId(), evento);
+            } else if ("PENDIENTE".equals(evento.getEstado())) {
+                reservationService.marcarPagoPendienteReserva(evento.getReferenciaId(), evento);
             }
 
             System.out.println("Reserva ID " + evento.getReferenciaId() + " actualizada con estado: " + evento.getEstado());

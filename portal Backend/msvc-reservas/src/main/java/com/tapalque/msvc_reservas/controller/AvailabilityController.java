@@ -49,8 +49,9 @@ public class AvailabilityController {
         LocalDateTime hastaDateTime = hasta.atTime(10, 0);
 
         Mono<List<HabitacionDTO>> habitacionesMono = hospedajeClient.fetchHabitaciones(hotelId);
+        // Incluye reservas activas + pendientes de pago (bloqueo temporal de 5 min)
         Mono<Long> ocupadasMono = reservationService
-                .getReservationsByHotelAndStayOverlap(hotelId, desdeDateTime, hastaDateTime)
+                .getReservationsByHotelAndStayOverlapIncludingPending(hotelId, desdeDateTime, hastaDateTime)
                 .count();
 
         return Mono.zip(habitacionesMono, ocupadasMono)

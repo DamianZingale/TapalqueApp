@@ -86,7 +86,7 @@ class MercadoPagoServiceTest {
         @DisplayName("Debe usar fallback si access token está vencido y guardar transacción")
         void crearPreferencia_ConTokenVencido_UsaFallback() {
             // Given
-            when(oauthService.obtenerAccessTokenPorId(1L)).thenReturn("encryptedToken");
+            when(oauthService.obtenerAccessTokenPorNegocio(1L, TipoServicioEnum.GASTRONOMICO)).thenReturn("encryptedToken");
             when(encriptadoUtil.desencriptar("encryptedToken")).thenReturn("accessToken");
             when(oauthService.AccessTokenValido("accessToken")).thenReturn(false);
             when(transaccionRepository.save(any(Transaccion.class))).thenAnswer(invocation -> {
@@ -104,7 +104,7 @@ class MercadoPagoServiceTest {
             }
 
             // Then - verifica que validó el token y guardó la transacción con el fallback
-            verify(oauthService).obtenerAccessTokenPorId(1L);
+            verify(oauthService).obtenerAccessTokenPorNegocio(1L, TipoServicioEnum.GASTRONOMICO);
             verify(encriptadoUtil).desencriptar("encryptedToken");
             verify(oauthService).AccessTokenValido("accessToken");
             verify(transaccionRepository).save(any(Transaccion.class));
@@ -114,7 +114,7 @@ class MercadoPagoServiceTest {
         @DisplayName("Debe guardar transacción cuando se inicia preferencia")
         void crearPreferencia_ConTokenValido_GuardaTransaccion() throws Exception {
             // Given
-            when(oauthService.obtenerAccessTokenPorId(1L)).thenReturn("encryptedToken");
+            when(oauthService.obtenerAccessTokenPorNegocio(1L, TipoServicioEnum.GASTRONOMICO)).thenReturn("encryptedToken");
             when(encriptadoUtil.desencriptar("encryptedToken")).thenReturn("validAccessToken");
             when(oauthService.AccessTokenValido("validAccessToken")).thenReturn(true);
             when(transaccionRepository.save(any(Transaccion.class))).thenAnswer(invocation -> {
@@ -132,7 +132,7 @@ class MercadoPagoServiceTest {
                 // Esperamos una excepción de MercadoPago API ya que no podemos mockear la SDK
             }
 
-            verify(oauthService).obtenerAccessTokenPorId(1L);
+            verify(oauthService).obtenerAccessTokenPorNegocio(1L, TipoServicioEnum.GASTRONOMICO);
             verify(encriptadoUtil).desencriptar("encryptedToken");
             verify(oauthService).AccessTokenValido("validAccessToken");
         }

@@ -32,4 +32,9 @@ public class ProductoRequestDTO {
 
     @Enumerated(EnumType.STRING)
     private TipoServicioEnum tipoServicio;
+
+    // Datos del pagador para mejorar tasa de aprobación en MP
+    String payerEmail;
+    String payerName;
+    String payerIdentificationNumber; // DNI
 }

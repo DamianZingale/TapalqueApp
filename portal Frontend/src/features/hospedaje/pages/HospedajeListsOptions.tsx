@@ -10,7 +10,7 @@ export const HospedajeListsOptions = () => {
 useEffect(() => {
     const fetchOpciones = async () => {
         try {
-        const res = await fetch(`http://localhost:3000/api/hospedajes/${id}/opciones`);
+        const res = await fetch(`/api/hospedajes/${id}/opciones`);
         const data = await res.json();
         setOpciones(data);
         } catch (err) {

@@ -3,12 +3,17 @@
 export interface ProductoRequest {
   idProducto: number;
   title: string;
+  description?: string;
   quantity: number;
   unitPrice: number;
   idVendedor: number;
   idComprador: number;
   idTransaccion: string; // ID de la reserva
   tipoServicio: 'GASTRONOMICO' | 'HOSPEDAJE';
+  // Datos del pagador para mejorar tasa de aprobación en MP
+  payerEmail?: string;
+  payerName?: string;
+  payerIdentificationNumber?: string; // DNI
 }
 
 function getAuthHeaders(): HeadersInit {
@@ -52,15 +57,24 @@ export async function crearPreferenciaPago(
 }
 
 /**
- * Obtiene la URL para conectar cuenta de Mercado Pago (OAuth)
+ * Obtiene la URL para conectar cuenta de Mercado Pago (OAuth) para un negocio
  * @param email Email del administrador del negocio
+ * @param externalBusinessId ID del negocio (restaurante o hospedaje)
+ * @param tipoServicio Tipo de servicio: 'GASTRONOMICO' o 'HOSPEDAJE'
  * @returns URL de autorización de Mercado Pago o null si hay error
  */
 export async function obtenerUrlOAuthMercadoPago(
-  email: string
+  email: string,
+  externalBusinessId: string,
+  tipoServicio: 'GASTRONOMICO' | 'HOSPEDAJE'
 ): Promise<string | null> {
   try {
-    const response = await fetch(`/api/mercadopago/oauth/init?email=${encodeURIComponent(email)}`, {
+    const params = new URLSearchParams({
+      email,
+      externalBusinessId,
+      tipoServicio,
+    });
+    const response = await fetch(`/api/mercadopago/oauth/init?${params.toString()}`, {
       method: 'GET',
       headers: getAuthHeaders(),
     });

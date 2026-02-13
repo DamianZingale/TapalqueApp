@@ -3,6 +3,14 @@ import { Card, Row, Col, Badge, Button, Alert, Modal } from "react-bootstrap";
 import authService from "../../../services/authService";
 import { fetchPedidosByUser, type Pedido, EstadoPedido } from "../../../services/fetchPedidos";
 
+const estadoLabel: Record<string, { bg: string; text: string }> = {
+    [EstadoPedido.RECIBIDO]: { bg: "warning", text: "Recibido" },
+    [EstadoPedido.EN_PREPARACION]: { bg: "info", text: "En preparacion" },
+    [EstadoPedido.LISTO]: { bg: "primary", text: "Listo" },
+    [EstadoPedido.EN_DELIVERY]: { bg: "dark", text: "En camino" },
+    [EstadoPedido.ENTREGADO]: { bg: "success", text: "Entregado" },
+};
+
 export const MisPedidosTab = () => {
     const [pedidos, setPedidos] = useState<Pedido[]>([]);
     const [loading, setLoading] = useState(true);
@@ -12,7 +20,6 @@ export const MisPedidosTab = () => {
 
     useEffect(() => {
         cargarPedidos();
-        // Actualizar cada 30 segundos
         const interval = setInterval(cargarPedidos, 30000);
         return () => clearInterval(interval);
     }, []);
@@ -26,7 +33,6 @@ export const MisPedidosTab = () => {
             const data = await fetchPedidosByUser(String(user.id));
             setPedidos(data);
 
-            // Actualizar contador en el header
             const totalElement = document.getElementById("total-pedidos");
             if (totalElement) totalElement.textContent = String(data.length);
         } catch (error) {
@@ -41,14 +47,8 @@ export const MisPedidosTab = () => {
     );
 
     const getEstadoBadge = (estado: EstadoPedido) => {
-        const badges = {
-            [EstadoPedido.PENDING]: { bg: "warning", text: "Pendiente" },
-            [EstadoPedido.PAID]: { bg: "info", text: "Pagado" },
-            [EstadoPedido.READY]: { bg: "primary", text: "Listo" },
-            [EstadoPedido.DELIVERED]: { bg: "success", text: "Entregado" }
-        };
-        const badge = badges[estado];
-        return <Badge bg={badge.bg}>{badge.text}</Badge>;
+        const config = estadoLabel[estado] ?? { bg: "secondary", text: estado };
+        return <Badge bg={config.bg}>{config.text}</Badge>;
     };
 
     const verDetalle = (pedido: Pedido) => {
@@ -94,30 +94,37 @@ export const MisPedidosTab = () => {
                             Todos
                         </Badge>
                         <Badge
-                            bg={filtroEstado === EstadoPedido.PENDING ? "warning" : "secondary"}
+                            bg={filtroEstado === EstadoPedido.RECIBIDO ? "warning" : "secondary"}
                             style={{ cursor: "pointer", padding: "8px 16px" }}
-                            onClick={() => setFiltroEstado(EstadoPedido.PENDING)}
+                            onClick={() => setFiltroEstado(EstadoPedido.RECIBIDO)}
                         >
-                            Pendientes
+                            Recibidos
                         </Badge>
                         <Badge
-                            bg={filtroEstado === EstadoPedido.PAID ? "info" : "secondary"}
+                            bg={filtroEstado === EstadoPedido.EN_PREPARACION ? "info" : "secondary"}
                             style={{ cursor: "pointer", padding: "8px 16px" }}
-                            onClick={() => setFiltroEstado(EstadoPedido.PAID)}
+                            onClick={() => setFiltroEstado(EstadoPedido.EN_PREPARACION)}
                         >
-                            Pagados
+                            En preparacion
                         </Badge>
                         <Badge
-                            bg={filtroEstado === EstadoPedido.READY ? "primary" : "secondary"}
+                            bg={filtroEstado === EstadoPedido.LISTO ? "primary" : "secondary"}
                             style={{ cursor: "pointer", padding: "8px 16px" }}
-                            onClick={() => setFiltroEstado(EstadoPedido.READY)}
+                            onClick={() => setFiltroEstado(EstadoPedido.LISTO)}
                         >
                             Listos
                         </Badge>
                         <Badge
-                            bg={filtroEstado === EstadoPedido.DELIVERED ? "success" : "secondary"}
+                            bg={filtroEstado === EstadoPedido.EN_DELIVERY ? "dark" : "secondary"}
                             style={{ cursor: "pointer", padding: "8px 16px" }}
-                            onClick={() => setFiltroEstado(EstadoPedido.DELIVERED)}
+                            onClick={() => setFiltroEstado(EstadoPedido.EN_DELIVERY)}
+                        >
+                            En camino
+                        </Badge>
+                        <Badge
+                            bg={filtroEstado === EstadoPedido.ENTREGADO ? "success" : "secondary"}
+                            style={{ cursor: "pointer", padding: "8px 16px" }}
+                            onClick={() => setFiltroEstado(EstadoPedido.ENTREGADO)}
                         >
                             Entregados
                         </Badge>
@@ -127,7 +134,7 @@ export const MisPedidosTab = () => {
                     {pedidosFiltrados.length === 0 ? (
                         <Alert variant="info">
                             <i className="bi bi-info-circle me-2"></i>
-                            No tienes pedidos {filtroEstado !== "TODOS" && `con estado "${filtroEstado}"`}.
+                            No tenes pedidos {filtroEstado !== "TODOS" && `con estado "${filtroEstado}"`}.
                         </Alert>
                     ) : (
                         <div className="d-flex flex-column gap-3">
@@ -137,15 +144,16 @@ export const MisPedidosTab = () => {
                                         <Row className="align-items-center">
                                             <Col md={3}>
                                                 <div className="mb-2">
-                                                    <small className="text-muted">Pedido #{pedido.id}</small>
+                                                    <small className="text-muted">Pedido #{pedido.id.slice(0, 8)}</small>
                                                 </div>
                                                 <div>
+                                                    {pedido.isDelivery && <Badge bg="dark" className="me-1">Delivery</Badge>}
                                                     {getEstadoBadge(pedido.status)}
                                                 </div>
                                             </Col>
                                             <Col md={3}>
                                                 <small className="text-muted d-block">Restaurante</small>
-                                                <strong>{pedido.restaurantName || "N/A"}</strong>
+                                                <strong>{pedido.restaurantName || pedido.restaurant?.restaurantName || "N/A"}</strong>
                                             </Col>
                                             <Col md={2}>
                                                 <small className="text-muted d-block">Fecha</small>
@@ -154,7 +162,7 @@ export const MisPedidosTab = () => {
                                             <Col md={2}>
                                                 <small className="text-muted d-block">Total</small>
                                                 <strong className="text-success">
-                                                    ${pedido.totalAmount?.toLocaleString() || "0"}
+                                                    ${(pedido.totalPrice ?? pedido.totalAmount ?? 0).toLocaleString()}
                                                 </strong>
                                             </Col>
                                             <Col md={2} className="text-end">
@@ -178,41 +186,53 @@ export const MisPedidosTab = () => {
             {/* Modal de detalle */}
             <Modal show={modalDetalle} onHide={() => setModalDetalle(false)} size="lg" centered>
                 <Modal.Header closeButton>
-                    <Modal.Title>Detalle del Pedido #{pedidoSeleccionado?.id}</Modal.Title>
+                    <Modal.Title>Detalle del Pedido #{pedidoSeleccionado?.id?.slice(0, 8)}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     {pedidoSeleccionado && (
                         <>
                             <Row className="mb-4">
                                 <Col md={6}>
-                                    <h6>Información del Pedido</h6>
+                                    <h6>Informacion del Pedido</h6>
                                     <div className="mb-2">
                                         <strong>Estado:</strong> {getEstadoBadge(pedidoSeleccionado.status)}
                                     </div>
                                     <div className="mb-2">
-                                        <strong>Restaurante:</strong> {pedidoSeleccionado.restaurantName || "N/A"}
+                                        <strong>Restaurante:</strong> {pedidoSeleccionado.restaurantName || pedidoSeleccionado.restaurant?.restaurantName || "N/A"}
                                     </div>
                                     <div className="mb-2">
                                         <strong>Fecha:</strong> {new Date(pedidoSeleccionado.dateCreated).toLocaleString("es-AR")}
                                     </div>
+                                    {pedidoSeleccionado.isDelivery && pedidoSeleccionado.deliveryAddress && (
+                                        <div className="mb-2">
+                                            <strong>Direccion de entrega:</strong> {pedidoSeleccionado.deliveryAddress}
+                                        </div>
+                                    )}
                                 </Col>
                                 <Col md={6}>
-                                    <h6>Información de Pago</h6>
+                                    <h6>Informacion de Pago</h6>
                                     <div className="mb-2">
-                                        <strong>Estado de pago:</strong>{" "}
-                                        <Badge bg={pedidoSeleccionado.payment.isPaid ? "success" : "warning"}>
-                                            {pedidoSeleccionado.payment.isPaid ? "Pagado" : "Pendiente"}
-                                        </Badge>
+                                        <strong>Metodo:</strong>{" "}
+                                        {pedidoSeleccionado.paidWithMercadoPago && <Badge bg="success">Mercado Pago</Badge>}
+                                        {pedidoSeleccionado.paidWithCash && <Badge bg="secondary">Efectivo</Badge>}
                                     </div>
-                                    {pedidoSeleccionado.payment.paymentId && (
+                                    {pedidoSeleccionado.payment?.isPaid !== undefined && (
                                         <div className="mb-2">
-                                            <strong>ID de Pago:</strong> {pedidoSeleccionado.payment.paymentId}
+                                            <strong>Estado de pago:</strong>{" "}
+                                            <Badge bg={pedidoSeleccionado.payment.isPaid ? "success" : "warning"}>
+                                                {pedidoSeleccionado.payment.isPaid ? "Pagado" : "Pendiente"}
+                                            </Badge>
+                                        </div>
+                                    )}
+                                    {pedidoSeleccionado.mercadoPagoId && (
+                                        <div className="mb-2">
+                                            <strong>ID de Pago MP:</strong> {pedidoSeleccionado.mercadoPagoId}
                                         </div>
                                     )}
                                     <div className="mb-2">
                                         <strong>Total:</strong>{" "}
                                         <span className="text-success h5">
-                                            ${pedidoSeleccionado.totalAmount?.toLocaleString() || "0"}
+                                            ${(pedidoSeleccionado.totalPrice ?? pedidoSeleccionado.totalAmount ?? 0).toLocaleString()}
                                         </span>
                                     </div>
                                 </Col>
@@ -232,11 +252,11 @@ export const MisPedidosTab = () => {
                                     <tbody>
                                         {pedidoSeleccionado.items?.map((item, idx) => (
                                             <tr key={idx}>
-                                                <td>{item.productName || `Item ${idx + 1}`}</td>
-                                                <td className="text-center">{item.quantity}</td>
-                                                <td className="text-end">${item.unitPrice?.toLocaleString() || "0"}</td>
+                                                <td>{item.itemName || item.productName || `Item ${idx + 1}`}</td>
+                                                <td className="text-center">{item.itemQuantity ?? item.quantity}</td>
+                                                <td className="text-end">${(item.itemPrice ?? item.unitPrice ?? 0).toLocaleString()}</td>
                                                 <td className="text-end">
-                                                    <strong>${((item.unitPrice || 0) * item.quantity).toLocaleString()}</strong>
+                                                    <strong>${((item.itemPrice ?? item.unitPrice ?? 0) * (item.itemQuantity ?? item.quantity)).toLocaleString()}</strong>
                                                 </td>
                                             </tr>
                                         ))}

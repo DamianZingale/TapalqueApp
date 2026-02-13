@@ -28,7 +28,12 @@ public interface ReservationService {
     public Flux<ReservationDTO> getReservationsByHotelAndStayOverlap(
             String hotelId, LocalDateTime desde, LocalDateTime hasta);
 
+    // Igual que la anterior pero incluye reservas pendientes de pago (bloqueo temporal)
+    public Flux<ReservationDTO> getReservationsByHotelAndStayOverlapIncludingPending(
+            String hotelId, LocalDateTime desde, LocalDateTime hasta);
+
     // Métodos para RabbitMQ - confirmación de pagos
     void confirmarPagoReserva(String reservaId, PagoEventoDTO evento);
     void rechazarPagoReserva(String reservaId, PagoEventoDTO evento);
+    void marcarPagoPendienteReserva(String reservaId, PagoEventoDTO evento);
 }

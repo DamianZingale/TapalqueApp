@@ -18,13 +18,13 @@ import org.springframework.web.client.RestTemplate;
 
 import com.mercadopago.MercadoPagoConfig;
 import com.mercadopago.client.payment.PaymentClient;
+import com.mercadopago.client.common.IdentificationRequest;
 import com.mercadopago.client.preference.PreferenceBackUrlsRequest;
 import com.mercadopago.client.preference.PreferenceClient;
 import com.mercadopago.client.preference.PreferenceItemRequest;
+import com.mercadopago.client.preference.PreferencePayerRequest;
 import com.mercadopago.client.preference.PreferenceRequest;
-import com.mercadopago.exceptions.MPApiException;
 import com.mercadopago.resources.payment.Payment;
-import com.mercadopago.resources.payment.PaymentRefund;
 import com.mercadopago.resources.preference.Preference;
 import com.tapalque.mercado_pago.dto.OauthTokenRequestDTO;
 import com.tapalque.mercado_pago.dto.ProductoRequestDTO;
@@ -71,19 +71,19 @@ public class MercadoPagoService {
 
         String accessToken;
 
-        // Intenta obtener el access token OAuth del vendedor
+        // Intenta obtener el access token OAuth del negocio (externalBusinessId + tipoServicio)
         try {
-            String accessTokenEncriptado = oauthService.obtenerAccessTokenPorId(p.getIdVendedor());
+            String accessTokenEncriptado = oauthService.obtenerAccessTokenPorNegocio(p.getIdVendedor(), p.getTipoServicio());
             accessToken = encriptadoUtil.desencriptar(accessTokenEncriptado);
 
             // Verifico que no este vencido ni revocado
             if (!oauthService.AccessTokenValido(accessToken)) {
-                System.out.println("Access token del vendedor vencido, usando fallback de la app");
+                System.out.println("Access token del negocio vencido, usando fallback de la app");
                 accessToken = appAccessToken;
             }
         } catch (RuntimeException e) {
             // Fallback: usar el access token de la app (para desarrollo)
-            System.out.println("Vendedor sin OAuth configurado, usando access token de la app (fallback)");
+            System.out.println("Negocio sin OAuth configurado, usando access token de la app (fallback)");
             accessToken = appAccessToken;
         }
 
@@ -103,6 +103,24 @@ public class MercadoPagoService {
                 .build();
 
 
+        // Datos del pagador para mejorar tasa de aprobación
+        PreferencePayerRequest.PreferencePayerRequestBuilder payerBuilder = PreferencePayerRequest.builder();
+        if (p.getPayerEmail() != null) {
+            payerBuilder.email(p.getPayerEmail());
+        }
+        if (p.getPayerName() != null) {
+            payerBuilder.name(p.getPayerName());
+        }
+        if (p.getPayerIdentificationNumber() != null) {
+            payerBuilder.identification(
+                IdentificationRequest.builder()
+                    .type("DNI")
+                    .number(p.getPayerIdentificationNumber())
+                    .build()
+            );
+        }
+        PreferencePayerRequest payer = payerBuilder.build();
+
         // Se crea la transaccion en la base de datos y se obtiene id de la misma
         Transaccion transaccion = new Transaccion(p.getIdTransaccion(),"Pendiente",p.getIdComprador(), p.getTipoServicio());
         transaccion.setMonto(p.getUnitPrice().multiply(java.math.BigDecimal.valueOf(p.getQuantity())));
@@ -111,39 +129,48 @@ public class MercadoPagoService {
         // Tiempo actual
         OffsetDateTime now = OffsetDateTime.now();
 
-        // Tiempo de expiración: 30 minutos desde ahora (para testing)
+        // Expiración de la preferencia (en producción sincronizar con bloqueo temporal de reservas)
         OffsetDateTime expirationFrom = now;
         OffsetDateTime expirationTo = now.plusMinutes(30);
 
         // URLs de retorno después del pago
+        String refParam = "";
+        if (p.getIdTransaccion() != null) {
+            String paramName = p.getTipoServicio() == TipoServicioEnum.GASTRONOMICO ? "pedido" : "reserva";
+            refParam = "&" + paramName + "=" + p.getIdTransaccion();
+        }
         PreferenceBackUrlsRequest backUrls = PreferenceBackUrlsRequest.builder()
-                .success(frontendUrl + "/pago/exito?transaccion=" + transaccionSave.getId())
-                .failure(frontendUrl + "/pago/error?transaccion=" + transaccionSave.getId())
-                .pending(frontendUrl + "/pago/pendiente?transaccion=" + transaccionSave.getId())
+                .success(frontendUrl + "/pago/exito?transaccion=" + transaccionSave.getId() + refParam)
+                .failure(frontendUrl + "/pago/error?transaccion=" + transaccionSave.getId() + refParam)
+                .pending(frontendUrl + "/pago/pendiente?transaccion=" + transaccionSave.getId() + refParam)
                 .build();
 
         // Arma la preferencia
-        PreferenceRequest preferenceRequest = PreferenceRequest.builder()
+        PreferenceRequest.PreferenceRequestBuilder preferenceBuilder = PreferenceRequest.builder()
                 .items(List.of(item))
                 // Aca se manda el id de la transaccion para obtenerlo cuando se haga el pago
                 .externalReference(transaccionSave.getId().toString())
                 // URLs de retorno
                 .backUrls(backUrls)
-                .autoReturn("approved")
+                // Datos del pagador
+                .payer(payer)
                 // URL donde Mercado Pago envía las notificaciones webhook
                 .notificationUrl(webhookUrl)
-                // Aca se setean datos para que la URL expire y no sea comprada mas alla de lo
-                // que dura la reserva
-                .expires(true)
+                // Expiración sincronizada con el bloqueo temporal de reservas (5 min)
                 .expirationDateFrom(expirationFrom)
-                .expirationDateTo(expirationTo)
-                .build();
+                .expirationDateTo(expirationTo);
+
+        // auto_return solo funciona con URLs públicas (no localhost)
+        if (!frontendUrl.contains("localhost")) {
+            preferenceBuilder.autoReturn("approved");
+        }
+
+        PreferenceRequest preferenceRequest = preferenceBuilder.build();
 
         // Se termina la preferencia
         PreferenceClient client = new PreferenceClient();
         Preference preference = client.create(preferenceRequest);
 
-        // Retorna la URL de pago
         return preference.getInitPoint();
     }
 
@@ -246,6 +273,27 @@ public class MercadoPagoService {
                 );
 
                 // Enviar notificación de rechazo
+                if(transaccion.getTipoServicio()== TipoServicioEnum.GASTRONOMICO){
+                    pagoProducerService.enviarNotificacionPagoPedido(evento);
+                }else{
+                    pagoProducerService.enviarNotificacionPagoReserva(evento);
+                }
+            } else if ("pending".equalsIgnoreCase(estado) || "in_process".equalsIgnoreCase(estado)) {
+                transaccion.setEstado("Pendiente");
+                transaccion.setMercadoPagoId(paymentId);
+                transaccionRepository.save(transaccion);
+
+                com.tapalque.mercado_pago.dto.PagoEventoDTO evento = new com.tapalque.mercado_pago.dto.PagoEventoDTO(
+                    transaccion.getId(),
+                    transaccion.getIdTransaccion(),
+                    transaccion.getTipoServicio().name(),
+                    "PENDIENTE",
+                    transaccion.getMonto(),
+                    transaccion.getMercadoPagoId(),
+                    transaccion.getUsuarioId(),
+                    LocalDateTime.now()
+                );
+
                 if(transaccion.getTipoServicio()== TipoServicioEnum.GASTRONOMICO){
                     pagoProducerService.enviarNotificacionPagoPedido(evento);
                 }else{

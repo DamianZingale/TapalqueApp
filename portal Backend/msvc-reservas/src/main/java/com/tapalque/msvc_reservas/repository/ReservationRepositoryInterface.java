@@ -29,4 +29,9 @@ public interface ReservationRepositoryInterface extends ReactiveMongoRepository<
     // Solapamiento: checkInDate < hasta  Y  checkOutDate > desde
     @Query("{ 'hotel.hotelId': ?0, 'stayPeriod.checkInDate': { $lt: ?2 }, 'stayPeriod.checkOutDate': { $gt: ?1 }, 'isActive': true, 'isCancelled': false }")
     Flux<Reservation> findByHotelAndStayPeriodOverlap(String hotelId, LocalDateTime desde, LocalDateTime hasta);
+
+    // Igual que la anterior pero también incluye reservas pendientes de pago (creadas hace menos de X minutos)
+    // Esto bloquea temporalmente la habitación mientras el usuario completa el pago
+    @Query("{ 'hotel.hotelId': ?0, 'stayPeriod.checkInDate': { $lt: ?2 }, 'stayPeriod.checkOutDate': { $gt: ?1 }, 'isCancelled': false, $or: [ { 'isActive': true }, { 'isActive': false, 'payment.isPaid': false, 'dateCreated': { $gte: ?3 } } ] }")
+    Flux<Reservation> findByHotelAndStayPeriodOverlapIncludingPending(String hotelId, LocalDateTime desde, LocalDateTime hasta, LocalDateTime creadoDespuesDe);
 }

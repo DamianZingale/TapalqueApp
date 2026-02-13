@@ -13,7 +13,6 @@ export const GestionPedidosTab = () => {
 
     useEffect(() => {
         cargarPedidos();
-        // Actualizar cada 30 segundos para tiempo real
         const interval = setInterval(cargarPedidos, 30000);
         return () => clearInterval(interval);
     }, []);
@@ -41,28 +40,49 @@ export const GestionPedidosTab = () => {
         .sort((a, b) => {
             if (ordenPor === 'reciente') return new Date(b.dateCreated).getTime() - new Date(a.dateCreated).getTime();
             if (ordenPor === 'antiguo') return new Date(a.dateCreated).getTime() - new Date(b.dateCreated).getTime();
-            return b.totalPrice - a.totalPrice;
+            return (b.totalPrice ?? 0) - (a.totalPrice ?? 0);
         });
 
     const getEstadoBadge = (estado: EstadoPedido) => {
-        const configs = {
-            [EstadoPedido.PENDING]: { bg: 'warning', text: 'Pendiente' },
-            [EstadoPedido.PAID]: { bg: 'info', text: 'Pagado' },
-            [EstadoPedido.READY]: { bg: 'success', text: 'Listo' },
-            [EstadoPedido.DELIVERED]: { bg: 'secondary', text: 'Entregado' },
+        const configs: Record<string, { bg: string; text: string }> = {
+            [EstadoPedido.RECIBIDO]: { bg: 'warning', text: 'Recibido' },
+            [EstadoPedido.EN_PREPARACION]: { bg: 'info', text: 'En preparacion' },
+            [EstadoPedido.LISTO]: { bg: 'success', text: 'Listo' },
+            [EstadoPedido.EN_DELIVERY]: { bg: 'primary', text: 'En delivery' },
+            [EstadoPedido.ENTREGADO]: { bg: 'secondary', text: 'Entregado' },
         };
-        const config = configs[estado];
+        const config = configs[estado] ?? { bg: 'dark', text: estado };
         return <Badge bg={config.bg}>{config.text}</Badge>;
     };
 
-    const getSiguienteEstado = (estadoActual: EstadoPedido): EstadoPedido | null => {
-        const flujo: Record<EstadoPedido, EstadoPedido | null> = {
-            [EstadoPedido.PENDING]: EstadoPedido.PAID,
-            [EstadoPedido.PAID]: EstadoPedido.READY,
-            [EstadoPedido.READY]: EstadoPedido.DELIVERED,
-            [EstadoPedido.DELIVERED]: null,
-        };
-        return flujo[estadoActual];
+    const getSiguienteEstado = (pedido: Pedido): EstadoPedido | null => {
+        switch (pedido.status) {
+            case EstadoPedido.RECIBIDO:
+                return EstadoPedido.EN_PREPARACION;
+            case EstadoPedido.EN_PREPARACION:
+                return EstadoPedido.LISTO;
+            case EstadoPedido.LISTO:
+                return pedido.isDelivery ? EstadoPedido.EN_DELIVERY : EstadoPedido.ENTREGADO;
+            case EstadoPedido.EN_DELIVERY:
+                return EstadoPedido.ENTREGADO;
+            default:
+                return null;
+        }
+    };
+
+    const getBotonTexto = (pedido: Pedido): string => {
+        switch (pedido.status) {
+            case EstadoPedido.RECIBIDO:
+                return 'Marcar en preparacion';
+            case EstadoPedido.EN_PREPARACION:
+                return 'Marcar como listo';
+            case EstadoPedido.LISTO:
+                return pedido.isDelivery ? 'Enviar a delivery' : 'Marcar entregado';
+            case EstadoPedido.EN_DELIVERY:
+                return 'Marcar entregado';
+            default:
+                return '';
+        }
     };
 
     if (loading) {
@@ -79,9 +99,9 @@ export const GestionPedidosTab = () => {
         <div>
             {/* Filtros y controles */}
             <Row className="mb-4">
-                <Col md={6}>
+                <Col md={8}>
                     <h5>Filtrar por estado:</h5>
-                    <ButtonGroup>
+                    <ButtonGroup className="flex-wrap">
                         <Button
                             variant={filtroEstado === 'TODOS' ? 'primary' : 'outline-primary'}
                             onClick={() => setFiltroEstado('TODOS')}
@@ -89,31 +109,37 @@ export const GestionPedidosTab = () => {
                             Todos ({pedidos.length})
                         </Button>
                         <Button
-                            variant={filtroEstado === EstadoPedido.PENDING ? 'warning' : 'outline-warning'}
-                            onClick={() => setFiltroEstado(EstadoPedido.PENDING)}
+                            variant={filtroEstado === EstadoPedido.RECIBIDO ? 'warning' : 'outline-warning'}
+                            onClick={() => setFiltroEstado(EstadoPedido.RECIBIDO)}
                         >
-                            Pendiente ({pedidos.filter(p => p.status === EstadoPedido.PENDING).length})
+                            Recibidos ({pedidos.filter(p => p.status === EstadoPedido.RECIBIDO).length})
                         </Button>
                         <Button
-                            variant={filtroEstado === EstadoPedido.PAID ? 'info' : 'outline-info'}
-                            onClick={() => setFiltroEstado(EstadoPedido.PAID)}
+                            variant={filtroEstado === EstadoPedido.EN_PREPARACION ? 'info' : 'outline-info'}
+                            onClick={() => setFiltroEstado(EstadoPedido.EN_PREPARACION)}
                         >
-                            Pagado ({pedidos.filter(p => p.status === EstadoPedido.PAID).length})
+                            En preparacion ({pedidos.filter(p => p.status === EstadoPedido.EN_PREPARACION).length})
                         </Button>
                         <Button
-                            variant={filtroEstado === EstadoPedido.READY ? 'success' : 'outline-success'}
-                            onClick={() => setFiltroEstado(EstadoPedido.READY)}
+                            variant={filtroEstado === EstadoPedido.LISTO ? 'success' : 'outline-success'}
+                            onClick={() => setFiltroEstado(EstadoPedido.LISTO)}
                         >
-                            Listo ({pedidos.filter(p => p.status === EstadoPedido.READY).length})
+                            Listos ({pedidos.filter(p => p.status === EstadoPedido.LISTO).length})
+                        </Button>
+                        <Button
+                            variant={filtroEstado === EstadoPedido.EN_DELIVERY ? 'primary' : 'outline-primary'}
+                            onClick={() => setFiltroEstado(EstadoPedido.EN_DELIVERY)}
+                        >
+                            En delivery ({pedidos.filter(p => p.status === EstadoPedido.EN_DELIVERY).length})
                         </Button>
                     </ButtonGroup>
                 </Col>
 
-                <Col md={6}>
+                <Col md={4}>
                     <h5>Ordenar por:</h5>
                     <Form.Select value={ordenPor} onChange={(e) => setOrdenPor(e.target.value as any)}>
-                        <option value="reciente">Más reciente</option>
-                        <option value="antiguo">Más antiguo</option>
+                        <option value="reciente">Mas reciente</option>
+                        <option value="antiguo">Mas antiguo</option>
                         <option value="monto">Mayor monto</option>
                     </Form.Select>
                 </Col>
@@ -129,7 +155,10 @@ export const GestionPedidosTab = () => {
                             <Card className="h-100 shadow-sm">
                                 <Card.Header className="d-flex justify-content-between align-items-center">
                                     <span className="fw-bold">Pedido #{pedido.id.slice(0, 8)}</span>
-                                    {getEstadoBadge(pedido.status)}
+                                    <div>
+                                        {pedido.isDelivery && <Badge bg="dark" className="me-1">Delivery</Badge>}
+                                        {getEstadoBadge(pedido.status)}
+                                    </div>
                                 </Card.Header>
                                 <Card.Body>
                                     <div className="mb-2">
@@ -138,47 +167,64 @@ export const GestionPedidosTab = () => {
                                         </small>
                                     </div>
 
+                                    {/* Info del cliente */}
+                                    {(pedido.userName || pedido.userPhone) && (
+                                        <div className="mb-2 p-2 bg-light rounded">
+                                            {pedido.userName && <div><strong>Cliente:</strong> {pedido.userName}</div>}
+                                            {pedido.userPhone && <div><strong>Tel:</strong> {pedido.userPhone}</div>}
+                                            {pedido.isDelivery && pedido.deliveryAddress && (
+                                                <div><strong>Direccion:</strong> {pedido.deliveryAddress}</div>
+                                            )}
+                                        </div>
+                                    )}
+
                                     <h6 className="mb-2">Productos:</h6>
                                     <ul className="list-unstyled small">
                                         {pedido.items.map((item, idx) => (
                                             <li key={idx}>
-                                                <Badge bg="light" text="dark" className="me-1">{item.itemQuantity}x</Badge>
-                                                {item.itemName} - ${item.itemPrice}
+                                                <Badge bg="light" text="dark" className="me-1">
+                                                    {item.itemQuantity ?? item.quantity}x
+                                                </Badge>
+                                                {item.itemName ?? item.productName} - ${item.itemPrice ?? item.unitPrice}
                                             </li>
                                         ))}
                                     </ul>
 
                                     <div className="border-top pt-2 mt-2">
-                                        <strong>Total: ${pedido.totalPrice.toFixed(2)}</strong>
+                                        <strong>Total: ${(pedido.totalPrice ?? pedido.totalAmount ?? 0).toFixed(2)}</strong>
                                     </div>
 
-                                    {pedido.paidWithMercadoPago && (
-                                        <div className="mt-2">
-                                            <Badge bg="success">Pagado con MP</Badge>
-                                            {pedido.mercadoPagoId && (
-                                                <small className="d-block text-muted mt-1">
-                                                    MP ID: {pedido.mercadoPagoId}
-                                                </small>
-                                            )}
-                                        </div>
-                                    )}
+                                    {/* Info de pago */}
+                                    <div className="mt-2">
+                                        {pedido.paidWithMercadoPago && (
+                                            <>
+                                                <Badge bg="success">Pagado con MP</Badge>
+                                                {pedido.mercadoPagoId && (
+                                                    <small className="d-block text-muted mt-1">
+                                                        MP ID: {pedido.mercadoPagoId}
+                                                    </small>
+                                                )}
+                                            </>
+                                        )}
+                                        {pedido.paidWithCash && (
+                                            <Badge bg="outline-secondary" text="dark" className="border">Pago en efectivo</Badge>
+                                        )}
+                                    </div>
                                 </Card.Body>
                                 <Card.Footer>
-                                    {getSiguienteEstado(pedido.status) && (
+                                    {getSiguienteEstado(pedido) && (
                                         <Button
                                             variant="primary"
                                             size="sm"
                                             className="w-100"
-                                            onClick={() => cambiarEstado(pedido.id, getSiguienteEstado(pedido.status)!)}
+                                            onClick={() => cambiarEstado(pedido.id, getSiguienteEstado(pedido)!)}
                                         >
-                                            {pedido.status === EstadoPedido.PAID && '👨‍🍳 Marcar en Preparación'}
-                                            {pedido.status === EstadoPedido.PENDING && '💰 Marcar como Pagado'}
-                                            {pedido.status === EstadoPedido.READY && '✅ Marcar Entregado'}
+                                            {getBotonTexto(pedido)}
                                         </Button>
                                     )}
-                                    {pedido.status === EstadoPedido.DELIVERED && (
-                                        <div className="text-center text-success">
-                                            ✓ Completado
+                                    {pedido.status === EstadoPedido.ENTREGADO && (
+                                        <div className="text-center text-success fw-bold">
+                                            Completado
                                         </div>
                                     )}
                                 </Card.Footer>
