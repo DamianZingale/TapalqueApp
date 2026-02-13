@@ -84,34 +84,16 @@ setup_ssl() {
     echo_info "Configurando SSL con Let's Encrypt..."
 
     # Verificar si ya existe el certificado
-    if docker compose exec nginx-proxy test -f /etc/letsencrypt/live/$DOMAIN/fullchain.pem 2>/dev/null; then
+    if $COMPOSE_CMD exec nginx-proxy test -f /etc/letsencrypt/live/$DOMAIN/fullchain.pem 2>/dev/null; then
         echo_info "Certificado SSL ya existe, saltando..."
         return
     fi
 
     echo_info "Obteniendo certificado SSL para $DOMAIN..."
+    echo_info "nginx-proxy ya sirve HTTP para el challenge de certbot..."
 
-    # Temporalmente servir solo HTTP para el challenge
-    # Crear config temporal sin SSL
-    docker compose exec nginx-proxy sh -c "cat > /etc/nginx/conf.d/default.conf << 'TMPEOF'
-server {
-    listen 80;
-    server_name www.tapalqueapp.com.ar tapalqueapp.com.ar;
-
-    location /.well-known/acme-challenge/ {
-        root /var/www/certbot;
-    }
-
-    location / {
-        return 200 'Configurando SSL...';
-        add_header Content-Type text/plain;
-    }
-}
-TMPEOF"
-    docker compose exec nginx-proxy nginx -s reload
-
-    # Obtener certificado
-    docker compose run --rm certbot certbot certonly \
+    # Obtener certificado via webroot (nginx-proxy arranca en modo HTTP-only automaticamente)
+    $COMPOSE_CMD run --rm certbot certonly \
         --webroot \
         -w /var/www/certbot \
         -d $DOMAIN \
@@ -120,9 +102,9 @@ TMPEOF"
         --agree-tos \
         --no-eff-email
 
-    # Restaurar config completa con SSL
-    docker compose cp nginx-proxy/nginx.conf nginx-proxy:/etc/nginx/conf.d/default.conf
-    docker compose exec nginx-proxy nginx -s reload
+    # Reiniciar nginx-proxy para que detecte el certificado y active SSL
+    echo_info "Reiniciando nginx-proxy con SSL..."
+    $COMPOSE_CMD restart nginx-proxy
 
     echo_info "Certificado SSL instalado correctamente"
 }
