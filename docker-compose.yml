@@ -79,6 +79,12 @@ services:
     volumes:
       - gastronomia_data:/var/lib/mysql
       - ./portal Backend/init-scripts/MySql/init-gastronomia.sql:/docker-entrypoint-initdb.d/init-gastronomia.sql:ro
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', 'root', '-p$$MYSQL_ROOT_PASSWORD']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     deploy:
       resources:
         limits:
@@ -121,6 +127,12 @@ services:
     volumes:
       - mercado_pago_data:/var/lib/mysql
       - ./portal Backend/init-scripts/MySql/init-mercado-pago.sql:/docker-entrypoint-initdb.d/init-mercado-pago.sql:ro
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', 'root', '-p$$MYSQL_ROOT_PASSWORD']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     deploy:
       resources:
         limits:
@@ -139,6 +151,12 @@ services:
     volumes:
       - jwt_data:/var/lib/mysql
       - ./portal Backend/init-scripts/MySql/init-jwt.sql:/docker-entrypoint-initdb.d/init-jwt.sql:ro
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', 'root', '-p$$MYSQL_ROOT_PASSWORD']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     deploy:
       resources:
         limits:
@@ -157,6 +175,12 @@ services:
     volumes:
       - user_data:/var/lib/mysql
       - ./portal Backend/init-scripts/MySql/init-user.sql:/docker-entrypoint-initdb.d/init-user.sql:ro
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', 'root', '-p$$MYSQL_ROOT_PASSWORD']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     deploy:
       resources:
         limits:
@@ -175,6 +199,12 @@ services:
     volumes:
       - comercio_data:/var/lib/mysql
       - ./portal Backend/init-scripts/MySql/init-comercio.sql:/docker-entrypoint-initdb.d/init-comercio.sql:ro
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', 'root', '-p$$MYSQL_ROOT_PASSWORD']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     deploy:
       resources:
         limits:
@@ -193,6 +223,12 @@ services:
     volumes:
       - eventos_data:/var/lib/mysql
       - ./portal Backend/init-scripts/MySql/init-eventos.sql:/docker-entrypoint-initdb.d/init-eventos.sql:ro
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', 'root', '-p$$MYSQL_ROOT_PASSWORD']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     deploy:
       resources:
         limits:
@@ -211,6 +247,12 @@ services:
     volumes:
       - servicios_data:/var/lib/mysql
       - ./portal Backend/init-scripts/MySql/init-servicios.sql:/docker-entrypoint-initdb.d/init-servicios.sql:ro
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', 'root', '-p$$MYSQL_ROOT_PASSWORD']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     deploy:
       resources:
         limits:
@@ -229,6 +271,12 @@ services:
     volumes:
       - termas_data:/var/lib/mysql
       - ./portal Backend/init-scripts/MySql/init-termas.sql:/docker-entrypoint-initdb.d/init-termas.sql:ro
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', 'root', '-p$$MYSQL_ROOT_PASSWORD']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     networks:
       - tapalque-net
 
@@ -243,6 +291,12 @@ services:
     volumes:
       - espacios_publicos_data:/var/lib/mysql
       - ./portal Backend/init-scripts/MySql/init-espacios-publicos.sql:/docker-entrypoint-initdb.d/init-espacios-publicos.sql:ro
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', 'root', '-p$$MYSQL_ROOT_PASSWORD']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     deploy:
       resources:
         limits:
@@ -308,8 +362,10 @@ services:
     build: ./portal Backend/msvc-jwt
     restart: always
     depends_on:
-      - eureka-server
-      - jwt-db
+      eureka-server:
+        condition: service_healthy
+      jwt-db:
+        condition: service_healthy
     deploy:
       resources:
         limits:
@@ -320,8 +376,10 @@ services:
   msvc-user:
     build: ./portal Backend/msvc-user
     depends_on:
-      - user-db
-      - eureka-server
+      user-db:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
     restart: always
     env_file:
       - .env
@@ -382,8 +440,10 @@ services:
     build: ./portal Backend/msvc-gastronomia
     container_name: msvc-gastronomia
     depends_on:
-      - gastronomia-db
-      - eureka-server
+      gastronomia-db:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
     volumes:
       - gastronomia_uploads:/app/uploads
     restart: always
@@ -401,7 +461,7 @@ services:
       hosteleria-db:
         condition: service_healthy
       eureka-server:
-        condition: service_started
+        condition: service_healthy
     volumes:
       - hosteleria_uploads:/app/uploads
     restart: always
@@ -421,7 +481,7 @@ services:
       SPRING_RABBITMQ_PASSWORD: guest
     depends_on:
       mercado-pago-db:
-        condition: service_started
+        condition: service_healthy
       rabbitmq:
         condition: service_healthy
       eureka-server:
@@ -440,8 +500,10 @@ services:
     build: ./portal Backend/msvc-comercio
     container_name: msvc-comercio
     depends_on:
-      - comercio-db
-      - eureka-server
+      comercio-db:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
     volumes:
       - comercio_uploads:/app/uploads
     restart: always
@@ -456,8 +518,10 @@ services:
     build: ./portal Backend/msvc-eventos
     container_name: msvc-eventos
     depends_on:
-      - eventos-db
-      - eureka-server
+      eventos-db:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
     volumes:
       - eventos_uploads:/app/uploads
     restart: always
@@ -472,8 +536,10 @@ services:
     build: ./portal Backend/msvc-servicios
     container_name: msvc-servicios
     depends_on:
-      - servicios-db
-      - eureka-server
+      servicios-db:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
     volumes:
       - servicios_uploads:/app/uploads
     restart: always
@@ -488,8 +554,10 @@ services:
     build: ./portal Backend/msvc-termas
     container_name: msvc-termas
     depends_on:
-      - termas-db
-      - eureka-server
+      termas-db:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
     volumes:
       - termas_uploads:/app/uploads
     restart: always
@@ -504,8 +572,10 @@ services:
     build: ./portal Backend/msvc-espacios-publicos
     container_name: msvc-espacios-publicos
     depends_on:
-      - espacios-publicos-db
-      - eureka-server
+      espacios-publicos-db:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
     volumes:
       - espacios_publicos_uploads:/app/uploads
     restart: always
