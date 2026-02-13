@@ -93,7 +93,7 @@ setup_ssl() {
     echo_info "nginx-proxy ya sirve HTTP para el challenge de certbot..."
 
     # Obtener certificado via webroot (nginx-proxy arranca en modo HTTP-only automaticamente)
-    $COMPOSE_CMD run --rm certbot certonly \
+    $COMPOSE_CMD run --rm --entrypoint "certbot" certbot certonly \
         --webroot \
         -w /var/www/certbot \
         -d $DOMAIN \
