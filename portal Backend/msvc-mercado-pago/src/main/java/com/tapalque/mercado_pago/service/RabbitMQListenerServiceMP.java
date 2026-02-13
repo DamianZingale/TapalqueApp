@@ -53,12 +53,11 @@ public class RabbitMQListenerServiceMP {
 
             // Crear DTO para enviar al servicio
             ProductoRequestDTO request = new ProductoRequestDTO();
-            request.setIdTransaccion(idTransaccion);
+            request.setIdTransaccion(String.valueOf(idTransaccion));
             request.setIdComprador(idComprador);
             request.setIdVendedor(idVendedor);
             request.setTipoServicio(tipoServicio);
             request.setUnitPrice(monto);
-            request.setFecha(fecha);
 
             // Llamar al servicio para crear la preferencia
             String initPoint = mercadoPagoService.crearPreferencia(request);
