@@ -10,11 +10,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.Builder;
 
 @Entity
-@Table(name = "roles_tb")
-@Builder
+@Table(name = "roles")
 public class Role {
 
     @Id
@@ -22,15 +20,15 @@ public class Role {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    @Column(unique = true)
+    @Column(nullable = false, unique = true)
     private RolName name;
-
-    public Role() {
-    }
 
     public Role(Long id, RolName name) {
         this.id = id;
         this.name = name;
+    }
+
+    public Role() {
     }
 
     public Long getId() {
@@ -50,6 +48,5 @@ public class Role {
     }
 
     
-
     
 }

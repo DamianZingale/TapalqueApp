@@ -33,38 +33,50 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain)
             throws ServletException, IOException {
-                
+
         final String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        Map<String, String> datos = webClientBuilder.build()
-                .post()
-                .uri("lb://MSVC-JWT/api/jwt/validate")
-                .header(HttpHeaders.AUTHORIZATION, authHeader)
-                .accept(MediaType.APPLICATION_JSON)
-                .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<Map<String, String>>() {
-                })
-                .onErrorReturn(Map.of())
-                .block();
+        try {
+            Map<String, String> datos = webClientBuilder.build()
+                    .post()
+                    .uri("lb://MSVC-JWT/jwt/public/validate")
+                    .header(HttpHeaders.AUTHORIZATION, authHeader)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .retrieve()
+                    .bodyToMono(new ParameterizedTypeReference<Map<String, String>>() {})
+                    .onErrorReturn(Map.of())
+                    .block();
 
-        if (!datos.containsKey("email") || !datos.containsKey("rol")) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return;
+            if (datos == null || !datos.containsKey("email") || !datos.containsKey("rol")) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+
+            String email = datos.get("email");
+            String rol = datos.get("rol");
+            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                    email,
+                    null,
+                    List.of(new SimpleGrantedAuthority("ROLE_" + rol)));
+            SecurityContextHolder.getContext().setAuthentication(auth);
+
+        } catch (Exception e) {
+            SecurityContextHolder.clearContext();
         }
 
-        String email = datos.get("email");
-        String rol = datos.get("rol");
-        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                email,
-                null,
-                List.of(new SimpleGrantedAuthority("ROLE_" + rol))
-        );
-        SecurityContextHolder.getContext().setAuthentication(auth);
-
         filterChain.doFilter(request, response);
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getServletPath();
+        // Endpoints públicos que no requieren autenticación
+        return path.startsWith("/user/public/") ||
+               path.equals("/user/email/") ||
+               path.startsWith("/user/email/");
     }
 }

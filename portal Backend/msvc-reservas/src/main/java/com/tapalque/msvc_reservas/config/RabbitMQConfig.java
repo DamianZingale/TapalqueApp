@@ -1,32 +1,25 @@
 package com.tapalque.msvc_reservas.config;
 
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.Queue;
-import org.springframework.amqp.core.TopicExchange;
+import org.springframework.amqp.rabbit.annotation.EnableRabbit;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@EnableRabbit
 public class RabbitMQConfig {
 
+    public static final String QUEUE_RESERVAS = "pagos.reservas";
 
-     
     @Bean
-    public Queue queueHospedaje() {
-        return new Queue("pagos-hospedaje-queue", true);
+    public Queue reservasQueue() {
+        return new Queue(QUEUE_RESERVAS, true); // durable
     }
 
     @Bean
-    public TopicExchange exchange() {
-        return new TopicExchange("pagos-exchange");
-    }
-
-
-
-    @Bean
-    public Binding bindingHospedaje(Queue queueHospedaje, TopicExchange exchange) {
-        return BindingBuilder.bind(queueHospedaje).to(exchange).with("pagos.hospedaje");
+    public MessageConverter jsonMessageConverter() {
+        return new Jackson2JsonMessageConverter();
     }
 }
-

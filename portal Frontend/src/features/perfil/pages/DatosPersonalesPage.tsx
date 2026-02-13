@@ -4,7 +4,7 @@ import { DatosPersonales } from "../components/DatosPersonales"
 
 export const DatosPersonalesPage = () => {
     return (
-        <div className="container vh-100 flex-column">
+        <div className="container pb-5">
             <Title text= "Datos Personales"/>
             <DatosPersonales/>
             <CambiarContraseña/>

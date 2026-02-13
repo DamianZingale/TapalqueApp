@@ -1,2 +1,7 @@
+*.jar
+target/
 .env
 *.env
+.md
+*.md
+env.*

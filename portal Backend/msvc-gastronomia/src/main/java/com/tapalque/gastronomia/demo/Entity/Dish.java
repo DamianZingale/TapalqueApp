@@ -27,6 +27,15 @@ public class Dish {
     @Column(nullable = false)
     private Double price;
 
+    @Column(length = 500)
+    private String description;
+
+    @Column(nullable = false)
+    private Boolean available = true;
+
+    @Column(length = 1000)
+    private String picture;
+
     // 🔹 Relación ManyToMany con DishCategory
     @ManyToMany
     @JoinTable(
@@ -125,5 +134,29 @@ public class Dish {
 
     public void setIngredients(List<Ingredient> ingredients) {
         this.ingredients = ingredients;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Boolean getAvailable() {
+        return available;
+    }
+
+    public void setAvailable(Boolean available) {
+        this.available = available;
+    }
+
+    public String getPicture() {
+        return picture;
+    }
+
+    public void setPicture(String picture) {
+        this.picture = picture;
     }
 }

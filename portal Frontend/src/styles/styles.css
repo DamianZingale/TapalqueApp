@@ -1,33 +1,177 @@
+@import './skeletons.css';
+
 .whatsapp-float {
-    position: fixed;
-    bottom: 140px; /* Encima del footer */
-    right: 20px;
-    z-index: 1040; /* Mayor que el footer (1030) */
-    background-color: #25D366;
-    color: white;
-    border-radius: 50%;
-    width: 60px;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    transition: all 0.3s ease;
+  position: fixed;
+  bottom: 140px; /* Encima del footer */
+  right: 20px;
+  z-index: 1040; /* Mayor que el footer (1030) */
+  background-color: #25d366;
+  color: white;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
 }
 
 .whatsapp-float:hover {
-    transform: scale(1.1);
-    color: white; /* Mantiene el color blanco en hover */
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+  transform: scale(1.1);
+  color: white; /* Mantiene el color blanco en hover */
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
 }
 
 /* Responsive: ajusta la posición en móviles */
 @media (max-width: 768px) {
-    .whatsapp-float {
-        bottom: 150px; /* Un poco más arriba en móviles */
-        right: 15px;
-        width: 55px;
-        height: 55px;
-    }
+  .whatsapp-float {
+    bottom: 150px; /* Un poco más arriba en móviles */
+    right: 15px;
+    width: 55px;
+    height: 55px;
+  }
+}
+body {
+  background-color: #e8e6e3;
+  margin: 0;
+  min-height: 100vh;
+}
+
+/* ============================================
+   Calendario de Reservas
+   ============================================ */
+
+/* Contenedor y datepicker base */
+.calendario-custom .react-datepicker {
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  font-family: inherit;
+  width: 100%;
+}
+
+.calendario-custom .react-datepicker__month-container {
+  width: 100%;
+}
+
+/* Header azul */
+.calendario-custom .react-datepicker__header {
+  background-color: #0d6efd;
+  border-bottom: none;
+  border-radius: 0;
+  padding: 14px 16px 8px;
+}
+
+/* Nombres de días (lu, ma, mi…) blancos */
+.calendario-custom .react-datepicker__day-name {
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 600;
+  font-size: 0.77rem;
+  text-transform: uppercase;
+}
+
+/* Zona de los días – centrada */
+.calendario-custom .react-datepicker__month {
+  padding: 10px 12px;
+  text-align: center;
+}
+
+/* Día base */
+.calendario-custom .react-datepicker__day {
+  color: #495057;
+  border-radius: 0;
+  width: 2.4rem;
+  line-height: 2.4rem;
+  font-size: 0.88rem;
+}
+
+/* Hover (días normales) */
+.calendario-custom .react-datepicker__day:hover:not(.react-datepicker__day--outside-month):not(.dia-reservado) {
+  background-color: #e7f1ff;
+  color: #0d6efd;
+  border-radius: 6px;
+}
+
+/* ─── Selección de rango ─── */
+
+/* Fecha seleccionada (click único / sin endDate aún) */
+.calendario-custom .react-datepicker__day--selected {
+  background-color: #0d6efd !important;
+  color: #fff !important;
+  border-radius: 50% !important;
+}
+
+/* Inicio del rango – media-circunferencia izquierda */
+.calendario-custom .react-datepicker__day--range-start {
+  border-radius: 50% 0 0 50% !important;
+}
+
+/* Fin del rango – media-circunferencia derecha */
+.calendario-custom .react-datepicker__day--range-end {
+  border-radius: 0 50% 50% 0 !important;
+}
+
+/* Inicio == fin (misma fecha seleccionada dos veces) */
+.calendario-custom .react-datepicker__day--range-start.react-datepicker__day--range-end {
+  border-radius: 50% !important;
+}
+
+/* Relleno entre inicio y fin */
+.calendario-custom .react-datepicker__day--in-range {
+  background-color: #cfe2ff !important;
+  color: #0d6efd !important;
+  border-radius: 0 !important;
+}
+
+/* ─── Otros estados ─── */
+
+/* Hoy (cuando no está dentro de la selección) */
+.calendario-custom .react-datepicker__day--today:not(.react-datepicker__day--selected):not(.react-datepicker__day--in-range):not(.react-datepicker__day--range-start):not(.react-datepicker__day--range-end) {
+  color: #0d6efd !important;
+  font-weight: 700;
+  border: 2px solid #0d6efd;
+  border-radius: 50%;
+}
+
+/* Keyboard-selected – neutralizar estilo por defecto */
+.calendario-custom .react-datepicker__day--keyboard-selected {
+  background-color: transparent !important;
+  color: #495057 !important;
+  border: none;
+}
+
+/* Fuera de mes */
+.calendario-custom .react-datepicker__day--outside-month {
+  color: #ced4da;
+}
+
+/* ─── Fechas ocupadas / reservadas ─── */
+.calendario-custom .dia-reservado {
+  background-color: #f8d7da !important;
+  color: #842029 !important;
+  text-decoration: line-through;
+  cursor: not-allowed !important;
+  border-radius: 4px !important;
+}
+
+/* ─── Leyenda ─── */
+.dia-leyenda {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+}
+
+.dia-leyenda--seleccionado {
+  background-color: #0d6efd;
+}
+
+.dia-leyenda--rango {
+  background-color: #cfe2ff;
+}
+
+.dia-leyenda--ocupada {
+  background-color: #f8d7da;
 }

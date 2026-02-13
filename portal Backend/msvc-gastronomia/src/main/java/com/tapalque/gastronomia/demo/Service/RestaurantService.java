@@ -23,10 +23,19 @@ public class RestaurantService implements I_RestaurantService {
     private CategoryRepositoriInterface categoryRepository;
     
     @Override // Implementación del método para obtener un local gastronómico por su ID
-  
+
     public RestaurantDTO getRestaurantById(Long id) {
-    return localGastronomicoRepository.selectRestaurantById(id)
-        .orElseThrow(() -> new EntityNotFoundException("Restaurant not found with id: " + id));
+    try {
+        System.out.println("Buscando restaurant con ID: " + id);
+        return localGastronomicoRepository.selectRestaurantById(id)
+            .orElseThrow(() -> new EntityNotFoundException("Restaurant not found with id: " + id));
+    } catch (EntityNotFoundException e) {
+        throw e;
+    } catch (Exception e) {
+        System.err.println("Error en consulta SQL para restaurant ID " + id + ": " + e.getMessage());
+        e.printStackTrace();
+        throw new RuntimeException("Error al obtener restaurant: " + e.getMessage(), e);
+    }
 }
     @Override // Implementación del método para obtener todos los locales gastronómicos
     public List<RestaurantDTO> getAllLocalGastronomicos() {
@@ -35,38 +44,93 @@ public class RestaurantService implements I_RestaurantService {
     }
    @Override //implementacion: busca las categorias en BD y setea los id_category para guardar. Mismo con phone y schedule
 public RestaurantDTO addRestaurant(RestaurantDTO dto) {
+    try {
+        System.out.println("Guardando restaurant: " + dto.getName());
+        Restaurant entity = dto.toEntity();
 
-   Restaurant entity = dto.toEntity();
+        // Manejar categorías: buscar las existentes o limpiar si no se encuentran
+        if (entity.getCategories() != null && !entity.getCategories().isEmpty()) {
+            System.out.println("Procesando categorías...");
+            List<Category> existingCategories = entity.getCategories().stream()
+                    .map(c -> {
+                        System.out.println("Buscando categoría: " + c.getName());
+                        return categoryRepository.findByName(c.getName())
+                                .orElseGet(() -> {
+                                    System.err.println("ADVERTENCIA: Categoría no encontrada: " + c.getName());
+                                    return null;
+                                });
+                    })
+                    .filter(c -> c != null) // Filtrar las que no se encontraron
+                    .toList();
 
-    if (entity.getCategories() != null && !entity.getCategories().isEmpty()) {
-        List<Category> existingCategories = entity.getCategories().stream()
-                .map(c -> categoryRepository.findByName(c.getName())
-                        .orElseThrow(() -> new RuntimeException("Categoría no encontrada: " + c.getName())))
-                .toList();
-        entity.setCategories(existingCategories);
+            entity.setCategories(existingCategories);
+            System.out.println("Categorías procesadas: " + existingCategories.size());
+        } else {
+            System.out.println("Sin categorías para procesar");
+            entity.setCategories(null);
+        }
+
+        if (entity.getPhoneNumbers() != null) {
+            entity.getPhoneNumbers().forEach(p -> p.setRestaurant(entity));
+        }
+        if (entity.getSchedules() != null) {
+            entity.getSchedules().forEach(s -> s.setRestaurant(entity));
+        }
+
+        Restaurant savedEntity = localGastronomicoRepository.save(entity);
+        System.out.println("Restaurant guardado exitosamente con ID: " + savedEntity.getIdRestaurant());
+        return new RestaurantDTO(savedEntity);
+    } catch (Exception e) {
+        System.err.println("Error al guardar restaurant: " + e.getMessage());
+        e.printStackTrace();
+        throw new RuntimeException("Error al guardar restaurant: " + e.getMessage(), e);
     }
-
-    if (entity.getPhoneNumbers() != null) {
-        entity.getPhoneNumbers().forEach(p -> p.setRestaurant(entity));
-    }
-    if (entity.getSchedules() != null) {
-        entity.getSchedules().forEach(s -> s.setRestaurant(entity));
-    }
-
-    Restaurant savedEntity = localGastronomicoRepository.save(entity);
-    return new RestaurantDTO(savedEntity);
 }
 
     @Override
     public void updateRestaurant(Restaurant restaurant) {
-        Long id = restaurant.getIdRestaurant();
-        if (id == null) {
-            throw new EntityNotFoundException("El id del local es nulo");
+        try {
+            Long id = restaurant.getIdRestaurant();
+            if (id == null) {
+                throw new EntityNotFoundException("El id del local es nulo");
+            }
+            if (!localGastronomicoRepository.existsById(id)) {
+                throw new EntityNotFoundException("No existe el local con id " + id);
+            }
+
+            System.out.println("Actualizando restaurant ID: " + id);
+
+            // Manejar categorías: buscar las existentes o limpiar si no se encuentran
+            if (restaurant.getCategories() != null && !restaurant.getCategories().isEmpty()) {
+                System.out.println("Procesando categorías para actualización...");
+                List<Category> existingCategories = restaurant.getCategories().stream()
+                        .map(c -> {
+                            System.out.println("Buscando categoría: " + c.getName());
+                            return categoryRepository.findByName(c.getName())
+                                    .orElseGet(() -> {
+                                        System.err.println("ADVERTENCIA: Categoría no encontrada: " + c.getName());
+                                        return null;
+                                    });
+                        })
+                        .filter(c -> c != null) // Filtrar las que no se encontraron
+                        .toList();
+
+                restaurant.setCategories(existingCategories);
+                System.out.println("Categorías procesadas: " + existingCategories.size());
+            } else {
+                System.out.println("Sin categorías para procesar");
+                restaurant.setCategories(null);
+            }
+
+            localGastronomicoRepository.save(restaurant);
+            System.out.println("Restaurant actualizado exitosamente");
+        } catch (EntityNotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            System.err.println("Error al actualizar restaurant: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Error al actualizar restaurant: " + e.getMessage(), e);
         }
-        if (!localGastronomicoRepository.existsById(id)) {
-            throw new EntityNotFoundException("No existe el local con id " + id);
-        }
-        localGastronomicoRepository.save(restaurant);
     }
 
     @Override

@@ -24,14 +24,16 @@ public class Menu {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idMenu;
 
-   
-    @Column(nullable = true)
+    @Column(nullable = false)
+    private String name;
+
+    @Column(nullable = true, columnDefinition = "TEXT")
     private String description;
 
     // Relación con Restaurant
     @JsonBackReference
     @OneToOne
-    @JoinColumn(name = "idRestaurant", nullable = false)
+    @JoinColumn(name = "id_restaurant", nullable = false)
     private Restaurant restaurant;
 
     // Relación con Dish
@@ -40,8 +42,8 @@ public class Menu {
 
     public Menu() {}
 
-    public Menu( String description, Restaurant restaurant, List<Dish> dishes) {
-      
+    public Menu(String name, String description, Restaurant restaurant, List<Dish> dishes) {
+        this.name = name;
         this.description = description;
         this.restaurant = restaurant;
         this.dishes = dishes;
@@ -55,7 +57,13 @@ public class Menu {
         this.idMenu = idMenu;
     }
 
-    
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public String getDescription() {
         return description;

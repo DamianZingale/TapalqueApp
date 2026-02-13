@@ -1,60 +1,41 @@
+// UserRequestDTO.java
 package com.tapalque.user.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-
+import jakarta.validation.constraints.Size;
 
 public class UserRequestDTO {
-
-    @Email
-    @NotBlank
-    private String correo;
-
-    @NotBlank
-    private String contrasena;
-
-    @NotBlank
+    
+    @NotBlank(message = "El nombre es obligatorio")
     private String nombre;
-
-    @NotBlank
+    
     private String apellido;
-
+    
+    @NotBlank(message = "El correo es obligatorio")
+    @Email(message = "El correo debe ser válido")
+    private String correo;
+    
+    @NotBlank(message = "La contraseña es obligatoria")
+    @Size(min = 8, message = "La contraseña debe tener al menos 8 caracteres")
+    private String contrasenia;
+    
     private String empresa;
 
-    
-
+    // Constructor vacío
     public UserRequestDTO() {
     }
 
-    
-
-    public UserRequestDTO(@Email @NotBlank String correo, @NotBlank String contrasena, @NotBlank String nombre,
-            @NotBlank String apellido, String empresa) {
-        this.correo = correo;
-        this.contrasena = contrasena;
+    // Constructor completo
+    public UserRequestDTO(String nombre, String apellido, String correo, String contrasenia, String empresa) {
         this.nombre = nombre;
         this.apellido = apellido;
+        this.correo = correo;
+        this.contrasenia = contrasenia;
         this.empresa = empresa;
     }
 
-
-
-    public String getCorreo() {
-        return correo;
-    }
-
-    public void setCorreo(String correo) {
-        this.correo = correo;
-    }
-
-    public String getContrasena() {
-        return contrasena;
-    }
-
-    public void setContrasena(String contrasena) {
-        this.contrasena = contrasena;
-    }
-
+    // Getters y Setters
     public String getNombre() {
         return nombre;
     }
@@ -71,6 +52,22 @@ public class UserRequestDTO {
         this.apellido = apellido;
     }
 
+    public String getCorreo() {
+        return correo;
+    }
+
+    public void setCorreo(String correo) {
+        this.correo = correo;
+    }
+
+    public String getContrasenia() {
+        return contrasenia;
+    }
+
+    public void setContrasena(String contrasenia) {
+        this.contrasenia = contrasenia;
+    }
+
     public String getEmpresa() {
         return empresa;
     }
@@ -78,6 +75,4 @@ public class UserRequestDTO {
     public void setEmpresa(String empresa) {
         this.empresa = empresa;
     }
-
-    
 }

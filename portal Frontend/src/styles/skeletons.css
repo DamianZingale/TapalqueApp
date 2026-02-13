@@ -1,0 +1,158 @@
+/* Estilos para skeletons animados */
+
+@keyframes shimmer {
+  0% {
+    background-position: -468px 0;
+  }
+  100% {
+    background-position: 468px 0;
+  }
+}
+
+.skeleton-image {
+  background: linear-gradient(
+    to right,
+    #f6f7f8 0%,
+    #edeef1 20%,
+    #f6f7f8 40%,
+    #f6f7f8 100%
+  );
+  background-size: 800px 104px;
+  animation: shimmer 1.5s infinite linear;
+  border-radius: 0.375rem;
+}
+
+.skeleton-thumbnail {
+  background: linear-gradient(
+    to right,
+    #f6f7f8 0%,
+    #edeef1 20%,
+    #f6f7f8 40%,
+    #f6f7f8 100%
+  );
+  background-size: 400px 104px;
+  animation: shimmer 1.5s infinite linear;
+  border-radius: 0.375rem;
+}
+
+.skeleton-title {
+  height: 20px;
+  background: linear-gradient(
+    to right,
+    #f6f7f8 0%,
+    #edeef1 20%,
+    #f6f7f8 40%,
+    #f6f7f8 100%
+  );
+  background-size: 400px 104px;
+  animation: shimmer 1.5s infinite linear;
+  border-radius: 0.25rem;
+  width: 70%;
+}
+
+.skeleton-title-large {
+  height: 32px;
+  background: linear-gradient(
+    to right,
+    #f6f7f8 0%,
+    #edeef1 20%,
+    #f6f7f8 40%,
+    #f6f7f8 100%
+  );
+  background-size: 600px 104px;
+  animation: shimmer 1.5s infinite linear;
+  border-radius: 0.375rem;
+  width: 80%;
+}
+
+.skeleton-text {
+  height: 16px;
+  background: linear-gradient(
+    to right,
+    #f6f7f8 0%,
+    #edeef1 20%,
+    #f6f7f8 40%,
+    #f6f7f8 100%
+  );
+  background-size: 400px 104px;
+  animation: shimmer 1.5s infinite linear;
+  border-radius: 0.25rem;
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.skeleton-text.short {
+  width: 60%;
+}
+
+.skeleton-field {
+  height: 38px;
+  background: linear-gradient(
+    to right,
+    #f6f7f8 0%,
+    #edeef1 20%,
+    #f6f7f8 40%,
+    #f6f7f8 100%
+  );
+  background-size: 400px 104px;
+  animation: shimmer 1.5s infinite linear;
+  border-radius: 0.375rem;
+  width: 100%;
+}
+
+/* Loading animation general */
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.loading-shimmer {
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 25%,
+    #e0e0e0 50%,
+    #f0f0f0 75%
+  );
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+/* Mejoras para Bootstrap placeholders */
+.placeholder {
+  background-color: #e9ecef;
+  animation: shimmer 1.5s infinite linear;
+}
+
+.placeholder-glow .placeholder {
+  animation: shimmer 1.5s infinite linear;
+}
+
+/* Estados de carga para diferentes contextos */
+.skeleton-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.skeleton-list-item {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  border: 1px solid #dee2e6;
+  border-radius: 0.375rem;
+  margin-bottom: 0.5rem;
+}
+
+.skeleton-detail-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.skeleton-detail-content {
+  max-width: 800px;
+  margin: 0 auto;
+}

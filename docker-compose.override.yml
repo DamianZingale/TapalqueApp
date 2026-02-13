@@ -1,0 +1,407 @@
+services:
+  # ===========================
+  # FRONTEND DEV - Hot Module Replacement
+  # ===========================
+  frontend:
+    image: node:20-slim
+    container_name: frontend-dev
+    working_dir: /app
+    volumes:
+      - "./portal Frontend:/app"
+      - /app/node_modules
+    command: sh -c "npm install && npm run dev -- --host"
+    ports:
+      - "3000:5173"
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true
+    networks:
+      - tapalque-net
+    depends_on:
+      - msvc-gateway-server
+
+  # ===========================
+  # BACKEND MICROSERVICIOS DEV
+  # ===========================
+
+  eureka-server:
+    build:
+      context: "./portal Backend/eureka-server"
+      dockerfile: Dockerfile.dev
+    container_name: eureka-server-dev
+    volumes:
+      - "./portal Backend/eureka-server:/app"
+      - maven-cache:/root/.m2
+    working_dir: /app
+    command: mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dspring.devtools.restart.enabled=true -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+    ports:
+      - "8761:8761"
+      - "5001:5005"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - tapalque-net
+
+  msvc-gateway-server:
+    build:
+      context: "./portal Backend/msvc-gateway-server"
+      dockerfile: Dockerfile.dev
+    container_name: msvc-gateway-server-dev
+    volumes:
+      - "./portal Backend/msvc-gateway-server:/app"
+      - maven-cache:/root/.m2
+    working_dir: /app
+    command: mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dspring.devtools.restart.enabled=true -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+    ports:
+      - "8090:8090"
+      - "5002:5005"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - tapalque-net
+
+  msvc-jwt:
+    build:
+      context: "./portal Backend/msvc-jwt"
+      dockerfile: Dockerfile.dev
+    container_name: msvc-jwt-dev
+    volumes:
+      - "./portal Backend/msvc-jwt:/app"
+      - maven-cache:/root/.m2
+    working_dir: /app
+    command: mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dspring.devtools.restart.enabled=true -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+    ports:
+      - "8084:8080"
+      - "5003:5005"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATASOURCE_URL=jdbc:mysql://jwt-db:3306/jwt?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    depends_on:
+      - eureka-server
+      - jwt-db
+    networks:
+      - tapalque-net
+
+  msvc-user:
+    build:
+      context: "./portal Backend/msvc-user"
+      dockerfile: Dockerfile.dev
+    container_name: msvc-user-dev
+    volumes:
+      - "./portal Backend/msvc-user:/app"
+      - maven-cache:/root/.m2
+    working_dir: /app
+    command: mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dspring.devtools.restart.enabled=true -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+    ports:
+      - "8081:8080"
+      - "5004:5005"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATASOURCE_URL=jdbc:mysql://user-db:3306/user?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    env_file:
+      - .env
+    depends_on:
+      - eureka-server
+      - user-db
+    networks:
+      - tapalque-net
+
+  msvc-pedidos:
+    build:
+      context: "./portal Backend/msvc-pedidos"
+      dockerfile: Dockerfile.dev
+    container_name: msvc-pedidos-dev
+    volumes:
+      - "./portal Backend/msvc-pedidos:/app"
+      - maven-cache:/root/.m2
+    working_dir: /app
+    command: mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dspring.devtools.restart.enabled=true -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+    ports:
+      - "8082:8080"
+      - "5005:5005"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATA_MONGODB_URI=mongodb://pedidos-db:27017/pedidos
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=guest
+      - SPRING_RABBITMQ_PASSWORD=guest
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    depends_on:
+      pedidos-db:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - tapalque-net
+
+  msvc-reservas:
+    build:
+      context: "./portal Backend/msvc-reservas"
+      dockerfile: Dockerfile.dev
+    container_name: msvc-reservas-dev
+    volumes:
+      - "./portal Backend/msvc-reservas:/app"
+      - maven-cache:/root/.m2
+    working_dir: /app
+    command: mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dspring.devtools.restart.enabled=true -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+    ports:
+      - "8083:8080"
+      - "5006:5005"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATA_MONGODB_URI=mongodb://reservas-db:27017/reservas
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=guest
+      - SPRING_RABBITMQ_PASSWORD=guest
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    depends_on:
+      reservas-db:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - tapalque-net
+
+  msvc-gastronomia:
+    build:
+      context: "./portal Backend/msvc-gastronomia"
+      dockerfile: Dockerfile.dev
+    container_name: msvc-gastronomia-dev
+    volumes:
+      - "./portal Backend/msvc-gastronomia:/app"
+      - maven-cache:/root/.m2
+      - gastronomia_uploads:/app/uploads
+    working_dir: /app
+    command: mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dspring.devtools.restart.enabled=true -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+    ports:
+      - "8085:8080"
+      - "5007:5005"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATASOURCE_URL=jdbc:mysql://gastronomia-db:3306/gastronomia?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    depends_on:
+      - gastronomia-db
+      - eureka-server
+    networks:
+      - tapalque-net
+
+  msvc-hosteleria:
+    build:
+      context: "./portal Backend/msvc-hosteleria"
+      dockerfile: Dockerfile.dev
+    container_name: msvc-hosteleria-dev
+    volumes:
+      - "./portal Backend/msvc-hosteleria:/app"
+      - maven-cache:/root/.m2
+      - hosteleria_uploads:/app/uploads
+    working_dir: /app
+    command: mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dspring.devtools.restart.enabled=true -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+    ports:
+      - "8086:8080"
+      - "5008:5005"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATASOURCE_URL=jdbc:mysql://hosteleria-db:3306/hosteleria?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    depends_on:
+      - hosteleria-db
+      - eureka-server
+    networks:
+      - tapalque-net
+
+  msvc-mercado-pago:
+    build:
+      context: "./portal Backend/msvc-mercado-pago"
+      dockerfile: Dockerfile.dev
+    container_name: msvc-mercado-pago-dev
+    volumes:
+      - "./portal Backend/msvc-mercado-pago:/app"
+      - maven-cache:/root/.m2
+    working_dir: /app
+    command: mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dspring.devtools.restart.enabled=true -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+    ports:
+      - "8087:8080"
+      - "5009:5005"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - PORT=8080
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mercado-pago-db:3306/mercado_pago?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=guest
+      - SPRING_RABBITMQ_PASSWORD=guest
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    env_file:
+      - .env
+    depends_on:
+      mercado-pago-db:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - tapalque-net
+
+  msvc-comercio:
+    build:
+      context: "./portal Backend/msvc-comercio"
+      dockerfile: Dockerfile.dev
+    container_name: msvc-comercio-dev
+    volumes:
+      - "./portal Backend/msvc-comercio:/app"
+      - maven-cache:/root/.m2
+      - comercio_uploads:/app/uploads
+    working_dir: /app
+    command: mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dspring.devtools.restart.enabled=true -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+    ports:
+      - "8088:8080"
+      - "5010:5005"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATASOURCE_URL=jdbc:mysql://comercio-db:3306/comercio?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    depends_on:
+      - comercio-db
+      - eureka-server
+    networks:
+      - tapalque-net
+
+  msvc-eventos:
+    build:
+      context: "./portal Backend/msvc-eventos"
+      dockerfile: Dockerfile.dev
+    container_name: msvc-eventos-dev
+    volumes:
+      - "./portal Backend/msvc-eventos:/app"
+      - maven-cache:/root/.m2
+      - eventos_uploads:/app/uploads
+    working_dir: /app
+    command: mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dspring.devtools.restart.enabled=true -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+    ports:
+      - "8089:8080"
+      - "5011:5005"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATASOURCE_URL=jdbc:mysql://eventos-db:3306/eventos?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    depends_on:
+      - eventos-db
+      - eureka-server
+    networks:
+      - tapalque-net
+
+  msvc-servicios:
+    build:
+      context: "./portal Backend/msvc-servicios"
+      dockerfile: Dockerfile.dev
+    container_name: msvc-servicios-dev
+    volumes:
+      - "./portal Backend/msvc-servicios:/app"
+      - maven-cache:/root/.m2
+      - servicios_uploads:/app/uploads
+    working_dir: /app
+    command: mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dspring.devtools.restart.enabled=true -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+    ports:
+      - "8091:8080"
+      - "5012:5005"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATASOURCE_URL=jdbc:mysql://servicios-db:3306/servicios?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    depends_on:
+      - servicios-db
+      - eureka-server
+    networks:
+      - tapalque-net
+
+  msvc-termas:
+    build:
+      context: "./portal Backend/msvc-termas"
+      dockerfile: Dockerfile.dev
+    container_name: msvc-termas-dev
+    volumes:
+      - "./portal Backend/msvc-termas:/app"
+      - maven-cache:/root/.m2
+      - termas_uploads:/app/uploads
+    working_dir: /app
+    command: mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dspring.devtools.restart.enabled=true -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+    ports:
+      - "8092:8080"
+      - "5013:5005"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATASOURCE_URL=jdbc:mysql://termas-db:3306/termas?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    depends_on:
+      - termas-db
+      - eureka-server
+    networks:
+      - tapalque-net
+
+  msvc-espacios-publicos:
+    build:
+      context: "./portal Backend/msvc-espacios-publicos"
+      dockerfile: Dockerfile.dev
+    container_name: msvc-espacios-publicos-dev
+    volumes:
+      - "./portal Backend/msvc-espacios-publicos:/app"
+      - maven-cache:/root/.m2
+      - espacios_publicos_uploads:/app/uploads
+    working_dir: /app
+    command: mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dspring.devtools.restart.enabled=true -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+    ports:
+      - "8093:8080"
+      - "5014:5005"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATASOURCE_URL=jdbc:mysql://espacios-publicos-db:3306/espacios_publicos?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    depends_on:
+      - espacios-publicos-db
+      - eureka-server
+    networks:
+      - tapalque-net
+
+volumes:
+  maven-cache:
+    name: tapalque-maven-cache

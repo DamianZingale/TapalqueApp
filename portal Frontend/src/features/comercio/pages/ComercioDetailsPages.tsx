@@ -1,51 +1,74 @@
-import { useParams } from "react-router-dom";
-import { Title } from "../../../shared/components/Title";
-import { Carrusel } from "../../../shared/components/Carrusel";
-import { Description } from "../../../shared/components/Description";
-import { Horarios } from "../../../shared/components/Horarios";
-import { WhatsAppButton } from "../../../shared/components/WhatsAppButton";
-import { comerciosMock } from './mocks/mockComercios';
-import {SocialLinks} from "../../../shared/components/SocialLinks"
+import { useEffect, useState } from 'react';
+import { FaMapMarkerAlt } from 'react-icons/fa';
+import { useParams } from 'react-router-dom';
+import { Comercio, fetchComercioById } from '../../../services/fetchComercios';
+import { Carrusel } from '../../../shared/components/Carrusel';
+import { Description } from '../../../shared/components/Description';
+import { Horarios } from '../../../shared/components/Horarios';
+import { SocialLinks } from '../../../shared/components/SocialLinks';
+import { Title } from '../../../shared/components/Title';
+import { WhatsAppButton } from '../../../shared/components/WhatsAppButton';
 
 export default function ComercioDetailPage() {
-    const { id } = useParams();
-    const data = comerciosMock.find((comercio) => comercio.id === id);
+  const { id } = useParams();
+  const [data, setData] = useState<Comercio | null>(null);
+  const [loading, setLoading] = useState(true);
 
-    if (!data) return <p>Comercio no encontrado</p>;
+  useEffect(() => {
+    const cargarComercio = async () => {
+      if (id) {
+        setLoading(true);
+        const comercio = await fetchComercioById(id);
+        setData(comercio);
+        setLoading(false);
+      }
+    };
+    cargarComercio();
+  }, [id]);
 
+  if (loading) {
     return (
-        <div className="container">
-        <Title text={data.titulo} />
-        <Carrusel images={data.imagenes} />
-
-         {/* Redes sociales */}
-        <SocialLinks
-        facebook={data.facebook}
-        instagram={data.instagram}
-        twitter={data.twitter}
-        tiktok={data.tiktok}
-        />
-        <div className="text-center my-4">
-        <a
-            href={data.urlMaps}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-block w-[11rem] h-[2rem] bg-black text-white rounded-3xl text-[1rem] cursor-pointer flex justify-center items-center transition-all duration-300 hover:bg-[#333]"
-        >
-            Cómo Llegar
-        </a>
+      <div className="container text-center py-5">
+        <div className="spinner-border" role="status">
+          <span className="visually-hidden">Cargando...</span>
         </div>
-
-        
-
-        <Description description={data.descripcion} />
-        <Horarios horarios={data.horarios} />
-                {/* Botón Cómo Llegar */}
-        
-        <WhatsAppButton num={data.num} />
-        <div className="text-center my-3">
-</div>
-
-        </div>
+      </div>
     );
+  }
+
+  if (!data) return <p className="text-center py-5">Comercio no encontrado</p>;
+
+  // Convertir imágenes al formato esperado por Carrusel
+  const imagenes = data.imagenes?.map((img) => img.imagenUrl) || [];
+
+  // Convertir horario string a formato de array para Horarios
+  //const horariosArray = data.horario ? [{ dia: "Horarios", horas: data.horario }] : [];
+
+  return (
+    <div className="container">
+      <Title text={data.titulo} />
+      <Carrusel images={imagenes} />
+
+      {/* Redes sociales */}
+      <SocialLinks facebook={data.facebook} instagram={data.instagram} />
+
+      <div className="text-center my-4">
+        <a
+          href={`https://www.google.com/maps?q=${data.latitud},${data.longitud}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-block w-[11rem] h-[2rem] text-black rounded-3xl text-[1rem] cursor-pointer flex justify-center items-center transition-all duration-300 hover:bg-[#333]"
+        >
+          <FaMapMarkerAlt size={18} color="#E53935" className="me-2" />
+          Cómo Llegar
+        </a>
+      </div>
+
+      <Description description={data.descripcion || ''} />
+      <Horarios horarios={data.horario || 'No hay horarios disponibles'} />
+
+      <WhatsAppButton num={data.telefono} />
+      <div className="text-center my-3"></div>
+    </div>
+  );
 }

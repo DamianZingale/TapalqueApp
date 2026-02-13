@@ -1,6 +1,7 @@
 package com.tapalque.user.entity;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -10,14 +11,13 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import lombok.Builder;
 
 
 @Entity
-@Builder
 @Table(name = "usuarios_tb")
 public class User {
 
@@ -27,53 +27,72 @@ public class User {
 
     @Email
     @NotBlank
-    @Column(unique = true)
+    @Column(nullable = false, unique=true)
     private String email;
 
     @NotBlank
+    @Column(name = "password", nullable = false)
     private String password;
 
     @NotBlank
-    private String firtName;
+    @Column(name = "first_name", nullable = false)
+    private String firstName;
 
-    @NotBlank
+    @Column(name = "last_name", nullable = true) 
     private String lastName;
 
+    @Column(name = "name_emprise", nullable = true)
     private String nameEmprise;
+
+    @Column(name = "direccion", nullable = true)
+    private String direccion;
+
+    @Column(name = "telefono", nullable = true)
+    private String telefono;
+
+    @Column(name = "dni", nullable = true)
+    private String dni;
 
     private LocalDateTime registrationDate;
 
+    @Column(name = "email_verified", nullable = false)
+    private boolean emailVerified = false;
+
+    @Column(name = "activo", nullable = false)
+    private boolean activo = true;
+
+    @Column(name = "verification_token")
+    private String verificationToken;
+
+    @Column(name = "verification_token_expiry")
+    private LocalDateTime verificationTokenExpiry;
+
+    @Column(name = "password_reset_token")
+    private String passwordResetToken;
+
+    @Column(name = "password_reset_token_expiry")
+    private LocalDateTime passwordResetTokenExpiry;
+
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "rol_id")
+    @JoinColumn(name = "roles_id")
     private Role role;
 
-    public User() {
-    }
+    @OneToMany(mappedBy = "owner")
+    private List<Business> businesses;
 
-    //CONSTRUCTOR SIN ID
-    public User(@Email @NotBlank String email, @NotBlank String password, @NotBlank String firtName,
-            @NotBlank String lastName, String nameEmprise, LocalDateTime registrationDate, Role role) {
-        this.email = email;
-        this.password = password;
-        this.firtName = firtName;
-        this.lastName = lastName;
-        this.nameEmprise = nameEmprise;
-        this.registrationDate = registrationDate;
-        this.role = role;
-    }
-
-    
-
-    public User(Long id, @Email @NotBlank String email, @NotBlank String password, @NotBlank String firtName,
-            @NotBlank String lastName, String nameEmprise, LocalDateTime registrationDate, Role role) {
+    public User(Long id, @Email @NotBlank String email, @NotBlank String password, @NotBlank String firstName,
+            String lastName, String nameEmprise, LocalDateTime registrationDate, Role role) {
         this.id = id;
         this.email = email;
         this.password = password;
-        this.firtName = firtName;
+        this.firstName = firstName;
         this.lastName = lastName;
         this.nameEmprise = nameEmprise;
         this.registrationDate = registrationDate;
         this.role = role;
+    }
+
+    public User() {
     }
 
     public Long getId() {
@@ -100,12 +119,12 @@ public class User {
         this.password = password;
     }
 
-    public String getFirtName() {
-        return firtName;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public void setFirtName(String firtName) {
-        this.firtName = firtName;
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
     }
 
     public String getLastName() {
@@ -124,12 +143,84 @@ public class User {
         this.nameEmprise = nameEmprise;
     }
 
+    public String getDireccion() {
+        return direccion;
+    }
+
+    public void setDireccion(String direccion) {
+        this.direccion = direccion;
+    }
+
+    public String getTelefono() {
+        return telefono;
+    }
+
+    public void setTelefono(String telefono) {
+        this.telefono = telefono;
+    }
+
+    public String getDni() {
+        return dni;
+    }
+
+    public void setDni(String dni) {
+        this.dni = dni;
+    }
+
     public LocalDateTime getRegistrationDate() {
         return registrationDate;
     }
 
     public void setRegistrationDate(LocalDateTime registrationDate) {
         this.registrationDate = registrationDate;
+    }
+
+    public boolean isEmailVerified() {
+        return emailVerified;
+    }
+
+    public void setEmailVerified(boolean emailVerified) {
+        this.emailVerified = emailVerified;
+    }
+
+    public boolean isActivo() {
+        return activo;
+    }
+
+    public void setActivo(boolean activo) {
+        this.activo = activo;
+    }
+
+    public String getVerificationToken() {
+        return verificationToken;
+    }
+
+    public void setVerificationToken(String verificationToken) {
+        this.verificationToken = verificationToken;
+    }
+
+    public LocalDateTime getVerificationTokenExpiry() {
+        return verificationTokenExpiry;
+    }
+
+    public void setVerificationTokenExpiry(LocalDateTime verificationTokenExpiry) {
+        this.verificationTokenExpiry = verificationTokenExpiry;
+    }
+
+    public String getPasswordResetToken() {
+        return passwordResetToken;
+    }
+
+    public void setPasswordResetToken(String passwordResetToken) {
+        this.passwordResetToken = passwordResetToken;
+    }
+
+    public LocalDateTime getPasswordResetTokenExpiry() {
+        return passwordResetTokenExpiry;
+    }
+
+    public void setPasswordResetTokenExpiry(LocalDateTime passwordResetTokenExpiry) {
+        this.passwordResetTokenExpiry = passwordResetTokenExpiry;
     }
 
     public Role getRole() {
@@ -140,6 +231,69 @@ public class User {
         this.role = role;
     }
 
+        public List<Business> getBusinesses() {
+        return businesses;
+    }
+
+    public void setBusinesses(List<Business> businesses) {
+        this.businesses = businesses;
+    }
+
+    public static User.Builder builder() {
+        return new User.Builder();
+    }
+
+    public static class Builder {
+        private Long id;
+        private String email;
+        private String firstName;
+        private String password;
+        private LocalDateTime registrationDate;
+        private Role role;
+
+        public Builder id(Long id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder email(String email) {
+            this.email = email;
+            return this;
+        }
+
+        public Builder firstName(String firstName) {
+            this.firstName = firstName;
+            return this;
+        }
+
+        public Builder password(String password) {
+            this.password = password;
+            return this;
+        }
+
+        public Builder registrationDate(LocalDateTime registrationDate) {
+            this.registrationDate = registrationDate;
+            return this;
+        }
+
+        public Builder role(Role role) {
+            this.role = role;
+            return this;
+        }
+
+        public User build() {
+            User user = new User();
+            user.setId(this.id);
+            user.setEmail(this.email);
+            user.setFirstName(this.firstName);
+            user.setPassword(this.password);
+            user.setRegistrationDate(this.registrationDate);
+            user.setRole(this.role);
+            return user;
+        }
+    }
+
+
     
-    
+
 }

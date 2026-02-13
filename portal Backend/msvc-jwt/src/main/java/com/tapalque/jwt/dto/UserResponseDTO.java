@@ -8,10 +8,10 @@ import lombok.Data;
 @Builder
 @Data
 public class UserResponseDTO {
+    private Long id;
     private String email;
-    private String contrasena;
     private String firtName;
-    private String lastName;
-    private String nameEmprise;
+    private String password;
     private RolName rol;
+    private boolean emailVerified;
 }

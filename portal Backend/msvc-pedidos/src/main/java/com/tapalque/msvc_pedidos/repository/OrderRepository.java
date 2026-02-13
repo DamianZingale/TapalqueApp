@@ -1,5 +1,7 @@
 package com.tapalque.msvc_pedidos.repository;
 
+import java.time.LocalDateTime;
+
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import org.springframework.stereotype.Repository;
 
@@ -19,5 +21,13 @@ public interface  OrderRepository extends ReactiveMongoRepository<Order, String>
 
     // Pedidos no pagados para limpieza
     Mono<Void> deleteByPaidWithMercadoPagoFalseAndPaidWithCashFalse();
+
+    // Pedidos de un restaurante filtrados por fecha
+    Flux<Order> findByRestaurant_RestaurantIdAndDateCreatedBetween(
+            String restaurantId, LocalDateTime desde, LocalDateTime hasta);
+
+    // Pedidos de un usuario filtrados por fecha
+    Flux<Order> findByUserIdAndDateCreatedBetween(
+            String userId, LocalDateTime desde, LocalDateTime hasta);
 
 }

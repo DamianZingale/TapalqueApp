@@ -1,43 +1,155 @@
-import { useState } from "react";
-import { WhatsAppButton } from "../../../shared/components/WhatsAppButton";
-import { Info } from "../components/RestaurantCard";
-import { MenuCard } from "../components/MenuCard";
-//import { OrderSummaryCard } from "../components/OrderSummaryCard";
-import { menuTest } from "../mock/MenuMock";
-import { mockData } from "../mock/RestaurantMock";
-
+import { useEffect, useState } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { api } from '../../../config/api';
+import { WhatsAppButton } from '../../../shared/components/WhatsAppButton';
+import { MenuCard } from '../components/MenuCard';
+import { Info } from '../components/RestaurantCard';
+import { Imenu, MenuResponseDTO, transformMenuResponse } from '../types/Imenu';
+import { IRestaurantInfo } from '../types/IrestaurantInfo';
 
 export default function GastronomiaDetailPage() {
-  // Mostrar menú o no
+  const location = useLocation();
+  const { id } = useParams();
+  const navigate = useNavigate();
+
+  // Intentar obtener datos del state primero (viene del clic en la card)
+  const [restaurante, setRestaurante] = useState<IRestaurantInfo | null>(
+    location.state?.restaurante || null
+  );
+  const [loading, setLoading] = useState(!restaurante);
   const [showMenu, setShowMenu] = useState(false);
 
+  const [menu, setMenu] = useState<Imenu[]>([]);
+  const [loadingMenu, setLoadingMenu] = useState(false);
 
+  useEffect(() => {
+    if (!restaurante && id) {
+      const fetchRestaurantDetail = async () => {
+        try {
+          const response = await api.get<IRestaurantInfo>(
+            `/api/gastronomia/restaurants/${id}`
+          );
+          setRestaurante(response);
+        } catch (error) {
+          console.error('Error fetching restaurant detail:', error);
+          navigate('/gastronomia');
+        } finally {
+          setLoading(false);
+        }
+      };
 
-  
+      fetchRestaurantDetail();
+    }
+  }, [id, restaurante, navigate]);
+  // fetch al menu
+  const fetchMenu = async () => {
+    if (!id) return;
 
-  // Toggle menú
-  const toggleMenu = () => setShowMenu(prev => !prev);
+    try {
+      setLoadingMenu(true);
+      const response = await api.get<MenuResponseDTO>(
+        `/gastronomia/menu/restaurant/${id}`
+      );
+      console.log('Menu response:', response);
+      // Transformar la respuesta del backend al formato del frontend
+      const transformedMenu = transformMenuResponse(response);
+      setMenu(transformedMenu);
+    } catch (error) {
+      console.error('Error fetching menu:', error);
+      setMenu([]);
+    } finally {
+      setLoadingMenu(false);
+    }
+  };
 
-  
+  const toggleMenu = () => {
+    if (!showMenu && menu.length === 0) {
+      fetchMenu();
+    }
+    setShowMenu((prev) => !prev);
+  };
 
-  
-  
+  // Mostrar loading mientras carga
+  if (loading) {
+    return (
+      <div className="container my-4 text-center">
+        <div className="spinner-border" role="status">
+          <span className="visually-hidden">Cargando...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Si no hay restaurante después de cargar, mostrar error
+  if (!restaurante) {
+    return (
+      <div className="container my-4">
+        <div className="alert alert-warning">
+          No se pudo cargar la información del restaurante.
+          <button
+            onClick={() => navigate('/gastronomia')}
+            className="btn btn-link"
+          >
+            Volver a la lista
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container my-4">
-      {/* Info del restaurante */}
-      <Info onVerMenu={toggleMenu} showMenu={showMenu} {...mockData} />
+      {/* Botón volver */}
+      <button
+        onClick={() => navigate(-1)}
+        className="btn btn-outline-secondary mb-3"
+      >
+        ← Volver
+      </button>
 
-      {/* Mostrar menú */}
+      {/* Info del restaurante */}
+      <Info
+        id={restaurante.id}
+        onVerMenu={toggleMenu}
+        showMenu={showMenu}
+        name={restaurante.name}
+        address={restaurante.address}
+        phones={restaurante.phones}
+        email={restaurante.email}
+        delivery={restaurante.delivery}
+        imageUrl={restaurante.imageUrl}
+        schedule={restaurante.schedule}
+        categories={restaurante.categories}
+        latitude={restaurante.latitude}
+        longitude={restaurante.longitude}
+      />
+
       {showMenu && (
-         <MenuCard items={menuTest} />  
-        
+        <>
+          {loadingMenu ? (
+            <div className="text-center my-3">
+              <div className="spinner-border" role="status" />
+            </div>
+          ) : (
+            <>
+              {menu.length > 0 ? (
+                <MenuCard
+                  items={menu}
+                  restaurantId={restaurante.id.toString()}
+                  restaurantName={restaurante.name}
+                />
+              ) : (
+                <div className="alert alert-info text-center">
+                  No hay elementos disponibles en el menú de este restaurante.
+                </div>
+              )}
+            </>
+          )}
+        </>
       )}
 
-     
-
-      {/* Botón WhatsApp */}
-      <WhatsAppButton num={mockData.phone ?? ""} />
+      {/* Botón WhatsApp - usar teléfono real */}
+      <WhatsAppButton num={restaurante.phones?.split(',')[0] || ''} />
     </div>
   );
 }

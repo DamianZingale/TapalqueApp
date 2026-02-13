@@ -1,0 +1,564 @@
+services:
+  # ==========================================
+  # IMAGEN BASE JAVA
+  # ==========================================
+  base-java:
+    build: 
+      context: ./portal Backend/base-java-image
+      dockerfile: Dockerfile
+    image: tapalque-base-java:latest
+    container_name: base-java
+    profiles: ["base"]
+
+  # ==========================================
+  # INFRAESTRUCTURA
+  # ==========================================
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: rabbitmq
+    ports:
+      - '15672:15672' # Panel de gestión
+      - '5672:5672' # Comunicación interna
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ['CMD', 'rabbitmq-diagnostics', '-q', 'ping']
+      interval: 15s
+      timeout: 10s
+      retries: 6
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    networks:
+      - tapalque-net
+
+  # Bases de datos Mongo
+  pedidos-db:
+    image: mongo:latest
+    container_name: pedidos-db
+    ports:
+      - '27017:27017'
+    volumes:
+      - pedidos_data:/data/db
+      - ./portal Backend/init-scripts/Mongo/init-pedidos.js:/docker-entrypoint-initdb.d/init-pedidos.js:ro
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+    networks:
+      - tapalque-net
+
+  reservas-db:
+    image: mongo:latest
+    container_name: reservas-db
+    ports:
+      - '27018:27017'
+    volumes:
+      - reservas_data:/data/db
+      - ./portal Backend/init-scripts/Mongo/init-reservas.js:/docker-entrypoint-initdb.d/init-reservas.js:ro
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+    networks:
+      - tapalque-net
+
+  # Bases de datos MySQL
+  gastronomia-db:
+    image: mysql:8
+    container_name: gastronomia-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: gastronomia
+    ports:
+      - '3305:3306'
+    volumes:
+      - gastronomia_data:/var/lib/mysql
+      - ./portal Backend/init-scripts/MySql/init-gastronomia.sql:/docker-entrypoint-initdb.d/init-gastronomia.sql:ro
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+    networks:
+      - tapalque-net
+
+  hosteleria-db:
+    image: mysql:8
+    container_name: hosteleria-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: hosteleria
+    ports:
+      - '3307:3306'
+    volumes:
+      - hosteleria_data:/var/lib/mysql
+      - ./portal Backend/init-scripts/MySql/init-hosteleria.sql:/docker-entrypoint-initdb.d/init-hosteleria.sql:ro
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', 'root', '-p$$MYSQL_ROOT_PASSWORD']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+    networks:
+      - tapalque-net
+
+  mercado-pago-db:
+    image: mysql:8
+    container_name: mercado-pago-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: mercado_pago
+    ports:
+      - '3308:3306'
+    volumes:
+      - mercado_pago_data:/var/lib/mysql
+      - ./portal Backend/init-scripts/MySql/init-mercado-pago.sql:/docker-entrypoint-initdb.d/init-mercado-pago.sql:ro
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+    networks:
+      - tapalque-net
+
+  jwt-db:
+    image: mysql:8
+    container_name: jwt-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: jwt
+    ports:
+      - '3309:3306'
+    volumes:
+      - jwt_data:/var/lib/mysql
+      - ./portal Backend/init-scripts/MySql/init-jwt.sql:/docker-entrypoint-initdb.d/init-jwt.sql:ro
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    networks:
+      - tapalque-net
+
+  user-db:
+    image: mysql:8
+    container_name: user-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: user
+    ports:
+      - '3310:3306'
+    volumes:
+      - user_data:/var/lib/mysql
+      - ./portal Backend/init-scripts/MySql/init-user.sql:/docker-entrypoint-initdb.d/init-user.sql:ro
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+    networks:
+      - tapalque-net
+
+  comercio-db:
+    image: mysql:8
+    container_name: comercio-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: comercio
+    ports:
+      - '3311:3306'
+    volumes:
+      - comercio_data:/var/lib/mysql
+      - ./portal Backend/init-scripts/MySql/init-comercio.sql:/docker-entrypoint-initdb.d/init-comercio.sql:ro
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    networks:
+      - tapalque-net
+
+  eventos-db:
+    image: mysql:8
+    container_name: eventos-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: eventos
+    ports:
+      - '3312:3306'
+    volumes:
+      - eventos_data:/var/lib/mysql
+      - ./portal Backend/init-scripts/MySql/init-eventos.sql:/docker-entrypoint-initdb.d/init-eventos.sql:ro
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    networks:
+      - tapalque-net
+
+  servicios-db:
+    image: mysql:8
+    container_name: servicios-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: servicios
+    ports:
+      - '3313:3306'
+    volumes:
+      - servicios_data:/var/lib/mysql
+      - ./portal Backend/init-scripts/MySql/init-servicios.sql:/docker-entrypoint-initdb.d/init-servicios.sql:ro
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    networks:
+      - tapalque-net
+
+  termas-db:
+    image: mysql:8
+    container_name: termas-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: termas
+    ports:
+      - '3314:3306'
+    volumes:
+      - termas_data:/var/lib/mysql
+      - ./portal Backend/init-scripts/MySql/init-termas.sql:/docker-entrypoint-initdb.d/init-termas.sql:ro
+    networks:
+      - tapalque-net
+
+  espacios-publicos-db:
+    image: mysql:8
+    container_name: espacios-publicos-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: espacios_publicos
+    ports:
+      - '3315:3306'
+    volumes:
+      - espacios_publicos_data:/var/lib/mysql
+      - ./portal Backend/init-scripts/MySql/init-espacios-publicos.sql:/docker-entrypoint-initdb.d/init-espacios-publicos.sql:ro
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    networks:
+      - tapalque-net
+
+  # ==========================================
+  # MICROSERVICIOS
+  # ==========================================
+  eureka-server:
+    build: 
+      context: ./portal Backend/eureka-server
+      dockerfile: Dockerfile
+      args:
+        - BASE_IMAGE=tapalque-base-java:latest
+    container_name: eureka-server
+    ports:
+      - '8761:8761'
+    restart: always
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'wget',
+          '--quiet',
+          '--tries=1',
+          '--spider',
+          'http://localhost:8761',
+        ]
+      interval: 15s
+      timeout: 10s
+      retries: 8
+      start_period: 90s
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    networks:
+      - tapalque-net
+
+  msvc-gateway-server:
+    build: 
+      context: ./portal Backend/msvc-gateway-server
+      dockerfile: Dockerfile
+      args:
+        - BASE_IMAGE=tapalque-base-java:latest
+    container_name: msvc-gateway-server
+    ports:
+      - '8090:8090'
+    restart: always
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    networks:
+      - tapalque-net
+
+  msvc-jwt:
+    build: ./portal Backend/msvc-jwt
+    restart: always
+    depends_on:
+      - eureka-server
+      - jwt-db
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+    networks:
+      - tapalque-net
+
+  msvc-user:
+    build: ./portal Backend/msvc-user
+    depends_on:
+      - user-db
+      - eureka-server
+    restart: always
+    env_file:
+      - .env
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+    networks:
+      - tapalque-net
+
+  msvc-pedidos:
+    build: ./portal Backend/msvc-pedidos
+    environment:
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+      JAVA_OPTS: "-Xmx192m -Xms96m -XX:+UseG1GC -XX:+UseContainerSupport -XX:MaxRAMPercentage=60.0"
+    depends_on:
+      pedidos-db:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+    networks:
+      - tapalque-net
+
+  msvc-reservas:
+    build: ./portal Backend/msvc-reservas
+    environment:
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+      JAVA_OPTS: "-Xmx192m -Xms96m -XX:+UseG1GC -XX:+UseContainerSupport -XX:MaxRAMPercentage=60.0"
+    depends_on:
+      reservas-db:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+    networks:
+      - tapalque-net
+
+  msvc-gastronomia:
+    build: ./portal Backend/msvc-gastronomia
+    container_name: msvc-gastronomia
+    depends_on:
+      - gastronomia-db
+      - eureka-server
+    volumes:
+      - gastronomia_uploads:/app/uploads
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+    networks:
+      - tapalque-net
+
+  msvc-hosteleria:
+    build: ./portal Backend/msvc-hosteleria
+    container_name: msvc-hosteleria
+    depends_on:
+      hosteleria-db:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    volumes:
+      - hosteleria_uploads:/app/uploads
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+    networks:
+      - tapalque-net
+
+  msvc-mercado-pago:
+    build: ./portal Backend/msvc-mercado-pago
+    environment:
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+    depends_on:
+      mercado-pago-db:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    env_file:
+      - .env
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+    networks:
+      - tapalque-net
+
+  msvc-comercio:
+    build: ./portal Backend/msvc-comercio
+    container_name: msvc-comercio
+    depends_on:
+      - comercio-db
+      - eureka-server
+    volumes:
+      - comercio_uploads:/app/uploads
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+    networks:
+      - tapalque-net
+
+  msvc-eventos:
+    build: ./portal Backend/msvc-eventos
+    container_name: msvc-eventos
+    depends_on:
+      - eventos-db
+      - eureka-server
+    volumes:
+      - eventos_uploads:/app/uploads
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+    networks:
+      - tapalque-net
+
+  msvc-servicios:
+    build: ./portal Backend/msvc-servicios
+    container_name: msvc-servicios
+    depends_on:
+      - servicios-db
+      - eureka-server
+    volumes:
+      - servicios_uploads:/app/uploads
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+    networks:
+      - tapalque-net
+
+  msvc-termas:
+    build: ./portal Backend/msvc-termas
+    container_name: msvc-termas
+    depends_on:
+      - termas-db
+      - eureka-server
+    volumes:
+      - termas_uploads:/app/uploads
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+    networks:
+      - tapalque-net
+
+  msvc-espacios-publicos:
+    build: ./portal Backend/msvc-espacios-publicos
+    container_name: msvc-espacios-publicos
+    depends_on:
+      - espacios-publicos-db
+      - eureka-server
+    volumes:
+      - espacios_publicos_uploads:/app/uploads
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+    networks:
+      - tapalque-net
+
+  # ==========================================
+  # FRONTEND - PUNTO DE ENTRADA PRINCIPAL
+  # ==========================================
+  frontend:
+    # build y ports definidos en:
+    # - docker-compose.override.yml para dev (image: node:20-slim, 3000:5173)
+    # - docker-compose.prod.yml para producción (build: ./portal Frontend, 3000:80)
+    container_name: frontend
+    depends_on:
+      - msvc-gateway-server
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    networks:
+      - tapalque-net
+
+# ==========================================
+# VOLUMENES Y REDES
+# ==========================================
+volumes:
+  rabbitmq_data:
+  pedidos_data:
+  reservas_data:
+  gastronomia_data:
+  gastronomia_uploads:
+  hosteleria_data:
+  hosteleria_uploads:
+  mercado_pago_data:
+  jwt_data:
+  user_data:
+  comercio_data:
+  comercio_uploads:
+  eventos_data:
+  eventos_uploads:
+  servicios_data:
+  servicios_uploads:
+  termas_data:
+  termas_uploads:
+  espacios_publicos_data:
+  espacios_publicos_uploads:
+
+networks:
+  tapalque-net:
+    driver: bridge

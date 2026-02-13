@@ -29,10 +29,14 @@ public class HospedajeDTO {
         this.ubicacion = hospedaje.getUbicacion();
         this.googleMapsUrl = hospedaje.getGoogleMapsUrl();
         this.numWhatsapp = hospedaje.getNumWhatsapp();
-        this.tipoHospedaje = hospedaje.getTipoHospedaje().name();
-        this.imagenes = hospedaje.getImagenes().stream()
-                .map(HospedajeImagen::getImagenUrl)
-                .collect(Collectors.toList());
+        this.tipoHospedaje = hospedaje.getTipoHospedaje() != null
+                ? hospedaje.getTipoHospedaje().name()
+                : null;
+        this.imagenes = hospedaje.getImagenes() != null
+                ? hospedaje.getImagenes().stream()
+                        .map(HospedajeImagen::getImagenUrl)
+                        .collect(Collectors.toList())
+                : List.of();
     }
 
     // Getters y setters

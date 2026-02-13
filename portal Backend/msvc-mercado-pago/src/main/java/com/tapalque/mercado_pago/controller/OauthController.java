@@ -7,24 +7,33 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.tapalque.mercado_pago.dto.TipoServicioEnum;
 import com.tapalque.mercado_pago.service.OauthService;
 
 
 @RestController
-@RequestMapping("/oauth")
+@RequestMapping("/mercadopago/oauth")
 public class OauthController {
-    OauthService oauthService;
+
+   private final OauthService oauthService;
 
     public OauthController(OauthService os) {
         this.oauthService = os;
     }
 
     @GetMapping("/init")
-    public ResponseEntity<String> init(@RequestParam("email") String email) {
-        try{
-            return ResponseEntity.ok(oauthService.UrlAutorizacion(email));
-        }
-        catch(Exception e){
+    public ResponseEntity<String> init(
+            @RequestParam("email") String email,
+            @RequestParam("externalBusinessId") Long externalBusinessId,
+            @RequestParam("tipoServicio") String tipoServicio) {
+        try {
+            TipoServicioEnum tipo = TipoServicioEnum.valueOf(tipoServicio);
+            return ResponseEntity.ok(oauthService.UrlAutorizacion(email, externalBusinessId, tipo));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body("Tipo de servicio inválido: " + tipoServicio);
+        } catch (Exception e) {
             return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body("Error al crear URL de autenticación: " + e.getMessage());

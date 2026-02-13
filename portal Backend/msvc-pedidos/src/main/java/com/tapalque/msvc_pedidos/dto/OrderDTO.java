@@ -5,15 +5,20 @@ import java.util.List;
 
 public class OrderDTO {
     private String id;
-    private Double totalPrice; //precio total del pedido
-    private Boolean paidWithMercadoPago; //indica si se pagó con MercadoPago
-    private Boolean paidWithCash; //indica si se paga en efectivo
-    private String status; //estado del pedido (e.g., "PENDING", "COMPLETED", "CANCELLED")
-    private LocalDateTime dateCreated; //fecha y hora de creación del pedido
-    private LocalDateTime dateUpdated; //fecha y hora de la última actualización del pedido
-    private List<ItemDTO> items; //lista de items en el pedido
-    private RestaurantDTO restaurant; //información del restaurante asociado al pedido
-    private String paymentReceiptPath; //ruta del comprobante de pago
+    private String userId;
+    private String userName;
+    private String userPhone;
+    private Double totalPrice;
+    private Boolean paidWithMercadoPago;
+    private Boolean paidWithCash;
+    private String status;
+    private LocalDateTime dateCreated;
+    private LocalDateTime dateUpdated;
+    private List<ItemDTO> items;
+    private RestaurantDTO restaurant;
+    private String paymentReceiptPath;
+    private Boolean isDelivery;
+    private String deliveryAddress;
 
     
     public OrderDTO() {}
@@ -53,4 +58,19 @@ public class OrderDTO {
     public void setPaymentReceiptPath(String paymentReceiptPath) {
         this.paymentReceiptPath = paymentReceiptPath;
     }
+
+    public String getUserId() { return userId; }
+    public void setUserId(String userId) { this.userId = userId; }
+
+    public String getUserName() { return userName; }
+    public void setUserName(String userName) { this.userName = userName; }
+
+    public String getUserPhone() { return userPhone; }
+    public void setUserPhone(String userPhone) { this.userPhone = userPhone; }
+
+    public Boolean getIsDelivery() { return isDelivery; }
+    public void setIsDelivery(Boolean isDelivery) { this.isDelivery = isDelivery; }
+
+    public String getDeliveryAddress() { return deliveryAddress; }
+    public void setDeliveryAddress(String deliveryAddress) { this.deliveryAddress = deliveryAddress; }
 }

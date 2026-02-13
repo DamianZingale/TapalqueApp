@@ -1,38 +1,143 @@
-import { createBrowserRouter, Navigate } from "react-router-dom";
+import { createBrowserRouter, Navigate } from 'react-router-dom';
 
-// Importá las páginas que quieras usar en cada ruta
-import MainLayout from "../../shared/layouts/MainLayouts";
-import HomeRoutes from "../../features/home/routes";
-import ComercioRoutes from "../../features/comercio/routes";
-import GastronomiaRoutes from "../../features/gastronomia/routes";
-import HospedajeRoutes from "../../features/hospedaje/routes";
-import EsPublicosRoutes from "../../features/espacios publicos/routes";
-import ServiciosRoutes from "../../features/servicios/routes";
-import TermasRoutes from "../../features/termas/routes";
-import LoginPage from "../../features/LoginRegister/pages/LoginPage";
-import RegisterPage from "../../features/LoginRegister/pages/RegisterPage";
-import PerfilRoutes from "../../features/perfil/routes";
-import AdministradorGeneralRoutes from "../../features/administrador general/routes";
+// Layout principal
+import MainLayout from '../../shared/layouts/MainLayouts';
+
+// Rutas públicas
+import ComercioRoutes from '../../features/comercio/routes';
+import EsPublicosRoutes from '../../features/espacios-publicos/routes';
+import EventosRoutes from '../../features/eventos/routes';
+import GastronomiaRoutes from '../../features/gastronomia/routes';
+import HomeRoutes from '../../features/home/routes';
+import HospedajeRoutes from '../../features/hospedaje/routes';
+import PerfilRoutes from '../../features/perfil/routes';
+import ServiciosRoutes from '../../features/servicios/routes';
+import TermasRoutes from '../../features/termas/routes';
+import { PagoRoutes } from '../../features/pago/routes';
+import MisPedidosPage from '../../features/gastronomia/pages/MisPedidosPage';
+
+// Usuario
+import UserDashboardRoutes from '../../features/user-dashboard/routes';
+
+// Login / Register
+import { VerifyEmail } from '../../features/auth/components/VerifyEmail';
+import { ForgotPassword } from '../../features/auth/components/ForgotPassword';
+import { ResetPassword } from '../../features/auth/components/ResetPassword';
+import LoginPage from '../../features/auth/pages/LoginPage';
+import RegisterPage from '../../features/auth/pages/RegisterPage';
+
+// Administradores
+import { AdministradoresRoutes } from '../../features/admin-negocios';
+
+// Moderador
+import { lazy } from 'react';
+const ModeradorDashboard = lazy(() => import('../../features/moderador/pages/ModeradorDashboard'));
+
+// Páginas legales
+import { TerminosYCondiciones } from '../../shared/pages/TerminosYCondiciones';
+import { Nosotros } from '../../shared/pages/Nosotros';
+
+// Protección
+import {
+  AdminOnlyRoute,
+  ModeradorOnlyRoute,
+  UserOnlyRoute,
+} from '../../shared/components/ProtectedRoute';
+import { Suspense } from 'react';
 
 export const router = createBrowserRouter([
-    {
-        path: "/",
-        element: <MainLayout />,
-        children: [
-            { path: "/", element: <HomeRoutes /> },
-            { path: "/termas/*", element: <TermasRoutes /> },
-            { path: "/comercio/*", element: <ComercioRoutes /> },
-            { path: "/gastronomia/*", element: <GastronomiaRoutes /> },
-            { path: "/hospedaje/*", element: <HospedajeRoutes /> },
-            { path: "/servicios/*", element: < ServiciosRoutes/> },
-            { path: "/espublicos/*", element: <EsPublicosRoutes /> },
-            { path: "/perfil/*", element: <PerfilRoutes /> },
-            { path: "/admin/*", element: <AdministradorGeneralRoutes /> },
-            // Ruta comodín: si no existe redirige al inicio
-            { path: "*", element: <Navigate to="/" /> },
-        ],
-    },
-    // Rutas fuera del layout principal
-    { path: "/login", element: <LoginPage /> },
-    { path: "/register", element: <RegisterPage /> },
+  /**
+   * ===============================
+   * RUTAS PÚBLICAS (con layout)
+   * ===============================
+   */
+  {
+    path: '/*',
+    element: <MainLayout />,
+    children: [
+      { index: true, element: <HomeRoutes /> },
+
+      { path: 'termas/*', element: <TermasRoutes /> },
+      { path: 'comercio/*', element: <ComercioRoutes /> },
+      { path: 'gastronomia/*', element: <GastronomiaRoutes /> },
+      { path: 'hospedaje/*', element: <HospedajeRoutes /> },
+      { path: 'servicios/*', element: <ServiciosRoutes /> },
+      { path: 'eventos/*', element: <EventosRoutes /> },
+      { path: 'espublicos/*', element: <EsPublicosRoutes /> },
+      { path: 'perfil/*', element: <PerfilRoutes /> },
+
+      { path: 'terminos-y-condiciones', element: <TerminosYCondiciones /> },
+      { path: 'nosotros', element: <Nosotros /> },
+      { path: 'pago/*', element: <PagoRoutes /> },
+      {
+        path: 'mis-pedidos',
+        element: (
+          <UserOnlyRoute>
+            <MisPedidosPage />
+          </UserOnlyRoute>
+        ),
+      },
+
+      {
+        path: 'dashboard/*',
+        element: (
+          <UserOnlyRoute>
+            <UserDashboardRoutes />
+          </UserOnlyRoute>
+        ),
+      },
+
+      { path: '*', element: <Navigate to="/" replace /> },
+    ],
+  },
+
+  /**
+   * ===============================
+   * AUTH
+   * ===============================
+   */
+  { path: '/login', element: <LoginPage /> },
+  { path: '/register', element: <RegisterPage /> },
+  { path: '/verify-email', element: <VerifyEmail /> },
+  { path: '/forgot-password', element: <ForgotPassword /> },
+  { path: '/reset-password', element: <ResetPassword /> },
+
+  /**
+   * ===============================
+   * ADMINISTRADORES
+   * ===============================
+   */
+  {
+    path: '/admin/*',
+    element: (
+      <AdminOnlyRoute>
+        <AdministradoresRoutes />
+      </AdminOnlyRoute>
+    ),
+  },
+
+  /**
+   * ===============================
+   * MODERADOR
+   * ===============================
+   */
+  {
+    path: '/moderador',
+    element: (
+      <ModeradorOnlyRoute>
+        <MainLayout>
+          <Suspense fallback={<div>Cargando dashboard...</div>}>
+            <ModeradorDashboard />
+          </Suspense>
+        </MainLayout>
+      </ModeradorOnlyRoute>
+    ),
+  },
+
+  /**
+   * ===============================
+   * FALLBACK GLOBAL
+   * ===============================
+   */
+  { path: '*', element: <Navigate to="/" replace /> },
 ]);

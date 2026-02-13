@@ -13,23 +13,28 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProductoRequestDTO {
-    @NotNull(message = "Debe enviar id de la transaccion") //cambie id producto por id de transaccion
-    Long idTransaccion;
-    
+    @NotNull(message = "Debe enviar id del producto a comprar")
+    long idProducto;
 
     String title;
-    
-    int quantity;
-    
-    BigDecimal unitPrice;
-    
-    long idVendedor;
-    
-    Long idComprador;
-    
-    String fecha;
 
+    String description;
+
+    int quantity;
+
+    BigDecimal unitPrice;
+
+    long idVendedor;
+
+    Long idComprador;
+
+    String idTransaccion;
 
     @Enumerated(EnumType.STRING)
     private TipoServicioEnum tipoServicio;
+
+    // Datos del pagador para mejorar tasa de aprobación en MP
+    String payerEmail;
+    String payerName;
+    String payerIdentificationNumber; // DNI
 }

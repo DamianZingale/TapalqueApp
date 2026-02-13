@@ -25,6 +25,14 @@ public class Reservation {
     private LocalDateTime dateCreated;
     private LocalDateTime dateUpdated;
 
+    // Información de Mercado Pago
+    private Long transaccionId; // ID de la transacción en msvc-mercado-pago
+    private String mercadoPagoId; // ID del pago en Mercado Pago
+    private LocalDateTime fechaPago; // Fecha en que se aprobó el pago
+
+    // Notas adicionales del administrador
+    private String notas;
+
     public Reservation() {}
 
     public Reservation(Customer customer, Hotel hotel, StayPeriod stayPeriod, Payment payment, Double totalPrice) {
@@ -120,17 +128,67 @@ public void setDateUpdated(LocalDateTime dateUpdated) {
     this.dateUpdated = dateUpdated;
 }
 
+public Long getTransaccionId() {
+    return transaccionId;
+}
+
+public void setTransaccionId(Long transaccionId) {
+    this.transaccionId = transaccionId;
+}
+
+public String getMercadoPagoId() {
+    return mercadoPagoId;
+}
+
+public void setMercadoPagoId(String mercadoPagoId) {
+    this.mercadoPagoId = mercadoPagoId;
+}
+
+public LocalDateTime getFechaPago() {
+    return fechaPago;
+}
+
+public void setFechaPago(LocalDateTime fechaPago) {
+    this.fechaPago = fechaPago;
+}
+
+public String getNotas() {
+    return notas;
+}
+
+public void setNotas(String notas) {
+    this.notas = notas;
+}
+
     // --- Inner classes --- //
 
     public static class Customer {
         private String customerId;
         private String customerName;
+        private String customerPhone;
+        private String customerEmail;
+        private String customerDni;
 
         public Customer() {}
 
         public Customer(String customerId, String customerName) {
             this.customerId = customerId;
             this.customerName = customerName;
+        }
+
+        public Customer(String customerId, String customerName, String customerPhone, String customerEmail) {
+            this.customerId = customerId;
+            this.customerName = customerName;
+            this.customerPhone = customerPhone;
+            this.customerEmail = customerEmail;
+        }
+
+        public Customer(String customerId, String customerName, String customerPhone, String customerEmail, String customerDni) {
+            this.customerId = customerId;
+            this.customerName = customerName;
+            this.customerPhone = customerPhone;
+            this.customerEmail = customerEmail;
+            this.customerDni = customerDni;
         }
 
         public String getCustomerId() {
@@ -147,6 +205,30 @@ public void setDateUpdated(LocalDateTime dateUpdated) {
 
         public void setCustomerName(String customerName) {
             this.customerName = customerName;
+        }
+
+        public String getCustomerPhone() {
+            return customerPhone;
+        }
+
+        public void setCustomerPhone(String customerPhone) {
+            this.customerPhone = customerPhone;
+        }
+
+        public String getCustomerEmail() {
+            return customerEmail;
+        }
+
+        public void setCustomerEmail(String customerEmail) {
+            this.customerEmail = customerEmail;
+        }
+
+        public String getCustomerDni() {
+            return customerDni;
+        }
+
+        public void setCustomerDni(String customerDni) {
+            this.customerDni = customerDni;
         }
     }
 
@@ -293,7 +375,9 @@ public void setDateUpdated(LocalDateTime dateUpdated) {
 
     public void setTotalAmount(Double totalAmount) {
         this.totalAmount = totalAmount;
-        this.remainingAmount = this.totalAmount - this.amountPaid;
+        if (this.totalAmount != null && this.amountPaid != null) {
+            this.remainingAmount = this.totalAmount - this.amountPaid;
+        }
     }
 }
 
