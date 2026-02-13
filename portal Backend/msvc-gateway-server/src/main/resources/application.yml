@@ -110,10 +110,10 @@ spring:
         - id: msvc-hosteleria-uploads
           uri: lb://msvc-hosteleria
           predicates:
-            - Path=/api/hospedaje/uploads/**
+            - Path=/api/hospedajes/uploads/**
             - Method=GET
           filters:
-            - RewritePath=/api/hospedaje/uploads/(?<file>.*), /uploads/${file}
+            - RewritePath=/api/hospedajes/uploads/(?<file>.*), /uploads/${file}
 
           #disponibilidad y habitaciones de un hospedaje
         - id: msvc-hosteleria-disponibilidad-public

@@ -60,7 +60,7 @@ public class HospedajeImagenService {
             Files.write(filePath, file.getBytes());
 
             HospedajeImagen imagen = new HospedajeImagen();
-            imagen.setImagenUrl("/api/hospedaje/uploads/" + fileName);
+            imagen.setImagenUrl("/api/hospedajes/uploads/" + fileName);
             imagen.setHospedaje(hospedaje);
             imagenRepository.save(imagen);
 
@@ -99,6 +99,7 @@ public class HospedajeImagenService {
 
         try {
             String fileName = dto.getImagenUrl()
+                    .replace("/api/hospedajes/uploads/", "")
                     .replace("/api/hospedaje/uploads/", "")
                     .replace("/uploads/", "");
             Path filePath = Paths.get(uploadDir, fileName);

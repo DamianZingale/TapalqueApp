@@ -72,15 +72,17 @@ services:
     image: mysql:8
     container_name: gastronomia-db
     environment:
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: Tapalque242
       MYSQL_DATABASE: gastronomia
+      MYSQL_USER: TapalqueApp
+      MYSQL_PASSWORD: Tapalque242
     ports:
       - '3305:3306'
     volumes:
       - gastronomia_data:/var/lib/mysql
       - ./portal Backend/init-scripts/MySql/init-gastronomia.sql:/docker-entrypoint-initdb.d/init-gastronomia.sql:ro
     healthcheck:
-      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', 'root', '-p$$MYSQL_ROOT_PASSWORD']
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', '$$MYSQL_USER', '-p$$MYSQL_PASSWORD']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -96,15 +98,17 @@ services:
     image: mysql:8
     container_name: hosteleria-db
     environment:
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: Tapalque242
       MYSQL_DATABASE: hosteleria
+      MYSQL_USER: TapalqueApp
+      MYSQL_PASSWORD: Tapalque242
     ports:
       - '3307:3306'
     volumes:
       - hosteleria_data:/var/lib/mysql
       - ./portal Backend/init-scripts/MySql/init-hosteleria.sql:/docker-entrypoint-initdb.d/init-hosteleria.sql:ro
     healthcheck:
-      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', 'root', '-p$$MYSQL_ROOT_PASSWORD']
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', '$$MYSQL_USER', '-p$$MYSQL_PASSWORD']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -120,15 +124,17 @@ services:
     image: mysql:8
     container_name: mercado-pago-db
     environment:
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: Tapalque242
       MYSQL_DATABASE: mercado_pago
+      MYSQL_USER: TapalqueApp
+      MYSQL_PASSWORD: Tapalque242
     ports:
       - '3308:3306'
     volumes:
       - mercado_pago_data:/var/lib/mysql
       - ./portal Backend/init-scripts/MySql/init-mercado-pago.sql:/docker-entrypoint-initdb.d/init-mercado-pago.sql:ro
     healthcheck:
-      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', 'root', '-p$$MYSQL_ROOT_PASSWORD']
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', '$$MYSQL_USER', '-p$$MYSQL_PASSWORD']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -144,15 +150,17 @@ services:
     image: mysql:8
     container_name: jwt-db
     environment:
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: Tapalque242
       MYSQL_DATABASE: jwt
+      MYSQL_USER: TapalqueApp
+      MYSQL_PASSWORD: Tapalque242
     ports:
       - '3309:3306'
     volumes:
       - jwt_data:/var/lib/mysql
       - ./portal Backend/init-scripts/MySql/init-jwt.sql:/docker-entrypoint-initdb.d/init-jwt.sql:ro
     healthcheck:
-      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', 'root', '-p$$MYSQL_ROOT_PASSWORD']
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', '$$MYSQL_USER', '-p$$MYSQL_PASSWORD']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -168,15 +176,17 @@ services:
     image: mysql:8
     container_name: user-db
     environment:
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: Tapalque242
       MYSQL_DATABASE: user
+      MYSQL_USER: TapalqueApp
+      MYSQL_PASSWORD: Tapalque242
     ports:
       - '3310:3306'
     volumes:
       - user_data:/var/lib/mysql
       - ./portal Backend/init-scripts/MySql/init-user.sql:/docker-entrypoint-initdb.d/init-user.sql:ro
     healthcheck:
-      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', 'root', '-p$$MYSQL_ROOT_PASSWORD']
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', '$$MYSQL_USER', '-p$$MYSQL_PASSWORD']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -192,15 +202,17 @@ services:
     image: mysql:8
     container_name: comercio-db
     environment:
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: Tapalque242
       MYSQL_DATABASE: comercio
+      MYSQL_USER: TapalqueApp
+      MYSQL_PASSWORD: Tapalque242
     ports:
       - '3311:3306'
     volumes:
       - comercio_data:/var/lib/mysql
       - ./portal Backend/init-scripts/MySql/init-comercio.sql:/docker-entrypoint-initdb.d/init-comercio.sql:ro
     healthcheck:
-      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', 'root', '-p$$MYSQL_ROOT_PASSWORD']
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', '$$MYSQL_USER', '-p$$MYSQL_PASSWORD']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -216,15 +228,17 @@ services:
     image: mysql:8
     container_name: eventos-db
     environment:
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: Tapalque242
       MYSQL_DATABASE: eventos
+      MYSQL_USER: TapalqueApp
+      MYSQL_PASSWORD: Tapalque242
     ports:
       - '3312:3306'
     volumes:
       - eventos_data:/var/lib/mysql
       - ./portal Backend/init-scripts/MySql/init-eventos.sql:/docker-entrypoint-initdb.d/init-eventos.sql:ro
     healthcheck:
-      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', 'root', '-p$$MYSQL_ROOT_PASSWORD']
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', '$$MYSQL_USER', '-p$$MYSQL_PASSWORD']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -240,15 +254,17 @@ services:
     image: mysql:8
     container_name: servicios-db
     environment:
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: Tapalque242
       MYSQL_DATABASE: servicios
+      MYSQL_USER: TapalqueApp
+      MYSQL_PASSWORD: Tapalque242
     ports:
       - '3313:3306'
     volumes:
       - servicios_data:/var/lib/mysql
       - ./portal Backend/init-scripts/MySql/init-servicios.sql:/docker-entrypoint-initdb.d/init-servicios.sql:ro
     healthcheck:
-      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', 'root', '-p$$MYSQL_ROOT_PASSWORD']
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', '$$MYSQL_USER', '-p$$MYSQL_PASSWORD']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -264,15 +280,17 @@ services:
     image: mysql:8
     container_name: termas-db
     environment:
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: Tapalque242
       MYSQL_DATABASE: termas
+      MYSQL_USER: TapalqueApp
+      MYSQL_PASSWORD: Tapalque242
     ports:
       - '3314:3306'
     volumes:
       - termas_data:/var/lib/mysql
       - ./portal Backend/init-scripts/MySql/init-termas.sql:/docker-entrypoint-initdb.d/init-termas.sql:ro
     healthcheck:
-      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', 'root', '-p$$MYSQL_ROOT_PASSWORD']
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', '$$MYSQL_USER', '-p$$MYSQL_PASSWORD']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -284,15 +302,17 @@ services:
     image: mysql:8
     container_name: espacios-publicos-db
     environment:
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: Tapalque242
       MYSQL_DATABASE: espacios_publicos
+      MYSQL_USER: TapalqueApp
+      MYSQL_PASSWORD: Tapalque242
     ports:
       - '3315:3306'
     volumes:
       - espacios_publicos_data:/var/lib/mysql
       - ./portal Backend/init-scripts/MySql/init-espacios-publicos.sql:/docker-entrypoint-initdb.d/init-espacios-publicos.sql:ro
     healthcheck:
-      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', 'root', '-p$$MYSQL_ROOT_PASSWORD']
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', '$$MYSQL_USER', '-p$$MYSQL_PASSWORD']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -383,6 +403,8 @@ services:
     restart: always
     env_file:
       - .env
+    volumes:
+      - user_uploads:/app/uploads
     deploy:
       resources:
         limits:
@@ -618,6 +640,7 @@ volumes:
   mercado_pago_data:
   jwt_data:
   user_data:
+  user_uploads:
   comercio_data:
   comercio_uploads:
   eventos_data:
