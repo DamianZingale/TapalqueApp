@@ -162,7 +162,9 @@ public class Order {
         EN_PREPARACION,  // En cocina
         LISTO,           // Listo para retirar/entregar
         EN_DELIVERY,     // Solo si isDelivery=true
-        ENTREGADO        // Finalizado
+        ENTREGADO,       // Finalizado
+        PAID,            // Pagado via Mercado Pago
+        FAILED           // Pago fallido
     }
 
     
