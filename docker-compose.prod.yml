@@ -6,39 +6,40 @@
 # Servicios criticos con 2 replicas: user, jwt, mercado-pago, pedidos, reservas
 # JVM tuneada con JAVA_TOOL_OPTIONS (funciona sin importar el ENTRYPOINT del Dockerfile)
 # MySQL y MongoDB con caches reducidos
+# Total estimado: ~12GB de 16GB disponibles
 # ==========================================
 
 x-java-opts-critical: &java-opts-critical
-  JAVA_TOOL_OPTIONS: >-
-    -Xmx192m -Xms96m
-    -XX:+UseG1GC
-    -XX:+UseContainerSupport
-    -XX:MaxRAMPercentage=75.0
-    -XX:+UseStringDeduplication
-    -XX:MaxMetaspaceSize=96m
-    -Xss256k
-
-x-java-opts-light: &java-opts-light
-  JAVA_TOOL_OPTIONS: >-
-    -Xmx128m -Xms64m
-    -XX:+UseSerialGC
-    -XX:+UseContainerSupport
-    -XX:MaxRAMPercentage=75.0
-    -XX:MaxMetaspaceSize=80m
-    -Xss256k
-
-x-java-opts-infra: &java-opts-infra
   JAVA_TOOL_OPTIONS: >-
     -Xmx256m -Xms128m
     -XX:+UseG1GC
     -XX:+UseContainerSupport
     -XX:MaxRAMPercentage=75.0
+    -XX:+UseStringDeduplication
+    -XX:MaxMetaspaceSize=128m
+    -Xss256k
+
+x-java-opts-light: &java-opts-light
+  JAVA_TOOL_OPTIONS: >-
+    -Xmx192m -Xms96m
+    -XX:+UseSerialGC
+    -XX:+UseContainerSupport
+    -XX:MaxRAMPercentage=75.0
     -XX:MaxMetaspaceSize=96m
+    -Xss256k
+
+x-java-opts-infra: &java-opts-infra
+  JAVA_TOOL_OPTIONS: >-
+    -Xmx384m -Xms192m
+    -XX:+UseG1GC
+    -XX:+UseContainerSupport
+    -XX:MaxRAMPercentage=75.0
+    -XX:MaxMetaspaceSize=128m
     -Xss256k
 
 x-mysql-tuned: &mysql-tuned
   command: >-
-    --innodb-buffer-pool-size=48M
+    --innodb-buffer-pool-size=64M
     --key-buffer-size=8M
     --max-connections=40
     --performance-schema=OFF
@@ -98,91 +99,103 @@ services:
     deploy:
       resources:
         limits:
-          memory: 192M
+          memory: 256M
 
   pedidos-db:
+    restart: always
     deploy:
       resources:
         limits:
-          memory: 256M
-    command: --wiredTigerCacheSizeGB=0.1
+          memory: 384M
+    command: --wiredTigerCacheSizeGB=0.15
 
   reservas-db:
+    restart: always
     deploy:
       resources:
         limits:
-          memory: 256M
-    command: --wiredTigerCacheSizeGB=0.1
+          memory: 384M
+    command: --wiredTigerCacheSizeGB=0.15
 
   gastronomia-db:
     <<: *mysql-tuned
+    restart: always
     deploy:
       resources:
         limits:
-          memory: 160M
+          memory: 384M
 
   hosteleria-db:
     <<: *mysql-tuned
+    restart: always
     deploy:
       resources:
         limits:
-          memory: 160M
+          memory: 384M
 
   mercado-pago-db:
     <<: *mysql-tuned
+    restart: always
     deploy:
       resources:
         limits:
-          memory: 160M
+          memory: 384M
 
   jwt-db:
     <<: *mysql-tuned
+    restart: always
     deploy:
       resources:
         limits:
-          memory: 128M
+          memory: 384M
 
   user-db:
     <<: *mysql-tuned
+    restart: always
     deploy:
       resources:
         limits:
-          memory: 160M
+          memory: 384M
 
   comercio-db:
     <<: *mysql-tuned
+    restart: always
     deploy:
       resources:
         limits:
-          memory: 128M
+          memory: 384M
 
   eventos-db:
     <<: *mysql-tuned
+    restart: always
     deploy:
       resources:
         limits:
-          memory: 128M
+          memory: 384M
 
   servicios-db:
     <<: *mysql-tuned
+    restart: always
     deploy:
       resources:
         limits:
-          memory: 128M
+          memory: 384M
 
   termas-db:
     <<: *mysql-tuned
+    restart: always
     deploy:
       resources:
         limits:
-          memory: 128M
+          memory: 384M
 
   espacios-publicos-db:
     <<: *mysql-tuned
+    restart: always
     deploy:
       resources:
         limits:
-          memory: 128M
+          memory: 384M
 
   # ==========================================
   # INFRAESTRUCTURA JAVA
@@ -193,7 +206,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 384M
+          memory: 512M
 
   msvc-gateway-server:
     environment:
@@ -201,7 +214,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 384M
+          memory: 512M
 
   # ==========================================
   # SERVICIOS CRITICOS - 2 REPLICAS
@@ -215,7 +228,7 @@ services:
       replicas: 2
       resources:
         limits:
-          memory: 256M
+          memory: 384M
 
   msvc-user:
     environment:
@@ -224,7 +237,7 @@ services:
       replicas: 2
       resources:
         limits:
-          memory: 256M
+          memory: 384M
 
   msvc-pedidos:
     environment:
@@ -237,7 +250,7 @@ services:
       replicas: 2
       resources:
         limits:
-          memory: 256M
+          memory: 384M
 
   msvc-reservas:
     environment:
@@ -250,7 +263,7 @@ services:
       replicas: 2
       resources:
         limits:
-          memory: 256M
+          memory: 384M
 
   msvc-mercado-pago:
     environment:
@@ -263,7 +276,7 @@ services:
       replicas: 2
       resources:
         limits:
-          memory: 256M
+          memory: 384M
 
   # ==========================================
   # SERVICIOS NO CRITICOS - 1 REPLICA
@@ -274,7 +287,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 200M
+          memory: 300M
 
   msvc-hosteleria:
     environment:
@@ -282,7 +295,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 200M
+          memory: 300M
 
   msvc-comercio:
     environment:
@@ -290,7 +303,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 200M
+          memory: 300M
 
   msvc-eventos:
     environment:
@@ -298,7 +311,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 200M
+          memory: 300M
 
   msvc-servicios:
     environment:
@@ -306,7 +319,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 200M
+          memory: 300M
 
   msvc-termas:
     environment:
@@ -314,7 +327,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 200M
+          memory: 300M
 
   msvc-espacios-publicos:
     environment:
@@ -322,7 +335,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 200M
+          memory: 300M
 
   # ==========================================
   # FRONTEND - Nginx en produccion (solo red interna)
@@ -335,7 +348,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 96M
+          memory: 128M
 
 # ==========================================
 # VOLUMENES ADICIONALES
