@@ -72,10 +72,10 @@ services:
     image: mysql:8
     container_name: gastronomia-db
     environment:
-      MYSQL_ROOT_PASSWORD: Tapalque242
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
       MYSQL_DATABASE: gastronomia
-      MYSQL_USER: TapalqueApp
-      MYSQL_PASSWORD: Tapalque242
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
     ports:
       - '3305:3306'
     volumes:
@@ -98,10 +98,10 @@ services:
     image: mysql:8
     container_name: hosteleria-db
     environment:
-      MYSQL_ROOT_PASSWORD: Tapalque242
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
       MYSQL_DATABASE: hosteleria
-      MYSQL_USER: TapalqueApp
-      MYSQL_PASSWORD: Tapalque242
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
     ports:
       - '3307:3306'
     volumes:
@@ -124,10 +124,10 @@ services:
     image: mysql:8
     container_name: mercado-pago-db
     environment:
-      MYSQL_ROOT_PASSWORD: Tapalque242
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
       MYSQL_DATABASE: mercado_pago
-      MYSQL_USER: TapalqueApp
-      MYSQL_PASSWORD: Tapalque242
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
     ports:
       - '3308:3306'
     volumes:
@@ -150,10 +150,10 @@ services:
     image: mysql:8
     container_name: jwt-db
     environment:
-      MYSQL_ROOT_PASSWORD: Tapalque242
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
       MYSQL_DATABASE: jwt
-      MYSQL_USER: TapalqueApp
-      MYSQL_PASSWORD: Tapalque242
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
     ports:
       - '3309:3306'
     volumes:
@@ -176,10 +176,10 @@ services:
     image: mysql:8
     container_name: user-db
     environment:
-      MYSQL_ROOT_PASSWORD: Tapalque242
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
       MYSQL_DATABASE: user
-      MYSQL_USER: TapalqueApp
-      MYSQL_PASSWORD: Tapalque242
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
     ports:
       - '3310:3306'
     volumes:
@@ -202,10 +202,10 @@ services:
     image: mysql:8
     container_name: comercio-db
     environment:
-      MYSQL_ROOT_PASSWORD: Tapalque242
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
       MYSQL_DATABASE: comercio
-      MYSQL_USER: TapalqueApp
-      MYSQL_PASSWORD: Tapalque242
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
     ports:
       - '3311:3306'
     volumes:
@@ -228,10 +228,10 @@ services:
     image: mysql:8
     container_name: eventos-db
     environment:
-      MYSQL_ROOT_PASSWORD: Tapalque242
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
       MYSQL_DATABASE: eventos
-      MYSQL_USER: TapalqueApp
-      MYSQL_PASSWORD: Tapalque242
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
     ports:
       - '3312:3306'
     volumes:
@@ -254,10 +254,10 @@ services:
     image: mysql:8
     container_name: servicios-db
     environment:
-      MYSQL_ROOT_PASSWORD: Tapalque242
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
       MYSQL_DATABASE: servicios
-      MYSQL_USER: TapalqueApp
-      MYSQL_PASSWORD: Tapalque242
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
     ports:
       - '3313:3306'
     volumes:
@@ -280,10 +280,10 @@ services:
     image: mysql:8
     container_name: termas-db
     environment:
-      MYSQL_ROOT_PASSWORD: Tapalque242
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
       MYSQL_DATABASE: termas
-      MYSQL_USER: TapalqueApp
-      MYSQL_PASSWORD: Tapalque242
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
     ports:
       - '3314:3306'
     volumes:
@@ -302,10 +302,10 @@ services:
     image: mysql:8
     container_name: espacios-publicos-db
     environment:
-      MYSQL_ROOT_PASSWORD: Tapalque242
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
       MYSQL_DATABASE: espacios_publicos
-      MYSQL_USER: TapalqueApp
-      MYSQL_PASSWORD: Tapalque242
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
     ports:
       - '3315:3306'
     volumes:
@@ -381,6 +381,8 @@ services:
   msvc-jwt:
     build: ./portal Backend/msvc-jwt
     restart: always
+    env_file:
+      - .env
     depends_on:
       eureka-server:
         condition: service_healthy
@@ -461,6 +463,8 @@ services:
   msvc-gastronomia:
     build: ./portal Backend/msvc-gastronomia
     container_name: msvc-gastronomia
+    env_file:
+      - .env
     depends_on:
       gastronomia-db:
         condition: service_healthy
@@ -479,6 +483,8 @@ services:
   msvc-hosteleria:
     build: ./portal Backend/msvc-hosteleria
     container_name: msvc-hosteleria
+    env_file:
+      - .env
     depends_on:
       hosteleria-db:
         condition: service_healthy
@@ -521,6 +527,8 @@ services:
   msvc-comercio:
     build: ./portal Backend/msvc-comercio
     container_name: msvc-comercio
+    env_file:
+      - .env
     depends_on:
       comercio-db:
         condition: service_healthy
@@ -539,6 +547,8 @@ services:
   msvc-eventos:
     build: ./portal Backend/msvc-eventos
     container_name: msvc-eventos
+    env_file:
+      - .env
     depends_on:
       eventos-db:
         condition: service_healthy
@@ -557,6 +567,8 @@ services:
   msvc-servicios:
     build: ./portal Backend/msvc-servicios
     container_name: msvc-servicios
+    env_file:
+      - .env
     depends_on:
       servicios-db:
         condition: service_healthy
@@ -575,6 +587,8 @@ services:
   msvc-termas:
     build: ./portal Backend/msvc-termas
     container_name: msvc-termas
+    env_file:
+      - .env
     depends_on:
       termas-db:
         condition: service_healthy
@@ -593,6 +607,8 @@ services:
   msvc-espacios-publicos:
     build: ./portal Backend/msvc-espacios-publicos
     container_name: msvc-espacios-publicos
+    env_file:
+      - .env
     depends_on:
       espacios-publicos-db:
         condition: service_healthy

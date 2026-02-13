@@ -135,6 +135,48 @@ services:
     networks:
       - tapalque-net
 
+  servicios-db:
+    image: mysql:8
+    container_name: servicios-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: servicios
+    ports:
+      - "3313:3306"
+    volumes:
+      - servicios_data:/var/lib/mysql
+      - ./init-scripts/mysql/init-servicios.sql:/docker-entrypoint-initdb.d/init-servicios.sql:ro
+    networks:
+      - tapalque-net
+
+  termas-db:
+    image: mysql:8
+    container_name: termas-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: termas
+    ports:
+      - "3314:3306"
+    volumes:
+      - termas_data:/var/lib/mysql
+      - ./init-scripts/mysql/init-termas.sql:/docker-entrypoint-initdb.d/init-termas.sql:ro
+    networks:
+      - tapalque-net
+
+  espacios-publicos-db:
+    image: mysql:8
+    container_name: espacios-publicos-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: espacios_publicos
+    ports:
+      - "3315:3306"
+    volumes:
+      - espacios_publicos_data:/var/lib/mysql
+      - ./init-scripts/mysql/init-espacios-publicos.sql:/docker-entrypoint-initdb.d/init-espacios-publicos.sql:ro
+    networks:
+      - tapalque-net
+
   # ==========================================
   # MICROSERVICIOS
   # ==========================================
@@ -168,6 +210,8 @@ services:
     container_name: msvc-user
     depends_on:
       - user-db
+    volumes:
+      - user_uploads:/app/uploads
     restart: always
     networks:
       - tapalque-net
@@ -197,6 +241,8 @@ services:
     container_name: msvc-gastronomia
     depends_on:
       - gastronomia-db
+    volumes:
+      - gastronomia_uploads:/app/uploads
     restart: always
     networks:
       - tapalque-net
@@ -206,6 +252,8 @@ services:
     container_name: msvc-hosteleria
     depends_on:
       - hosteleria-db
+    volumes:
+      - hosteleria_uploads:/app/uploads
     restart: always
     networks:
       - tapalque-net
@@ -227,6 +275,8 @@ services:
     container_name: msvc-comercio
     depends_on:
       - comercio-db
+    volumes:
+      - comercio_uploads:/app/uploads
     restart: always
     networks:
       - tapalque-net
@@ -235,6 +285,41 @@ services:
     container_name: msvc-eventos
     depends_on:
       - eventos-db
+    volumes:
+      - eventos_uploads:/app/uploads
+    restart: always
+    networks:
+      - tapalque-net
+
+  msvc-servicios:
+    build: ./msvc-servicios
+    container_name: msvc-servicios
+    depends_on:
+      - servicios-db
+    volumes:
+      - servicios_uploads:/app/uploads
+    restart: always
+    networks:
+      - tapalque-net
+
+  msvc-termas:
+    build: ./msvc-termas
+    container_name: msvc-termas
+    depends_on:
+      - termas-db
+    volumes:
+      - termas_uploads:/app/uploads
+    restart: always
+    networks:
+      - tapalque-net
+
+  msvc-espacios-publicos:
+    build: ./msvc-espacios-publicos
+    container_name: msvc-espacios-publicos
+    depends_on:
+      - espacios-publicos-db
+    volumes:
+      - espacios_publicos_uploads:/app/uploads
     restart: always
     networks:
       - tapalque-net
@@ -252,6 +337,17 @@ volumes:
   user_data:
   comercio_data:
   eventos_data:
+  servicios_data:
+  termas_data:
+  espacios_publicos_data:
+  gastronomia_uploads:
+  hosteleria_uploads:
+  comercio_uploads:
+  eventos_uploads:
+  servicios_uploads:
+  termas_uploads:
+  espacios_publicos_uploads:
+  user_uploads:
 
 networks:
   tapalque-net:
