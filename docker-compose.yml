@@ -25,10 +25,10 @@ services:
       - rabbitmq_data:/var/lib/rabbitmq
     healthcheck:
       test: ['CMD', 'rabbitmq-diagnostics', '-q', 'ping']
-      interval: 15s
-      timeout: 10s
+      interval: 30s
+      timeout: 15s
       retries: 10
-      start_period: 30s
+      start_period: 120s
     deploy:
       resources:
         limits:
