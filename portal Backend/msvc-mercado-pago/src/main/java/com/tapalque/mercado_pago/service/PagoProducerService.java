@@ -19,7 +19,7 @@ public class PagoProducerService {
     public void enviarNotificacionPagoPedido(PagoEventoDTO evento) {
         try {
             rabbitTemplate.convertAndSend(
-                RabbitMQConfig.EXCHANGE_NAME,
+                RabbitMQConfig.EXCHANGE_PAGOS,
                 RabbitMQConfig.ROUTING_KEY_PEDIDOS,
                 evento
             );
@@ -32,7 +32,7 @@ public class PagoProducerService {
     public void enviarNotificacionPagoReserva(PagoEventoDTO evento) {
         try {
             rabbitTemplate.convertAndSend(
-                RabbitMQConfig.EXCHANGE_NAME,
+                RabbitMQConfig.EXCHANGE_PAGOS,
                 RabbitMQConfig.ROUTING_KEY_RESERVAS,
                 evento
             );
