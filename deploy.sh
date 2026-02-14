@@ -64,35 +64,49 @@ setup_firewall() {
 # COMPILAR JARS (Maven sin tests)
 # ==========================================
 build_jars() {
-    echo_info "Compilando JARs de todos los microservicios (en paralelo)..."
+    echo_info "Compilando JARs de todos los microservicios (en lotes de 3)..."
 
     BACKEND_DIR="portal Backend"
     LOG_DIR="/tmp/tapalque-build-logs"
+    BATCH_SIZE=3
     mkdir -p "$LOG_DIR"
 
-    PIDS=()
-    SERVICES=()
-
+    ALL_SERVICES=()
     for SERVICE_DIR in "$BACKEND_DIR"/msvc-* "$BACKEND_DIR"/eureka-*; do
         if [ -f "$SERVICE_DIR/pom.xml" ]; then
-            SERVICE_NAME=$(basename "$SERVICE_DIR")
-            SERVICES+=("$SERVICE_NAME")
-            echo_info "Iniciando compilacion de $SERVICE_NAME..."
-            (cd "$SERVICE_DIR" && mvn clean package -Dmaven.test.skip=true -q > "$LOG_DIR/$SERVICE_NAME.log" 2>&1) &
-            PIDS+=($!)
+            ALL_SERVICES+=("$SERVICE_DIR")
         fi
     done
 
-    echo_info "Esperando ${#PIDS[@]} compilaciones en paralelo..."
-
     FAILED=()
-    for i in "${!PIDS[@]}"; do
-        if wait "${PIDS[$i]}"; then
-            echo_info "${SERVICES[$i]} compilado OK"
-        else
-            echo_error "${SERVICES[$i]} fallo (ver $LOG_DIR/${SERVICES[$i]}.log)"
-            FAILED+=("${SERVICES[$i]}")
-        fi
+    TOTAL=${#ALL_SERVICES[@]}
+    BUILT=0
+
+    for ((i=0; i<TOTAL; i+=BATCH_SIZE)); do
+        PIDS=()
+        SERVICES=()
+        BATCH_END=$((i + BATCH_SIZE))
+        if [ $BATCH_END -gt $TOTAL ]; then BATCH_END=$TOTAL; fi
+
+        echo_info "Lote $((i/BATCH_SIZE + 1)): compilando servicios $((i+1))-${BATCH_END} de ${TOTAL}..."
+
+        for ((j=i; j<BATCH_END; j++)); do
+            SERVICE_DIR="${ALL_SERVICES[$j]}"
+            SERVICE_NAME=$(basename "$SERVICE_DIR")
+            SERVICES+=("$SERVICE_NAME")
+            (cd "$SERVICE_DIR" && mvn clean package -Dmaven.test.skip=true -q > "$LOG_DIR/$SERVICE_NAME.log" 2>&1) &
+            PIDS+=($!)
+        done
+
+        for k in "${!PIDS[@]}"; do
+            if wait "${PIDS[$k]}"; then
+                BUILT=$((BUILT + 1))
+                echo_info "${SERVICES[$k]} compilado OK ($BUILT/$TOTAL)"
+            else
+                echo_error "${SERVICES[$k]} fallo (ver $LOG_DIR/${SERVICES[$k]}.log)"
+                FAILED+=("${SERVICES[$k]}")
+            fi
+        done
     done
 
     if [ ${#FAILED[@]} -gt 0 ]; then
