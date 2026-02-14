@@ -3,21 +3,23 @@
 # Dominio: www.tapalqueapp.com.ar
 # Uso: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 #
-# Servicios criticos con 2 replicas: user, jwt, mercado-pago, pedidos, reservas
-# JVM tuneada con JAVA_TOOL_OPTIONS (funciona sin importar el ENTRYPOINT del Dockerfile)
+# Servicios criticos con 1 replica (reducido para limitar CPU en Hostinger)
+# JVM tuneada con JAVA_TOOL_OPTIONS: SerialGC, TieredStopAtLevel=1, ActiveProcessorCount=1
+# Limites de CPU por contenedor para evitar exceso de uso
 # MySQL y MongoDB con caches reducidos
-# Total estimado: ~12GB de 16GB disponibles
 # ==========================================
 
 x-java-opts-critical: &java-opts-critical
   JAVA_TOOL_OPTIONS: >-
     -Xmx256m -Xms128m
-    -XX:+UseG1GC
+    -XX:+UseSerialGC
     -XX:+UseContainerSupport
     -XX:MaxRAMPercentage=75.0
-    -XX:+UseStringDeduplication
     -XX:MaxMetaspaceSize=128m
     -Xss256k
+    -XX:ActiveProcessorCount=1
+    -XX:CICompilerCount=1
+    -XX:+TieredCompilation -XX:TieredStopAtLevel=1
 
 x-java-opts-light: &java-opts-light
   JAVA_TOOL_OPTIONS: >-
@@ -27,15 +29,21 @@ x-java-opts-light: &java-opts-light
     -XX:MaxRAMPercentage=75.0
     -XX:MaxMetaspaceSize=96m
     -Xss256k
+    -XX:ActiveProcessorCount=1
+    -XX:CICompilerCount=1
+    -XX:+TieredCompilation -XX:TieredStopAtLevel=1
 
 x-java-opts-infra: &java-opts-infra
   JAVA_TOOL_OPTIONS: >-
     -Xmx384m -Xms192m
-    -XX:+UseG1GC
+    -XX:+UseSerialGC
     -XX:+UseContainerSupport
     -XX:MaxRAMPercentage=75.0
     -XX:MaxMetaspaceSize=128m
     -Xss256k
+    -XX:ActiveProcessorCount=1
+    -XX:CICompilerCount=1
+    -XX:+TieredCompilation -XX:TieredStopAtLevel=1
 
 x-mysql-tuned: &mysql-tuned
   command: >-
@@ -207,6 +215,7 @@ services:
       resources:
         limits:
           memory: 512M
+          cpus: "0.30"
 
   msvc-gateway-server:
     environment:
@@ -215,29 +224,31 @@ services:
       resources:
         limits:
           memory: 512M
+          cpus: "0.40"
 
   # ==========================================
-  # SERVICIOS CRITICOS - 2 REPLICAS
-  # Sin container_name para permitir replicas
+  # SERVICIOS CRITICOS - 1 REPLICA
   # Sin ports de host (acceso solo via gateway)
   # ==========================================
   msvc-jwt:
     environment:
       <<: *java-opts-critical
     deploy:
-      replicas: 2
+      replicas: 1
       resources:
         limits:
           memory: 384M
+          cpus: "0.30"
 
   msvc-user:
     environment:
       <<: *java-opts-critical
     deploy:
-      replicas: 2
+      replicas: 1
       resources:
         limits:
           memory: 384M
+          cpus: "0.30"
 
   msvc-pedidos:
     environment:
@@ -247,10 +258,11 @@ services:
       SPRING_RABBITMQ_PASSWORD: guest
       <<: *java-opts-critical
     deploy:
-      replicas: 2
+      replicas: 1
       resources:
         limits:
           memory: 384M
+          cpus: "0.30"
 
   msvc-reservas:
     environment:
@@ -260,10 +272,11 @@ services:
       SPRING_RABBITMQ_PASSWORD: guest
       <<: *java-opts-critical
     deploy:
-      replicas: 2
+      replicas: 1
       resources:
         limits:
           memory: 384M
+          cpus: "0.30"
 
   msvc-mercado-pago:
     environment:
@@ -273,10 +286,11 @@ services:
       SPRING_RABBITMQ_PASSWORD: guest
       <<: *java-opts-critical
     deploy:
-      replicas: 2
+      replicas: 1
       resources:
         limits:
           memory: 384M
+          cpus: "0.30"
 
   # ==========================================
   # SERVICIOS NO CRITICOS - 1 REPLICA
@@ -288,6 +302,7 @@ services:
       resources:
         limits:
           memory: 300M
+          cpus: "0.20"
 
   msvc-hosteleria:
     environment:
@@ -296,6 +311,7 @@ services:
       resources:
         limits:
           memory: 300M
+          cpus: "0.20"
 
   msvc-comercio:
     environment:
@@ -304,6 +320,7 @@ services:
       resources:
         limits:
           memory: 300M
+          cpus: "0.20"
 
   msvc-eventos:
     environment:
@@ -312,6 +329,7 @@ services:
       resources:
         limits:
           memory: 300M
+          cpus: "0.20"
 
   msvc-servicios:
     environment:
@@ -320,6 +338,7 @@ services:
       resources:
         limits:
           memory: 300M
+          cpus: "0.20"
 
   msvc-termas:
     environment:
@@ -328,6 +347,7 @@ services:
       resources:
         limits:
           memory: 300M
+          cpus: "0.20"
 
   msvc-espacios-publicos:
     environment:
@@ -336,6 +356,7 @@ services:
       resources:
         limits:
           memory: 300M
+          cpus: "0.20"
 
   # ==========================================
   # FRONTEND - Nginx en produccion (solo red interna)
