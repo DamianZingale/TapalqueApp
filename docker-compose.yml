@@ -44,7 +44,7 @@ services:
       - '27017:27017'
     volumes:
       - pedidos_data:/data/db
-      - ./portal Backend/init-scripts/Mongo/init-pedidos.js:/docker-entrypoint-initdb.d/init-pedidos.js:ro
+      - ./portal Backend/init-scripts/mongo/init-pedidos.js:/docker-entrypoint-initdb.d/init-pedidos.js:ro
     deploy:
       resources:
         limits:
@@ -59,7 +59,7 @@ services:
       - '27018:27017'
     volumes:
       - reservas_data:/data/db
-      - ./portal Backend/init-scripts/Mongo/init-reservas.js:/docker-entrypoint-initdb.d/init-reservas.js:ro
+      - ./portal Backend/init-scripts/mongo/init-reservas.js:/docker-entrypoint-initdb.d/init-reservas.js:ro
     deploy:
       resources:
         limits:
@@ -80,7 +80,7 @@ services:
       - '3305:3306'
     volumes:
       - gastronomia_data:/var/lib/mysql
-      - ./portal Backend/init-scripts/MySql/init-gastronomia.sql:/docker-entrypoint-initdb.d/init-gastronomia.sql:ro
+      - ./portal Backend/init-scripts/mysql/init-gastronomia.sql:/docker-entrypoint-initdb.d/init-gastronomia.sql:ro
     healthcheck:
       test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', '$$MYSQL_USER', '-p$$MYSQL_PASSWORD']
       interval: 10s
@@ -106,7 +106,7 @@ services:
       - '3307:3306'
     volumes:
       - hosteleria_data:/var/lib/mysql
-      - ./portal Backend/init-scripts/MySql/init-hosteleria.sql:/docker-entrypoint-initdb.d/init-hosteleria.sql:ro
+      - ./portal Backend/init-scripts/mysql/init-hosteleria.sql:/docker-entrypoint-initdb.d/init-hosteleria.sql:ro
     healthcheck:
       test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', '$$MYSQL_USER', '-p$$MYSQL_PASSWORD']
       interval: 10s
@@ -132,7 +132,7 @@ services:
       - '3308:3306'
     volumes:
       - mercado_pago_data:/var/lib/mysql
-      - ./portal Backend/init-scripts/MySql/init-mercado-pago.sql:/docker-entrypoint-initdb.d/init-mercado-pago.sql:ro
+      - ./portal Backend/init-scripts/mysql/init-mercado-pago.sql:/docker-entrypoint-initdb.d/init-mercado-pago.sql:ro
     healthcheck:
       test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', '$$MYSQL_USER', '-p$$MYSQL_PASSWORD']
       interval: 10s
@@ -158,7 +158,7 @@ services:
       - '3309:3306'
     volumes:
       - jwt_data:/var/lib/mysql
-      - ./portal Backend/init-scripts/MySql/init-jwt.sql:/docker-entrypoint-initdb.d/init-jwt.sql:ro
+      - ./portal Backend/init-scripts/mysql/init-jwt.sql:/docker-entrypoint-initdb.d/init-jwt.sql:ro
     healthcheck:
       test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', '$$MYSQL_USER', '-p$$MYSQL_PASSWORD']
       interval: 10s
@@ -184,7 +184,7 @@ services:
       - '3310:3306'
     volumes:
       - user_data:/var/lib/mysql
-      - ./portal Backend/init-scripts/MySql/init-user.sql:/docker-entrypoint-initdb.d/init-user.sql:ro
+      - ./portal Backend/init-scripts/mysql/init-user.sql:/docker-entrypoint-initdb.d/init-user.sql:ro
     healthcheck:
       test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', '$$MYSQL_USER', '-p$$MYSQL_PASSWORD']
       interval: 10s
@@ -210,7 +210,7 @@ services:
       - '3311:3306'
     volumes:
       - comercio_data:/var/lib/mysql
-      - ./portal Backend/init-scripts/MySql/init-comercio.sql:/docker-entrypoint-initdb.d/init-comercio.sql:ro
+      - ./portal Backend/init-scripts/mysql/init-comercio.sql:/docker-entrypoint-initdb.d/init-comercio.sql:ro
     healthcheck:
       test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', '$$MYSQL_USER', '-p$$MYSQL_PASSWORD']
       interval: 10s
@@ -236,7 +236,7 @@ services:
       - '3312:3306'
     volumes:
       - eventos_data:/var/lib/mysql
-      - ./portal Backend/init-scripts/MySql/init-eventos.sql:/docker-entrypoint-initdb.d/init-eventos.sql:ro
+      - ./portal Backend/init-scripts/mysql/init-eventos.sql:/docker-entrypoint-initdb.d/init-eventos.sql:ro
     healthcheck:
       test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', '$$MYSQL_USER', '-p$$MYSQL_PASSWORD']
       interval: 10s
@@ -262,7 +262,7 @@ services:
       - '3313:3306'
     volumes:
       - servicios_data:/var/lib/mysql
-      - ./portal Backend/init-scripts/MySql/init-servicios.sql:/docker-entrypoint-initdb.d/init-servicios.sql:ro
+      - ./portal Backend/init-scripts/mysql/init-servicios.sql:/docker-entrypoint-initdb.d/init-servicios.sql:ro
     healthcheck:
       test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', '$$MYSQL_USER', '-p$$MYSQL_PASSWORD']
       interval: 10s
@@ -288,7 +288,7 @@ services:
       - '3314:3306'
     volumes:
       - termas_data:/var/lib/mysql
-      - ./portal Backend/init-scripts/MySql/init-termas.sql:/docker-entrypoint-initdb.d/init-termas.sql:ro
+      - ./portal Backend/init-scripts/mysql/init-termas.sql:/docker-entrypoint-initdb.d/init-termas.sql:ro
     healthcheck:
       test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', '$$MYSQL_USER', '-p$$MYSQL_PASSWORD']
       interval: 10s
@@ -310,7 +310,7 @@ services:
       - '3315:3306'
     volumes:
       - espacios_publicos_data:/var/lib/mysql
-      - ./portal Backend/init-scripts/MySql/init-espacios-publicos.sql:/docker-entrypoint-initdb.d/init-espacios-publicos.sql:ro
+      - ./portal Backend/init-scripts/mysql/init-espacios-publicos.sql:/docker-entrypoint-initdb.d/init-espacios-publicos.sql:ro
     healthcheck:
       test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', '$$MYSQL_USER', '-p$$MYSQL_PASSWORD']
       interval: 10s

@@ -6,7 +6,6 @@ import java.util.Map;
 
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +19,7 @@ public class RabbitMQListenerServiceMP {
 
     //===============RABBITMQ=================//
     private final RabbitTemplate rabbitTemplate;
+    private final MercadoPagoService mercadoPagoService;
 
     @Value("${rabbitmq.exchange}")
     private String exchange;
@@ -29,13 +29,10 @@ public class RabbitMQListenerServiceMP {
 
     @Value("${rabbitmq.routingKey.hospedaje}")
     private String routingKeyHospedaje;
-    
-    @Autowired
-    private final MercadoPagoService mercadoPagoService;
 
-    public RabbitMQListenerServiceMP(MercadoPagoService mercadoPagoService) {
+    public RabbitMQListenerServiceMP(RabbitTemplate rabbitTemplate, MercadoPagoService mercadoPagoService) {
+        this.rabbitTemplate = rabbitTemplate;
         this.mercadoPagoService = mercadoPagoService;
-        this.rabbitTemplate = new RabbitTemplate();
     }
 
     @RabbitListener(queues = "mercado-pago-queue")

@@ -16,6 +16,7 @@ import com.tapalque.user.entity.User;
 import com.tapalque.user.enu.RolName;
 import com.tapalque.user.repository.RoleRepository;
 import com.tapalque.user.repository.UserRepository;
+import com.tapalque.user.service.HomeConfigService;
 
 @Component
 public class DataInitializer implements CommandLineRunner {
@@ -31,6 +32,9 @@ public class DataInitializer implements CommandLineRunner {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private HomeConfigService homeConfigService;
+
     @Value("${moderator.email:go@tapalque.com}")
     private String moderatorEmail;
 
@@ -44,6 +48,7 @@ public class DataInitializer implements CommandLineRunner {
     public void run(String... args) throws Exception {
         initRoles();
         initModeratorUser();
+        homeConfigService.initializeDefaultConfigs();
     }
 
     private void initRoles() {

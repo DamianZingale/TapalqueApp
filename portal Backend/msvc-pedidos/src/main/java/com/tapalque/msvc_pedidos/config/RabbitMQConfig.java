@@ -12,10 +12,16 @@ import org.springframework.context.annotation.Configuration;
 public class RabbitMQConfig {
 
     public static final String QUEUE_PEDIDOS = "pagos.pedidos";
+    public static final String QUEUE_GASTRONOMIA = "pagos-gastronomia-queue";
 
     @Bean
     public Queue pedidosQueue() {
-        return new Queue(QUEUE_PEDIDOS, true); // durable
+        return new Queue(QUEUE_PEDIDOS, true);
+    }
+
+    @Bean
+    public Queue gastronomiaQueue() {
+        return new Queue(QUEUE_GASTRONOMIA, true);
     }
 
     @Bean
