@@ -61,20 +61,137 @@ setup_firewall() {
 }
 
 # ==========================================
+# COMPILAR JARS (Maven sin tests)
+# ==========================================
+build_jars() {
+    echo_info "Compilando JARs de todos los microservicios (en paralelo)..."
+
+    BACKEND_DIR="portal Backend"
+    LOG_DIR="/tmp/tapalque-build-logs"
+    mkdir -p "$LOG_DIR"
+
+    PIDS=()
+    SERVICES=()
+
+    for SERVICE_DIR in "$BACKEND_DIR"/msvc-* "$BACKEND_DIR"/eureka-*; do
+        if [ -f "$SERVICE_DIR/pom.xml" ]; then
+            SERVICE_NAME=$(basename "$SERVICE_DIR")
+            SERVICES+=("$SERVICE_NAME")
+            echo_info "Iniciando compilacion de $SERVICE_NAME..."
+            (cd "$SERVICE_DIR" && mvn clean package -Dmaven.test.skip=true -q > "$LOG_DIR/$SERVICE_NAME.log" 2>&1) &
+            PIDS+=($!)
+        fi
+    done
+
+    echo_info "Esperando ${#PIDS[@]} compilaciones en paralelo..."
+
+    FAILED=()
+    for i in "${!PIDS[@]}"; do
+        if wait "${PIDS[$i]}"; then
+            echo_info "${SERVICES[$i]} compilado OK"
+        else
+            echo_error "${SERVICES[$i]} fallo (ver $LOG_DIR/${SERVICES[$i]}.log)"
+            FAILED+=("${SERVICES[$i]}")
+        fi
+    done
+
+    if [ ${#FAILED[@]} -gt 0 ]; then
+        echo_error "Servicios con error: ${FAILED[*]}"
+        exit 1
+    fi
+
+    echo_info "Todos los JARs compilados correctamente"
+}
+
+# ==========================================
+# ARRANQUE ESCALONADO (evita picos de CPU)
+# ==========================================
+wait_for_services() {
+    local services=("$@")
+    local max_wait=120
+    local elapsed=0
+
+    while [ $elapsed -lt $max_wait ]; do
+        local all_ready=true
+        for svc in "${services[@]}"; do
+            local status
+            status=$($COMPOSE_CMD ps "$svc" --format "{{.Status}}" 2>/dev/null)
+            if echo "$status" | grep -qi "unhealthy\|starting"; then
+                all_ready=false
+                break
+            fi
+        done
+
+        if $all_ready; then
+            return 0
+        fi
+
+        sleep 10
+        elapsed=$((elapsed + 10))
+        echo_info "Esperando servicios... (${elapsed}s)"
+    done
+
+    echo_warn "Timeout esperando servicios, continuando..."
+}
+
+startup_staggered() {
+    echo_info "=== Arranque escalonado de servicios ==="
+
+    # Paso 1: Bases de datos + RabbitMQ
+    echo_info "[1/6] Levantando bases de datos y RabbitMQ..."
+    $COMPOSE_CMD up -d rabbitmq \
+        pedidos-db reservas-db jwt-db user-db \
+        gastronomia-db hosteleria-db mercado-pago-db \
+        comercio-db eventos-db servicios-db termas-db espacios-publicos-db
+    wait_for_services rabbitmq jwt-db user-db
+
+    # Paso 2: Eureka (service registry)
+    echo_info "[2/6] Levantando Eureka..."
+    $COMPOSE_CMD up -d eureka-server
+    wait_for_services eureka-server
+
+    # Paso 3: Gateway
+    echo_info "[3/6] Levantando Gateway..."
+    $COMPOSE_CMD up -d msvc-gateway-server
+    sleep 30
+
+    # Paso 4: Servicios criticos
+    echo_info "[4/6] Levantando servicios criticos..."
+    $COMPOSE_CMD up -d msvc-jwt msvc-user
+    sleep 40
+    $COMPOSE_CMD up -d msvc-pedidos msvc-reservas msvc-mercado-pago
+    sleep 40
+
+    # Paso 5: Servicios no criticos (de a 3)
+    echo_info "[5/6] Levantando servicios no criticos..."
+    $COMPOSE_CMD up -d msvc-gastronomia msvc-hosteleria msvc-comercio
+    sleep 30
+    $COMPOSE_CMD up -d msvc-eventos msvc-servicios msvc-termas
+    sleep 30
+    $COMPOSE_CMD up -d msvc-espacios-publicos
+
+    # Paso 6: Frontend + proxy
+    echo_info "[6/6] Levantando frontend y proxy..."
+    $COMPOSE_CMD up -d frontend nginx-proxy certbot
+
+    echo_info "=== Arranque escalonado completado ==="
+}
+
+# ==========================================
 # BUILD Y DEPLOY
 # ==========================================
 build_and_deploy() {
-    echo_info "Construyendo imagen base de Java..."
-    docker compose build base-java
+    echo_info "Compilando JARs..."
+    build_jars
 
-    echo_info "Construyendo imagenes de produccion..."
+    echo_info "Construyendo imagen base de Java..."
+    docker build -t tapalque-base-java:latest "portal Backend/base-java-image"
+
+    echo_info "Construyendo imagenes Docker de produccion..."
     $COMPOSE_CMD build
 
-    echo_info "Levantando servicios..."
-    $COMPOSE_CMD up -d
-
-    echo_info "Esperando a que los servicios esten listos..."
-    sleep 30
+    echo_info "Levantando servicios (escalonado)..."
+    startup_staggered
 }
 
 # ==========================================
@@ -142,20 +259,31 @@ case "${1:-deploy}" in
         echo_info "Sitio: https://$DOMAIN"
         echo_info "Recorda apuntar el DNS de $DOMAIN a la IP de este servidor"
         ;;
+    build-jars)
+        build_jars
+        ;;
+    startup)
+        echo_info "Arrancando servicios de forma escalonada..."
+        startup_staggered
+        verify_deployment
+        ;;
     ssl)
         setup_ssl
         ;;
     rebuild)
         echo_info "Rebuild completo..."
+        build_jars
+        docker build -t tapalque-base-java:latest "portal Backend/base-java-image"
         $COMPOSE_CMD down
         $COMPOSE_CMD build --no-cache
-        $COMPOSE_CMD up -d
+        startup_staggered
         ;;
     update)
         echo_info "Actualizando servicios..."
-        $COMPOSE_CMD pull
+        build_jars
+        docker build -t tapalque-base-java:latest "portal Backend/base-java-image"
         $COMPOSE_CMD build
-        $COMPOSE_CMD up -d
+        startup_staggered
         ;;
     logs)
         $COMPOSE_CMD logs -f ${2:-}
@@ -170,14 +298,16 @@ case "${1:-deploy}" in
         $COMPOSE_CMD down
         ;;
     *)
-        echo "Uso: $0 {deploy|ssl|rebuild|update|logs|status|stop}"
+        echo "Uso: $0 {deploy|ssl|rebuild|update|build-jars|startup|logs|status|stop}"
         echo ""
-        echo "  deploy   - Deploy completo (build + up + SSL)"
-        echo "  ssl      - Solo configurar/renovar SSL"
-        echo "  rebuild  - Rebuild sin cache y restart"
-        echo "  update   - Pull + build + restart"
-        echo "  logs     - Ver logs (opcional: nombre del servicio)"
-        echo "  status   - Ver estado y recursos"
-        echo "  stop     - Detener todos los servicios"
+        echo "  deploy     - Deploy completo (build JARs + Docker + arranque escalonado + SSL)"
+        echo "  build-jars - Solo compilar JARs (Maven sin tests)"
+        echo "  startup    - Solo arrancar servicios de forma escalonada (sin compilar)"
+        echo "  ssl        - Solo configurar/renovar SSL"
+        echo "  rebuild    - Recompilar JARs + rebuild Docker sin cache + arranque escalonado"
+        echo "  update     - Recompilar JARs + rebuild Docker + arranque escalonado"
+        echo "  logs       - Ver logs (opcional: nombre del servicio)"
+        echo "  status     - Ver estado y recursos"
+        echo "  stop       - Detener todos los servicios"
         ;;
 esac

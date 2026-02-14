@@ -107,7 +107,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 256M
+          memory: 384M
 
   pedidos-db:
     restart: always
