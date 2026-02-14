@@ -14,10 +14,9 @@ services:
   # INFRAESTRUCTURA
   # ==========================================
   rabbitmq:
-    image: rabbitmq:3.13-management-alpine
+    image: rabbitmq:3.13-alpine
     container_name: rabbitmq
     ports:
-      - '15672:15672' # Panel de gestión
       - '5672:5672' # Comunicación interna
     environment:
       RABBITMQ_DEFAULT_USER: guest
