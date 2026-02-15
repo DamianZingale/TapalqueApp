@@ -3,12 +3,12 @@ services:
   # IMAGEN BASE JAVA
   # ==========================================
   base-java:
-    build: 
+    build:
       context: ./portal Backend/base-java-image
       dockerfile: Dockerfile
     image: tapalque-base-java:latest
     container_name: base-java
-    profiles: ["base"]
+    profiles: ['base']
 
   # ==========================================
   # INFRAESTRUCTURA
@@ -19,18 +19,18 @@ services:
     ports:
       - '5672:5672' # Comunicación interna
     environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
     healthcheck:
       test: ['CMD', 'rabbitmq-diagnostics', '-q', 'ping']
       interval: 30s
       timeout: 15s
       retries: 10
       start_period: 120s
-    deploy:
-      resources:
-        limits:
-          memory: 384M
+    mem_limit: 1g
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+      - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
     networks:
       - tapalque-net
 
@@ -80,7 +80,17 @@ services:
       - gastronomia_data:/var/lib/mysql
       - ./portal Backend/init-scripts/mysql/init-gastronomia.sql:/docker-entrypoint-initdb.d/init-gastronomia.sql:ro
     healthcheck:
-      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', '$$MYSQL_USER', '-p$$MYSQL_PASSWORD']
+      test:
+        [
+          'CMD',
+          'mysqladmin',
+          'ping',
+          '-h',
+          'localhost',
+          '-u',
+          '$$MYSQL_USER',
+          '-p$$MYSQL_PASSWORD',
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -106,7 +116,17 @@ services:
       - hosteleria_data:/var/lib/mysql
       - ./portal Backend/init-scripts/mysql/init-hosteleria.sql:/docker-entrypoint-initdb.d/init-hosteleria.sql:ro
     healthcheck:
-      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', '$$MYSQL_USER', '-p$$MYSQL_PASSWORD']
+      test:
+        [
+          'CMD',
+          'mysqladmin',
+          'ping',
+          '-h',
+          'localhost',
+          '-u',
+          '$$MYSQL_USER',
+          '-p$$MYSQL_PASSWORD',
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -132,7 +152,17 @@ services:
       - mercado_pago_data:/var/lib/mysql
       - ./portal Backend/init-scripts/mysql/init-mercado-pago.sql:/docker-entrypoint-initdb.d/init-mercado-pago.sql:ro
     healthcheck:
-      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', '$$MYSQL_USER', '-p$$MYSQL_PASSWORD']
+      test:
+        [
+          'CMD',
+          'mysqladmin',
+          'ping',
+          '-h',
+          'localhost',
+          '-u',
+          '$$MYSQL_USER',
+          '-p$$MYSQL_PASSWORD',
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -158,7 +188,17 @@ services:
       - jwt_data:/var/lib/mysql
       - ./portal Backend/init-scripts/mysql/init-jwt.sql:/docker-entrypoint-initdb.d/init-jwt.sql:ro
     healthcheck:
-      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', '$$MYSQL_USER', '-p$$MYSQL_PASSWORD']
+      test:
+        [
+          'CMD',
+          'mysqladmin',
+          'ping',
+          '-h',
+          'localhost',
+          '-u',
+          '$$MYSQL_USER',
+          '-p$$MYSQL_PASSWORD',
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -184,7 +224,17 @@ services:
       - user_data:/var/lib/mysql
       - ./portal Backend/init-scripts/mysql/init-user.sql:/docker-entrypoint-initdb.d/init-user.sql:ro
     healthcheck:
-      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', '$$MYSQL_USER', '-p$$MYSQL_PASSWORD']
+      test:
+        [
+          'CMD',
+          'mysqladmin',
+          'ping',
+          '-h',
+          'localhost',
+          '-u',
+          '$$MYSQL_USER',
+          '-p$$MYSQL_PASSWORD',
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -210,7 +260,17 @@ services:
       - comercio_data:/var/lib/mysql
       - ./portal Backend/init-scripts/mysql/init-comercio.sql:/docker-entrypoint-initdb.d/init-comercio.sql:ro
     healthcheck:
-      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', '$$MYSQL_USER', '-p$$MYSQL_PASSWORD']
+      test:
+        [
+          'CMD',
+          'mysqladmin',
+          'ping',
+          '-h',
+          'localhost',
+          '-u',
+          '$$MYSQL_USER',
+          '-p$$MYSQL_PASSWORD',
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -236,7 +296,17 @@ services:
       - eventos_data:/var/lib/mysql
       - ./portal Backend/init-scripts/mysql/init-eventos.sql:/docker-entrypoint-initdb.d/init-eventos.sql:ro
     healthcheck:
-      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', '$$MYSQL_USER', '-p$$MYSQL_PASSWORD']
+      test:
+        [
+          'CMD',
+          'mysqladmin',
+          'ping',
+          '-h',
+          'localhost',
+          '-u',
+          '$$MYSQL_USER',
+          '-p$$MYSQL_PASSWORD',
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -262,7 +332,17 @@ services:
       - servicios_data:/var/lib/mysql
       - ./portal Backend/init-scripts/mysql/init-servicios.sql:/docker-entrypoint-initdb.d/init-servicios.sql:ro
     healthcheck:
-      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', '$$MYSQL_USER', '-p$$MYSQL_PASSWORD']
+      test:
+        [
+          'CMD',
+          'mysqladmin',
+          'ping',
+          '-h',
+          'localhost',
+          '-u',
+          '$$MYSQL_USER',
+          '-p$$MYSQL_PASSWORD',
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -288,7 +368,17 @@ services:
       - termas_data:/var/lib/mysql
       - ./portal Backend/init-scripts/mysql/init-termas.sql:/docker-entrypoint-initdb.d/init-termas.sql:ro
     healthcheck:
-      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', '$$MYSQL_USER', '-p$$MYSQL_PASSWORD']
+      test:
+        [
+          'CMD',
+          'mysqladmin',
+          'ping',
+          '-h',
+          'localhost',
+          '-u',
+          '$$MYSQL_USER',
+          '-p$$MYSQL_PASSWORD',
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -310,7 +400,17 @@ services:
       - espacios_publicos_data:/var/lib/mysql
       - ./portal Backend/init-scripts/mysql/init-espacios-publicos.sql:/docker-entrypoint-initdb.d/init-espacios-publicos.sql:ro
     healthcheck:
-      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', '$$MYSQL_USER', '-p$$MYSQL_PASSWORD']
+      test:
+        [
+          'CMD',
+          'mysqladmin',
+          'ping',
+          '-h',
+          'localhost',
+          '-u',
+          '$$MYSQL_USER',
+          '-p$$MYSQL_PASSWORD',
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -326,7 +426,7 @@ services:
   # MICROSERVICIOS
   # ==========================================
   eureka-server:
-    build: 
+    build:
       context: ./portal Backend/eureka-server
       dockerfile: Dockerfile
       args:
@@ -357,7 +457,7 @@ services:
       - tapalque-net
 
   msvc-gateway-server:
-    build: 
+    build:
       context: ./portal Backend/msvc-gateway-server
       dockerfile: Dockerfile
       args:
@@ -419,7 +519,7 @@ services:
       SPRING_RABBITMQ_PORT: 5672
       SPRING_RABBITMQ_USERNAME: guest
       SPRING_RABBITMQ_PASSWORD: guest
-      JAVA_OPTS: "-Xmx192m -Xms96m -XX:+UseG1GC -XX:+UseContainerSupport -XX:MaxRAMPercentage=60.0"
+      JAVA_OPTS: '-Xmx192m -Xms96m -XX:+UseG1GC -XX:+UseContainerSupport -XX:MaxRAMPercentage=60.0'
     depends_on:
       pedidos-db:
         condition: service_started
@@ -442,7 +542,7 @@ services:
       SPRING_RABBITMQ_PORT: 5672
       SPRING_RABBITMQ_USERNAME: guest
       SPRING_RABBITMQ_PASSWORD: guest
-      JAVA_OPTS: "-Xmx192m -Xms96m -XX:+UseG1GC -XX:+UseContainerSupport -XX:MaxRAMPercentage=60.0"
+      JAVA_OPTS: '-Xmx192m -Xms96m -XX:+UseG1GC -XX:+UseContainerSupport -XX:MaxRAMPercentage=60.0'
     depends_on:
       reservas-db:
         condition: service_started
@@ -637,6 +737,7 @@ services:
 # VOLUMENES Y REDES
 # ==========================================
 volumes:
+  rabbit_data:
   pedidos_data:
   reservas_data:
   gastronomia_data:
