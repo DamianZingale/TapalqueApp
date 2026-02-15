@@ -34,6 +34,8 @@ public class HospedajeImagenService {
     @Autowired
     private HospedajeImagenRepository imagenRepository;
 
+    private static final int MAX_IMAGENES_HOSPEDAJE = 5;
+
     public ImagenResponseDTO agregarImagen(Long hospedajeId, MultipartFile file) {
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("El archivo está vacío o no fue enviado");
@@ -41,6 +43,11 @@ public class HospedajeImagenService {
 
         Hospedaje hospedaje = hospedajeRepository.findById(hospedajeId)
                 .orElseThrow(() -> new IllegalArgumentException("Hospedaje no encontrado"));
+
+        long imagenesExistentes = imagenRepository.findByHospedajeId(hospedajeId).size();
+        if (imagenesExistentes >= MAX_IMAGENES_HOSPEDAJE) {
+            throw new IllegalArgumentException("Máximo " + MAX_IMAGENES_HOSPEDAJE + " imágenes por hospedaje");
+        }
 
         try {
             String originalName = Objects.requireNonNull(file.getOriginalFilename());

@@ -104,10 +104,12 @@ services:
   # En el VPS, configurar firewall (ufw) para solo permitir 80, 443 y 22.
   # ==========================================
   rabbitmq:
+    environment:
+      RABBITMQ_VM_MEMORY_HIGH_WATERMARK: 0.7
     deploy:
       resources:
         limits:
-          memory: 384M
+          memory: 512M
 
   pedidos-db:
     restart: always

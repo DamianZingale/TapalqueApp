@@ -1,11 +1,11 @@
 // Servicios para gestión de imágenes de habitaciones
+// Endpoint separado del de hospedaje para evitar mezcla de fotos
 
 interface ImagenResponse {
   imagenUrl: string;
 }
 
 export async function subirImagenHabitacion(
-  hospedajeId: string,
   file: File
 ): Promise<string> {
   try {
@@ -13,7 +13,7 @@ export async function subirImagenHabitacion(
     formData.append('file', file);
 
     const token = localStorage.getItem('token');
-    const response = await fetch(`/api/hospedajes/${hospedajeId}/imagenes`, {
+    const response = await fetch('/api/habitaciones/imagenes/upload', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -34,12 +34,11 @@ export async function subirImagenHabitacion(
 }
 
 export async function eliminarImagenHabitacion(
-  hospedajeId: string,
   imagenUrl: string
 ): Promise<void> {
   try {
     const token = localStorage.getItem('token');
-    const response = await fetch(`/api/hospedajes/${hospedajeId}/imagenes`, {
+    const response = await fetch('/api/habitaciones/imagenes', {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',

@@ -402,6 +402,26 @@ spring:
             - RewritePath=/api/hospedajes/(?<id>[0-9]+), /hospedajes/${id}
             - JwtAuth
 
+        # Habitación - Subir imagen
+        - id: msvc-hosteleria-habitacion-imagen-upload
+          uri: lb://msvc-hosteleria
+          predicates:
+            - Path=/api/habitaciones/imagenes/upload
+            - Method=POST
+          filters:
+            - RewritePath=/api/habitaciones/imagenes/upload, /habitaciones/imagenes/upload
+            - JwtAuth
+
+        # Habitación - Eliminar imagen
+        - id: msvc-hosteleria-habitacion-imagen-delete
+          uri: lb://msvc-hosteleria
+          predicates:
+            - Path=/api/habitaciones/imagenes
+            - Method=DELETE
+          filters:
+            - RewritePath=/api/habitaciones/imagenes, /habitaciones/imagenes
+            - JwtAuth
+
         # Crear habitación
         - id: msvc-hosteleria-habitaciones-create
           uri: lb://msvc-hosteleria

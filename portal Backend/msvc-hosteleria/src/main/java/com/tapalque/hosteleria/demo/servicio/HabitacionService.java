@@ -18,6 +18,8 @@ import jakarta.persistence.EntityNotFoundException;
 @Service
 public class HabitacionService {
 
+    private static final int MAX_FOTOS_HABITACION = 3;
+
     private final HabitacionRepository habitacionRepository;
     private final HospedajeRepository hospedajeRepository;
 
@@ -49,12 +51,11 @@ public class HabitacionService {
         habitacion.setMaxPersonas(dto.getMaxPersonas());
         habitacion.setPrecio(dto.getPrecio());
         habitacion.setTipoPrecio(parseTipoPrecio(dto.getTipoPrecio()));
-        // Limitar a máximo 3 fotos
-        if (dto.getFotos() != null && dto.getFotos().size() > 3) {
-            habitacion.setFotos(dto.getFotos().subList(0, 3));
-        } else {
-            habitacion.setFotos(dto.getFotos());
+        // Validar máximo 3 fotos
+        if (dto.getFotos() != null && dto.getFotos().size() > MAX_FOTOS_HABITACION) {
+            throw new IllegalArgumentException("Máximo " + MAX_FOTOS_HABITACION + " fotos por habitación");
         }
+        habitacion.setFotos(dto.getFotos());
         habitacion.setServicios(dto.getServicios());
         habitacion.setDisponible(dto.getDisponible() != null ? dto.getDisponible() : true);
         habitacion.setHospedaje(hospedaje);
@@ -83,12 +84,11 @@ public class HabitacionService {
             habitacion.setTipoPrecio(parseTipoPrecio(dto.getTipoPrecio()));
         }
         if (dto.getFotos() != null) {
-            // Limitar a máximo 3 fotos
-            if (dto.getFotos().size() > 3) {
-                habitacion.setFotos(dto.getFotos().subList(0, 3));
-            } else {
-                habitacion.setFotos(dto.getFotos());
+            // Validar máximo 3 fotos
+            if (dto.getFotos().size() > MAX_FOTOS_HABITACION) {
+                throw new IllegalArgumentException("Máximo " + MAX_FOTOS_HABITACION + " fotos por habitación");
             }
+            habitacion.setFotos(dto.getFotos());
         }
         if (dto.getServicios() != null) {
             habitacion.setServicios(dto.getServicios());

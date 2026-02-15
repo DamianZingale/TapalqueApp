@@ -18,7 +18,10 @@ import {
   eliminarHabitacion,
   fetchHabitacionesByHospedaje,
 } from '../../../services/fetchHabitaciones';
-import { subirImagenHabitacion } from '../../../services/habitacionImagenService';
+import {
+  eliminarImagenHabitacion,
+  subirImagenHabitacion,
+} from '../../../services/habitacionImagenService';
 import type { Habitacion } from '../types';
 
 interface HosteleriaHabitacionesProps {
@@ -260,7 +263,7 @@ export function HosteleriaHabitaciones({
 
     try {
       setGuardando(true);
-      const imagenUrl = await subirImagenHabitacion(businessId, file);
+      const imagenUrl = await subirImagenHabitacion(file);
 
       if (isEditing && habitacionSeleccionada) {
         const nuevasFotos = [
@@ -286,7 +289,20 @@ export function HosteleriaHabitaciones({
     }
   };
 
-  const handleEliminarFoto = (index: number, isEditing: boolean) => {
+  const handleEliminarFoto = async (index: number, isEditing: boolean) => {
+    const fotoUrl = isEditing && habitacionSeleccionada
+      ? (habitacionSeleccionada.fotos || [])[index]
+      : nuevaHabitacion.fotos[index];
+
+    // Eliminar archivo fisico del servidor
+    if (fotoUrl) {
+      try {
+        await eliminarImagenHabitacion(fotoUrl);
+      } catch (error) {
+        console.error('Error eliminando imagen del servidor:', error);
+      }
+    }
+
     if (isEditing && habitacionSeleccionada) {
       const nuevasFotos = (habitacionSeleccionada.fotos || []).filter(
         (_, i) => i !== index
