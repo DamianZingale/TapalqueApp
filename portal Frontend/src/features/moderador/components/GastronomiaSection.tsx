@@ -109,7 +109,7 @@ export function GastronomiaSection() {
   };
   const handleChange = (
     field: keyof Restaurant,
-    value: string | number | boolean
+    value: string | number | boolean | undefined
   ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
@@ -156,8 +156,8 @@ export function GastronomiaSection() {
         categories: formData.categories?.trim() || undefined,
         phones: formData.phones?.trim() || undefined,
         schedule: formData.schedule?.trim() || undefined,
-        latitude: formData.latitude || undefined,
-        longitude: formData.longitude || undefined,
+        latitude: formData.latitude != null && String(formData.latitude).trim() !== '' ? parseFloat(String(formData.latitude)) : undefined,
+        longitude: formData.longitude != null && String(formData.longitude).trim() !== '' ? parseFloat(String(formData.longitude)) : undefined,
       };
 
       const res = isNew
@@ -433,12 +433,9 @@ export function GastronomiaSection() {
                   <Form.Label className="small mb-0">Latitud</Form.Label>
                   <Form.Control
                     size="sm"
-                    type="number"
-                    step="any"
                     value={formData.latitude ?? ''}
-                    onChange={(e) =>
-                      handleChange('latitude', parseFloat(e.target.value) || 0)
-                    }
+                    onChange={(e) => handleChange('latitude', e.target.value)}
+                    placeholder="Ej: -36.345099"
                   />
                 </Form.Group>
               </Col>
@@ -447,12 +444,9 @@ export function GastronomiaSection() {
                   <Form.Label className="small mb-0">Longitud</Form.Label>
                   <Form.Control
                     size="sm"
-                    type="number"
-                    step="any"
                     value={formData.longitude ?? ''}
-                    onChange={(e) =>
-                      handleChange('longitude', parseFloat(e.target.value) || 0)
-                    }
+                    onChange={(e) => handleChange('longitude', e.target.value)}
+                    placeholder="Ej: -60.006261"
                   />
                 </Form.Group>
               </Col>

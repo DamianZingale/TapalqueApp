@@ -65,8 +65,8 @@ export function ServiciosSection() {
                 telefono: formData.telefono?.trim() || undefined,
                 facebook: formData.facebook?.trim() || undefined,
                 instagram: formData.instagram?.trim() || undefined,
-                latitud: formData.latitud || undefined,
-                longitud: formData.longitud || undefined,
+                latitud: formData.latitud != null && String(formData.latitud).trim() !== '' ? parseFloat(String(formData.latitud)) : undefined,
+                longitud: formData.longitud != null && String(formData.longitud).trim() !== '' ? parseFloat(String(formData.longitud)) : undefined,
                 tag: formData.tag?.trim().toUpperCase() || undefined,
             };
 
@@ -152,8 +152,8 @@ export function ServiciosSection() {
                         <Form.Group className="mb-2"><Form.Label className="small mb-0">Descripción</Form.Label><Form.Control size="sm" as="textarea" rows={2} value={formData.descripcion || ""} onChange={e => handleChange("descripcion", e.target.value)} /></Form.Group>
                         <Row><Col md={6}><Form.Group className="mb-2"><Form.Label className="small mb-0">Dirección</Form.Label><Form.Control size="sm" value={formData.direccion || ""} onChange={e => handleChange("direccion", e.target.value)} /></Form.Group></Col>
                         <Col md={6}><Form.Group className="mb-2"><Form.Label className="small mb-0">Horario</Form.Label><Form.Control size="sm" value={formData.horario || ""} onChange={e => handleChange("horario", e.target.value)} /></Form.Group></Col></Row>
-                        <Row><Col md={6}><Form.Group className="mb-2"><Form.Label className="small mb-0">Latitud</Form.Label><Form.Control size="sm" type="number" step="any" value={formData.latitud ?? ""} onChange={e => handleChange("latitud", parseFloat(e.target.value) || 0)} /></Form.Group></Col>
-                        <Col md={6}><Form.Group className="mb-2"><Form.Label className="small mb-0">Longitud</Form.Label><Form.Control size="sm" type="number" step="any" value={formData.longitud ?? ""} onChange={e => handleChange("longitud", parseFloat(e.target.value) || 0)} /></Form.Group></Col></Row>
+                        <Row><Col md={6}><Form.Group className="mb-2"><Form.Label className="small mb-0">Latitud</Form.Label><Form.Control size="sm" value={formData.latitud ?? ""} onChange={e => handleChange("latitud", e.target.value)} placeholder="Ej: -36.345099" /></Form.Group></Col>
+                        <Col md={6}><Form.Group className="mb-2"><Form.Label className="small mb-0">Longitud</Form.Label><Form.Control size="sm" value={formData.longitud ?? ""} onChange={e => handleChange("longitud", e.target.value)} placeholder="Ej: -60.006261" /></Form.Group></Col></Row>
                         <Row><Col md={6}><Form.Group className="mb-2"><Form.Label className="small mb-0">Facebook</Form.Label><Form.Control size="sm" value={formData.facebook || ""} onChange={e => handleChange("facebook", e.target.value)} /></Form.Group></Col>
                         <Col md={6}><Form.Group className="mb-2"><Form.Label className="small mb-0">Instagram</Form.Label><Form.Control size="sm" value={formData.instagram || ""} onChange={e => handleChange("instagram", e.target.value)} /></Form.Group></Col></Row>
                         <ImageManager

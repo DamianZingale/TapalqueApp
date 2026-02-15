@@ -105,8 +105,8 @@ export function TermasSection() {
         direccion: formData.direccion?.trim() || undefined,
         horario: formData.horario?.trim() || undefined,
         telefono: formData.telefono?.trim() || undefined,
-        latitud: formData.latitud || undefined,
-        longitud: formData.longitud || undefined,
+        latitud: formData.latitud != null && String(formData.latitud).trim() !== '' ? parseFloat(String(formData.latitud)) : undefined,
+        longitud: formData.longitud != null && String(formData.longitud).trim() !== '' ? parseFloat(String(formData.longitud)) : undefined,
         facebook: formData.facebook?.trim() || undefined,
         instagram: formData.instagram?.trim() || undefined,
       };
@@ -277,12 +277,9 @@ export function TermasSection() {
                   <Form.Label className="small mb-0">Latitud</Form.Label>
                   <Form.Control
                     size="sm"
-                    type="number"
-                    step="any"
                     value={formData.latitud ?? ''}
-                    onChange={(e) =>
-                      handleChange('latitud', parseFloat(e.target.value) || 0)
-                    }
+                    onChange={(e) => handleChange('latitud', e.target.value)}
+                    placeholder="Ej: -36.345099"
                   />
                 </Form.Group>
               </Col>
@@ -291,12 +288,9 @@ export function TermasSection() {
                   <Form.Label className="small mb-0">Longitud</Form.Label>
                   <Form.Control
                     size="sm"
-                    type="number"
-                    step="any"
                     value={formData.longitud ?? ''}
-                    onChange={(e) =>
-                      handleChange('longitud', parseFloat(e.target.value) || 0)
-                    }
+                    onChange={(e) => handleChange('longitud', e.target.value)}
+                    placeholder="Ej: -60.006261"
                   />
                 </Form.Group>
               </Col>
