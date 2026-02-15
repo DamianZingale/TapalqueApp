@@ -1,6 +1,7 @@
 // portal Frontend/src/modules/auth/components/Register.tsx
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { BsEye, BsEyeSlash } from 'react-icons/bs';
 import { UserData } from '../../../services/authService';
 import { authAPI } from '../api/authApi';
 
@@ -36,6 +37,8 @@ export const Register = () => {
     password: '',
     confirmPassword: '',
   });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [passwordStrength, setPasswordStrength] = useState<PasswordStrength>({
@@ -189,17 +192,28 @@ export const Register = () => {
             <label htmlFor="password" className="form-label">
               Contraseña
             </label>
-            <input
-              type="password"
-              className="form-control rounded-3"
-              id="password"
-              name="password"
-              placeholder="Crea una contraseña segura"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              disabled={loading}
-            />
+            <div className="position-relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                className="form-control rounded-3 pe-5"
+                id="password"
+                name="password"
+                placeholder="Crea una contraseña segura"
+                value={formData.password}
+                onChange={handleChange}
+                required
+                disabled={loading}
+              />
+              <button
+                type="button"
+                className="btn btn-link position-absolute top-50 end-0 translate-middle-y text-muted px-3 border-0"
+                onClick={() => setShowPassword(!showPassword)}
+                tabIndex={-1}
+                style={{ zIndex: 10 }}
+              >
+                {showPassword ? <BsEyeSlash size={18} /> : <BsEye size={18} />}
+              </button>
+            </div>
 
             {/* Indicadores de fortaleza */}
             {formData.password && (
@@ -264,17 +278,28 @@ export const Register = () => {
             <label htmlFor="confirmPassword" className="form-label">
               Confirmar contraseña
             </label>
-            <input
-              type="password"
-              className="form-control rounded-3"
-              id="confirmPassword"
-              name="confirmPassword"
-              placeholder="Repita la contraseña"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              required
-              disabled={loading}
-            />
+            <div className="position-relative">
+              <input
+                type={showConfirmPassword ? 'text' : 'password'}
+                className="form-control rounded-3 pe-5"
+                id="confirmPassword"
+                name="confirmPassword"
+                placeholder="Repita la contraseña"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                required
+                disabled={loading}
+              />
+              <button
+                type="button"
+                className="btn btn-link position-absolute top-50 end-0 translate-middle-y text-muted px-3 border-0"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                tabIndex={-1}
+                style={{ zIndex: 10 }}
+              >
+                {showConfirmPassword ? <BsEyeSlash size={18} /> : <BsEye size={18} />}
+              </button>
+            </div>
             {formData.confirmPassword &&
               formData.password !== formData.confirmPassword && (
                 <small className="text-danger d-block mt-1">

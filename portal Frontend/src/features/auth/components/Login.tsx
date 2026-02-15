@@ -1,6 +1,7 @@
 // portal Frontend/src/components/Login.tsx
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { BsEye, BsEyeSlash } from 'react-icons/bs';
 import authService, { UserData } from '../../../services/authService';
 import { authAPI } from '../api/authApi';
 
@@ -19,6 +20,7 @@ interface ApiErrorResponse {
 export const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -126,17 +128,28 @@ export const Login = () => {
             <label htmlFor="password" className="form-label">
               Contraseña
             </label>
-            <input
-              type="password"
-              className="form-control rounded-3"
-              id="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoComplete="current-password"
-              required
-              disabled={loading}
-            />
+            <div className="position-relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                className="form-control rounded-3 pe-5"
+                id="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoComplete="current-password"
+                required
+                disabled={loading}
+              />
+              <button
+                type="button"
+                className="btn btn-link position-absolute top-50 end-0 translate-middle-y text-muted px-3 border-0"
+                onClick={() => setShowPassword(!showPassword)}
+                tabIndex={-1}
+                style={{ zIndex: 10 }}
+              >
+                {showPassword ? <BsEyeSlash size={18} /> : <BsEye size={18} />}
+              </button>
+            </div>
           </div>
 
           <div className="mb-4 text-end">
