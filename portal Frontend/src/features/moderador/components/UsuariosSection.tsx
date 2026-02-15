@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Alert,
   Badge,
@@ -13,12 +13,13 @@ import {
 
 interface Usuario {
   id: number;
-  firstName: string;
-  lastName: string;
+  nombre: string;
+  apellido: string;
   email: string;
-  role: string;
+  rol: string;
   emailVerified: boolean;
-  address?: string;
+  direccion?: string;
+  activo: boolean;
 }
 
 interface NuevoUsuario {
@@ -37,10 +38,18 @@ const emptyUser: NuevoUsuario = {
   role: 'USER',
 };
 
+const ROLES = [
+  { value: '', label: 'Todos' },
+  { value: 'USER', label: 'Usuario' },
+  { value: 'ADMINISTRADOR', label: 'Administrador' },
+  { value: 'MODERADOR', label: 'Moderador' },
+];
+
 export function UsuariosSection() {
   const [items, setItems] = useState<Usuario[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<Usuario | null>(null);
+  const [filtroRol, setFiltroRol] = useState('');
   const [mensaje, setMensaje] = useState<{
     tipo: 'success' | 'danger';
     texto: string;
@@ -54,6 +63,11 @@ export function UsuariosSection() {
   useEffect(() => {
     cargarDatos();
   }, []);
+
+  const filteredItems = useMemo(() => {
+    if (!filtroRol) return items;
+    return items.filter((u) => u.rol === filtroRol);
+  }, [items, filtroRol]);
 
   const cargarDatos = async () => {
     try {
@@ -103,6 +117,7 @@ export function UsuariosSection() {
         setMensaje({ tipo: 'success', texto: 'Rol actualizado' });
         cargarDatos();
         setShowRoleModal(false);
+        setSelected(null);
       } else {
         const errorData = await res.json().catch(() => ({}));
         setMensaje({
@@ -163,8 +178,8 @@ export function UsuariosSection() {
     }
   };
 
-  const getRoleBadge = (role: string) => {
-    switch (role) {
+  const getRoleBadge = (rol: string) => {
+    switch (rol) {
       case 'MODERADOR':
         return <Badge bg="danger">Moderador</Badge>;
       case 'ADMINISTRADOR':
@@ -172,7 +187,7 @@ export function UsuariosSection() {
       case 'USER':
         return <Badge bg="secondary">Usuario</Badge>;
       default:
-        return <Badge bg="light" text="dark">{role}</Badge>;
+        return <Badge bg="light" text="dark">{rol}</Badge>;
     }
   };
 
@@ -188,7 +203,7 @@ export function UsuariosSection() {
       <Col md={4}>
         <div className="d-flex align-items-center justify-content-between mb-2">
           <small className="text-muted">
-            {items.length} usuario(s)
+            {filteredItems.length} de {items.length} usuario(s)
           </small>
           <Button
             variant="success"
@@ -198,8 +213,24 @@ export function UsuariosSection() {
             + Nuevo
           </Button>
         </div>
+
+        {/* Filtro por rol */}
+        <Form.Select
+          size="sm"
+          className="mb-2"
+          value={filtroRol}
+          onChange={(e) => {
+            setFiltroRol(e.target.value);
+            setSelected(null);
+          }}
+        >
+          {ROLES.map((r) => (
+            <option key={r.value} value={r.value}>{r.label}</option>
+          ))}
+        </Form.Select>
+
         <ListGroup style={{ maxHeight: 400, overflowY: 'auto' }}>
-          {items.map((item) => (
+          {filteredItems.map((item) => (
             <ListGroup.Item
               key={item.id}
               action
@@ -210,17 +241,17 @@ export function UsuariosSection() {
               <div className="d-flex justify-content-between align-items-start">
                 <div>
                   <div className="fw-bold small">
-                    {item.firstName} {item.lastName}
+                    {item.nombre} {item.apellido}
                   </div>
                   <small className="text-muted">{item.email}</small>
                 </div>
-                {getRoleBadge(item.role)}
+                {getRoleBadge(item.rol)}
               </div>
             </ListGroup.Item>
           ))}
-          {items.length === 0 && (
+          {filteredItems.length === 0 && (
             <ListGroup.Item className="text-muted">
-              Sin usuarios registrados
+              {filtroRol ? 'Sin usuarios con ese rol' : 'Sin usuarios registrados'}
             </ListGroup.Item>
           )}
         </ListGroup>
@@ -238,7 +269,7 @@ export function UsuariosSection() {
               <tbody>
                 <tr>
                   <th className="text-muted" style={{ width: '30%' }}>Nombre</th>
-                  <td>{selected.firstName} {selected.lastName}</td>
+                  <td>{selected.nombre} {selected.apellido}</td>
                 </tr>
                 <tr>
                   <th className="text-muted">Email</th>
@@ -253,12 +284,22 @@ export function UsuariosSection() {
                 </tr>
                 <tr>
                   <th className="text-muted">Rol</th>
-                  <td>{getRoleBadge(selected.role)}</td>
+                  <td>{getRoleBadge(selected.rol)}</td>
                 </tr>
-                {selected.address && (
+                <tr>
+                  <th className="text-muted">Estado</th>
+                  <td>
+                    {selected.activo ? (
+                      <Badge bg="success">Activo</Badge>
+                    ) : (
+                      <Badge bg="danger">Inactivo</Badge>
+                    )}
+                  </td>
+                </tr>
+                {selected.direccion && (
                   <tr>
-                    <th className="text-muted">Dirección</th>
-                    <td>{selected.address}</td>
+                    <th className="text-muted">Direccion</th>
+                    <td>{selected.direccion}</td>
                   </tr>
                 )}
               </tbody>
@@ -268,7 +309,7 @@ export function UsuariosSection() {
               size="sm"
               variant="outline-primary"
               onClick={() => {
-                setNewRole(selected.role);
+                setNewRole(selected.rol);
                 setShowRoleModal(true);
               }}
             >
@@ -286,7 +327,7 @@ export function UsuariosSection() {
         </Modal.Header>
         <Modal.Body>
           <p>
-            Cambiar rol de <strong>{selected?.firstName} {selected?.lastName}</strong>
+            Cambiar rol de <strong>{selected?.nombre} {selected?.apellido}</strong>
           </p>
           <Form.Select
             value={newRole}
@@ -297,9 +338,9 @@ export function UsuariosSection() {
             <option value="MODERADOR">Moderador</option>
           </Form.Select>
           <small className="text-muted mt-2 d-block">
-            <strong>Usuario:</strong> Acceso básico.<br/>
+            <strong>Usuario:</strong> Acceso basico.<br/>
             <strong>Administrador:</strong> Gestiona comercios/negocios asignados.<br/>
-            <strong>Moderador:</strong> Acceso total al panel de moderación.
+            <strong>Moderador:</strong> Acceso total al panel de moderacion.
           </small>
         </Modal.Body>
         <Modal.Footer>
@@ -350,7 +391,7 @@ export function UsuariosSection() {
               />
             </Form.Group>
             <Form.Group className="mb-2">
-              <Form.Label className="small mb-0">Contraseña *</Form.Label>
+              <Form.Label className="small mb-0">Contrasena *</Form.Label>
               <Form.Control
                 size="sm"
                 type="password"

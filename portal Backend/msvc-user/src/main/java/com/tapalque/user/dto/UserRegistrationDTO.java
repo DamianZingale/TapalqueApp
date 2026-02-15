@@ -17,6 +17,9 @@ public class UserRegistrationDTO {
     @JsonProperty("nombre")  // ← Frontend envía "nombre"
     private String firtName;
 
+    @JsonProperty("apellido")  // ← Frontend envía "apellido"
+    private String lastName;
+
     @NotBlank(message = "La contraseña es obligatoria")
     @Size(min = 8, message = "La contraseña debe tener al menos 8 caracteres")
     @JsonProperty("contrasenia")  // ← Frontend envía "contrasenia"
@@ -58,6 +61,14 @@ public class UserRegistrationDTO {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     public String getRole() {

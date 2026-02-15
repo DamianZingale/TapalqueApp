@@ -24,6 +24,7 @@ import com.tapalque.user.dto.UserRegistrationDTO;
 import com.tapalque.user.dto.UserResponseDTO;
 import com.tapalque.user.entity.Role;
 import com.tapalque.user.enu.RolName;
+import com.tapalque.user.repository.RoleRepository;
 import com.tapalque.user.service.EmailService;
 import com.tapalque.user.service.EmailVerificationService;
 import com.tapalque.user.service.PasswordResetService;
@@ -37,16 +38,19 @@ import jakarta.validation.Valid;
 public class UserController {
 
     private final UserService userService;
+    private final RoleRepository roleRepository;
     private final EmailVerificationService emailVerificationService;
     private final EmailService emailService;
     private final PasswordResetService passwordResetService;
 
     public UserController(
             UserService userService,
+            RoleRepository roleRepository,
             EmailVerificationService emailVerificationService,
             EmailService emailService,
             PasswordResetService passwordResetService) {
         this.userService = userService;
+        this.roleRepository = roleRepository;
         this.emailVerificationService = emailVerificationService;
         this.emailService = emailService;
         this.passwordResetService = passwordResetService;
@@ -55,8 +59,9 @@ public class UserController {
     @PostMapping("/public/register")
     public ResponseEntity<?> register(@Valid @RequestBody UserRegistrationDTO dto) {
         try {
-            Role role = new Role(3L, RolName.USER);
-            UserResponseDTO response = userService.register(dto, role);  
+            Role role = roleRepository.findByName(RolName.USER)
+                    .orElseThrow(() -> new RuntimeException("Rol USER no encontrado"));
+            UserResponseDTO response = userService.register(dto, role);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(error("Error en registro", e.getMessage()));
@@ -67,7 +72,8 @@ public class UserController {
     @PostMapping("/AdminRegistro")
     public ResponseEntity<?> registerAdmin(@Valid @RequestBody UserRegistrationDTO dto) {
         try {
-            Role role = new Role(1L, RolName.MODERADOR);
+            Role role = roleRepository.findByName(RolName.MODERADOR)
+                    .orElseThrow(() -> new RuntimeException("Rol MODERADOR no encontrado"));
             UserResponseDTO response = userService.register(dto, role);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (Exception e) {
@@ -79,7 +85,8 @@ public class UserController {
     @PostMapping("/GastroRegistro")
     public ResponseEntity<?> registerGastro(@Valid @RequestBody UserRegistrationDTO dto) {
         try {
-            Role role = new Role(2L, RolName.ADMINISTRADOR);
+            Role role = roleRepository.findByName(RolName.ADMINISTRADOR)
+                    .orElseThrow(() -> new RuntimeException("Rol ADMINISTRADOR no encontrado"));
             UserResponseDTO response = userService.register(dto, role);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (Exception e) {
@@ -342,13 +349,8 @@ public class UserController {
             String roleName = dto.getRole() != null ? dto.getRole().toUpperCase() : "USER";
             RolName rolName = RolName.valueOf(roleName);
 
-            Long roleId = switch (rolName) {
-                case MODERADOR -> 1L;
-                case ADMINISTRADOR -> 2L;
-                default -> 3L;
-            };
-
-            Role role = new Role(roleId, rolName);
+            Role role = roleRepository.findByName(rolName)
+                    .orElseThrow(() -> new RuntimeException("Rol " + rolName + " no encontrado"));
             UserResponseDTO response = userService.registerByModerator(dto, role);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (IllegalArgumentException e) {

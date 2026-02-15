@@ -35,13 +35,20 @@ export default function NavBar() {
     >
       <Container>
         <Navbar.Brand as={Link} to="/" onClick={() => setExpanded(false)}>
+          <img
+            src="/favicon.png"
+            alt=""
+            width="28"
+            height="28"
+            className="d-inline-block align-top me-2"
+          />
           Tapalqué App
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="main-navbar" />
         <Navbar.Collapse id="main-navbar">
           <Nav className="ms-auto">
             <Nav.Link as={Link} to="/termas">
-              Termas tapalque
+              Térmas Tapalque
             </Nav.Link>
             <Nav.Link as={Link} to="/gastronomia">
               Gastronomía

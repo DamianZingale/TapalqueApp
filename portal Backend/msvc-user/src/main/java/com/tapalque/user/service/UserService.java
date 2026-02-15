@@ -56,6 +56,7 @@ public class UserService {
                 .email(dto.getEmail())
                 .password(encoded)
                 .firstName(dto.getFirtName())
+                .lastName(dto.getLastName())
                 .registrationDate(LocalDateTime.now())
                 .role(role)
                 .build();
@@ -98,6 +99,7 @@ public class UserService {
                 .email(dto.getEmail())
                 .password(encoded)
                 .firstName(dto.getFirtName())
+                .lastName(dto.getLastName())
                 .registrationDate(LocalDateTime.now())
                 .role(role)
                 .build();

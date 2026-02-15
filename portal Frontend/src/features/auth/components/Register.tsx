@@ -31,6 +31,7 @@ interface PasswordStrength {
 export const Register = () => {
   const [formData, setFormData] = useState({
     nombre: '',
+    apellido: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -95,6 +96,7 @@ export const Register = () => {
     try {
       const response = await authAPI.register({
         nombre: formData.nombre,
+        apellido: formData.apellido,
         correo: formData.email,
         contrasenia: formData.password,
       });
@@ -134,7 +136,7 @@ export const Register = () => {
 
           <div className="mb-3">
             <label htmlFor="nombre" className="form-label">
-              Nombre completo
+              Nombre
             </label>
             <input
               type="text"
@@ -143,6 +145,23 @@ export const Register = () => {
               name="nombre"
               placeholder="Ingrese su nombre"
               value={formData.nombre}
+              onChange={handleChange}
+              required
+              disabled={loading}
+            />
+          </div>
+
+          <div className="mb-3">
+            <label htmlFor="apellido" className="form-label">
+              Apellido
+            </label>
+            <input
+              type="text"
+              className="form-control rounded-3"
+              id="apellido"
+              name="apellido"
+              placeholder="Ingrese su apellido"
+              value={formData.apellido}
               onChange={handleChange}
               required
               disabled={loading}

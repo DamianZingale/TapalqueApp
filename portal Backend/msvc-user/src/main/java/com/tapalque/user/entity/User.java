@@ -247,6 +247,7 @@ public class User {
         private Long id;
         private String email;
         private String firstName;
+        private String lastName;
         private String password;
         private LocalDateTime registrationDate;
         private Role role;
@@ -263,6 +264,11 @@ public class User {
 
         public Builder firstName(String firstName) {
             this.firstName = firstName;
+            return this;
+        }
+
+        public Builder lastName(String lastName) {
+            this.lastName = lastName;
             return this;
         }
 
@@ -286,6 +292,7 @@ public class User {
             user.setId(this.id);
             user.setEmail(this.email);
             user.setFirstName(this.firstName);
+            user.setLastName(this.lastName);
             user.setPassword(this.password);
             user.setRegistrationDate(this.registrationDate);
             user.setRole(this.role);

@@ -460,7 +460,6 @@ services:
 
   msvc-gastronomia:
     build: ./portal Backend/msvc-gastronomia
-    container_name: msvc-gastronomia
     env_file:
       - .env
     depends_on:
@@ -480,7 +479,6 @@ services:
 
   msvc-hosteleria:
     build: ./portal Backend/msvc-hosteleria
-    container_name: msvc-hosteleria
     env_file:
       - .env
     depends_on:
@@ -524,7 +522,6 @@ services:
 
   msvc-comercio:
     build: ./portal Backend/msvc-comercio
-    container_name: msvc-comercio
     env_file:
       - .env
     depends_on:
@@ -544,7 +541,6 @@ services:
 
   msvc-eventos:
     build: ./portal Backend/msvc-eventos
-    container_name: msvc-eventos
     env_file:
       - .env
     depends_on:
@@ -564,7 +560,6 @@ services:
 
   msvc-servicios:
     build: ./portal Backend/msvc-servicios
-    container_name: msvc-servicios
     env_file:
       - .env
     depends_on:
@@ -584,7 +579,6 @@ services:
 
   msvc-termas:
     build: ./portal Backend/msvc-termas
-    container_name: msvc-termas
     env_file:
       - .env
     depends_on:
@@ -604,7 +598,6 @@ services:
 
   msvc-espacios-publicos:
     build: ./portal Backend/msvc-espacios-publicos
-    container_name: msvc-espacios-publicos
     env_file:
       - .env
     depends_on:
