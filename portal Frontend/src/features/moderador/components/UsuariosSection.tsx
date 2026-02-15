@@ -10,6 +10,7 @@ import {
   Row,
   Spinner,
 } from 'react-bootstrap';
+import { BsEye, BsEyeSlash } from 'react-icons/bs';
 
 interface Usuario {
   id: number;
@@ -59,6 +60,7 @@ export function UsuariosSection() {
   const [newRole, setNewRole] = useState('');
   const [newUser, setNewUser] = useState<NuevoUsuario>(emptyUser);
   const [saving, setSaving] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     cargarDatos();
@@ -391,13 +393,25 @@ export function UsuariosSection() {
               />
             </Form.Group>
             <Form.Group className="mb-2">
-              <Form.Label className="small mb-0">Contrasena *</Form.Label>
-              <Form.Control
-                size="sm"
-                type="password"
-                value={newUser.password}
-                onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
-              />
+              <Form.Label className="small mb-0">Contraseña *</Form.Label>
+              <div className="position-relative">
+                <Form.Control
+                  size="sm"
+                  type={showPassword ? 'text' : 'password'}
+                  className="pe-5"
+                  value={newUser.password}
+                  onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                />
+                <button
+                  type="button"
+                  className="btn btn-link position-absolute top-50 end-0 translate-middle-y text-muted px-3 border-0 py-0"
+                  onClick={() => setShowPassword(!showPassword)}
+                  tabIndex={-1}
+                  style={{ zIndex: 10 }}
+                >
+                  {showPassword ? <BsEyeSlash size={16} /> : <BsEye size={16} />}
+                </button>
+              </div>
             </Form.Group>
             <Form.Group className="mb-2">
               <Form.Label className="small mb-0">Rol</Form.Label>

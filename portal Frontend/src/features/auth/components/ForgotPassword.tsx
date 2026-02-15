@@ -18,11 +18,22 @@ export const ForgotPassword = () => {
       setSuccess(true);
     } catch (err: any) {
       console.error('Error al solicitar reset:', err);
-      setError(
+      let errorMsg =
         err.response?.data?.detalle ||
-          err.response?.data?.message ||
-          'Error al procesar la solicitud. Intenta de nuevo.'
-      );
+        err.response?.data?.message ||
+        'Error al procesar la solicitud. Intenta de nuevo.';
+
+      // Convertir segundos a minutos para mejor legibilidad
+      errorMsg = errorMsg.replace(/(\d+)\s*segundo[s]?/gi, (_: string, secs: string) => {
+        const totalSecs = parseInt(secs, 10);
+        if (totalSecs >= 60) {
+          const mins = Math.ceil(totalSecs / 60);
+          return `${mins} minuto${mins !== 1 ? 's' : ''}`;
+        }
+        return `${totalSecs} segundo${totalSecs !== 1 ? 's' : ''}`;
+      });
+
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }

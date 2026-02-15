@@ -85,12 +85,23 @@ export const Login = () => {
     } catch (err: any) {
       console.error('Error al iniciar sesión:', err);
 
-      setError(
-        err.response?.data?.detalle || 
+      let errorMsg =
+        err.response?.data?.detalle ||
         err.response?.data?.message ||
         err.message ||
-        'Error al iniciar sesión. Verifica tus credenciales.'
-      );
+        'Error al iniciar sesión. Verifica tus credenciales.';
+
+      // Convertir segundos a minutos para mejor legibilidad
+      errorMsg = errorMsg.replace(/(\d+)\s*segundo[s]?/gi, (_: string, secs: string) => {
+        const totalSecs = parseInt(secs, 10);
+        if (totalSecs >= 60) {
+          const mins = Math.ceil(totalSecs / 60);
+          return `${mins} minuto${mins !== 1 ? 's' : ''}`;
+        }
+        return `${totalSecs} segundo${totalSecs !== 1 ? 's' : ''}`;
+      });
+
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }
