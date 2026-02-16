@@ -8,11 +8,15 @@ const RECONNECT_DELAY = 5000;
 const MAX_RECONNECT_ATTEMPTS = 10;
 
 function getWsUrl(businessType: BusinessType): string {
-  const base = API_BASE.replace(/\/+$/, '');
-  if (businessType === 'GASTRONOMIA') {
-    return `${base}/ws/pedidos`;
+  // En desarrollo API_BASE es absoluto (http://localhost:8090) → usar el origin
+  // En producción API_BASE es relativo (/api) → usar path relativo (mismo host)
+  let origin = '';
+  if (API_BASE.startsWith('http')) {
+    const url = new URL(API_BASE);
+    origin = url.origin;
   }
-  return `${base}/ws/reservas`;
+  const service = businessType === 'GASTRONOMIA' ? 'pedidos' : 'reservas';
+  return `${origin}/ws/${service}`;
 }
 
 function getTopic(businessId: string, businessType: BusinessType): string {
