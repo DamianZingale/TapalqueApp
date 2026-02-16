@@ -9,6 +9,7 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -41,12 +42,25 @@ public class EspacioPublicoImagenService {
         }
     }
 
+    @CacheEvict(value = "espacios-publicos", allEntries = true)
     public EspacioPublicoImagen guardarImagen(Long espacioPublicoId, MultipartFile file) throws IOException {
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException("El archivo está vacío o no fue enviado");
+        }
+
         EspacioPublico espacioPublico = espacioPublicoRepository.findById(espacioPublicoId)
                 .orElseThrow(() -> new EspacioPublicoNotFoundException(espacioPublicoId));
 
-        String originalFilename = file.getOriginalFilename();
-        String extension = originalFilename != null ? originalFilename.substring(originalFilename.lastIndexOf(".")) : ".jpg";
+        String originalFilename = java.util.Objects.requireNonNull(file.getOriginalFilename());
+        if (!originalFilename.contains(".")) {
+            throw new IllegalArgumentException("El archivo no tiene extensión válida");
+        }
+
+        String extension = originalFilename.substring(originalFilename.lastIndexOf(".")).toLowerCase();
+        if (!extension.matches("\\.(jpg|jpeg|png)$")) {
+            throw new IllegalArgumentException("Solo se permiten archivos JPG, JPEG y PNG");
+        }
+
         String newFilename = UUID.randomUUID().toString() + extension;
 
         Path filePath = Paths.get(uploadDir).resolve(newFilename);
@@ -59,6 +73,7 @@ public class EspacioPublicoImagenService {
         return imagenRepository.save(imagen);
     }
 
+    @CacheEvict(value = "espacios-publicos", allEntries = true)
     public void eliminarImagen(Long imagenId) throws IOException {
         EspacioPublicoImagen imagen = imagenRepository.findById(imagenId)
                 .orElseThrow(() -> new IllegalArgumentException("Imagen no encontrada"));

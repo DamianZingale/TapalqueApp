@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,6 +53,7 @@ public class MenuService implements MenuServiceInterface {
         this.restaurantRepository = restaurantRepository;
     }
 
+    @Cacheable(value = "menus", key = "#idRestaurant")
     @Override
     public MenuDTO getMenuByRestaurantId(Long idRestaurant) {
         Optional<Menu> menuOptional = menuRepository.findByRestaurantIdRestaurant(idRestaurant);
@@ -112,6 +115,7 @@ public class MenuService implements MenuServiceInterface {
         return menu;
     }
 
+    @Cacheable(value = "menu-categorias")
     @Override
     public List<DishCategoryDTO> getAllCategories() {
         // Retornar todas las categorías del enum, no solo las que están en la BD
@@ -126,6 +130,7 @@ public class MenuService implements MenuServiceInterface {
             .collect(Collectors.toList());
     }
 
+    @Cacheable(value = "menu-restricciones")
     @Override
     public List<DishRestrictionDTO> getAllRestrictions() {
         return dishRestrictionRepository.findAll().stream()
@@ -133,6 +138,7 @@ public class MenuService implements MenuServiceInterface {
             .collect(Collectors.toList());
     }
 
+    @CacheEvict(value = "menus", allEntries = true)
     @Override
     @Transactional
     public DishDTO createDish(Long restaurantId, DishDTO dishDTO) {
@@ -235,6 +241,7 @@ public class MenuService implements MenuServiceInterface {
         return DishDTO.fromEntity(savedDish);
     }
 
+    @CacheEvict(value = "menus", allEntries = true)
     @Override
     @Transactional
     public DishDTO updateDish(Long dishId, DishDTO dishDTO) {
@@ -334,6 +341,7 @@ public class MenuService implements MenuServiceInterface {
         return DishDTO.fromEntity(updatedDish);
     }
 
+    @CacheEvict(value = "menus", allEntries = true)
     @Override
     @Transactional
     public void deleteDish(Long dishId) {
@@ -343,6 +351,7 @@ public class MenuService implements MenuServiceInterface {
         dishRepository.deleteById(dishId);
     }
 
+    @CacheEvict(value = "menus", allEntries = true)
     @Override
     @Transactional
     public DishDTO updateDishAvailability(Long dishId, Boolean available) {

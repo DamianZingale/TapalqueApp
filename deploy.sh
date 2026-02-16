@@ -151,13 +151,13 @@ wait_for_services() {
 startup_staggered() {
     echo_info "=== Arranque escalonado de servicios ==="
 
-    # Paso 1: Bases de datos + RabbitMQ
-    echo_info "[1/6] Levantando bases de datos y RabbitMQ..."
-    $COMPOSE_CMD up -d rabbitmq \
+    # Paso 1: Bases de datos + RabbitMQ + Redis
+    echo_info "[1/6] Levantando bases de datos, RabbitMQ y Redis..."
+    $COMPOSE_CMD up -d rabbitmq redis \
         pedidos-db reservas-db jwt-db user-db \
         gastronomia-db hosteleria-db mercado-pago-db \
         comercio-db eventos-db servicios-db termas-db espacios-publicos-db
-    wait_for_services rabbitmq jwt-db user-db
+    wait_for_services rabbitmq redis jwt-db user-db
 
     # Paso 2: Eureka (service registry)
     echo_info "[2/6] Levantando Eureka..."

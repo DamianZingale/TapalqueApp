@@ -6,6 +6,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
@@ -30,6 +32,7 @@ public class HospedajeService {
     @Autowired
     private HabitacionRepository habitacionRepository;
 
+    @Cacheable(value = "hospedajes")
     public List<HospedajeDTO> obtenerTodos() {
         return hospedajeRepository.findAll().stream()
                 .map(HospedajeDTO::new)
@@ -49,6 +52,7 @@ public class HospedajeService {
         }
     }
 
+    @CacheEvict(value = "hospedajes", allEntries = true)
     @Transactional
     public HospedajeDTO guardar(HospedajeRequestDTO dto) {
         Hospedaje hospedaje = mapToEntity(dto);
@@ -56,6 +60,7 @@ public class HospedajeService {
         return new HospedajeDTO(hospedajeRepository.save(hospedaje));
     }
 
+    @CacheEvict(value = "hospedajes", allEntries = true)
     @Transactional
     public ResponseEntity<Void> eliminarPorId(Long id) {
         Optional<Hospedaje> existente = hospedajeRepository.findById(id);
@@ -67,6 +72,7 @@ public class HospedajeService {
         return ResponseEntity.noContent().build(); // 204
     }
 
+    @CacheEvict(value = "hospedajes", allEntries = true)
     @Transactional
     public ResponseEntity<HospedajeDTO> actualizarHospedaje(Long id, HospedajeRequestDTO dto)
     {

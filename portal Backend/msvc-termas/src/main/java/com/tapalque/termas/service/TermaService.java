@@ -5,6 +5,8 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.tapalque.termas.Exceptions.TermaNotFoundException;
@@ -19,6 +21,7 @@ public class TermaService {
     @Autowired
     private TermaRepository termaRepository;
 
+    @CacheEvict(value = "termas", allEntries = true)
     @Transactional
     public TermaResponseDTO crear(TermaRequestDTO dto) {
         if (dto.getTitulo() == null || dto.getTitulo().isBlank()) {
@@ -30,6 +33,7 @@ public class TermaService {
         return new TermaResponseDTO(terma);
     }
 
+    @Cacheable(value = "termas")
     public List<TermaResponseDTO> obtenerTodos() {
         return termaRepository.findAll()
                 .stream()
@@ -37,12 +41,14 @@ public class TermaService {
                 .collect(Collectors.toList());
     }
 
+    @Cacheable(value = "termas", key = "#id")
     public TermaResponseDTO obtenerPorId(Long id) {
         Terma terma = termaRepository.findById(id)
                 .orElseThrow(() -> new TermaNotFoundException(id));
         return new TermaResponseDTO(terma);
     }
 
+    @CacheEvict(value = "termas", allEntries = true)
     @Transactional
     public TermaResponseDTO actualizarCompleto(Long id, TermaRequestDTO dto) {
         Terma terma = termaRepository.findById(id)
@@ -62,6 +68,7 @@ public class TermaService {
         return new TermaResponseDTO(terma);
     }
 
+    @CacheEvict(value = "termas", allEntries = true)
     @Transactional
     public TermaResponseDTO actualizarParcial(Long id, TermaRequestDTO dto) {
         Terma terma = termaRepository.findById(id)
@@ -71,6 +78,7 @@ public class TermaService {
         return new TermaResponseDTO(terma);
     }
 
+    @CacheEvict(value = "termas", allEntries = true)
     @Transactional
     public void eliminar(Long id) {
         Terma terma = termaRepository.findById(id)

@@ -5,6 +5,8 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.tapalque.eventos.Exceptions.EventoNotFoundException;
@@ -19,6 +21,7 @@ public class EventoService {
     @Autowired
     private EventoRepository eventoRepository;
 
+    @CacheEvict(value = "eventos", allEntries = true)
     @Transactional
     public EventoResponseDTO crear(EventoRequestDTO dto) {
         if (dto.getNombreEvento() == null || dto.getNombreEvento().isBlank()) {
@@ -30,6 +33,7 @@ public class EventoService {
         return new EventoResponseDTO(evento);
     }
 
+    @Cacheable(value = "eventos")
     public List<EventoResponseDTO> obtenerTodos() {
         return eventoRepository.findAll()
                 .stream()
@@ -37,12 +41,14 @@ public class EventoService {
                 .collect(Collectors.toList());
     }
 
+    @Cacheable(value = "eventos", key = "#id")
     public EventoResponseDTO obtenerPorId(Long id) {
         Evento evento = eventoRepository.findById(id)
                 .orElseThrow(() -> new EventoNotFoundException(id));
         return new EventoResponseDTO(evento);
     }
 
+    @CacheEvict(value = "eventos", allEntries = true)
     @Transactional
     public EventoResponseDTO actualizarCompleto(Long id, EventoRequestDTO dto) {
         Evento evento = eventoRepository.findById(id)
@@ -52,6 +58,7 @@ public class EventoService {
         return new EventoResponseDTO(evento);
     }
 
+    @CacheEvict(value = "eventos", allEntries = true)
     @Transactional
     public EventoResponseDTO actualizarParcial(Long id, EventoRequestDTO dto) {
         Evento evento = eventoRepository.findById(id)
@@ -61,6 +68,7 @@ public class EventoService {
         return new EventoResponseDTO(evento);
     }
 
+    @CacheEvict(value = "eventos", allEntries = true)
     @Transactional
     public void eliminar(Long id) {
         Evento evento = eventoRepository.findById(id)

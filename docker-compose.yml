@@ -34,6 +34,25 @@ services:
     networks:
       - tapalque-net
 
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    command: redis-server --appendonly yes --maxmemory 128mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          memory: 192M
+    volumes:
+      - redis_data:/data
+    networks:
+      - tapalque-net
+
   # Bases de datos Mongo
   pedidos-db:
     image: mongo:latest
@@ -571,6 +590,8 @@ services:
         condition: service_healthy
       eureka-server:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     volumes:
       - gastronomia_uploads:/app/uploads
     restart: always
@@ -589,6 +610,8 @@ services:
       hosteleria-db:
         condition: service_healthy
       eureka-server:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     volumes:
       - hosteleria_uploads:/app/uploads
@@ -633,6 +656,8 @@ services:
         condition: service_healthy
       eureka-server:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     volumes:
       - comercio_uploads:/app/uploads
     restart: always
@@ -651,6 +676,8 @@ services:
       eventos-db:
         condition: service_healthy
       eureka-server:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     volumes:
       - eventos_uploads:/app/uploads
@@ -671,6 +698,8 @@ services:
         condition: service_healthy
       eureka-server:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     volumes:
       - servicios_uploads:/app/uploads
     restart: always
@@ -690,6 +719,8 @@ services:
         condition: service_healthy
       eureka-server:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     volumes:
       - termas_uploads:/app/uploads
     restart: always
@@ -708,6 +739,8 @@ services:
       espacios-publicos-db:
         condition: service_healthy
       eureka-server:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     volumes:
       - espacios_publicos_uploads:/app/uploads
@@ -741,6 +774,7 @@ services:
 # VOLUMENES Y REDES
 # ==========================================
 volumes:
+  redis_data:
   rabbitmq_data:
   pedidos_data:
   reservas_data:

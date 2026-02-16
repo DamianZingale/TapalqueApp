@@ -5,6 +5,8 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.tapalque.servicios.Exceptions.ServicioNotFoundException;
@@ -19,6 +21,7 @@ public class ServicioService {
     @Autowired
     private ServicioRepository servicioRepository;
 
+    @CacheEvict(value = "servicios", allEntries = true)
     @Transactional
     public ServicioResponseDTO crear(ServicioRequestDTO dto) {
         if (dto.getTitulo() == null || dto.getTitulo().isBlank()) {
@@ -30,6 +33,7 @@ public class ServicioService {
         return new ServicioResponseDTO(servicio);
     }
 
+    @Cacheable(value = "servicios")
     public List<ServicioResponseDTO> obtenerTodos() {
         return servicioRepository.findAll()
                 .stream()
@@ -37,12 +41,14 @@ public class ServicioService {
                 .collect(Collectors.toList());
     }
 
+    @Cacheable(value = "servicios", key = "#id")
     public ServicioResponseDTO obtenerPorId(Long id) {
         Servicio servicio = servicioRepository.findById(id)
                 .orElseThrow(() -> new ServicioNotFoundException(id));
         return new ServicioResponseDTO(servicio);
     }
 
+    @CacheEvict(value = "servicios", allEntries = true)
     @Transactional
     public ServicioResponseDTO actualizarCompleto(Long id, ServicioRequestDTO dto) {
         Servicio servicio = servicioRepository.findById(id)
@@ -53,6 +59,7 @@ public class ServicioService {
         return new ServicioResponseDTO(actualizado);
     }
 
+    @CacheEvict(value = "servicios", allEntries = true)
     @Transactional
     public ServicioResponseDTO actualizarParcial(Long id, ServicioRequestDTO dto) {
         Servicio servicio = servicioRepository.findById(id)
@@ -62,6 +69,7 @@ public class ServicioService {
         return new ServicioResponseDTO(servicio);
     }
 
+    @CacheEvict(value = "servicios", allEntries = true)
     @Transactional
     public void eliminar(Long id) {
         Servicio servicio = servicioRepository.findById(id)

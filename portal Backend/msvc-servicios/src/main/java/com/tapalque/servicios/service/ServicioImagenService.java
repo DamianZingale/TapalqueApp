@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -33,6 +34,7 @@ public class ServicioImagenService {
     @Autowired
     private ServicioImagenRepository cImagenRepository;
 
+    @CacheEvict(value = "servicios", allEntries = true)
     public ImagenResponseDTO agregarImagen(Long servicioId, MultipartFile file) {
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("El archivo está vacío o no fue enviado");
@@ -47,7 +49,11 @@ public class ServicioImagenService {
                 throw new IllegalArgumentException("El archivo no tiene extensión válida");
             }
 
-            String extension = originalName.substring(originalName.lastIndexOf("."));
+            String extension = originalName.substring(originalName.lastIndexOf(".")).toLowerCase();
+            if (!extension.matches("\\.(jpg|jpeg|png)$")) {
+                throw new IllegalArgumentException("Solo se permiten archivos JPG, JPEG y PNG");
+            }
+
             String fileName = UUID.randomUUID().toString() + extension;
             Path filePath = Paths.get(uploadDir, fileName);
             Files.createDirectories(filePath.getParent());
@@ -75,6 +81,7 @@ public class ServicioImagenService {
                 .collect(Collectors.toList());
     }
 
+    @CacheEvict(value = "servicios", allEntries = true)
     public void eliminarImagen(Long servicioId, ServicioImagenRequestDTO dto) {
         if (dto.getImagenUrl() == null || dto.getImagenUrl().isBlank()) {
             throw new IllegalArgumentException("La URL de la imagen es obligatoria");

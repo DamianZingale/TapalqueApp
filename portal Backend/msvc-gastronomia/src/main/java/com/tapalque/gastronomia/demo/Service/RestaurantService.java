@@ -3,6 +3,9 @@ package com.tapalque.gastronomia.demo.Service;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
 import com.tapalque.gastronomia.demo.DTO.RestaurantDTO;
@@ -22,6 +25,7 @@ public class RestaurantService implements I_RestaurantService {
     @Autowired
     private CategoryRepositoriInterface categoryRepository;
     
+    @Cacheable(value = "restaurante", key = "#id")
     @Override // Implementación del método para obtener un local gastronómico por su ID
 
     public RestaurantDTO getRestaurantById(Long id) {
@@ -37,11 +41,13 @@ public class RestaurantService implements I_RestaurantService {
         throw new RuntimeException("Error al obtener restaurant: " + e.getMessage(), e);
     }
 }
+    @Cacheable(value = "restaurantes")
     @Override // Implementación del método para obtener todos los locales gastronómicos
     public List<RestaurantDTO> getAllLocalGastronomicos() {
         return localGastronomicoRepository.selectAllRestaurant();
         
     }
+   @CacheEvict(value = "restaurantes", allEntries = true)
    @Override //implementacion: busca las categorias en BD y setea los id_category para guardar. Mismo con phone y schedule
 public RestaurantDTO addRestaurant(RestaurantDTO dto) {
     try {
@@ -87,6 +93,7 @@ public RestaurantDTO addRestaurant(RestaurantDTO dto) {
     }
 }
 
+    @Caching(evict = {@CacheEvict(value = "restaurantes", allEntries = true), @CacheEvict(value = "restaurante", allEntries = true)})
     @Override
     public void updateRestaurant(Restaurant restaurant) {
         try {
@@ -133,6 +140,7 @@ public RestaurantDTO addRestaurant(RestaurantDTO dto) {
         }
     }
 
+    @Caching(evict = {@CacheEvict(value = "restaurantes", allEntries = true), @CacheEvict(value = "restaurante", allEntries = true)})
     @Override
     public void deleteRestaurant(Long id) {
         Long idLong = (long) id;

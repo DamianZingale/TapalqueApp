@@ -417,6 +417,7 @@ spring:
             - Method=DELETE
           filters:
             - RewritePath=/api/habitaciones/imagenes, /habitaciones/imagenes
+            - JwtAuth
 
         # Crear habitación
         - id: msvc-hosteleria-habitaciones-create

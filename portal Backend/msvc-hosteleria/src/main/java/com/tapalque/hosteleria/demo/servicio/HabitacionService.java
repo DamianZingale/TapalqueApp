@@ -3,6 +3,8 @@ package com.tapalque.hosteleria.demo.servicio;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +30,7 @@ public class HabitacionService {
         this.hospedajeRepository = hospedajeRepository;
     }
 
+    @Cacheable(value = "habitaciones", key = "#hospedajeId")
     public List<HabitacionDTO> obtenerPorHospedaje(@NonNull Long hospedajeId) {
         return habitacionRepository.findByHospedajeId(hospedajeId)
                 .stream()
@@ -35,12 +38,14 @@ public class HabitacionService {
                 .collect(Collectors.toList());
     }
 
+    @Cacheable(value = "habitaciones", key = "#id")
     public HabitacionDTO obtenerPorId(@NonNull Long id) {
         Habitacion habitacion = habitacionRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Habitación no encontrada con ID: " + id));
         return new HabitacionDTO(habitacion);
     }
 
+    @CacheEvict(value = "habitaciones", allEntries = true)
     public HabitacionDTO crear(@NonNull Long hospedajeId, @NonNull HabitacionRequestDTO dto) {
         Hospedaje hospedaje = hospedajeRepository.findById(hospedajeId)
                 .orElseThrow(() -> new EntityNotFoundException("Hospedaje no encontrado con ID: " + hospedajeId));
@@ -64,6 +69,7 @@ public class HabitacionService {
         return new HabitacionDTO(guardada);
     }
 
+    @CacheEvict(value = "habitaciones", allEntries = true)
     public HabitacionDTO actualizar(@NonNull Long id, @NonNull HabitacionRequestDTO dto) {
         Habitacion habitacion = habitacionRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Habitación no encontrada con ID: " + id));
@@ -101,6 +107,7 @@ public class HabitacionService {
         return new HabitacionDTO(actualizada);
     }
 
+    @CacheEvict(value = "habitaciones", allEntries = true)
     public void eliminar(@NonNull Long id) {
         if (!habitacionRepository.existsById(id)) {
             throw new EntityNotFoundException("Habitación no encontrada con ID: " + id);
@@ -108,6 +115,7 @@ public class HabitacionService {
         habitacionRepository.deleteById(id);
     }
 
+    @CacheEvict(value = "habitaciones", allEntries = true)
     public HabitacionDTO cambiarDisponibilidad(@NonNull Long id, @NonNull Boolean disponible) {
         Habitacion habitacion = habitacionRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Habitación no encontrada con ID: " + id));

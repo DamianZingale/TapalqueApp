@@ -8,6 +8,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,6 +20,7 @@ public class HabitacionImagenService {
     @Value("${upload.dir}")
     private String uploadDir;
 
+    @CacheEvict(value = "habitaciones", allEntries = true)
     public ImagenResponseDTO subirImagen(MultipartFile file) {
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("El archivo está vacío o no fue enviado");
@@ -47,6 +49,7 @@ public class HabitacionImagenService {
         }
     }
 
+    @CacheEvict(value = "habitaciones", allEntries = true)
     public void eliminarImagen(String imagenUrl) {
         if (imagenUrl == null || imagenUrl.isBlank()) {
             throw new IllegalArgumentException("La URL de la imagen es obligatoria");

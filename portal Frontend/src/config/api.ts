@@ -7,33 +7,57 @@ interface RequestOptions extends RequestInit {
   headers?: Record<string, string>;
 }
 
+let refreshPromise: Promise<boolean> | null = null;
+
+function tryRefresh(): Promise<boolean> {
+  if (refreshPromise) return refreshPromise;
+  refreshPromise = authService.refreshAccessToken().finally(() => {
+    refreshPromise = null;
+  });
+  return refreshPromise;
+}
+
 export const apiRequest = async <T = unknown>(
   endpoint: string,
   options: RequestOptions = {}
 ): Promise<T> => {
   const url = `${API_BASE_URL}${endpoint}`;
 
-  const config: RequestOptions = {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
+  const buildConfig = (): RequestOptions => {
+    const config: RequestOptions = {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers,
+      },
+    };
+
+    const token = authService.getToken();
+    if (token) {
+      config.headers = {
+        ...config.headers,
+        Authorization: `Bearer ${token}`,
+      };
+    }
+
+    return config;
   };
 
-  const token = authService.getToken();
-  if (token) {
-    config.headers = {
-      ...config.headers,
-      Authorization: `Bearer ${token}`,
-    };
-  }
-
   try {
-    const response = await fetch(url, config);
+    const response = await fetch(url, buildConfig());
 
     if (response.status === 401) {
+      const refreshed = await tryRefresh();
+      if (refreshed) {
+        const retryResponse = await fetch(url, buildConfig());
+        if (!retryResponse.ok) {
+          throw new Error(`HTTP error! status: ${retryResponse.status}`);
+        }
+        return (await retryResponse.json()) as T;
+      }
+
       authService.logout();
+      alert('Tu sesión ha expirado. Por favor, iniciá sesión nuevamente.');
       window.location.href = '/public/login';
       throw new Error('Sesión expirada');
     }

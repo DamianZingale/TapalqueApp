@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -36,6 +37,7 @@ public class HospedajeImagenService {
 
     private static final int MAX_IMAGENES_HOSPEDAJE = 5;
 
+    @CacheEvict(value = "hospedajes", allEntries = true)
     public ImagenResponseDTO agregarImagen(Long hospedajeId, MultipartFile file) {
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("El archivo está vacío o no fue enviado");
@@ -88,6 +90,7 @@ public class HospedajeImagenService {
                 .collect(Collectors.toList());
     }
 
+    @CacheEvict(value = "hospedajes", allEntries = true)
     public void eliminarImagen(Long hospedajeId, ImagenRequestDTO dto) {
         if (dto.getImagenUrl() == null || dto.getImagenUrl().isBlank()) {
             throw new IllegalArgumentException("La URL de la imagen es obligatoria");

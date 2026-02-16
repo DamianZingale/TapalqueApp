@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -33,6 +34,7 @@ public class RestaurantImageService {
     @Autowired
     private RestaurantImageRepository imageRepository;
 
+    @CacheEvict(value = "restaurantes", allEntries = true)
     public ImagenResponseDTO agregarImagen(Long restaurantId, MultipartFile file) {
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("El archivo está vacío o no fue enviado");
@@ -80,6 +82,7 @@ public class RestaurantImageService {
                 .collect(Collectors.toList());
     }
 
+    @CacheEvict(value = "restaurantes", allEntries = true)
     public void eliminarImagen(Long restaurantId, ImagenRequestDTO dto) {
         if (dto.getImagenUrl() == null || dto.getImagenUrl().isBlank()) {
             throw new IllegalArgumentException("La URL de la imagen es obligatoria");

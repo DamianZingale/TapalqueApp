@@ -5,6 +5,8 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.tapalque.espaciospublicos.Exceptions.EspacioPublicoNotFoundException;
@@ -19,6 +21,7 @@ public class EspacioPublicoService {
     @Autowired
     private EspacioPublicoRepository espacioPublicoRepository;
 
+    @CacheEvict(value = "espacios-publicos", allEntries = true)
     @Transactional
     public EspacioPublicoResponseDTO crear(EspacioPublicoRequestDTO dto) {
         if (dto.getTitulo() == null || dto.getTitulo().isBlank()) {
@@ -30,6 +33,7 @@ public class EspacioPublicoService {
         return new EspacioPublicoResponseDTO(espacioPublico);
     }
 
+    @Cacheable(value = "espacios-publicos")
     public List<EspacioPublicoResponseDTO> obtenerTodos() {
         return espacioPublicoRepository.findAll()
                 .stream()
@@ -37,6 +41,7 @@ public class EspacioPublicoService {
                 .collect(Collectors.toList());
     }
 
+    @Cacheable(value = "espacios-publicos", key = "#categoria")
     public List<EspacioPublicoResponseDTO> obtenerPorCategoria(String categoria) {
         return espacioPublicoRepository.findByCategoria(categoria)
                 .stream()
@@ -44,12 +49,14 @@ public class EspacioPublicoService {
                 .collect(Collectors.toList());
     }
 
+    @Cacheable(value = "espacios-publicos", key = "'id-' + #id")
     public EspacioPublicoResponseDTO obtenerPorId(Long id) {
         EspacioPublico espacioPublico = espacioPublicoRepository.findById(id)
                 .orElseThrow(() -> new EspacioPublicoNotFoundException(id));
         return new EspacioPublicoResponseDTO(espacioPublico);
     }
 
+    @CacheEvict(value = "espacios-publicos", allEntries = true)
     @Transactional
     public EspacioPublicoResponseDTO actualizarCompleto(Long id, EspacioPublicoRequestDTO dto) {
         EspacioPublico espacioPublico = espacioPublicoRepository.findById(id)
@@ -61,6 +68,7 @@ public class EspacioPublicoService {
         return new EspacioPublicoResponseDTO(actualizado);
     }
 
+    @CacheEvict(value = "espacios-publicos", allEntries = true)
     @Transactional
     public EspacioPublicoResponseDTO actualizarParcial(Long id, EspacioPublicoRequestDTO dto) {
         EspacioPublico espacioPublico = espacioPublicoRepository.findById(id)
@@ -70,6 +78,7 @@ public class EspacioPublicoService {
         return new EspacioPublicoResponseDTO(espacioPublico);
     }
 
+    @CacheEvict(value = "espacios-publicos", allEntries = true)
     @Transactional
     public void eliminar(Long id) {
         EspacioPublico espacioPublico = espacioPublicoRepository.findById(id)

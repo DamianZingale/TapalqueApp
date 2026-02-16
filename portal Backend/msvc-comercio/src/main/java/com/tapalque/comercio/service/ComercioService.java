@@ -5,6 +5,8 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.tapalque.comercio.Exceptions.ComercioNotFoundException;
@@ -21,6 +23,7 @@ public class ComercioService {
     @Autowired
     private ComercioRepository comercioRepository;
 
+    @CacheEvict(value = "comercios", allEntries = true)
     @Transactional
     public ComercioResponseDTO crear(ComercioRequestDTO dto) {
         if (dto.getTitulo() == null || dto.getTitulo().isBlank()) {
@@ -32,6 +35,7 @@ public class ComercioService {
         return new ComercioResponseDTO(comercio);
     }
 
+    @Cacheable(value = "comercios")
     public List<ComercioResponseDTO> obtenerTodos() {
         return comercioRepository.findAll()
                 .stream()
@@ -39,12 +43,14 @@ public class ComercioService {
                 .collect(Collectors.toList());
     }
 
+    @Cacheable(value = "comercios", key = "#id")
     public ComercioResponseDTO obtenerPorId(Long id) {
         Comercio comercio = comercioRepository.findById(id)
                 .orElseThrow(() -> new ComercioNotFoundException(id));
         return new ComercioResponseDTO(comercio);
     }
 
+    @CacheEvict(value = "comercios", allEntries = true)
     @Transactional
     public ComercioResponseDTO actualizarCompleto(Long id, ComercioRequestDTO dto) {
         Comercio comercio = comercioRepository.findById(id)
@@ -55,6 +61,7 @@ public class ComercioService {
         return new ComercioResponseDTO(actualizado);
     }
 
+    @CacheEvict(value = "comercios", allEntries = true)
     @Transactional
     public ComercioResponseDTO actualizarParcial(Long id, ComercioRequestDTO dto) {
         Comercio comercio = comercioRepository.findById(id)
@@ -64,6 +71,7 @@ public class ComercioService {
         return new ComercioResponseDTO(comercio);
     }
 
+    @CacheEvict(value = "comercios", allEntries = true)
     @Transactional
     public void eliminar(Long id) {
         Comercio comercio = comercioRepository.findById(id)

@@ -119,6 +119,35 @@ export const authService = {
   logout(): void {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
+    localStorage.removeItem('refresh_token');
+  },
+
+  // Intentar renovar el access token usando el refresh token
+  async refreshAccessToken(): Promise<boolean> {
+    const refreshToken = this.getRefreshToken();
+    if (!refreshToken) return false;
+
+    try {
+      const response = await fetch('/api/jwt/public/refresh-token', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${refreshToken}`,
+        },
+      });
+
+      if (!response.ok) return false;
+
+      const data = await response.json();
+      if (data.accessToken) {
+        this.setToken(data.accessToken);
+        if (data.refreshToken) this.setRefreshToken(data.refreshToken);
+        if (data.user) this.setUser(data.user);
+        return true;
+      }
+      return false;
+    } catch {
+      return false;
+    }
   },
 
   // Decodificar JWT completo
