@@ -20,9 +20,11 @@ public class HospedajeRequestDTO {
     @NotBlank(message = "La ubicación es obligatoria")
     private String ubicacion;
 
-    @NotBlank(message = "La URL de Google Maps es obligatoria")
-    @Pattern(regexp = "https?://.*", message = "Debe ser una URL válida")
-    private String googleMapsUrl;
+    @NotNull(message = "La latitud es obligatoria")
+    private Double latitud;
+
+    @NotNull(message = "La longitud es obligatoria")
+    private Double longitud;
 
     @Pattern(regexp = "^\\+?[0-9]{7,15}$", message = "Número de WhatsApp inválido")
     private String numWhatsapp;
@@ -62,12 +64,20 @@ public class HospedajeRequestDTO {
         this.ubicacion = ubicacion;
     }
 
-    public String getGoogleMapsUrl() {
-        return googleMapsUrl;
+    public Double getLatitud() {
+        return latitud;
     }
 
-    public void setGoogleMapsUrl(String googleMapsUrl) {
-        this.googleMapsUrl = googleMapsUrl;
+    public void setLatitud(Double latitud) {
+        this.latitud = latitud;
+    }
+
+    public Double getLongitud() {
+        return longitud;
+    }
+
+    public void setLongitud(Double longitud) {
+        this.longitud = longitud;
     }
 
     public String getNumWhatsapp() {

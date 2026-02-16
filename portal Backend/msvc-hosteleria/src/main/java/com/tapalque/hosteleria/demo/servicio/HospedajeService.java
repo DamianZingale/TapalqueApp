@@ -85,7 +85,8 @@ public class HospedajeService {
         hospedaje.setTitulo(dto.getTitulo());
         hospedaje.setDescription(dto.getDescription());
         hospedaje.setUbicacion(dto.getUbicacion());
-        hospedaje.setGoogleMapsUrl(dto.getGoogleMapsUrl());
+        hospedaje.setLatitud(dto.getLatitud());
+        hospedaje.setLongitud(dto.getLongitud());
         hospedaje.setNumWhatsapp(dto.getNumWhatsapp());
         hospedaje.setTipoHospedaje(dto.getTipoHospedaje());
         // Solo actualizar imágenes si se envían explícitamente en el request.
@@ -110,7 +111,8 @@ public class HospedajeService {
         hospedaje.setTitulo(dto.getTitulo());
         hospedaje.setDescription(dto.getDescription());
         hospedaje.setUbicacion(dto.getUbicacion());
-        hospedaje.setGoogleMapsUrl(dto.getGoogleMapsUrl());
+        hospedaje.setLatitud(dto.getLatitud());
+        hospedaje.setLongitud(dto.getLongitud());
         hospedaje.setNumWhatsapp(dto.getNumWhatsapp());
         hospedaje.setTipoHospedaje(dto.getTipoHospedaje());
         // Carga imágenes si hay URLs

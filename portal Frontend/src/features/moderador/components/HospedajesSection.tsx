@@ -19,7 +19,8 @@ interface Hospedaje {
   titulo: string;
   description?: string;
   ubicacion: string;
-  googleMapsUrl?: string;
+  latitud?: string;
+  longitud?: string;
   numWhatsapp?: string;
   tipoHospedaje: TipoHospedaje;
   imagenes?: { imagenUrl: string }[];
@@ -38,7 +39,8 @@ const emptyItem: Partial<Hospedaje> = {
   titulo: '',
   description: '',
   ubicacion: '',
-  googleMapsUrl: '',
+  latitud: '',
+  longitud: '',
   numWhatsapp: '',
   tipoHospedaje: 'HOTEL',
   imagenes: [],
@@ -142,7 +144,8 @@ export function HospedajesSection() {
         ...(isNew ? dataWithoutIdAndImages : { ...dataWithoutIdAndImages, id: formData.id }),
         description: formData.description?.trim() || '',
         ubicacion: formData.ubicacion?.trim() || undefined,
-        googleMapsUrl: formData.googleMapsUrl?.trim() || undefined,
+        latitud: formData.latitud ? parseFloat(formData.latitud) : undefined,
+        longitud: formData.longitud ? parseFloat(formData.longitud) : undefined,
         numWhatsapp: formData.numWhatsapp?.trim() || undefined,
       };
 
@@ -413,15 +416,30 @@ export function HospedajesSection() {
                 </Form.Group>
               </Col>
             </Row>
-            <Form.Group className="mb-2">
-              <Form.Label className="small mb-0">Google Maps URL *</Form.Label>
-              <Form.Control
-                size="sm"
-                value={formData.googleMapsUrl || ''}
-                onChange={(e) => handleChange('googleMapsUrl', e.target.value)}
-                placeholder="https://maps.google.com/..."
-              />
-            </Form.Group>
+            <Row>
+              <Col md={6}>
+                <Form.Group className="mb-2">
+                  <Form.Label className="small mb-0">Latitud *</Form.Label>
+                  <Form.Control
+                    size="sm"
+                    value={formData.latitud || ''}
+                    onChange={(e) => handleChange('latitud', e.target.value)}
+                    placeholder="-36.3576"
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group className="mb-2">
+                  <Form.Label className="small mb-0">Longitud *</Form.Label>
+                  <Form.Control
+                    size="sm"
+                    value={formData.longitud || ''}
+                    onChange={(e) => handleChange('longitud', e.target.value)}
+                    placeholder="-60.0167"
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
 
             <ImageManager
               images={formData.imagenes || []}

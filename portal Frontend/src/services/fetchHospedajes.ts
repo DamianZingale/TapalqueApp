@@ -5,7 +5,8 @@ export interface Hospedaje {
     titulo: string;
     description: string;
     ubicacion: string;
-    googleMapsUrl?: string;
+    latitud?: number;
+    longitud?: number;
     numWhatsapp?: string;
     tipoHospedaje: 'HOTEL' | 'DEPARTAMENTO' | 'CABAÑA' | 'CASA' | 'OTRO';
     imagenes: string[];  // Backend returns array of URLs directly

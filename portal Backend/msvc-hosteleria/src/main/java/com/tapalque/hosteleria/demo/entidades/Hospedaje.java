@@ -31,8 +31,9 @@ public class Hospedaje {
 
     private String ubicacion;
 
-    @Column(name = "google_maps_url")
-    private String googleMapsUrl;
+    private Double latitud;
+
+    private Double longitud;
 
     @Column(name = "num_whatsapp")
     private String numWhatsapp;
@@ -48,12 +49,13 @@ public class Hospedaje {
     public Hospedaje() {
     }
 
-    public Hospedaje(String titulo, String description, String ubicacion, String googleMapsUrl,
-                     String numWhatsapp, TipoHospedaje tipoHospedaje) {
+    public Hospedaje(String titulo, String description, String ubicacion, Double latitud,
+                     Double longitud, String numWhatsapp, TipoHospedaje tipoHospedaje) {
         this.titulo = titulo;
         this.description = description;
         this.ubicacion = ubicacion;
-        this.googleMapsUrl = googleMapsUrl;
+        this.latitud = latitud;
+        this.longitud = longitud;
         this.numWhatsapp = numWhatsapp;
         this.tipoHospedaje = tipoHospedaje;
     }
@@ -91,12 +93,20 @@ public class Hospedaje {
         this.ubicacion = ubicacion;
     }
 
-    public String getGoogleMapsUrl() {
-        return googleMapsUrl;
+    public Double getLatitud() {
+        return latitud;
     }
 
-    public void setGoogleMapsUrl(String googleMapsUrl) {
-        this.googleMapsUrl = googleMapsUrl;
+    public void setLatitud(Double latitud) {
+        this.latitud = latitud;
+    }
+
+    public Double getLongitud() {
+        return longitud;
+    }
+
+    public void setLongitud(Double longitud) {
+        this.longitud = longitud;
     }
 
     public String getNumWhatsapp() {

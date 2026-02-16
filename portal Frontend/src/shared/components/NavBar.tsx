@@ -36,7 +36,7 @@ export default function NavBar() {
       <Container>
         <Navbar.Brand as={Link} to="/" onClick={() => setExpanded(false)}>
           <img
-            src="/favicon.png"
+            src="/title.jpeg"
             alt=""
             width="28"
             height="28"

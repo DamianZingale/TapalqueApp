@@ -292,10 +292,10 @@ export default function HospedajeDetailPage() {
         </div>
       )}
 
-      {data.googleMapsUrl && (
+      {data.latitud != null && data.longitud != null && (
         <div className="text-center my-4">
           <a
-            href={data.googleMapsUrl}
+            href={`https://www.google.com/maps?q=${data.latitud},${data.longitud}`}
             target="_blank"
             rel="noopener noreferrer"
             className="btn btn-dark"

@@ -19,7 +19,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n  \"titulo\": \"Hotel Tapalqué\",\r\n  \"description\": \"Alojamiento cómodo en el centro del pueblo\",\r\n  \"ubicacion\": \"Av. Belgrano 456\",\r\n  \"googleMapsUrl\": \"https://goo.gl/maps/abc123\",\r\n  \"numWhatsapp\": \"+5491122334455\",\r\n  \"tipoHospedaje\": \"HOTEL\",\r\n  \"imagenes\": [\r\n    \"https://miweb.com/img/hotel1.jpg\",\r\n    \"https://miweb.com/img/hotel2.jpg\"\r\n  ]\r\n}",
+					"raw": "{\r\n  \"titulo\": \"Hotel Tapalqué\",\r\n  \"description\": \"Alojamiento cómodo en el centro del pueblo\",\r\n  \"ubicacion\": \"Av. Belgrano 456\",\r\n  \"latitud\": -36.3576,\r\n  \"longitud\": -60.0167,\r\n  \"numWhatsapp\": \"+5491122334455\",\r\n  \"tipoHospedaje\": \"HOTEL\",\r\n  \"imagenes\": [\r\n    \"https://miweb.com/img/hotel1.jpg\",\r\n    \"https://miweb.com/img/hotel2.jpg\"\r\n  ]\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -116,7 +116,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n  \"titulo\": \"Hotel Actualizado\",\r\n  \"description\": \"Descripción modificada del hotel\",\r\n  \"ubicacion\": \"Nueva dirección 789\",\r\n  \"googleMapsUrl\": \"https://goo.gl/maps/nueva123\",\r\n  \"numWhatsapp\": \"+5491199887766\",\r\n  \"tipoHospedaje\": \"HOTEL\",\r\n  \"imagenes\": [\r\n    \"https://miweb.com/img/nueva1.jpg\",\r\n    \"https://miweb.com/img/nueva2.jpg\"\r\n  ]\r\n}",
+					"raw": "{\r\n  \"titulo\": \"Hotel Actualizado\",\r\n  \"description\": \"Descripción modificada del hotel\",\r\n  \"ubicacion\": \"Nueva dirección 789\",\r\n  \"latitud\": -36.3576,\r\n  \"longitud\": -60.0167,\r\n  \"numWhatsapp\": \"+5491199887766\",\r\n  \"tipoHospedaje\": \"HOTEL\",\r\n  \"imagenes\": [\r\n    \"https://miweb.com/img/nueva1.jpg\",\r\n    \"https://miweb.com/img/nueva2.jpg\"\r\n  ]\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"

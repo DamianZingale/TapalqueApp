@@ -12,7 +12,8 @@ public class HospedajeDTO {
     private String titulo;
     private String description;
     private String ubicacion;
-    private String googleMapsUrl;
+    private Double latitud;
+    private Double longitud;
     private String numWhatsapp;
     private String tipoHospedaje;
     private List<String> imagenes;
@@ -27,7 +28,8 @@ public class HospedajeDTO {
         this.titulo = hospedaje.getTitulo();
         this.description = hospedaje.getDescription();
         this.ubicacion = hospedaje.getUbicacion();
-        this.googleMapsUrl = hospedaje.getGoogleMapsUrl();
+        this.latitud = hospedaje.getLatitud();
+        this.longitud = hospedaje.getLongitud();
         this.numWhatsapp = hospedaje.getNumWhatsapp();
         this.tipoHospedaje = hospedaje.getTipoHospedaje() != null
                 ? hospedaje.getTipoHospedaje().name()
@@ -73,12 +75,20 @@ public class HospedajeDTO {
         this.ubicacion = ubicacion;
     }
 
-    public String getGoogleMapsUrl() {
-        return googleMapsUrl;
+    public Double getLatitud() {
+        return latitud;
     }
 
-    public void setGoogleMapsUrl(String googleMapsUrl) {
-        this.googleMapsUrl = googleMapsUrl;
+    public void setLatitud(Double latitud) {
+        this.latitud = latitud;
+    }
+
+    public Double getLongitud() {
+        return longitud;
+    }
+
+    public void setLongitud(Double longitud) {
+        this.longitud = longitud;
     }
 
     public String getNumWhatsapp() {
