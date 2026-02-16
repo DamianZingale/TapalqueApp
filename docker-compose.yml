@@ -466,6 +466,10 @@ services:
     ports:
       - '8090:8090'
     restart: always
+    env_file:
+      - .env
+    environment:
+      SECRET_KEY: ${SECRET_KEY}
     depends_on:
       eureka-server:
         condition: service_healthy

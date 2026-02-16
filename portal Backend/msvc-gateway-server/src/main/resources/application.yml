@@ -7,11 +7,6 @@ jwt:
 spring:
   application:
     name: msvc-gateway-server
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          secret-key: ${JWT_SECRET}
 
   main:
     web-application-type: reactive
