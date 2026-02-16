@@ -36,6 +36,9 @@ class ReservationServiceImplTest {
     @Mock
     private ReservationRepositoryInterface reservationRepository;
 
+    @Mock
+    private AdminNotificationService adminNotificationService;
+
     @InjectMocks
     private ReservationServiceImpl reservationService;
 

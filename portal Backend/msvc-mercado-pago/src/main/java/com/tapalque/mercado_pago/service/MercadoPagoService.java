@@ -156,6 +156,8 @@ public class MercadoPagoService {
                 .payer(payer)
                 // URL donde Mercado Pago envía las notificaciones webhook
                 .notificationUrl(webhookUrl)
+                // Descripción que aparece en el resumen de tarjeta del comprador
+                .statementDescriptor("TapalqueApp")
                 // Expiración sincronizada con el bloqueo temporal de reservas (5 min)
                 .expirationDateFrom(expirationFrom)
                 .expirationDateTo(expirationTo);

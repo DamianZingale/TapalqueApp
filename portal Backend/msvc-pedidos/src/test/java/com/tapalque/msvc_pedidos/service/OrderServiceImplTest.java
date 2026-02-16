@@ -32,6 +32,12 @@ class OrderServiceImplTest {
     @Mock
     private OrderRepository orderRepository;
 
+    @Mock
+    private org.springframework.amqp.rabbit.core.RabbitTemplate rabbitTemplate;
+
+    @Mock
+    private AdminNotificationService adminNotificationService;
+
     @InjectMocks
     private OrderServiceImpl orderService;
 
