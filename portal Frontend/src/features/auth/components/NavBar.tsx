@@ -9,6 +9,13 @@ export const NavBar = () => {
         <Navbar bg="dark" variant="dark" sticky="top">
             <Container>
                 <Navbar.Brand as={Link} to="/">
+                    <img
+                        src="/logo-tapalque.png"
+                        alt=""
+                        width="28"
+                        height="28"
+                        className="d-inline-block align-top me-2"
+                    />
                     Tapalqué App
                 </Navbar.Brand>
                 <Navbar.Toggle aria-controls="main-navbar" />
