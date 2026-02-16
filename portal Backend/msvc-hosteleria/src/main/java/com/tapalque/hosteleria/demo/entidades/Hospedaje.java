@@ -45,6 +45,9 @@ public class Hospedaje {
     @OneToMany(mappedBy = "hospedaje", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<HospedajeImagen> imagenes = new ArrayList<>();
 
+    @OneToMany(mappedBy = "hospedaje", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Habitacion> habitaciones = new ArrayList<>();
+
     // --- Constructores ---
     public Hospedaje() {
     }
@@ -131,5 +134,13 @@ public class Hospedaje {
 
     public void setImagenes(List<HospedajeImagen> imagenes) {
         this.imagenes = imagenes;
+    }
+
+    public List<Habitacion> getHabitaciones() {
+        return habitaciones;
+    }
+
+    public void setHabitaciones(List<Habitacion> habitaciones) {
+        this.habitaciones = habitaciones;
     }
 }
