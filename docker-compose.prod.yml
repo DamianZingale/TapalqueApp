@@ -294,66 +294,66 @@ services:
   # ==========================================
   msvc-gastronomia:
     environment:
-      <<: *java-opts-light
+      <<: *java-opts-infra
     deploy:
       resources:
         limits:
-          memory: 300M
-          cpus: '0.20'
+          memory: 512M
+          cpus: '0.30'
 
   msvc-hosteleria:
     environment:
-      <<: *java-opts-light
+      <<: *java-opts-infra
     deploy:
       resources:
         limits:
-          memory: 300M
-          cpus: '0.20'
+          memory: 512M
+          cpus: '0.30'
 
   msvc-comercio:
     environment:
-      <<: *java-opts-light
+      <<: *java-opts-infra
     deploy:
       resources:
         limits:
-          memory: 300M
-          cpus: '0.20'
+          memory: 512M
+          cpus: '0.30'
 
   msvc-eventos:
     environment:
-      <<: *java-opts-light
+      <<: *java-opts-infra
     deploy:
       resources:
         limits:
-          memory: 300M
-          cpus: '0.20'
+          memory: 512M
+          cpus: '0.30'
 
   msvc-servicios:
     environment:
-      <<: *java-opts-light
+      <<: *java-opts-infra
     deploy:
       resources:
         limits:
-          memory: 300M
-          cpus: '0.20'
+          memory: 512M
+          cpus: '0.30'
 
   msvc-termas:
     environment:
-      <<: *java-opts-light
+      <<: *java-opts-infra
     deploy:
       resources:
         limits:
-          memory: 300M
-          cpus: '0.20'
+          memory: 512M
+          cpus: '0.30'
 
   msvc-espacios-publicos:
     environment:
-      <<: *java-opts-light
+      <<: *java-opts-infra
     deploy:
       resources:
         limits:
-          memory: 300M
-          cpus: '0.20'
+          memory: 512M
+          cpus: '0.30'
 
   # ==========================================
   # FRONTEND - Nginx en produccion (solo red interna)
