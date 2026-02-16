@@ -4,6 +4,11 @@ server:
 spring:
   application:
     name: msvc-gateway-server
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          secret-key: ${JWT_SECRET}
 
   main:
     web-application-type: reactive
@@ -355,7 +360,6 @@ spring:
             - Method=GET, DELETE, POST
           filters:
             - RewritePath=/api/comercio/imagen/(?<id>[0-9]+), /comercio/${id}/imagenes
-            - JwtAuth
 
         - id: msvc-comercio-create
           uri: lb://msvc-comercio
@@ -364,7 +368,6 @@ spring:
             - Method=POST
           filters:
             - RewritePath=/api/comercio, /comercio
-            - JwtAuth
 
         - id: msvc-comercio-update
           uri: lb://msvc-comercio
@@ -373,7 +376,6 @@ spring:
             - Method=PUT,PATCH,DELETE
           filters:
             - RewritePath=/api/comercio/(?<id>[0-9]+), /comercio/${id}
-            - JwtAuth
 
         - id: msvc-hospedaje-imagen
           uri: lb://msvc-hosteleria
@@ -382,7 +384,6 @@ spring:
             - Method=GET,DELETE,POST
           filters:
             - RewritePath=/api/hospedajes/(?<id>[0-9]+)/imagenes, /hospedajes/${id}/imagenes
-            - JwtAuth
 
         - id: msvc-hosteleria-create
           uri: lb://msvc-hosteleria
@@ -391,7 +392,6 @@ spring:
             - Method=POST
           filters:
             - RewritePath=/api/hospedajes, /hospedajes
-            - JwtAuth
 
         - id: msvc-hosteleria
           uri: lb://msvc-hosteleria
@@ -400,7 +400,6 @@ spring:
             - Method=PUT,DELETE
           filters:
             - RewritePath=/api/hospedajes/(?<id>[0-9]+), /hospedajes/${id}
-            - JwtAuth
 
         # Habitación - Subir imagen
         - id: msvc-hosteleria-habitacion-imagen-upload
@@ -420,7 +419,6 @@ spring:
             - Method=DELETE
           filters:
             - RewritePath=/api/habitaciones/imagenes, /habitaciones/imagenes
-            - JwtAuth
 
         # Crear habitación
         - id: msvc-hosteleria-habitaciones-create
@@ -430,7 +428,6 @@ spring:
             - Method=POST
           filters:
             - RewritePath=/api/habitaciones/hospedajes/(?<id>[0-9]+), /habitaciones/hospedajes/${id}
-            - JwtAuth
 
         # CRUD habitaciones individuales
         - id: msvc-hosteleria-habitaciones
@@ -440,7 +437,6 @@ spring:
             - Method=GET,PUT,DELETE
           filters:
             - RewritePath=/api/habitaciones/(?<id>[0-9]+), /habitaciones/${id}
-            - JwtAuth
 
         - id: msvc-hosteleria-habitaciones-disponibilidad-update
           uri: lb://msvc-hosteleria
@@ -449,7 +445,6 @@ spring:
             - Method=PATCH
           filters:
             - RewritePath=/api/habitaciones/(?<id>[0-9]+)/disponibilidad, /habitaciones/${id}/disponibilidad
-            - JwtAuth
 
         - id: msvc-gastronomia-imagen
           uri: lb://msvc-gastronomia
@@ -458,7 +453,6 @@ spring:
             - Method=GET,POST,DELETE
           filters:
             - RewritePath=/api/(?<segment>.*), /${segment}
-            - JwtAuth
 
         - id: msvc-gastronomia-create
           uri: lb://msvc-gastronomia
@@ -467,7 +461,6 @@ spring:
             - Method=POST
           filters:
             - RewritePath=/api/gastronomia, /restaurante/save
-            - JwtAuth
 
         # PUT /api/gastronomia/{id} -> /restaurante/update/{id}
         - id: msvc-gastronomia-update
@@ -477,7 +470,6 @@ spring:
             - Method=PUT
           filters:
             - RewritePath=/api/gastronomia/(?<id>[0-9]+), /restaurante/update/${id}
-            - JwtAuth
 
         - id: msvc-gastronomia-delete
           uri: lb://msvc-gastronomia
@@ -486,7 +478,6 @@ spring:
             - Method=DELETE
           filters:
             - RewritePath=/api/gastronomia/delete/(?<id>[0-9]+), /restaurante/delete/${id}
-            - JwtAuth
 
         # ===== MENU CRUD =====
         - id: msvc-gastronomia-menu-create-dish
@@ -496,7 +487,6 @@ spring:
             - Method=POST
           filters:
             - RewritePath=/api/gastronomia/menu/restaurant/(?<restaurantId>[0-9]+)/dish, /gastronomia/menu/restaurant/${restaurantId}/dish
-            - JwtAuth
 
         - id: msvc-gastronomia-menu-update-dish
           uri: lb://msvc-gastronomia
@@ -505,7 +495,6 @@ spring:
             - Method=PUT
           filters:
             - RewritePath=/api/gastronomia/menu/dish/(?<dishId>[0-9]+), /gastronomia/menu/dish/${dishId}
-            - JwtAuth
 
         - id: msvc-gastronomia-menu-delete-dish
           uri: lb://msvc-gastronomia
@@ -514,7 +503,6 @@ spring:
             - Method=DELETE
           filters:
             - RewritePath=/api/gastronomia/menu/dish/(?<dishId>[0-9]+), /gastronomia/menu/dish/${dishId}
-            - JwtAuth
 
         - id: msvc-gastronomia-menu-update-availability
           uri: lb://msvc-gastronomia
@@ -523,7 +511,6 @@ spring:
             - Method=PATCH
           filters:
             - RewritePath=/api/gastronomia/menu/dish/(?<dishId>[0-9]+)/availability, /gastronomia/menu/dish/${dishId}/availability
-            - JwtAuth
 
         # MERCADO PAGO
         # Test payment (público - para activar la app)
@@ -542,7 +529,6 @@ spring:
             - Method=POST
           filters:
             - RewritePath=/api/(?<segment>.*), /${segment}
-            - JwtAuth
 
         - id: msvc-mercado-pago
           uri: lb://msvc-mercado-pago
@@ -592,7 +578,6 @@ spring:
             - Method=POST
           filters:
             - RewritePath=/api/pedidos/(?<segment>.*), /${segment}
-            - JwtAuth
 
         - id: msvc-pedidos
           uri: lb://msvc-pedidos
@@ -601,7 +586,6 @@ spring:
             - Method=GET
           filters:
             - RewritePath=/api/pedidos/(?<id>[0-9]+), /${id}
-            - JwtAuth
 
         - id: msvc-pedidos
           uri: lb://msvc-pedidos
@@ -610,7 +594,6 @@ spring:
             - Method=GET
           filters:
             - RewritePath=/api/pedidos/(?<segment>.*),  /${segment}
-            - JwtAuth
 
         - id: msvc-pedidos
           uri: lb://msvc-pedidos
@@ -619,7 +602,6 @@ spring:
             - Method=GET
           filters:
             - RewritePath=/api/pedidos/(?<segment>.*), /${segment}
-            - JwtAuth
 
         - id: msvc-pedidos
           uri: lb://msvc-pedidos
@@ -628,7 +610,6 @@ spring:
             - Method=PUT
           filters:
             - RewritePath=/api/pedidos/orders/(?<id>[0-9]+), /orders/${id}
-            - JwtAuth
 
         - id: msvc-pedidos
           uri: lb://msvc-pedidos
@@ -637,7 +618,6 @@ spring:
             - Method=DELETE
           filters:
             - RewritePath=/api/pedidos/orders/(?<id>[0-9]+), /orders/${id}
-            - JwtAuth
 
         - id: msvc-pedidos
           uri: lb://msvc-pedidos
@@ -646,7 +626,6 @@ spring:
             - Method=PATCH
           filters:
             - RewritePath=/api/pedidos/orders/(?<id>[^/]+)/estado, /orders/${id}/estado
-            - JwtAuth
 
         # RESERVAS - disponibilidad pública (sin auth)
         - id: msvc-reservas-disponibilidad-public
@@ -665,7 +644,6 @@ spring:
             - Method=POST
           filters:
             - RewritePath=/api/reservas/(?<segment>.*), /${segment}
-            - JwtAuth
 
         - id: msvc-reservas-by-id
           uri: lb://msvc-reservas
@@ -674,7 +652,6 @@ spring:
             - Method=GET
           filters:
             - RewritePath=/api/reservas/reservations/by-id/(?<id>.*), /reservations/by-id/${id}
-            - JwtAuth
 
         - id: msvc-reservas-update
           uri: lb://msvc-reservas
@@ -683,7 +660,6 @@ spring:
             - Method=PUT
           filters:
             - RewritePath=/api/reservas/reservations/update/(?<id>.*), /reservations/update/${id}
-            - JwtAuth
 
         - id: msvc-reservas-delete
           uri: lb://msvc-reservas
@@ -692,7 +668,6 @@ spring:
             - Method=DELETE
           filters:
             - RewritePath=/api/reservas/reservations/delete/(?<id>.*), /reservations/delete/${id}
-            - JwtAuth
 
         - id: msvc-reservas
           uri: lb://msvc-reservas
@@ -701,7 +676,6 @@ spring:
             - Method=GET
           filters:
             - RewritePath=/api/reservas/reservations/by-hotel/(?<id>[0-9]+), /reservations/by-hotel/${id}
-            - JwtAuth
 
         - id: msvc-reservas
           uri: lb://msvc-reservas
@@ -710,7 +684,6 @@ spring:
             - Method=GET
           filters:
             - RewritePath=/api/reservas/reservations/by-customer/(?<id>[0-9]+), /reservations/by-customer/${id}
-            - JwtAuth
 
           # EVENTOS
         - id: msvc-eventos-imagen
@@ -720,7 +693,6 @@ spring:
             - Method=POST,DELETE
           filters:
             - RewritePath=/api/(?<segment>.*), /${segment}
-            - JwtAuth
 
         - id: msvc-eventos-create
           uri: lb://msvc-eventos
@@ -729,7 +701,6 @@ spring:
             - Method=POST
           filters:
             - RewritePath=/api/evento, /evento
-            - JwtAuth
 
         - id: msvc-eventos
           uri: lb://msvc-eventos
@@ -738,7 +709,6 @@ spring:
             - Method=PUT,PATCH,DELETE
           filters:
             - RewritePath=/api/evento/(?<id>[0-9]+), /evento/${id}
-            - JwtAuth
 
         # SERVICIOS
         - id: msvc-servicios-imagen
@@ -748,7 +718,6 @@ spring:
             - Method=GET,POST,DELETE
           filters:
             - RewritePath=/api/(?<segment>.*), /${segment}
-            - JwtAuth
 
         - id: msvc-servicios-create
           uri: lb://msvc-servicios
@@ -766,7 +735,6 @@ spring:
             - Method=PUT,PATCH,DELETE
           filters:
             - RewritePath=/api/servicio/(?<id>[0-9]+), /servicio/${id}
-            - JwtAuth
 
         # TERMAS
         - id: msvc-termas-imagen
@@ -785,7 +753,6 @@ spring:
             - Method=POST
           filters:
             - RewritePath=/api/terma, /terma
-            - JwtAuth
 
         - id: msvc-termas-update
           uri: lb://msvc-termas
@@ -794,7 +761,6 @@ spring:
             - Method=PUT,PATCH,DELETE
           filters:
             - RewritePath=/api/terma/(?<id>[0-9]+), /terma/${id}
-            - JwtAuth
 
         # ESPACIOS PÚBLICOS
         - id: msvc-espacios-publicos-imagen
@@ -813,7 +779,6 @@ spring:
             - Method=POST
           filters:
             - RewritePath=/api/espacio-publico, /espacio-publico
-            - JwtAuth
 
         - id: msvc-espacios-publicos-update
           uri: lb://msvc-espacios-publicos
@@ -822,7 +787,6 @@ spring:
             - Method=PUT,PATCH,DELETE
           filters:
             - RewritePath=/api/espacio-publico/(?<id>[0-9]+), /espacio-publico/${id}
-            - JwtAuth
 
         # ========== HOME CONFIG (PÚBLICO) ==========
         - id: msvc-home-config-public
@@ -841,7 +805,6 @@ spring:
             - Method=PUT
           filters:
             - RewritePath=/api/(?<segment>.*), /${segment}
-            - JwtAuth
 
         # ========== HOME CONFIG - UPLOAD IMAGEN (MODERADOR) ==========
         - id: msvc-home-config-upload
@@ -851,7 +814,6 @@ spring:
             - Method=POST
           filters:
             - RewritePath=/api/(?<segment>.*), /${segment}
-            - JwtAuth
 
         # ========== USER UPLOADS (PÚBLICO) ==========
         - id: msvc-user-uploads
@@ -871,7 +833,6 @@ spring:
             - Method=GET
           filters:
             - RewritePath=/api/(?<segment>.*), /${segment}
-            - JwtAuth
 
         # Actualizar perfil
         - id: msvc-user-profile-update
@@ -881,7 +842,6 @@ spring:
             - Method=PUT
           filters:
             - RewritePath=/api/(?<segment>.*), /${segment}
-            - JwtAuth
 
         # ========== USUARIOS (MODERADOR) ==========
         - id: msvc-user-moderador
@@ -890,7 +850,6 @@ spring:
             - Path=/api/user/all, /api/user/administradores, /api/user/{id}, /api/user/{id}/role, /api/user/{id}/estado, /api/user/moderador/create
           filters:
             - RewritePath=/api/(?<segment>.*), /${segment}
-            - JwtAuth
 
         # ========== BUSINESS (MODERADOR) ==========
         - id: msvc-business
@@ -899,7 +858,6 @@ spring:
             - Path=/api/business, /api/business/**, /api/business/all, /api/business/user/{userId}, /api/business/external/{externalBusinessId}/type/{businessType}
           filters:
             - RewritePath=/api/(?<segment>.*), /${segment}
-            - JwtAuth
 
 eureka:
   client:

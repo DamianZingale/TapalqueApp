@@ -19,7 +19,7 @@ public class EventImages {
 
     @ManyToOne
     @JoinColumn(name = "evento_id", referencedColumnName = "id", nullable = false)   
-    private Eventos eventoId;
+    private Evento eventoId;
 
     private String imageUrl;
 
@@ -27,7 +27,7 @@ public class EventImages {
     public EventImages() {
     }
 
-    public EventImages(Long id_image, Eventos eventoId, String imageUrl) {
+    public EventImages(Long id_image, Evento eventoId, String imageUrl) {
         this.id_image = id_image;
         this.eventoId = eventoId;
         this.imageUrl = imageUrl;
@@ -41,11 +41,11 @@ public class EventImages {
         this.id_image = id_image;
     }
 
-    public Eventos getEventoId() {
+    public Evento getEventoId() {
         return eventoId;
     }
 
-    public void setEventoId(Eventos eventoId) {
+    public void setEventoId(Evento eventoId) {
         this.eventoId = eventoId;
     }
 

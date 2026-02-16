@@ -67,8 +67,8 @@ services:
       dockerfile: Dockerfile
     container_name: nginx-proxy
     ports:
-      - "80:80"
-      - "443:443"
+      - '80:80'
+      - '443:443'
     volumes:
       - letsencrypt_data:/etc/letsencrypt
       - certbot_www:/var/www/certbot
@@ -104,12 +104,7 @@ services:
   # En el VPS, configurar firewall (ufw) para solo permitir 80, 443 y 22.
   # ==========================================
   rabbitmq:
-    environment:
-      RABBITMQ_VM_MEMORY_HIGH_WATERMARK: 0.7
-    deploy:
-      resources:
-        limits:
-          memory: 512M
+    mem_limit: 1g
 
   pedidos-db:
     restart: always
@@ -217,7 +212,7 @@ services:
       resources:
         limits:
           memory: 512M
-          cpus: "0.30"
+          cpus: '0.30'
 
   msvc-gateway-server:
     environment:
@@ -226,7 +221,7 @@ services:
       resources:
         limits:
           memory: 512M
-          cpus: "0.40"
+          cpus: '0.40'
 
   # ==========================================
   # SERVICIOS CRITICOS - 1 REPLICA
@@ -240,7 +235,7 @@ services:
       resources:
         limits:
           memory: 384M
-          cpus: "0.30"
+          cpus: '0.30'
 
   msvc-user:
     environment:
@@ -250,7 +245,7 @@ services:
       resources:
         limits:
           memory: 384M
-          cpus: "0.30"
+          cpus: '0.30'
 
   msvc-pedidos:
     environment:
@@ -264,7 +259,7 @@ services:
       resources:
         limits:
           memory: 384M
-          cpus: "0.30"
+          cpus: '0.30'
 
   msvc-reservas:
     environment:
@@ -278,7 +273,7 @@ services:
       resources:
         limits:
           memory: 384M
-          cpus: "0.30"
+          cpus: '0.30'
 
   msvc-mercado-pago:
     environment:
@@ -292,7 +287,7 @@ services:
       resources:
         limits:
           memory: 384M
-          cpus: "0.30"
+          cpus: '0.30'
 
   # ==========================================
   # SERVICIOS NO CRITICOS - 1 REPLICA
@@ -304,7 +299,7 @@ services:
       resources:
         limits:
           memory: 300M
-          cpus: "0.20"
+          cpus: '0.20'
 
   msvc-hosteleria:
     environment:
@@ -313,7 +308,7 @@ services:
       resources:
         limits:
           memory: 300M
-          cpus: "0.20"
+          cpus: '0.20'
 
   msvc-comercio:
     environment:
@@ -322,7 +317,7 @@ services:
       resources:
         limits:
           memory: 300M
-          cpus: "0.20"
+          cpus: '0.20'
 
   msvc-eventos:
     environment:
@@ -331,7 +326,7 @@ services:
       resources:
         limits:
           memory: 300M
-          cpus: "0.20"
+          cpus: '0.20'
 
   msvc-servicios:
     environment:
@@ -340,7 +335,7 @@ services:
       resources:
         limits:
           memory: 300M
-          cpus: "0.20"
+          cpus: '0.20'
 
   msvc-termas:
     environment:
@@ -349,7 +344,7 @@ services:
       resources:
         limits:
           memory: 300M
-          cpus: "0.20"
+          cpus: '0.20'
 
   msvc-espacios-publicos:
     environment:
@@ -358,7 +353,7 @@ services:
       resources:
         limits:
           memory: 300M
-          cpus: "0.20"
+          cpus: '0.20'
 
   # ==========================================
   # FRONTEND - Nginx en produccion (solo red interna)

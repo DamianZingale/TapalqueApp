@@ -737,7 +737,7 @@ services:
 # VOLUMENES Y REDES
 # ==========================================
 volumes:
-  rabbit_data:
+  rabbitmq_data:
   pedidos_data:
   reservas_data:
   gastronomia_data:
