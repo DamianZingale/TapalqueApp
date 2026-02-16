@@ -5,6 +5,7 @@ import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
 import { es } from 'date-fns/locale';
 import { fetchReservasByHotel, cancelarReserva, crearReservaExterna, Reserva } from '../../../../services/fetchReservas';
+import { PhoneInput } from '../../../../shared/components/PhoneInput';
 
 interface FormReservaExterna {
     customerName: string;
@@ -362,11 +363,9 @@ export const GestionReservasTab = () => {
                         <Col md={6}>
                             <Form.Group className="mb-3">
                                 <Form.Label>Teléfono</Form.Label>
-                                <Form.Control
-                                    type="tel"
+                                <PhoneInput
                                     value={formData.customerPhone}
-                                    onChange={(e) => setFormData(prev => ({ ...prev, customerPhone: e.target.value }))}
-                                    placeholder="+54 9 11 1234-5678"
+                                    onChange={(val) => setFormData(prev => ({ ...prev, customerPhone: val }))}
                                 />
                             </Form.Group>
                         </Col>

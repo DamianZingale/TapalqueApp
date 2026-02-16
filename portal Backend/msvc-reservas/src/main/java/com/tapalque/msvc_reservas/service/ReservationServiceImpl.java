@@ -19,9 +19,12 @@ import reactor.core.publisher.Mono;
 public class ReservationServiceImpl implements ReservationService {
 
     private final ReservationRepositoryInterface reservationRepository;
+    private final AdminNotificationService adminNotificationService;
 
-    public ReservationServiceImpl(ReservationRepositoryInterface reservationRepository) {
+    public ReservationServiceImpl(ReservationRepositoryInterface reservationRepository,
+                                  AdminNotificationService adminNotificationService) {
         this.reservationRepository = reservationRepository;
+        this.adminNotificationService = adminNotificationService;
     }
 
     @Override
@@ -33,7 +36,10 @@ public class ReservationServiceImpl implements ReservationService {
 
         // Guardamos en Mongo y mapeamos de nuevo a DTO para devolver
         return reservationRepository.save(reservation)
-                .map(ReservationMapper::toDto);
+                .map(ReservationMapper::toDto)
+                .doOnSuccess(dto -> {
+                    if (dto != null) adminNotificationService.notificarNuevaReserva(dto);
+                });
     }
 
     @Override
@@ -56,7 +62,10 @@ public Mono<ReservationDTO> updateReservation(ReservationDTO reservationDto) {
                 updated.setDateUpdated(LocalDateTime.now());
                 return reservationRepository.save(updated);
             })
-            .map(ReservationMapper::toDto);
+            .map(ReservationMapper::toDto)
+            .doOnSuccess(dto -> {
+                if (dto != null) adminNotificationService.notificarReservaActualizada(dto);
+            });
 }
 
     @Override
@@ -128,7 +137,12 @@ public Mono<ReservationDTO> updateReservation(ReservationDTO reservationDto) {
                 reservation.setDateUpdated(LocalDateTime.now());
                 return reservationRepository.save(reservation);
             })
-            .doOnSuccess(reservation -> System.out.println("Reserva " + reservaId + " confirmada como PAGADA"))
+            .doOnSuccess(reservation -> {
+                System.out.println("Reserva " + reservaId + " confirmada como PAGADA");
+                if (reservation != null) {
+                    adminNotificationService.notificarReservaActualizada(ReservationMapper.toDto(reservation));
+                }
+            })
             .doOnError(error -> System.err.println("Error al confirmar pago de reserva " + reservaId + ": " + error.getMessage()))
             .subscribe();
     }

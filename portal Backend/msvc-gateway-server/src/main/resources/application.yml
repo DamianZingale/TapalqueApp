@@ -35,6 +35,35 @@ spring:
             allowCredentials: true
 
       routes:
+        # ========== WEBSOCKET (STOMP+SockJS) ==========
+        - id: msvc-pedidos-ws
+          uri: lb://msvc-pedidos
+          predicates:
+            - Path=/ws/pedidos/**
+          filters:
+            - RewritePath=/ws/pedidos/(?<segment>.*), /ws/${segment}
+
+        - id: msvc-pedidos-ws-root
+          uri: lb://msvc-pedidos
+          predicates:
+            - Path=/ws/pedidos
+          filters:
+            - RewritePath=/ws/pedidos, /ws
+
+        - id: msvc-reservas-ws
+          uri: lb://msvc-reservas
+          predicates:
+            - Path=/ws/reservas/**
+          filters:
+            - RewritePath=/ws/reservas/(?<segment>.*), /ws/${segment}
+
+        - id: msvc-reservas-ws-root
+          uri: lb://msvc-reservas
+          predicates:
+            - Path=/ws/reservas
+          filters:
+            - RewritePath=/ws/reservas, /ws
+
         # ========== RUTAS PÚBLICAS (CON RATE LIMITING) ==========
         - id: msvc-jwt-login
           uri: lb://msvc-jwt

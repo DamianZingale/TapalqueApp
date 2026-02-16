@@ -25,6 +25,7 @@ public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
     private final RabbitTemplate rabbitTemplate;
+    private final AdminNotificationService adminNotificationService;
 
     @Value("${rabbitmq.pedido.exchange}")
     private String orderExchange;
@@ -32,9 +33,11 @@ public class OrderServiceImpl implements OrderService {
     @Value("${rabbitmq.routingKey.mercado.pago}")
     private String routingKeyMercadoPago;
 
-    public OrderServiceImpl(OrderRepository orderRepository, RabbitTemplate rabbitTemplate) {
+    public OrderServiceImpl(OrderRepository orderRepository, RabbitTemplate rabbitTemplate,
+                            AdminNotificationService adminNotificationService) {
         this.orderRepository = orderRepository;
         this.rabbitTemplate = rabbitTemplate;
+        this.adminNotificationService = adminNotificationService;
     }
     
     @Override
@@ -46,14 +49,16 @@ public class OrderServiceImpl implements OrderService {
     return orderRepository.save(order)
         .map(savedOrder -> {
             rabbitTemplate.convertAndSend(
-                orderExchange,  
-                routingKeyMercadoPago,                      
+                orderExchange,
+                routingKeyMercadoPago,
                 Map.of(
                     "idPedido", savedOrder.getId(),
                     "monto", savedOrder.getTotalPrice(),
                     "fecha", savedOrder.getDateCreated().toString()
                 )
             );
+
+            adminNotificationService.notificarNuevoPedido(savedOrder);
 
             return mapToDTO(savedOrder);
         });
@@ -110,6 +115,9 @@ public class OrderServiceImpl implements OrderService {
                 order.setStatus(Order.OrderStatus.valueOf(status.toUpperCase()));
                 order.setDateUpdated(LocalDateTime.now());
                 return orderRepository.save(order);
+            })
+            .doOnSuccess(order -> {
+                if (order != null) adminNotificationService.notificarPedidoActualizado(order);
             });
     }
 
@@ -132,7 +140,10 @@ public class OrderServiceImpl implements OrderService {
                 order.setDateUpdated(LocalDateTime.now());
                 return orderRepository.save(order);
             })
-            .doOnSuccess(order -> System.out.println("Pedido " + pedidoId + " confirmado como PAGADO"))
+            .doOnSuccess(order -> {
+                System.out.println("Pedido " + pedidoId + " confirmado como PAGADO");
+                if (order != null) adminNotificationService.notificarPedidoActualizado(order);
+            })
             .doOnError(error -> System.err.println("Error al confirmar pago del pedido " + pedidoId + ": " + error.getMessage()))
             .subscribe();
     }

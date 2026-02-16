@@ -1,25 +1,26 @@
 package com.tapalque.msvc_reservas.config;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.ReactiveSecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.WebFilter;
-import org.springframework.web.server.WebFilterChain;
 
-import reactor.core.publisher.Mono;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Component
-public class JwtAuthenticationFilter implements WebFilter {
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final WebClient.Builder webClientBuilder;
 
@@ -28,42 +29,45 @@ public class JwtAuthenticationFilter implements WebFilter {
     }
 
     @Override
-    public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
-        ServerHttpRequest request = exchange.getRequest();
-        String path = request.getPath().value();
+    protected void doFilterInternal(HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain)
+            throws ServletException, IOException {
 
-        // Skip public endpoints
-        if (path.startsWith("/reservas/public/") || path.startsWith("/availability/")) {
-            return chain.filter(exchange);
-        }
-
-        String authHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+        final String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return chain.filter(exchange);
+            filterChain.doFilter(request, response);
+            return;
         }
 
-        return webClientBuilder.build()
-                .post()
-                .uri("lb://MSVC-JWT/jwt/public/validate")
-                .header(HttpHeaders.AUTHORIZATION, authHeader)
-                .accept(MediaType.APPLICATION_JSON)
-                .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<Map<String, String>>() {})
-                .onErrorReturn(Map.of())
-                .flatMap(datos -> {
-                    if (datos == null || !datos.containsKey("email") || !datos.containsKey("rol")) {
-                        return chain.filter(exchange);
-                    }
+        try {
+            Map<String, String> datos = webClientBuilder.build()
+                    .post()
+                    .uri("lb://MSVC-JWT/jwt/public/validate")
+                    .header(HttpHeaders.AUTHORIZATION, authHeader)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .retrieve()
+                    .bodyToMono(new ParameterizedTypeReference<Map<String, String>>() {})
+                    .onErrorReturn(Map.of())
+                    .block();
 
-                    String email = datos.get("email");
-                    String rol = datos.get("rol");
-                    UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                            email,
-                            null,
-                            List.of(new SimpleGrantedAuthority("ROLE_" + rol)));
+            if (datos == null || !datos.containsKey("email") || !datos.containsKey("rol")) {
+                filterChain.doFilter(request, response);
+                return;
+            }
 
-                    return chain.filter(exchange)
-                            .contextWrite(ReactiveSecurityContextHolder.withAuthentication(auth));
-                });
+            String email = datos.get("email");
+            String rol = datos.get("rol");
+            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                    email,
+                    null,
+                    List.of(new SimpleGrantedAuthority("ROLE_" + rol)));
+            SecurityContextHolder.getContext().setAuthentication(auth);
+
+        } catch (Exception e) {
+            SecurityContextHolder.clearContext();
+        }
+
+        filterChain.doFilter(request, response);
     }
 }

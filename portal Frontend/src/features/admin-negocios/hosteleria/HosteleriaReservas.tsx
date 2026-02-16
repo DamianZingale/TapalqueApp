@@ -12,6 +12,7 @@ import {
   Tab,
   Tabs,
 } from 'react-bootstrap';
+import { PhoneInput } from '../../../shared/components/PhoneInput';
 import {
   actualizarReserva,
   cancelarReserva,
@@ -815,16 +816,11 @@ export function HosteleriaReservas({
             <Col md={6}>
               <Form.Group className="mb-3">
                 <Form.Label>Teléfono</Form.Label>
-                <Form.Control
-                  type="tel"
+                <PhoneInput
                   value={formReserva.customerPhone}
-                  onChange={(e) =>
-                    setFormReserva({
-                      ...formReserva,
-                      customerPhone: e.target.value,
-                    })
+                  onChange={(val) =>
+                    setFormReserva({ ...formReserva, customerPhone: val })
                   }
-                  placeholder="Número de contacto"
                 />
               </Form.Group>
             </Col>
@@ -1086,7 +1082,19 @@ export function HosteleriaReservas({
                     <p className="mb-1 small">DNI: {reservaDetalle.customer.customerDni}</p>
                   )}
                   {reservaDetalle.customer.customerPhone && (
-                    <p className="mb-1 small">Tel: {reservaDetalle.customer.customerPhone}</p>
+                    <p className="mb-1 small d-flex align-items-center gap-2">
+                      Tel: {reservaDetalle.customer.customerPhone}
+                      <a
+                        href={`https://wa.me/${reservaDetalle.customer.customerPhone.replace(/\D/g, '')}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn btn-success btn-sm py-0 px-1"
+                        title="Enviar WhatsApp"
+                        style={{ fontSize: '0.75rem', lineHeight: 1.2 }}
+                      >
+                        <i className="bi bi-whatsapp"></i>
+                      </a>
+                    </p>
                   )}
                   {reservaDetalle.customer.customerEmail && (
                     <p className="mb-1 small">Email: {reservaDetalle.customer.customerEmail}</p>

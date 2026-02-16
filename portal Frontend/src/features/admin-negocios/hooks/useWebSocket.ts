@@ -1,9 +1,26 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { Client } from '@stomp/stompjs';
+import SockJS from 'sockjs-client';
 import type { WebSocketMessage, BusinessType } from '../types';
 
-const WS_BASE_URL = import.meta.env.VITE_WS_URL || (window.location.protocol === 'https:' ? 'wss:' : 'ws:') + '//' + window.location.host + '/ws';
-const RECONNECT_INTERVAL = 5000;
+const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
+const RECONNECT_DELAY = 5000;
 const MAX_RECONNECT_ATTEMPTS = 10;
+
+function getWsUrl(businessType: BusinessType): string {
+  const base = API_BASE.replace(/\/+$/, '');
+  if (businessType === 'GASTRONOMIA') {
+    return `${base}/ws/pedidos`;
+  }
+  return `${base}/ws/reservas`;
+}
+
+function getTopic(businessId: string, businessType: BusinessType): string {
+  if (businessType === 'GASTRONOMIA') {
+    return `/topic/pedidos/${businessId}`;
+  }
+  return `/topic/reservas/${businessId}`;
+}
 
 interface UseWebSocketReturn {
   isConnected: boolean;
@@ -16,91 +33,88 @@ export function useWebSocket(businessId: string, businessType: BusinessType): Us
   const [isConnected, setIsConnected] = useState(false);
   const [lastMessage, setLastMessage] = useState<WebSocketMessage | null>(null);
 
-  const wsRef = useRef<WebSocket | null>(null);
+  const clientRef = useRef<Client | null>(null);
   const reconnectAttempts = useRef(0);
-  const reconnectTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const connect = useCallback(() => {
-    if (wsRef.current?.readyState === WebSocket.OPEN) {
+    if (clientRef.current?.active) {
       return;
     }
 
-    try {
-      const wsUrl = `${WS_BASE_URL}/business/${businessId}?type=${businessType}`;
-      const ws = new WebSocket(wsUrl);
+    const wsUrl = getWsUrl(businessType);
+    const topic = getTopic(businessId, businessType);
 
-      ws.onopen = () => {
-        console.log('WebSocket conectado');
+    const client = new Client({
+      webSocketFactory: () => new SockJS(wsUrl),
+      reconnectDelay: RECONNECT_DELAY,
+      heartbeatIncoming: 10000,
+      heartbeatOutgoing: 10000,
+
+      onConnect: () => {
+        console.log(`STOMP conectado a ${businessType}`);
         setIsConnected(true);
         reconnectAttempts.current = 0;
 
-        ws.send(JSON.stringify({
-          type: 'subscribe',
-          businessId,
-          businessType
-        }));
-      };
+        client.subscribe(topic, (message) => {
+          try {
+            const parsed: WebSocketMessage = JSON.parse(message.body);
+            setLastMessage(parsed);
+          } catch (error) {
+            console.error('Error parsing STOMP message:', error);
+          }
+        });
+      },
 
-      ws.onmessage = (event) => {
-        try {
-          const message: WebSocketMessage = JSON.parse(event.data);
-          setLastMessage(message);
-        } catch (error) {
-          console.error('Error parsing WebSocket message:', error);
-        }
-      };
+      onStompError: (frame) => {
+        console.error('STOMP error:', frame.headers['message'], frame.body);
+      },
 
-      ws.onerror = (error) => {
-        console.error('WebSocket error:', error);
-      };
-
-      ws.onclose = (event) => {
-        console.log('WebSocket cerrado:', event.code, event.reason);
+      onWebSocketClose: () => {
+        console.log('WebSocket cerrado');
         setIsConnected(false);
-        wsRef.current = null;
+        reconnectAttempts.current++;
 
-        if (reconnectAttempts.current < MAX_RECONNECT_ATTEMPTS) {
-          reconnectTimeout.current = setTimeout(() => {
-            reconnectAttempts.current++;
-            console.log(`Intentando reconectar (${reconnectAttempts.current}/${MAX_RECONNECT_ATTEMPTS})...`);
-            connect();
-          }, RECONNECT_INTERVAL);
+        if (reconnectAttempts.current >= MAX_RECONNECT_ATTEMPTS) {
+          console.warn('Máximo de intentos de reconexión alcanzado');
+          client.deactivate();
         }
-      };
+      },
 
-      wsRef.current = ws;
-    } catch (error) {
-      console.error('Error creating WebSocket:', error);
-      setIsConnected(false);
-    }
+      onDisconnect: () => {
+        setIsConnected(false);
+      },
+    });
+
+    client.activate();
+    clientRef.current = client;
   }, [businessId, businessType]);
 
   const disconnect = useCallback(() => {
-    if (reconnectTimeout.current) {
-      clearTimeout(reconnectTimeout.current);
-      reconnectTimeout.current = null;
+    if (clientRef.current) {
+      clientRef.current.deactivate();
+      clientRef.current = null;
     }
-
-    if (wsRef.current) {
-      wsRef.current.close();
-      wsRef.current = null;
-    }
-
     setIsConnected(false);
   }, []);
 
   const sendMessage = useCallback((message: WebSocketMessage) => {
-    if (wsRef.current?.readyState === WebSocket.OPEN) {
-      wsRef.current.send(JSON.stringify(message));
+    if (clientRef.current?.active) {
+      const destination = businessType === 'GASTRONOMIA'
+        ? `/app/pedidos/${businessId}`
+        : `/app/reservas/${businessId}`;
+      clientRef.current.publish({
+        destination,
+        body: JSON.stringify(message),
+      });
     } else {
-      console.warn('WebSocket no está conectado');
+      console.warn('STOMP no está conectado');
     }
-  }, []);
+  }, [businessId, businessType]);
 
   const reconnect = useCallback(() => {
     disconnect();
     reconnectAttempts.current = 0;
-    connect();
+    setTimeout(() => connect(), 100);
   }, [connect, disconnect]);
 
   useEffect(() => {
@@ -108,16 +122,12 @@ export function useWebSocket(businessId: string, businessType: BusinessType): Us
     return () => {
       disconnect();
     };
-  }, [connect, disconnect]);
-
-  useEffect(() => {
-    reconnect();
   }, [businessId, businessType]);
 
   return {
     isConnected,
     lastMessage,
     sendMessage,
-    reconnect
+    reconnect,
   };
 }

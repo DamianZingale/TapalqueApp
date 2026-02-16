@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { authService } from "../../../services/authService";
 import { api } from "../../../config/api";
+import { PhoneInput } from "../../../shared/components/PhoneInput";
 
 interface UserProfile {
     id: number;
@@ -181,15 +182,12 @@ export const DatosPersonales = () => {
 
             <Form.Group className="mb-3">
                 <Form.Label>Teléfono <span className="text-danger">*</span></Form.Label>
-                <Form.Control
-                    type="tel"
+                <PhoneInput
                     value={telefono}
-                    onChange={(e) => setTelefono(e.target.value)}
-                    placeholder="Ej: 2284-123456"
+                    onChange={setTelefono}
+                    required
+                    helpText="Requerido para realizar reservas. Sin 0 ni 15."
                 />
-                <Form.Text className="text-muted">
-                    Requerido para realizar reservas
-                </Form.Text>
             </Form.Group>
 
             <Form.Group className="mb-3">
