@@ -8,6 +8,7 @@ import com.tapalque.hosteleria.demo.entidades.Habitacion;
 public class HabitacionDTO {
 
     private Long id;
+    private Integer numero;
     private String titulo;
     private String descripcion;
     private Integer maxPersonas;
@@ -23,6 +24,7 @@ public class HabitacionDTO {
 
     public HabitacionDTO(Habitacion habitacion) {
         this.id = habitacion.getId();
+        this.numero = habitacion.getNumero();
         this.titulo = habitacion.getTitulo();
         this.descripcion = habitacion.getDescripcion();
         this.maxPersonas = habitacion.getMaxPersonas();
@@ -30,8 +32,8 @@ public class HabitacionDTO {
         this.tipoPrecio = habitacion.getTipoPrecio() != null
             ? habitacion.getTipoPrecio().name().toLowerCase()
             : "por_habitacion";
-        this.fotos = habitacion.getFotos();
-        this.servicios = habitacion.getServicios();
+        this.fotos = habitacion.getFotos() != null ? new java.util.ArrayList<>(habitacion.getFotos()) : new java.util.ArrayList<>();
+        this.servicios = habitacion.getServicios() != null ? new java.util.ArrayList<>(habitacion.getServicios()) : new java.util.ArrayList<>();
         this.disponible = habitacion.getDisponible();
         this.hospedajeId = habitacion.getHospedaje() != null
             ? habitacion.getHospedaje().getId()
@@ -45,6 +47,14 @@ public class HabitacionDTO {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Integer getNumero() {
+        return numero;
+    }
+
+    public void setNumero(Integer numero) {
+        this.numero = numero;
     }
 
     public String getTitulo() {

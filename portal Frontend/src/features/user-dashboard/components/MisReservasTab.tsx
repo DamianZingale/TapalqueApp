@@ -175,6 +175,9 @@ export const MisReservasTab = () => {
                                                 <Col md={3}>
                                                     <small className="text-muted d-block">Hotel</small>
                                                     <strong>{reserva.hotel.hotelName}</strong>
+                                                    {reserva.roomNumber && (
+                                                        <div><Badge bg="light" text="dark">Hab. #{reserva.roomNumber}</Badge></div>
+                                                    )}
                                                 </Col>
                                                 <Col md={3}>
                                                     <small className="text-muted d-block">Fechas</small>
@@ -238,6 +241,11 @@ export const MisReservasTab = () => {
                                     <div className="mb-2">
                                         <strong>Hotel:</strong> {reservaSeleccionada.hotel.hotelName}
                                     </div>
+                                    {reservaSeleccionada.roomNumber && (
+                                        <div className="mb-2">
+                                            <strong>Habitación:</strong> #{reservaSeleccionada.roomNumber}
+                                        </div>
+                                    )}
                                     <div className="mb-2">
                                         <strong>Estado:</strong>{" "}
                                         {reservaSeleccionada.isCancelled ? (

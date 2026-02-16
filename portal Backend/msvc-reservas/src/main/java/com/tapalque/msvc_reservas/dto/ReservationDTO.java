@@ -13,6 +13,7 @@ public class ReservationDTO {
     private Boolean isCancelled;
     private LocalDateTime dateCreated;
     private LocalDateTime dateUpdated;
+    private Integer roomNumber;
     private String notas;
 
     public ReservationDTO() {}
@@ -103,6 +104,14 @@ public class ReservationDTO {
 
     public void setDateUpdated(LocalDateTime dateUpdated) {
         this.dateUpdated = dateUpdated;
+    }
+
+    public Integer getRoomNumber() {
+        return roomNumber;
+    }
+
+    public void setRoomNumber(Integer roomNumber) {
+        this.roomNumber = roomNumber;
     }
 
     public String getNotas() {

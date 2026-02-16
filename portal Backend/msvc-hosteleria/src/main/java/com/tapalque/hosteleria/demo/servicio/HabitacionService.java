@@ -54,6 +54,7 @@ public class HabitacionService {
                 .orElseThrow(() -> new EntityNotFoundException("Hospedaje no encontrado con ID: " + hospedajeId));
 
         Habitacion habitacion = new Habitacion();
+        habitacion.setNumero(dto.getNumero());
         habitacion.setTitulo(dto.getTitulo());
         habitacion.setDescripcion(dto.getDescripcion());
         habitacion.setMaxPersonas(dto.getMaxPersonas());
@@ -78,6 +79,9 @@ public class HabitacionService {
         Habitacion habitacion = habitacionRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Habitación no encontrada con ID: " + id));
 
+        if (dto.getNumero() != null) {
+            habitacion.setNumero(dto.getNumero());
+        }
         if (dto.getTitulo() != null) {
             habitacion.setTitulo(dto.getTitulo());
         }

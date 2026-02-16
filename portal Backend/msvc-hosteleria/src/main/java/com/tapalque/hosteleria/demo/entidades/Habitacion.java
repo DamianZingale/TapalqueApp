@@ -27,6 +27,9 @@ public class Habitacion {
     private Long id;
 
     @Column(nullable = false)
+    private Integer numero;
+
+    @Column(nullable = false)
     private String titulo;
 
     @Column(columnDefinition = "TEXT")
@@ -87,6 +90,14 @@ public class Habitacion {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Integer getNumero() {
+        return numero;
+    }
+
+    public void setNumero(Integer numero) {
+        this.numero = numero;
     }
 
     public String getTitulo() {

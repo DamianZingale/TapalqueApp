@@ -30,6 +30,7 @@ interface HosteleriaHabitacionesProps {
 }
 
 interface NuevaHabitacionForm {
+  numero: number;
   titulo: string;
   descripcion: string;
   maxPersonas: number;
@@ -40,6 +41,7 @@ interface NuevaHabitacionForm {
 }
 
 const initialFormState: NuevaHabitacionForm = {
+  numero: 0,
   titulo: '',
   descripcion: '',
   maxPersonas: 2,
@@ -101,6 +103,10 @@ export function HosteleriaHabitaciones({
   const handleAgregarHabitacion = async () => {
     setErrorForm(null);
 
+    if (!nuevaHabitacion.numero || nuevaHabitacion.numero <= 0) {
+      setErrorForm('El número de habitación es obligatorio y debe ser mayor a 0');
+      return;
+    }
     if (!nuevaHabitacion.titulo.trim()) {
       setErrorForm('El título es obligatorio');
       return;
@@ -119,6 +125,7 @@ export function HosteleriaHabitaciones({
       setGuardando(true);
 
       const nueva = {
+        numero: nuevaHabitacion.numero,
         titulo: nuevaHabitacion.titulo.trim(),
         descripcion: nuevaHabitacion.descripcion.trim(),
         maxPersonas: nuevaHabitacion.maxPersonas,
@@ -367,6 +374,7 @@ export function HosteleriaHabitaciones({
                 <Table hover>
                   <thead>
                     <tr>
+                      <th>N°</th>
                       <th>Habitación</th>
                       <th>Capacidad</th>
                       <th>Precio</th>
@@ -377,6 +385,9 @@ export function HosteleriaHabitaciones({
                   <tbody>
                     {habitaciones.map((habitacion) => (
                       <tr key={habitacion.id}>
+                        <td>
+                          <strong>#{habitacion.numero}</strong>
+                        </td>
                         <td>
                           <div className="d-flex align-items-center gap-2">
                             {habitacion.fotos && habitacion.fotos.length > 0 ? (
@@ -539,7 +550,7 @@ export function HosteleriaHabitaciones({
                         />
                       )}
                       <Card.Body>
-                        <Card.Title>{habitacion.titulo}</Card.Title>
+                        <Card.Title>#{habitacion.numero} - {habitacion.titulo}</Card.Title>
                         {habitacion.descripcion && (
                           <Card.Text className="text-muted small">
                             {habitacion.descripcion}
@@ -596,7 +607,24 @@ export function HosteleriaHabitaciones({
           {errorForm && <Alert variant="danger">{errorForm}</Alert>}
 
           <Row>
-            <Col md={6}>
+            <Col md={3}>
+              <Form.Group className="mb-3">
+                <Form.Label>N° de habitación *</Form.Label>
+                <Form.Control
+                  type="number"
+                  min={1}
+                  value={nuevaHabitacion.numero || ''}
+                  onChange={(e) =>
+                    setNuevaHabitacion({
+                      ...nuevaHabitacion,
+                      numero: Number(e.target.value),
+                    })
+                  }
+                  placeholder="Ej: 101"
+                />
+              </Form.Group>
+            </Col>
+            <Col md={5}>
               <Form.Group className="mb-3">
                 <Form.Label>Título *</Form.Label>
                 <Form.Control
@@ -612,7 +640,7 @@ export function HosteleriaHabitaciones({
                 />
               </Form.Group>
             </Col>
-            <Col md={6}>
+            <Col md={4}>
               <Form.Group className="mb-3">
                 <Form.Label>Capacidad máxima *</Form.Label>
                 <Form.Select
@@ -791,7 +819,23 @@ export function HosteleriaHabitaciones({
           {habitacionSeleccionada && (
             <>
               <Row>
-                <Col md={6}>
+                <Col md={3}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>N° de habitación</Form.Label>
+                    <Form.Control
+                      type="number"
+                      min={1}
+                      value={habitacionSeleccionada.numero || ''}
+                      onChange={(e) =>
+                        setHabitacionSeleccionada({
+                          ...habitacionSeleccionada,
+                          numero: Number(e.target.value),
+                        })
+                      }
+                    />
+                  </Form.Group>
+                </Col>
+                <Col md={5}>
                   <Form.Group className="mb-3">
                     <Form.Label>Título</Form.Label>
                     <Form.Control
@@ -806,7 +850,7 @@ export function HosteleriaHabitaciones({
                     />
                   </Form.Group>
                 </Col>
-                <Col md={6}>
+                <Col md={4}>
                   <Form.Group className="mb-3">
                     <Form.Label>Capacidad máxima</Form.Label>
                     <Form.Select

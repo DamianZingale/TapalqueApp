@@ -30,6 +30,9 @@ public class Reservation {
     private String mercadoPagoId; // ID del pago en Mercado Pago
     private LocalDateTime fechaPago; // Fecha en que se aprobó el pago
 
+    // Número de habitación asignada
+    private Integer roomNumber;
+
     // Notas adicionales del administrador
     private String notas;
 
@@ -150,6 +153,14 @@ public LocalDateTime getFechaPago() {
 
 public void setFechaPago(LocalDateTime fechaPago) {
     this.fechaPago = fechaPago;
+}
+
+public Integer getRoomNumber() {
+    return roomNumber;
+}
+
+public void setRoomNumber(Integer roomNumber) {
+    this.roomNumber = roomNumber;
 }
 
 public String getNotas() {

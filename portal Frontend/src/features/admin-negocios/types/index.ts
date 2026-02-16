@@ -120,6 +120,7 @@ export interface Reserva {
   payment: PagoReserva;
   roomType?: string;
   roomId?: string;
+  roomNumber?: number;
   totalPrice: number;
   isActive: boolean;
   isCancelled: boolean;
@@ -160,6 +161,7 @@ export interface NuevoMenuItem {
 // Habitación/Opción de hospedaje
 export interface Habitacion {
   id: string;
+  numero: number;
   titulo: string;
   descripcion?: string;
   maxPersonas: number;

@@ -13,6 +13,11 @@ import jakarta.validation.constraints.Positive;
 public class HabitacionRequestDTO {
 
     @NonNull
+    @NotNull(message = "El número de habitación es obligatorio")
+    @Min(value = 1, message = "El número de habitación debe ser mayor a 0")
+    private Integer numero;
+
+    @NonNull
     @NotBlank(message = "El título es obligatorio")
     private String titulo;
 
@@ -42,6 +47,14 @@ public class HabitacionRequestDTO {
     }
 
     // Getters and Setters
+    public Integer getNumero() {
+        return numero;
+    }
+
+    public void setNumero(Integer numero) {
+        this.numero = numero;
+    }
+
     public String getTitulo() {
         return titulo;
     }

@@ -21,6 +21,7 @@ public class ReservationMapper {
         dto.setIsCancelled(r.getIsCancelled());
         dto.setDateCreated(r.getDateCreated());
         dto.setDateUpdated(r.getDateUpdated());
+        dto.setRoomNumber(r.getRoomNumber());
         dto.setNotas(r.getNotas());
         return dto;
     }
@@ -77,6 +78,7 @@ public class ReservationMapper {
         r.setIsCancelled(dto.getIsCancelled() != null ? dto.getIsCancelled() : false);
         r.setDateCreated(dto.getDateCreated());
         r.setDateUpdated(dto.getDateUpdated());
+        r.setRoomNumber(dto.getRoomNumber());
         r.setNotas(dto.getNotas());
         return r;
     }

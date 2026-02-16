@@ -19,7 +19,7 @@ import {
   fetchReservasByHotel,
 } from '../../../services/fetchReservas';
 import { useWebSocket } from '../hooks/useWebSocket';
-import type { EstadoReservaColor, FormReservaExterna, Reserva } from '../types';
+import type { FormReservaExterna, Reserva } from '../types';
 import { getColorEstadoReserva } from '../types';
 
 interface HosteleriaReservasProps {
@@ -77,6 +77,12 @@ export function HosteleriaReservas({
   const [amountPaidInput, setAmountPaidInput] = useState('');
   const [guardando, setGuardando] = useState(false);
   const [errorForm, setErrorForm] = useState<string | null>(null);
+
+  const [roomNumberInput, setRoomNumberInput] = useState('');
+
+  // Estado para modal de detalle de reserva
+  const [modalDetalle, setModalDetalle] = useState(false);
+  const [reservaDetalle, setReservaDetalle] = useState<Reserva | null>(null);
 
   // Estado para modal de completar pago
   const [modalCompletarPago, setModalCompletarPago] = useState(false);
@@ -335,6 +341,7 @@ export function HosteleriaReservas({
           remainingAmount: totalPrice - amountPaid,
         },
         totalPrice: totalPrice,
+        roomNumber: roomNumberInput ? Number(roomNumberInput) : undefined,
         isActive: true,
         isCancelled: false,
         notas: formReserva.notas,
@@ -348,6 +355,7 @@ export function HosteleriaReservas({
         setFormReserva(initialFormReserva);
         setTotalPriceInput('');
         setAmountPaidInput('');
+        setRoomNumberInput('');
         setMensaje({ tipo: 'success', texto: 'Reserva creada correctamente' });
       }
     } catch (error) {
@@ -640,14 +648,15 @@ export function HosteleriaReservas({
             </Col>
           </Row>
 
-          <Row xs={1} md={2} lg={3} className="g-3">
+          <Row xs={2} md={3} lg={4} className="g-2">
             {reservasActivas.map((reserva) => (
               <Col key={reserva.id}>
-                <ReservaCard
+                <ReservaCardCompacta
                   reserva={reserva}
-                  onCancelar={handleCancelarReserva}
-                  onCompletarPago={abrirModalCompletarPago}
-                  onCheckout={handleCheckout}
+                  onClick={() => {
+                    setReservaDetalle(reserva);
+                    setModalDetalle(true);
+                  }}
                 />
               </Col>
             ))}
@@ -753,13 +762,15 @@ export function HosteleriaReservas({
             </Col>
           </Row>
 
-          <Row xs={1} md={2} lg={3} className="g-3">
+          <Row xs={2} md={3} lg={4} className="g-2">
             {reservasFiltradas.map((reserva) => (
               <Col key={reserva.id}>
-                <ReservaCard
+                <ReservaCardCompacta
                   reserva={reserva}
-                  onCancelar={handleCancelarReserva}
-                  showHistorial
+                  onClick={() => {
+                    setReservaDetalle(reserva);
+                    setModalDetalle(true);
+                  }}
                 />
               </Col>
             ))}
@@ -858,7 +869,19 @@ export function HosteleriaReservas({
           <h6 className="text-muted mb-3">Datos de la Reserva</h6>
 
           <Row>
-            <Col md={6}>
+            <Col md={4}>
+              <Form.Group className="mb-3">
+                <Form.Label>N° de habitación</Form.Label>
+                <Form.Control
+                  type="number"
+                  min={1}
+                  value={roomNumberInput}
+                  onChange={(e) => setRoomNumberInput(e.target.value)}
+                  placeholder="Ej: 101"
+                />
+              </Form.Group>
+            </Col>
+            <Col md={4}>
               <Form.Group className="mb-3">
                 <Form.Label>Check-in *</Form.Label>
                 <Form.Control
@@ -873,7 +896,7 @@ export function HosteleriaReservas({
                 />
               </Form.Group>
             </Col>
-            <Col md={6}>
+            <Col md={4}>
               <Form.Group className="mb-3">
                 <Form.Label>Check-out *</Form.Label>
                 <Form.Control
@@ -1021,6 +1044,167 @@ export function HosteleriaReservas({
         </Modal.Footer>
       </Modal>
 
+      {/* Modal Detalle de Reserva */}
+      <Modal
+        show={modalDetalle}
+        onHide={() => setModalDetalle(false)}
+        size="lg"
+      >
+        {reservaDetalle && (
+          <>
+            <Modal.Header closeButton>
+              <Modal.Title className="d-flex align-items-center gap-2">
+                <span>Reserva #{reservaDetalle.id.slice(-6).toUpperCase()}</span>
+                {reservaDetalle.roomNumber && (
+                  <Badge bg="secondary">Hab. #{reservaDetalle.roomNumber}</Badge>
+                )}
+                {(() => {
+                  const hoy = new Date();
+                  const checkIn = new Date(reservaDetalle.stayPeriod.checkInDate);
+                  const checkOut = new Date(reservaDetalle.stayPeriod.checkOutDate);
+                  const esCheckInHoy = hoy.getFullYear() === checkIn.getFullYear() && hoy.getMonth() === checkIn.getMonth() && hoy.getDate() === checkIn.getDate();
+                  const esCheckOutHoy = hoy.getFullYear() === checkOut.getFullYear() && hoy.getMonth() === checkOut.getMonth() && hoy.getDate() === checkOut.getDate();
+                  return (
+                    <>
+                      {esCheckInHoy && reservaDetalle.isActive && !reservaDetalle.isCancelled && (
+                        <Badge bg="info" className="pulse-animation">ENTRA HOY</Badge>
+                      )}
+                      {esCheckOutHoy && reservaDetalle.isActive && !reservaDetalle.isCancelled && (
+                        <Badge bg="warning" text="dark" className="pulse-animation">SALE HOY</Badge>
+                      )}
+                    </>
+                  );
+                })()}
+              </Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <Row>
+                <Col md={6}>
+                  <h6 className="text-muted">Cliente</h6>
+                  <p className="mb-1"><strong>{reservaDetalle.customer.customerName}</strong></p>
+                  {reservaDetalle.customer.customerDni && (
+                    <p className="mb-1 small">DNI: {reservaDetalle.customer.customerDni}</p>
+                  )}
+                  {reservaDetalle.customer.customerPhone && (
+                    <p className="mb-1 small">Tel: {reservaDetalle.customer.customerPhone}</p>
+                  )}
+                  {reservaDetalle.customer.customerEmail && (
+                    <p className="mb-1 small">Email: {reservaDetalle.customer.customerEmail}</p>
+                  )}
+                </Col>
+                <Col md={6}>
+                  <h6 className="text-muted">Estadía</h6>
+                  <div className="p-2 bg-light rounded">
+                    <Row>
+                      <Col>
+                        <small className="text-muted">Check-in</small>
+                        <div><strong>{new Date(reservaDetalle.stayPeriod.checkInDate).toLocaleDateString('es-AR')}</strong></div>
+                      </Col>
+                      <Col className="text-center">
+                        <Badge bg="secondary">
+                          {calcularNoches(reservaDetalle.stayPeriod.checkInDate, reservaDetalle.stayPeriod.checkOutDate)} noches
+                        </Badge>
+                      </Col>
+                      <Col className="text-end">
+                        <small className="text-muted">Check-out</small>
+                        <div><strong>{new Date(reservaDetalle.stayPeriod.checkOutDate).toLocaleDateString('es-AR')}</strong></div>
+                      </Col>
+                    </Row>
+                  </div>
+                </Col>
+              </Row>
+
+              <hr />
+
+              <h6 className="text-muted">Pago</h6>
+              <Card className="bg-light">
+                <Card.Body className="py-2">
+                  <div className="d-flex justify-content-between">
+                    <span>Total:</span>
+                    <strong>${reservaDetalle.totalPrice.toLocaleString()}</strong>
+                  </div>
+                  <div className="d-flex justify-content-between text-success">
+                    <span>Pagado:</span>
+                    <span>${reservaDetalle.payment.amountPaid.toLocaleString()}</span>
+                  </div>
+                  {reservaDetalle.payment.remainingAmount > 0 && (
+                    <div className="d-flex justify-content-between text-danger fw-bold">
+                      <span>Pendiente:</span>
+                      <span>${reservaDetalle.payment.remainingAmount.toLocaleString()}</span>
+                    </div>
+                  )}
+                </Card.Body>
+              </Card>
+
+              {reservaDetalle.payment.paymentReceiptPath && (
+                <div className="mt-2">
+                  <a
+                    href={reservaDetalle.payment.paymentReceiptPath}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-sm btn-outline-primary"
+                  >
+                    Ver comprobante
+                  </a>
+                </div>
+              )}
+
+              {reservaDetalle.notas && (
+                <>
+                  <hr />
+                  <h6 className="text-muted">Notas</h6>
+                  <p className="small" style={{ whiteSpace: 'pre-line' }}>{reservaDetalle.notas}</p>
+                </>
+              )}
+            </Modal.Body>
+            <Modal.Footer>
+              {reservaDetalle.isActive && !reservaDetalle.isCancelled && (
+                <div className="d-flex gap-2 w-100">
+                  {reservaDetalle.payment.remainingAmount > 0 && (
+                    <Button
+                      variant="success"
+                      size="sm"
+                      onClick={() => {
+                        setModalDetalle(false);
+                        abrirModalCompletarPago(reservaDetalle);
+                      }}
+                    >
+                      Registrar Pago
+                    </Button>
+                  )}
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={() => {
+                      setModalDetalle(false);
+                      handleCheckout(reservaDetalle);
+                    }}
+                  >
+                    Check-out
+                  </Button>
+                  <Button
+                    variant="outline-danger"
+                    size="sm"
+                    className="ms-auto"
+                    onClick={() => {
+                      setModalDetalle(false);
+                      handleCancelarReserva(reservaDetalle);
+                    }}
+                  >
+                    Cancelar Reserva
+                  </Button>
+                </div>
+              )}
+              {(!reservaDetalle.isActive || reservaDetalle.isCancelled) && (
+                <Button variant="secondary" size="sm" onClick={() => setModalDetalle(false)}>
+                  Cerrar
+                </Button>
+              )}
+            </Modal.Footer>
+          </>
+        )}
+      </Modal>
+
       {/* Modal Completar Pago */}
       <Modal
         show={modalCompletarPago}
@@ -1160,229 +1344,61 @@ export function HosteleriaReservas({
   );
 }
 
-interface ReservaCardProps {
+interface ReservaCardCompactaProps {
   reserva: Reserva;
-  onCancelar: (reserva: Reserva) => void;
-  onCompletarPago?: (reserva: Reserva) => void;
-  onCheckout?: (reserva: Reserva) => void;
-  showHistorial?: boolean;
+  onClick: () => void;
 }
 
-function ReservaCard({
-  reserva,
-  onCancelar,
-  onCompletarPago,
-  onCheckout,
-  showHistorial,
-}: ReservaCardProps) {
+function ReservaCardCompacta({ reserva, onClick }: ReservaCardCompactaProps) {
   const colorEstado = getColorEstadoReserva(reserva);
+  const borderColor = colorEstado === 'ROJO' ? '#dc3545' : colorEstado === 'AMARILLO' ? '#ffc107' : '#fd7e14';
 
-  const getColorBg = (color: EstadoReservaColor): string => {
-    switch (color) {
-      case 'ROJO':
-        return 'danger';
-      case 'AMARILLO':
-        return 'warning';
-      case 'NARANJA':
-        return 'warning';
-      default:
-        return 'secondary';
-    }
-  };
+  const hoy = new Date();
+  const checkIn = new Date(reserva.stayPeriod.checkInDate);
+  const checkOut = new Date(reserva.stayPeriod.checkOutDate);
+  const esCheckInHoy = hoy.getFullYear() === checkIn.getFullYear() && hoy.getMonth() === checkIn.getMonth() && hoy.getDate() === checkIn.getDate();
+  const esCheckOutHoy = hoy.getFullYear() === checkOut.getFullYear() && hoy.getMonth() === checkOut.getMonth() && hoy.getDate() === checkOut.getDate();
 
-  const calcularNoches = (): number => {
-    const inicio = new Date(reserva.stayPeriod.checkInDate);
-    const fin = new Date(reserva.stayPeriod.checkOutDate);
-    const diff = fin.getTime() - inicio.getTime();
-    return Math.ceil(diff / (1000 * 60 * 60 * 24));
-  };
-
-  const esCheckInHoy = (): boolean => {
-    const hoy = new Date();
-    const checkIn = new Date(reserva.stayPeriod.checkInDate);
-    return (
-      hoy.getFullYear() === checkIn.getFullYear() &&
-      hoy.getMonth() === checkIn.getMonth() &&
-      hoy.getDate() === checkIn.getDate()
-    );
-  };
-
-  const esCheckOutHoy = (): boolean => {
-    const hoy = new Date();
-    const checkOut = new Date(reserva.stayPeriod.checkOutDate);
-    return (
-      hoy.getFullYear() === checkOut.getFullYear() &&
-      hoy.getMonth() === checkOut.getMonth() &&
-      hoy.getDate() === checkOut.getDate()
-    );
+  const getEstadoBadge = () => {
+    if (reserva.isCancelled) return <Badge bg="dark">Cancelada</Badge>;
+    if (!reserva.isActive) return <Badge bg="secondary">Finalizada</Badge>;
+    if (colorEstado === 'ROJO') return <Badge bg="danger">Paga al ingreso</Badge>;
+    if (colorEstado === 'AMARILLO') return <Badge bg="warning" text="dark">Con adelanto</Badge>;
+    return <Badge style={{ backgroundColor: '#fd7e14', color: 'white' }}>Pago completo</Badge>;
   };
 
   return (
     <Card
-      className="h-100"
+      onClick={onClick}
       style={{
-        borderLeft: `4px solid ${colorEstado === 'ROJO' ? '#dc3545' : colorEstado === 'AMARILLO' ? '#ffc107' : '#fd7e14'}`,
+        borderLeft: `4px solid ${borderColor}`,
+        cursor: 'pointer',
+        transition: 'box-shadow 0.15s',
       }}
+      className="h-100"
+      onMouseEnter={(e) => (e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)')}
+      onMouseLeave={(e) => (e.currentTarget.style.boxShadow = 'none')}
     >
-      <Card.Header className="d-flex justify-content-between align-items-center">
-        <div className="d-flex align-items-center gap-2">
-          <small className="text-muted">
-            #{reserva.id.slice(-6).toUpperCase()}
-          </small>
-          {esCheckInHoy() && reserva.isActive && !reserva.isCancelled && (
-            <Badge bg="info" className="pulse-animation">
-              ENTRA HOY
-            </Badge>
-          )}
-          {esCheckOutHoy() && reserva.isActive && !reserva.isCancelled && (
-            <Badge bg="warning" text="dark" className="pulse-animation">
-              SALE HOY
-            </Badge>
-          )}
+      <Card.Body className="py-2 px-3">
+        <div className="d-flex justify-content-between align-items-center mb-1">
+          <strong>
+            {reserva.roomNumber ? `Hab. #${reserva.roomNumber}` : 'Sin asignar'}
+          </strong>
+          {getEstadoBadge()}
         </div>
-        {reserva.isCancelled ? (
-          <Badge bg="dark">Cancelada</Badge>
-        ) : !reserva.isActive ? (
-          <Badge bg="secondary">Finalizada</Badge>
-        ) : (
-          <Badge
-            bg={colorEstado === 'NARANJA' ? undefined : getColorBg(colorEstado)}
-            text={colorEstado === 'AMARILLO' ? 'dark' : undefined}
-            style={
-              colorEstado === 'NARANJA'
-                ? { backgroundColor: '#fd7e14', color: 'white' }
-                : undefined
-            }
-          >
-            {colorEstado === 'ROJO' && 'Paga al ingreso'}
-            {colorEstado === 'AMARILLO' && 'Con adelanto'}
-            {colorEstado === 'NARANJA' && 'Pago completo'}
-          </Badge>
-        )}
-      </Card.Header>
-      <Card.Body>
-        <div className="mb-2">
-          <strong>{reserva.customer.customerName}</strong>
-          {reserva.customer.customerDni && (
-            <div className="small text-muted">
-              DNI: {reserva.customer.customerDni}
-            </div>
-          )}
-          {reserva.customer.customerPhone && (
-            <div className="small text-muted">
-              {reserva.customer.customerPhone}
-            </div>
-          )}
-          {reserva.customer.customerEmail && (
-            <div className="small text-muted">
-              {reserva.customer.customerEmail}
-            </div>
-          )}
+        <div className="small text-muted">
+          {new Date(reserva.stayPeriod.checkInDate).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' })}
+          {' → '}
+          {new Date(reserva.stayPeriod.checkOutDate).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' })}
         </div>
-
-        <div className="mb-2 p-2 bg-light rounded">
-          <Row>
-            <Col>
-              <small className="text-muted">Check-in</small>
-              <div>
-                <strong>
-                  {new Date(reserva.stayPeriod.checkInDate).toLocaleDateString(
-                    'es-AR'
-                  )}
-                </strong>
-              </div>
-            </Col>
-            <Col className="text-center">
-              <Badge bg="secondary">{calcularNoches()} noches</Badge>
-            </Col>
-            <Col className="text-end">
-              <small className="text-muted">Check-out</small>
-              <div>
-                <strong>
-                  {new Date(reserva.stayPeriod.checkOutDate).toLocaleDateString(
-                    'es-AR'
-                  )}
-                </strong>
-              </div>
-            </Col>
-          </Row>
-        </div>
-
-        <div className="mb-2">
-          <div className="d-flex justify-content-between">
-            <span>Total:</span>
-            <strong>${reserva.totalPrice.toLocaleString()}</strong>
-          </div>
-          <div className="d-flex justify-content-between text-success">
-            <span>Pagado:</span>
-            <span>${reserva.payment.amountPaid.toLocaleString()}</span>
-          </div>
-          {reserva.payment.remainingAmount > 0 && (
-            <div className="d-flex justify-content-between text-warning">
-              <span>Pendiente:</span>
-              <span>${reserva.payment.remainingAmount.toLocaleString()}</span>
-            </div>
-          )}
-        </div>
-
-        {reserva.payment.paymentReceiptPath && (
-          <div className="mb-2">
-            <a
-              href={reserva.payment.paymentReceiptPath}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn btn-sm btn-outline-primary w-100"
-            >
-              Ver comprobante
-            </a>
-          </div>
-        )}
-
-        {reserva.notas && (
-          <div className="small text-muted border-top pt-2 mt-2">
-            {reserva.notas}
+        <div className="small text-muted">{reserva.customer.customerName}</div>
+        {(esCheckInHoy || esCheckOutHoy) && reserva.isActive && !reserva.isCancelled && (
+          <div className="mt-1">
+            {esCheckInHoy && <Badge bg="info" className="me-1 pulse-animation" style={{ fontSize: '0.65rem' }}>ENTRA HOY</Badge>}
+            {esCheckOutHoy && <Badge bg="warning" text="dark" className="pulse-animation" style={{ fontSize: '0.65rem' }}>SALE HOY</Badge>}
           </div>
         )}
       </Card.Body>
-
-      {!showHistorial && !reserva.isCancelled && (
-        <Card.Footer>
-          <div className="d-flex flex-column gap-2">
-            <div className="d-flex gap-2">
-              {reserva.payment.remainingAmount > 0 && onCompletarPago && (
-                <Button
-                  variant="success"
-                  size="sm"
-                  className="flex-grow-1"
-                  onClick={() => onCompletarPago(reserva)}
-                >
-                  Registrar Pago
-                </Button>
-              )}
-              {onCheckout && (
-                <Button
-                  variant="primary"
-                  size="sm"
-                  className={
-                    reserva.payment.remainingAmount > 0 ? '' : 'flex-grow-1'
-                  }
-                  onClick={() => onCheckout(reserva)}
-                  title="Marcar check-out completado"
-                >
-                  Check-out
-                </Button>
-              )}
-            </div>
-            <Button
-              variant="outline-danger"
-              size="sm"
-              onClick={() => onCancelar(reserva)}
-            >
-              Cancelar Reserva
-            </Button>
-          </div>
-        </Card.Footer>
-      )}
     </Card>
   );
 }

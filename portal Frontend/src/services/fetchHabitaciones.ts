@@ -3,6 +3,7 @@ import { api } from '../config/api';
 
 export interface Habitacion {
   id: string;
+  numero: number;
   titulo: string;
   descripcion?: string;
   maxPersonas: number;
@@ -15,6 +16,7 @@ export interface Habitacion {
 }
 
 export interface NuevaHabitacion {
+  numero: number;
   titulo: string;
   descripcion?: string;
   maxPersonas: number;

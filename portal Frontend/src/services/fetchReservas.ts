@@ -43,6 +43,7 @@ export interface Reserva {
   transaccionId?: number;
   mercadoPagoId?: string;
   fechaPago?: string;
+  roomNumber?: number;
   notas?: string;
 }
 
