@@ -48,7 +48,7 @@ export default function GastronomiaListPage() {
                 id={String(local.id)}
                 titulo={local.name || 'Nombre no disponible'}
                 direccion_local={local.address || 'Dirección no disponible'}
-                imagenUrl={local.imageUrl || '/placeholder-restaurant.jpg'}
+                imagenUrl={local.imageUrl || 'https://via.placeholder.com/400x300/e9ecef/6c757d?text=Sin+imagen'}
                 tipo={'gastronomia'}
                 schedule={local.schedule}
                 onClick={() => handleCardClick(local)}

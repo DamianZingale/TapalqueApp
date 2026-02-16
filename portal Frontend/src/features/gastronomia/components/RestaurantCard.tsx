@@ -59,7 +59,7 @@ export const Info: React.FC<InfoProps> = ({
           {/* Columna central - imagen */}
           <div className="col-md-6 text-center">
             <img
-              src={imageUrl || '/placeholder-restaurant.jpg'}
+              src={imageUrl || 'https://via.placeholder.com/400x300/e9ecef/6c757d?text=Sin+imagen'}
               alt={name}
               className="img-fluid rounded"
               style={{

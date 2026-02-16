@@ -15,9 +15,9 @@ import com.tapalque.gastronomia.demo.Entity.Restaurant;
 @Repository
 public interface LocalRepositoryInterface extends JpaRepository<Restaurant, Long> {
 
-   //seleccionar todos los locales gastronomicos con sus categorias, telefonos y horarios concatenados
+   //seleccionar todos los locales gastronomicos con sus categorias, telefonos, horarios e imagen
     @Query(value = """
-    SELECT 
+    SELECT
         r.id_restaurant AS idRestaurant,
         r.name,
         r.address,
@@ -27,7 +27,8 @@ public interface LocalRepositoryInterface extends JpaRepository<Restaurant, Long
         GROUP_CONCAT(DISTINCT c.name SEPARATOR ', ') AS categories,
         GROUP_CONCAT(DISTINCT p.number SEPARATOR ', ') AS phones,
         GROUP_CONCAT(DISTINCT CONCAT(s.day_of_week, ':', s.opening_time, '-', s.closing_time) SEPARATOR '; ') AS schedule,
-        r.delivery
+        r.delivery,
+        (SELECT ri.photo FROM restaurant_images ri WHERE ri.restaurant_id = r.id_restaurant LIMIT 1) AS imageUrl
     FROM restaurant r
     LEFT JOIN restaurant_category rc ON rc.id_restaurant = r.id_restaurant
     LEFT JOIN category c ON c.id_category = rc.id_category
@@ -38,9 +39,9 @@ public interface LocalRepositoryInterface extends JpaRepository<Restaurant, Long
     """, nativeQuery = true)
 List<RestaurantDTO> selectAllRestaurant();
 
-//seleccionar restaurant por id con sus categorias, telefonos y horarios concatenados
+//seleccionar restaurant por id con sus categorias, telefonos, horarios e imagen
     @Query(value = """
-    SELECT 
+    SELECT
         r.id_restaurant AS idRestaurant,
         r.name,
         r.address,
@@ -50,7 +51,8 @@ List<RestaurantDTO> selectAllRestaurant();
         GROUP_CONCAT(DISTINCT c.name SEPARATOR ', ') AS categories,
         GROUP_CONCAT(DISTINCT p.number SEPARATOR ', ') AS phones,
         GROUP_CONCAT(DISTINCT CONCAT(s.day_of_week, ':', s.opening_time, '-', s.closing_time) SEPARATOR '; ') AS schedule,
-        r.delivery
+        r.delivery,
+        (SELECT ri.photo FROM restaurant_images ri WHERE ri.restaurant_id = r.id_restaurant LIMIT 1) AS imageUrl
     FROM restaurant r
     LEFT JOIN restaurant_category rc ON rc.id_restaurant = r.id_restaurant
     LEFT JOIN category c ON c.id_category = rc.id_category

@@ -18,18 +18,19 @@ public class RestaurantDTO {
     private String address;
     private String email;
     private Double latitude;
-    private Double longitude; 
+    private Double longitude;
     private String categories; // concatenadas con ', '
     private String phones;     // concatenados con ', '
     private String schedule;    // concatenado tipo "1:09:00-22:00; 2:09:00-22:00"
-    private boolean delivery;  
+    private boolean delivery;
+    private String imageUrl;
 
     // 🔹 Constructor vacío
     public RestaurantDTO() {}
 
     // 🔹 Constructor con todos los campos
     public RestaurantDTO(Long id, String name, String address, String email, Double latitude, Double longitude,
-                         String categories, String phones, String schedule, boolean delivery) {
+                         String categories, String phones, String schedule, boolean delivery, String imageUrl) {
         this.id = id;
         this.name = name;
         this.address = address;
@@ -40,6 +41,7 @@ public class RestaurantDTO {
         this.phones = phones;
         this.schedule = schedule;
         this.delivery = delivery;
+        this.imageUrl = imageUrl;
     }
 
     // 🔹 Constructor que recibe una entidad
@@ -51,6 +53,10 @@ public class RestaurantDTO {
     this.latitude = Optional.ofNullable(entity.getcoordinate_lat()).orElse(0.0);
     this.longitude = Optional.ofNullable(entity.getCoordinate_lon()).orElse(0.0);
     this.delivery = entity.getDelivery();
+    // Imagen: tomar la primera imagen del restaurante
+    if (entity.getImages() != null && !entity.getImages().isEmpty()) {
+        this.imageUrl = entity.getImages().get(0).getImageUrl();
+    }
     // Categories: List<Category> -> String
     if(entity.getCategories() != null) {
         this.categories = entity.getCategories().stream()
@@ -240,5 +246,13 @@ entity.setSchedules(scheduleList);
     public void setDelivery(boolean delivery) {
         this.delivery = delivery;
     }
-    
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
 }
