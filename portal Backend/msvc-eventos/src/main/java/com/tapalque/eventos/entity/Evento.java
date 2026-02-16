@@ -50,6 +50,9 @@ public class Evento {
     @Column(nullable = false)
     private String nombreContacto;
 
+    @Column(columnDefinition = "TEXT")
+    private String descripcion;
+
     @OneToMany(mappedBy = "evento", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<EventoImagen> imagenes = new ArrayList<>();
 
@@ -61,6 +64,7 @@ public class Evento {
         this.setFechaFin(dto.getFechaFin());
         this.setTelefonoContacto(dto.getTelefonoContacto());
         this.setNombreContacto(dto.getNombreContacto());
+        this.setDescripcion(dto.getDescripcion());
     }
 
     public void actualizarParcial(EventoRequestDTO dto) {
@@ -78,5 +82,7 @@ public class Evento {
             this.telefonoContacto = dto.getTelefonoContacto();
         if (dto.getNombreContacto() != null)
             this.nombreContacto = dto.getNombreContacto();
+        if (dto.getDescripcion() != null)
+            this.descripcion = dto.getDescripcion();
     }
 }

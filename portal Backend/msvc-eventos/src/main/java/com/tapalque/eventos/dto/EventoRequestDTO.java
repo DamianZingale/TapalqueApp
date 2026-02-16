@@ -34,4 +34,6 @@ public class EventoRequestDTO {
 
     @NotBlank(message = "El nombre del contacto es obligatorio")
     private String nombreContacto;
+
+    private String descripcion;
 }

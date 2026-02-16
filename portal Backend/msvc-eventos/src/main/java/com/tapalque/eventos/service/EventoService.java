@@ -47,10 +47,9 @@ public class EventoService {
     public EventoResponseDTO actualizarCompleto(Long id, EventoRequestDTO dto) {
         Evento evento = eventoRepository.findById(id)
                 .orElseThrow(() -> new EventoNotFoundException(id));
-        Evento actualizado = new Evento(dto);
-        actualizado.setId(evento.getId());
-        eventoRepository.save(actualizado);
-        return new EventoResponseDTO(actualizado);
+        evento.actualizarParcial(dto);
+        eventoRepository.save(evento);
+        return new EventoResponseDTO(evento);
     }
 
     @Transactional

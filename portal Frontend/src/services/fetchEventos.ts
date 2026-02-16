@@ -8,6 +8,7 @@ export interface Evento {
   fechaFin?: string;
   telefonoContacto: string;
   nombreContacto: string;
+  descripcion?: string;
   imagenes: { imagenUrl: string }[];
 }
 

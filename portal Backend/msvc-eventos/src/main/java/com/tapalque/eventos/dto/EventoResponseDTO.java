@@ -24,6 +24,7 @@ public class EventoResponseDTO {
     private LocalDate fechaFin;
     private String telefonoContacto;
     private String nombreContacto;
+    private String descripcion;
     private List<ImagenResponseDTO> imagenes;
 
     public EventoResponseDTO(Evento evento) {
@@ -35,6 +36,7 @@ public class EventoResponseDTO {
         this.fechaFin = evento.getFechaFin();
         this.telefonoContacto = evento.getTelefonoContacto();
         this.nombreContacto = evento.getNombreContacto();
+        this.descripcion = evento.getDescripcion();
         this.imagenes = evento.getImagenes()
                 .stream()
                 .map(img -> new ImagenResponseDTO(img.getImagenUrl()))

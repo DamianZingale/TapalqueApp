@@ -12,11 +12,12 @@ interface Evento {
     fechaFin?: string;
     telefonoContacto: string;
     nombreContacto: string;
+    descripcion?: string;
     imagenes?: { imagenUrl: string }[];
 }
 
 const emptyItem: Partial<Evento> = {
-    nombreEvento: "", lugar: "", horario: "", fechaInicio: "", fechaFin: "", telefonoContacto: "", nombreContacto: "",
+    nombreEvento: "", lugar: "", horario: "", fechaInicio: "", fechaFin: "", telefonoContacto: "", nombreContacto: "", descripcion: "",
     imagenes: []
 };
 
@@ -146,6 +147,9 @@ export function EventosSection() {
                         <Row>
                             <Col md={6}><Form.Group className="mb-2"><Form.Label className="small mb-0">Nombre Contacto *</Form.Label><Form.Control size="sm" value={formData.nombreContacto || ""} onChange={e => handleChange("nombreContacto", e.target.value)} /></Form.Group></Col>
                             <Col md={6}><Form.Group className="mb-2"><Form.Label className="small mb-0">Teléfono Contacto *</Form.Label><Form.Control size="sm" value={formData.telefonoContacto || ""} onChange={e => handleChange("telefonoContacto", e.target.value)} /></Form.Group></Col>
+                        </Row>
+                        <Row>
+                            <Col md={12}><Form.Group className="mb-2"><Form.Label className="small mb-0">Descripcion</Form.Label><Form.Control as="textarea" rows={3} size="sm" value={formData.descripcion || ""} onChange={e => handleChange("descripcion", e.target.value)} /></Form.Group></Col>
                         </Row>
                         <ImageManager
                             images={formData.imagenes || []}

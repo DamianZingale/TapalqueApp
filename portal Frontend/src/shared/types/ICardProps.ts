@@ -6,6 +6,7 @@ export interface CardProps {
   imagenUrl: string;
   tipo: (typeof SECCION_TYPE)[keyof typeof SECCION_TYPE];
   direccion_local: string;
-  schedule?: string; // ← Agregar schedule opcional
+  schedule?: string;
+  descripcion?: string;
   onClick?: () => void;
 }

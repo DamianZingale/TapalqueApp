@@ -50,7 +50,9 @@ export default function EventosListPage() {
                 evento.imagenes?.[0]?.imagenUrl ||
                 'https://via.placeholder.com/300'
               }
-              direccion_local={`${evento.fechaInicio}${evento.fechaFin ? ` - ${evento.fechaFin}` : ''}`}
+              direccion_local={`${evento.lugar} | ${evento.fechaInicio}${evento.fechaFin ? ` - ${evento.fechaFin}` : ''}`}
+              schedule={evento.horario}
+              descripcion={evento.descripcion}
               tipo="eventos"
               onClick={() => handleCardClick(evento)}
             />

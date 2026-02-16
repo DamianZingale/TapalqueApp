@@ -39,6 +39,13 @@ export default function EventosDetailPage() {
       <Title text={evento.nombreEvento} />
       <Carrusel images={imagenes} />
 
+      {evento.descripcion && (
+        <div className="my-4">
+          <h4>Descripcion</h4>
+          <p>{evento.descripcion}</p>
+        </div>
+      )}
+
       <div className="my-4">
         <h4>Fechas</h4>
         <p>
