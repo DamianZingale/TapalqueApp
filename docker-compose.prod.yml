@@ -10,7 +10,7 @@
 # ==========================================
 
 x-java-opts-critical: &java-opts-critical
-  JAVA_TOOL_OPTIONS: >-
+  JAVA_OPTS: >-
     -Xmx256m -Xms128m
     -XX:+UseSerialGC
     -XX:+UseContainerSupport
@@ -22,7 +22,7 @@ x-java-opts-critical: &java-opts-critical
     -XX:+TieredCompilation -XX:TieredStopAtLevel=1
 
 x-java-opts-light: &java-opts-light
-  JAVA_TOOL_OPTIONS: >-
+  JAVA_OPTS: >-
     -Xmx192m -Xms96m
     -XX:+UseSerialGC
     -XX:+UseContainerSupport
@@ -34,7 +34,7 @@ x-java-opts-light: &java-opts-light
     -XX:+TieredCompilation -XX:TieredStopAtLevel=1
 
 x-java-opts-infra: &java-opts-infra
-  JAVA_TOOL_OPTIONS: >-
+  JAVA_OPTS: >-
     -Xmx384m -Xms192m
     -XX:+UseSerialGC
     -XX:+UseContainerSupport
