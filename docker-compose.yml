@@ -512,7 +512,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 384M
+          memory: 512M
     networks:
       - tapalque-net
 
@@ -531,7 +531,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 384M
+          memory: 512M
     networks:
       - tapalque-net
 
@@ -542,7 +542,7 @@ services:
       SPRING_RABBITMQ_PORT: 5672
       SPRING_RABBITMQ_USERNAME: guest
       SPRING_RABBITMQ_PASSWORD: guest
-      JAVA_OPTS: '-Xmx192m -Xms96m -XX:+UseG1GC -XX:+UseContainerSupport -XX:MaxRAMPercentage=60.0'
+      JAVA_OPTS: '-Xmx256m -Xms128m -XX:+UseG1GC -XX:+UseContainerSupport -XX:MaxRAMPercentage=60.0'
     depends_on:
       pedidos-db:
         condition: service_started
@@ -554,7 +554,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 384M
+          memory: 512M
     networks:
       - tapalque-net
 
@@ -565,7 +565,7 @@ services:
       SPRING_RABBITMQ_PORT: 5672
       SPRING_RABBITMQ_USERNAME: guest
       SPRING_RABBITMQ_PASSWORD: guest
-      JAVA_OPTS: '-Xmx192m -Xms96m -XX:+UseG1GC -XX:+UseContainerSupport -XX:MaxRAMPercentage=60.0'
+      JAVA_OPTS: '-Xmx256m -Xms128m -XX:+UseG1GC -XX:+UseContainerSupport -XX:MaxRAMPercentage=60.0'
     depends_on:
       reservas-db:
         condition: service_started
@@ -577,7 +577,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 384M
+          memory: 512M
     networks:
       - tapalque-net
 
@@ -598,7 +598,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 384M
+          memory: 512M
     networks:
       - tapalque-net
 
@@ -619,7 +619,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 384M
+          memory: 512M
     networks:
       - tapalque-net
 
@@ -643,7 +643,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 384M
+          memory: 512M
     networks:
       - tapalque-net
 
@@ -664,7 +664,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 384M
+          memory: 512M
     networks:
       - tapalque-net
 
@@ -685,7 +685,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 384M
+          memory: 512M
     networks:
       - tapalque-net
 
@@ -706,7 +706,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 384M
+          memory: 512M
     networks:
       - tapalque-net
 
@@ -727,7 +727,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 384M
+          memory: 512M
     networks:
       - tapalque-net
 
@@ -748,7 +748,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 384M
+          memory: 512M
     networks:
       - tapalque-net
 

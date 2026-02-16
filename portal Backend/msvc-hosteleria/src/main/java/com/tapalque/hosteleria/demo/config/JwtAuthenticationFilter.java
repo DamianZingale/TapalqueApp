@@ -22,10 +22,10 @@ import jakarta.servlet.http.HttpServletResponse;
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final WebClient.Builder webClientBuilder;
+    private final WebClient webClient;
 
     public JwtAuthenticationFilter(WebClient.Builder webClientBuilder) {
-        this.webClientBuilder = webClientBuilder;
+        this.webClient = webClientBuilder.build();
     }
 
     @Override
@@ -41,7 +41,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         try {
-            Map<String, String> datos = webClientBuilder.build()
+            Map<String, String> datos = webClient
                     .post()
                     .uri("lb://MSVC-JWT/jwt/public/validate")
                     .header(HttpHeaders.AUTHORIZATION, authHeader)
