@@ -30,16 +30,20 @@ public class SecurityConfig {
                         // Recursos estáticos (imágenes)
                         .requestMatchers("/uploads/**").permitAll()
                         // GET públicos - ver restaurantes, menús, imágenes
+                        .requestMatchers(HttpMethod.GET, "/restaurante/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/gastronomia/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/menu/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/image/**").permitAll()
-                        // Crear/modificar requiere autenticación (para Mercado Pago)
+                        // Crear/modificar requiere autenticación
+                        .requestMatchers(HttpMethod.POST, "/restaurante/**").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/restaurante/**").authenticated()
                         .requestMatchers(HttpMethod.POST, "/gastronomia/**").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/gastronomia/**").authenticated()
                         .requestMatchers(HttpMethod.POST, "/menu/**").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/menu/**").authenticated()
                         .requestMatchers(HttpMethod.POST, "/image/**").authenticated()
                         // Eliminar requiere rol ADMINISTRADOR o MODERADOR
+                        .requestMatchers(HttpMethod.DELETE, "/restaurante/**").hasAnyRole("ADMINISTRADOR", "MODERADOR")
                         .requestMatchers(HttpMethod.DELETE, "/gastronomia/**").hasAnyRole("ADMINISTRADOR", "MODERADOR")
                         .requestMatchers(HttpMethod.DELETE, "/menu/**").hasAnyRole("ADMINISTRADOR", "MODERADOR")
                         .requestMatchers(HttpMethod.DELETE, "/image/**").hasAnyRole("ADMINISTRADOR", "MODERADOR")
