@@ -15,15 +15,21 @@ import com.tapalque.gastronomia.demo.Repository.CategoryRepositoriInterface;
 import com.tapalque.gastronomia.demo.Repository.LocalRepositoryInterface;
 
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
+@Transactional(readOnly = true)
 public class RestaurantService implements I_RestaurantService {
 
     @Autowired
     private LocalRepositoryInterface localGastronomicoRepository;
-    
+
     @Autowired
     private CategoryRepositoriInterface categoryRepository;
+
+    @Autowired
+    private WebClient.Builder webClientBuilder;
     
     @Cacheable(value = "restaurante", key = "#id")
     @Override // Implementación del método para obtener un local gastronómico por su ID
@@ -48,6 +54,7 @@ public class RestaurantService implements I_RestaurantService {
         
     }
    @CacheEvict(value = "restaurantes", allEntries = true)
+   @Transactional
    @Override //implementacion: busca las categorias en BD y setea los id_category para guardar. Mismo con phone y schedule
 public RestaurantDTO addRestaurant(RestaurantDTO dto) {
     try {
@@ -94,6 +101,7 @@ public RestaurantDTO addRestaurant(RestaurantDTO dto) {
 }
 
     @Caching(evict = {@CacheEvict(value = "restaurantes", allEntries = true), @CacheEvict(value = "restaurante", allEntries = true)})
+    @Transactional
     @Override
     public void updateRestaurant(Restaurant restaurant) {
         try {
@@ -141,6 +149,7 @@ public RestaurantDTO addRestaurant(RestaurantDTO dto) {
     }
 
     @Caching(evict = {@CacheEvict(value = "restaurantes", allEntries = true), @CacheEvict(value = "restaurante", allEntries = true)})
+    @Transactional
     @Override
     public void deleteRestaurant(Long id) {
         Long idLong = (long) id;
@@ -148,6 +157,18 @@ public RestaurantDTO addRestaurant(RestaurantDTO dto) {
             throw new EntityNotFoundException("No se puede eliminar, no existe el local con id " + id);
         }
         localGastronomicoRepository.deleteById(idLong);
+
+        // Eliminar la asignación de negocio en msvc-user
+        try {
+            webClientBuilder.build()
+                    .delete()
+                    .uri("lb://MSVC-USER/business/external/{externalId}/type/{type}", idLong, "GASTRONOMIA")
+                    .retrieve()
+                    .toBodilessEntity()
+                    .block();
+        } catch (Exception e) {
+            System.err.println("No se pudo eliminar la asignación de negocio en msvc-user: " + e.getMessage());
+        }
     }
    
 

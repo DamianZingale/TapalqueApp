@@ -108,6 +108,21 @@ public class BusinessController {
         }
     }
 
+    @DeleteMapping("/external/{externalBusinessId}/type/{businessType}")
+    public ResponseEntity<?> removeByExternalIdAndType(
+            @PathVariable Long externalBusinessId,
+            @PathVariable String businessType) {
+        try {
+            businessService.removeByExternalIdAndType(externalBusinessId, businessType);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(error("Error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(error("Error al eliminar asignación", e.getMessage()));
+        }
+    }
+
     // @PreAuthorize("hasRole('MODERADOR')")
     @DeleteMapping("/{businessId}")
     public ResponseEntity<?> removeBusinessAssignment(@PathVariable Long businessId) {

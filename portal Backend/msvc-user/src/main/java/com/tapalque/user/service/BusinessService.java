@@ -127,4 +127,14 @@ public class BusinessService {
         }
         businessRepository.deleteById(businessId);
     }
+
+    /**
+     * Eliminar asignación de negocio por externalBusinessId y businessType.
+     * Usado cuando un microservicio elimina un recurso (hospedaje, restaurante, etc.)
+     */
+    @org.springframework.transaction.annotation.Transactional
+    public void removeByExternalIdAndType(Long externalBusinessId, String businessType) {
+        com.tapalque.user.enu.BusinessType type = com.tapalque.user.enu.BusinessType.valueOf(businessType);
+        businessRepository.deleteByExternalBusinessIdAndBusinessType(externalBusinessId, type);
+    }
 }

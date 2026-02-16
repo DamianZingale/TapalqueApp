@@ -16,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.tapalque.hosteleria.demo.dto.DisponibilidadResponseDTO;
 import com.tapalque.hosteleria.demo.dto.HospedajeDTO;
 import com.tapalque.hosteleria.demo.dto.HospedajeRequestDTO;
+import org.springframework.web.reactive.function.client.WebClient;
+
 import com.tapalque.hosteleria.demo.entidades.Habitacion;
 import com.tapalque.hosteleria.demo.entidades.Hospedaje;
 import com.tapalque.hosteleria.demo.entidades.HospedajeImagen;
@@ -31,6 +33,9 @@ public class HospedajeService {
 
     @Autowired
     private HabitacionRepository habitacionRepository;
+
+    @Autowired
+    private WebClient.Builder webClientBuilder;
 
     @Cacheable(value = "hospedajes")
     public List<HospedajeDTO> obtenerTodos() {
@@ -69,6 +74,19 @@ public class HospedajeService {
         }
         //🔴Falta logia para eliminar archivo de imagenesen servidor❗
         hospedajeRepository.deleteById(id);
+
+        // Eliminar la asignación de negocio en msvc-user
+        try {
+            webClientBuilder.build()
+                    .delete()
+                    .uri("lb://MSVC-USER/business/external/{externalId}/type/{type}", id, "HOSPEDAJE")
+                    .retrieve()
+                    .toBodilessEntity()
+                    .block();
+        } catch (Exception e) {
+            System.err.println("No se pudo eliminar la asignación de negocio en msvc-user: " + e.getMessage());
+        }
+
         return ResponseEntity.noContent().build(); // 204
     }
 

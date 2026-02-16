@@ -27,6 +27,8 @@ import jakarta.validation.Valid;
 @RequestMapping("/habitaciones")
 public class HabitacionController {
 
+    private static final System.Logger logger = System.getLogger(HabitacionController.class.getName());
+
     private final HabitacionService habitacionService;
 
     public HabitacionController(HabitacionService habitacionService) {
@@ -40,6 +42,7 @@ public class HabitacionController {
             List<HabitacionDTO> habitaciones = habitacionService.obtenerPorHospedaje(hospedajeId);
             return ResponseEntity.ok(habitaciones);
         } catch (Exception e) {
+            logger.log(System.Logger.Level.ERROR, "Error al listar habitaciones del hospedaje " + hospedajeId + ": " + e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }

@@ -16,8 +16,10 @@ import com.tapalque.hosteleria.demo.repositorio.HabitacionRepository;
 import com.tapalque.hosteleria.demo.repositorio.HospedajeRepository;
 
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional(readOnly = true)
 public class HabitacionService {
 
     private static final int MAX_FOTOS_HABITACION = 3;
@@ -46,6 +48,7 @@ public class HabitacionService {
     }
 
     @CacheEvict(value = "habitaciones", allEntries = true)
+    @Transactional
     public HabitacionDTO crear(@NonNull Long hospedajeId, @NonNull HabitacionRequestDTO dto) {
         Hospedaje hospedaje = hospedajeRepository.findById(hospedajeId)
                 .orElseThrow(() -> new EntityNotFoundException("Hospedaje no encontrado con ID: " + hospedajeId));
@@ -70,6 +73,7 @@ public class HabitacionService {
     }
 
     @CacheEvict(value = "habitaciones", allEntries = true)
+    @Transactional
     public HabitacionDTO actualizar(@NonNull Long id, @NonNull HabitacionRequestDTO dto) {
         Habitacion habitacion = habitacionRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Habitación no encontrada con ID: " + id));
@@ -108,6 +112,7 @@ public class HabitacionService {
     }
 
     @CacheEvict(value = "habitaciones", allEntries = true)
+    @Transactional
     public void eliminar(@NonNull Long id) {
         if (!habitacionRepository.existsById(id)) {
             throw new EntityNotFoundException("Habitación no encontrada con ID: " + id);
@@ -116,6 +121,7 @@ public class HabitacionService {
     }
 
     @CacheEvict(value = "habitaciones", allEntries = true)
+    @Transactional
     public HabitacionDTO cambiarDisponibilidad(@NonNull Long id, @NonNull Boolean disponible) {
         Habitacion habitacion = habitacionRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Habitación no encontrada con ID: " + id));

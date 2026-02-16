@@ -21,8 +21,10 @@ import com.tapalque.gastronomia.demo.Entity.Restaurant;
 import com.tapalque.gastronomia.demo.Entity.RestaurantImage;
 import com.tapalque.gastronomia.demo.Repository.LocalRepositoryInterface;
 import com.tapalque.gastronomia.demo.Repository.RestaurantImageRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional(readOnly = true)
 public class RestaurantImageService {
 
     @Value("${upload.dir}")
@@ -35,6 +37,7 @@ public class RestaurantImageService {
     private RestaurantImageRepository imageRepository;
 
     @CacheEvict(value = "restaurantes", allEntries = true)
+    @Transactional
     public ImagenResponseDTO agregarImagen(Long restaurantId, MultipartFile file) {
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("El archivo está vacío o no fue enviado");
@@ -83,6 +86,7 @@ public class RestaurantImageService {
     }
 
     @CacheEvict(value = "restaurantes", allEntries = true)
+    @Transactional
     public void eliminarImagen(Long restaurantId, ImagenRequestDTO dto) {
         if (dto.getImagenUrl() == null || dto.getImagenUrl().isBlank()) {
             throw new IllegalArgumentException("La URL de la imagen es obligatoria");
