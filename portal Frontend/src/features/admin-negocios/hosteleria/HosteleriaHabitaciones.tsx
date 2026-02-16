@@ -391,10 +391,7 @@ export function HosteleriaHabitaciones({
                                     borderRadius: '4px',
                                   }}
                                   onError={(e) => {
-                                    console.error('Error cargando imagen:', habitacion.fotos?.[0]);
-                                    e.currentTarget.style.display = 'none';
-                                    e.currentTarget.parentElement?.classList.add('bg-light', 'd-flex', 'align-items-center', 'justify-content-center');
-                                    e.currentTarget.parentElement!.innerHTML = '<span style="font-size: 1.5rem">🛏️</span>';
+                                    e.currentTarget.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50"><rect fill="%23f8f9fa" width="50" height="50"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%23999" font-size="24">🛏️</text></svg>';
                                   }}
                                 />
                                 {habitacion.fotos.length > 1 && (
