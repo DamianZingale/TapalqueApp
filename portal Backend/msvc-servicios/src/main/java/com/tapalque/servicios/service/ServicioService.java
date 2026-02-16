@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.tapalque.servicios.Exceptions.ServicioNotFoundException;
 import com.tapalque.servicios.dto.ServicioRequestDTO;
@@ -13,10 +14,12 @@ import com.tapalque.servicios.entity.Servicio;
 import com.tapalque.servicios.repository.ServicioRepository;
 
 @Service
+@Transactional(readOnly = true )
 public class ServicioService {
     @Autowired
     private ServicioRepository servicioRepository;
 
+    @Transactional
     public ServicioResponseDTO crear(ServicioRequestDTO dto) {
         if (dto.getTitulo() == null || dto.getTitulo().isBlank()) {
             throw new IllegalArgumentException("El título del servicio es obligatorio");
@@ -40,6 +43,7 @@ public class ServicioService {
         return new ServicioResponseDTO(servicio);
     }
 
+    @Transactional
     public ServicioResponseDTO actualizarCompleto(Long id, ServicioRequestDTO dto) {
         Servicio servicio = servicioRepository.findById(id)
                 .orElseThrow(() -> new ServicioNotFoundException(id));
@@ -49,6 +53,7 @@ public class ServicioService {
         return new ServicioResponseDTO(actualizado);
     }
 
+    @Transactional
     public ServicioResponseDTO actualizarParcial(Long id, ServicioRequestDTO dto) {
         Servicio servicio = servicioRepository.findById(id)
                 .orElseThrow(() -> new ServicioNotFoundException(id));
@@ -57,6 +62,7 @@ public class ServicioService {
         return new ServicioResponseDTO(servicio);
     }
 
+    @Transactional
     public void eliminar(Long id) {
         Servicio servicio = servicioRepository.findById(id)
                 .orElseThrow(() -> new ServicioNotFoundException(id));

@@ -1,6 +1,9 @@
 server:
   port: 8090
 
+jwt:
+  secret: ${SECRET_KEY}
+
 spring:
   application:
     name: msvc-gateway-server
@@ -304,7 +307,7 @@ spring:
         - id: msvc-espacios-publicos-list-public
           uri: lb://msvc-espacios-publicos
           predicates:
-            - Path=/api/espacio-publico,
+            - Path=/api/espacio-publico
             - Method=GET
           filters:
             - RewritePath=/api/espacio-publico, /espacio-publico
@@ -530,7 +533,7 @@ spring:
           filters:
             - RewritePath=/api/(?<segment>.*), /${segment}
 
-        - id: msvc-mercado-pago
+        - id: msvc-mercado-pago-webhook
           uri: lb://msvc-mercado-pago
           predicates:
             - Path=/api/mercadopago/webhook
@@ -554,7 +557,7 @@ spring:
           filters:
             - RewritePath=/api/(?<segment>.*), /${segment}
 
-        - id: msvc-mercado-pago
+        - id: msvc-mercado-pago-webhook-alt
           uri: lb://msvc-mercado-pago
           predicates:
             - Path=/api/mercado-pago/webhook
@@ -562,7 +565,7 @@ spring:
           filters:
             - RewritePath=/api/(?<segment>.*), /${segment}
 
-        - id: msvc-mercado-pago
+        - id: msvc-mercado-pago-crear-alt
           uri: lb://msvc-mercado-pago
           predicates:
             - Path=/api/mercado-pago/pagos/crear
@@ -571,7 +574,7 @@ spring:
             - RewritePath=/api/(?<segment>.*), /${segment}
 
         # PEDIDOS
-        - id: msvc-pedidos
+        - id: msvc-pedidos-create
           uri: lb://msvc-pedidos
           predicates:
             - Path=/api/pedidos/orders/new
@@ -579,7 +582,7 @@ spring:
           filters:
             - RewritePath=/api/pedidos/(?<segment>.*), /${segment}
 
-        - id: msvc-pedidos
+        - id: msvc-pedidos-by-id
           uri: lb://msvc-pedidos
           predicates:
             - Path=/api/pedidos/orders/{id}
@@ -587,15 +590,16 @@ spring:
           filters:
             - RewritePath=/api/pedidos/(?<id>[0-9]+), /${id}
 
-        - id: msvc-pedidos
+        - id: msvc-pedidos-by-restaurant
           uri: lb://msvc-pedidos
           predicates:
             - Path=/api/pedidos/orders/restaurant/{restaurantId}
             - Method=GET
           filters:
-            - RewritePath=/api/pedidos/(?<segment>.*),  /${segment}
+            - RewritePath=/api/pedidos/(?<segment>.*), /${segment}
+            - JwtAuth
 
-        - id: msvc-pedidos
+        - id: msvc-pedidos-by-user
           uri: lb://msvc-pedidos
           predicates:
             - Path=/api/pedidos/orders/user/{userId}
@@ -603,7 +607,7 @@ spring:
           filters:
             - RewritePath=/api/pedidos/(?<segment>.*), /${segment}
 
-        - id: msvc-pedidos
+        - id: msvc-pedidos-update
           uri: lb://msvc-pedidos
           predicates:
             - Path=/api/pedidos/orders/{id:[0-9]+}
@@ -611,7 +615,7 @@ spring:
           filters:
             - RewritePath=/api/pedidos/orders/(?<id>[0-9]+), /orders/${id}
 
-        - id: msvc-pedidos
+        - id: msvc-pedidos-delete
           uri: lb://msvc-pedidos
           predicates:
             - Path=/api/pedidos/orders/{id:[0-9]+}
@@ -619,7 +623,7 @@ spring:
           filters:
             - RewritePath=/api/pedidos/orders/(?<id>[0-9]+), /orders/${id}
 
-        - id: msvc-pedidos
+        - id: msvc-pedidos-update-estado
           uri: lb://msvc-pedidos
           predicates:
             - Path=/api/pedidos/orders/{id}/estado
@@ -637,7 +641,7 @@ spring:
             - RewritePath=/api/reservas/disponibilidad/(?<id>[0-9]+), /disponibilidad/${id}
 
         # RESERVAS
-        - id: msvc-reservas
+        - id: msvc-reservas-create
           uri: lb://msvc-reservas
           predicates:
             - Path=/api/reservas/reservations/new
@@ -669,7 +673,7 @@ spring:
           filters:
             - RewritePath=/api/reservas/reservations/delete/(?<id>.*), /reservations/delete/${id}
 
-        - id: msvc-reservas
+        - id: msvc-reservas-by-hotel
           uri: lb://msvc-reservas
           predicates:
             - Path=/api/reservas/reservations/by-hotel/{id:[0-9]+}
@@ -677,7 +681,7 @@ spring:
           filters:
             - RewritePath=/api/reservas/reservations/by-hotel/(?<id>[0-9]+), /reservations/by-hotel/${id}
 
-        - id: msvc-reservas
+        - id: msvc-reservas-by-customer
           uri: lb://msvc-reservas
           predicates:
             - Path=/api/reservas/reservations/by-customer/{id:[0-9]+}

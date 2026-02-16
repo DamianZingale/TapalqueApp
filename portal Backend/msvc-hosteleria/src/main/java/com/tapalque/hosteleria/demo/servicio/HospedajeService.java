@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.tapalque.hosteleria.demo.dto.DisponibilidadResponseDTO;
 import com.tapalque.hosteleria.demo.dto.HospedajeDTO;
@@ -20,6 +21,7 @@ import com.tapalque.hosteleria.demo.repositorio.HabitacionRepository;
 import com.tapalque.hosteleria.demo.repositorio.HospedajeRepository;
 
 @Service
+@Transactional(readOnly = true)
 public class HospedajeService {
 
     @Autowired
@@ -47,12 +49,14 @@ public class HospedajeService {
         }
     }
 
+    @Transactional
     public HospedajeDTO guardar(HospedajeRequestDTO dto) {
         Hospedaje hospedaje = mapToEntity(dto);
         //🔴falta loguica para guardar archivo en servidor, y obtener la url para guardarla en la DB❗
         return new HospedajeDTO(hospedajeRepository.save(hospedaje));
     }
 
+    @Transactional
     public ResponseEntity<Void> eliminarPorId(Long id) {
         Optional<Hospedaje> existente = hospedajeRepository.findById(id);
         if (existente.isEmpty()) {
@@ -63,6 +67,7 @@ public class HospedajeService {
         return ResponseEntity.noContent().build(); // 204
     }
 
+    @Transactional
     public ResponseEntity<HospedajeDTO> actualizarHospedaje(Long id, HospedajeRequestDTO dto)
     {
         Optional<Hospedaje> existente = hospedajeRepository.findById(id);

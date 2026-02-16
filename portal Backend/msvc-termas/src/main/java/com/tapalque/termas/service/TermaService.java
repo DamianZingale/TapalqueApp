@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.tapalque.termas.Exceptions.TermaNotFoundException;
 import com.tapalque.termas.dto.TermaRequestDTO;
@@ -13,10 +14,12 @@ import com.tapalque.termas.entity.Terma;
 import com.tapalque.termas.repository.TermaRepository;
 
 @Service
+@Transactional(readOnly = true )
 public class TermaService {
     @Autowired
     private TermaRepository termaRepository;
 
+    @Transactional
     public TermaResponseDTO crear(TermaRequestDTO dto) {
         if (dto.getTitulo() == null || dto.getTitulo().isBlank()) {
             throw new IllegalArgumentException("El título del terma es obligatorio");
@@ -40,6 +43,7 @@ public class TermaService {
         return new TermaResponseDTO(terma);
     }
 
+    @Transactional
     public TermaResponseDTO actualizarCompleto(Long id, TermaRequestDTO dto) {
         Terma terma = termaRepository.findById(id)
                 .orElseThrow(() -> new TermaNotFoundException(id));
@@ -58,6 +62,7 @@ public class TermaService {
         return new TermaResponseDTO(terma);
     }
 
+    @Transactional
     public TermaResponseDTO actualizarParcial(Long id, TermaRequestDTO dto) {
         Terma terma = termaRepository.findById(id)
                 .orElseThrow(() -> new TermaNotFoundException(id));
@@ -66,6 +71,7 @@ public class TermaService {
         return new TermaResponseDTO(terma);
     }
 
+    @Transactional
     public void eliminar(Long id) {
         Terma terma = termaRepository.findById(id)
                 .orElseThrow(() -> new TermaNotFoundException(id));
