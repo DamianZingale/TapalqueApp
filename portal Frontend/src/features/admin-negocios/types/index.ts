@@ -14,7 +14,7 @@ export interface Business {
   phone?: string;
 
   // Configuración Gastronomía
-  isDelivery?: boolean;
+  delivery?: boolean;
   deliveryPrice?: number;
 }
 
@@ -63,7 +63,7 @@ export interface Pedido {
   totalAmount?: number;
   paidWithMercadoPago: boolean;
   paidWithCash: boolean;
-  isDelivery: boolean;
+  delivery: boolean;
   deliveryPrice?: number;
   deliveryAddress?: string;
   status: EstadoPedido;

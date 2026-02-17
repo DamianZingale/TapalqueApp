@@ -59,7 +59,7 @@ export interface Pedido {
   mercadoPagoId?: string;
   fechaPago?: string;
   payment?: Payment;
-  isDelivery: boolean;
+  delivery: boolean;
   deliveryAddress?: string;
 }
 
@@ -111,7 +111,9 @@ export async function fetchPedidosByUser(userId: string): Promise<Pedido[]> {
   }
 }
 
-export async function fetchPedidoById(pedidoId: string): Promise<Pedido | null> {
+export async function fetchPedidoById(
+  pedidoId: string
+): Promise<Pedido | null> {
   try {
     const response = await fetch(`/api/pedidos/orders/${pedidoId}`, {
       headers: getAuthHeaders(),
@@ -141,7 +143,9 @@ export async function updateEstadoPedido(
   }
 }
 
-export async function crearPedido(pedido: CrearPedidoDTO): Promise<Pedido | null> {
+export async function crearPedido(
+  pedido: CrearPedidoDTO
+): Promise<Pedido | null> {
   try {
     const response = await fetch('/api/pedidos/orders/new', {
       method: 'POST',

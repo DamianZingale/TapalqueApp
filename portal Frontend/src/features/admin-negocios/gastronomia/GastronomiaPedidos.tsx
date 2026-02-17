@@ -24,7 +24,7 @@ import {
 interface GastronomiaPedidosProps {
   businessId: string;
   businessName: string;
-  isDelivery: boolean;
+  delivery: boolean;
   deliveryPrice: number;
 }
 
@@ -35,7 +35,7 @@ interface Mensaje {
 
 export function GastronomiaPedidos({
   businessId,
-  isDelivery,
+  delivery,
   deliveryPrice,
 }: GastronomiaPedidosProps) {
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
@@ -47,30 +47,28 @@ export function GastronomiaPedidos({
   const { isConnected } = useWebSocket(businessId, 'GASTRONOMIA');
 
   useEffect(() => {
-    setPrecioDeliveryEdit(deliveryPrice);
+    setPrecioDeliveryEdit(deliveryPrice ?? 0);
   }, [deliveryPrice]);
 
   useEffect(() => {
+    const cargarPedidos = async () => {
+      try {
+        setLoading(true);
+        const data = await fetchPedidosByRestaurant(businessId);
+        setPedidos(data);
+      } catch (error) {
+        console.error(error);
+        setMensaje({ tipo: 'danger', texto: 'Error al cargar pedidos' });
+      } finally {
+        setLoading(false);
+      }
+    };
+
     cargarPedidos();
   }, [businessId]);
 
-  const cargarPedidos = async () => {
-    try {
-      setLoading(true);
-      const data = await fetchPedidosByRestaurant(businessId);
-      setPedidos(data);
-    } catch {
-      setMensaje({ tipo: 'danger', texto: 'Error al cargar pedidos' });
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleCambiarEstado = async (pedido: Pedido) => {
-    const siguiente = getSiguienteEstadoPedido(
-      pedido.status,
-      pedido.isDelivery
-    );
+    const siguiente = getSiguienteEstadoPedido(pedido.status, pedido.delivery);
     if (!siguiente) return;
 
     await updateEstadoPedido(pedido.id, siguiente);
@@ -104,7 +102,7 @@ export function GastronomiaPedidos({
         </Alert>
       )}
 
-      {isDelivery && (
+      {delivery && (
         <Card className="mb-3 border-warning">
           <Card.Body>
             <Row className="align-items-end">
@@ -158,16 +156,16 @@ function PedidoCard({
   const estadoBadge = getEstadoPedidoBadge(pedido.status);
 
   const baseTotal = pedido.totalPrice || pedido.totalAmount || 0;
-  const total = pedido.isDelivery ? baseTotal + deliveryPrice : baseTotal;
+  const total = pedido.delivery ? baseTotal + deliveryPrice : baseTotal;
 
   const siguienteEstado = getSiguienteEstadoPedido(
     pedido.status,
-    pedido.isDelivery
+    pedido.delivery
   );
 
   const textoBoton = getTextoBotonSiguienteEstado(
     pedido.status,
-    pedido.isDelivery
+    pedido.delivery
   );
 
   return (
@@ -179,7 +177,7 @@ function PedidoCard({
 
       <Card.Body>
         <div className="mb-2">
-          {pedido.isDelivery ? (
+          {pedido.delivery ? (
             <Badge bg="warning" text="dark">
               Delivery (+${deliveryPrice})
             </Badge>
