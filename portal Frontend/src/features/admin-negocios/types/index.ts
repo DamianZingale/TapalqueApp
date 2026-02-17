@@ -14,7 +14,7 @@ export interface Business {
   phone?: string;
 
   // Configuración Gastronomía
-  allowDelivery?: boolean;
+  delivery?: boolean;
   deliveryPrice?: number;
 }
 
