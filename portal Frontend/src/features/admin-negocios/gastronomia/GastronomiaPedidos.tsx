@@ -1,3 +1,4 @@
+// src/components/admin/gastronomia/GastronomiaPedidos.tsx
 import { useEffect, useState } from 'react';
 import {
   Alert,
@@ -9,6 +10,10 @@ import {
   Row,
   Spinner,
 } from 'react-bootstrap';
+import {
+  fetchRestaurantById,
+  type Restaurant,
+} from '../../../services/fetchGastronomia';
 import {
   fetchPedidosByRestaurant,
   updateEstadoPedido,
@@ -24,8 +29,6 @@ import {
 interface GastronomiaPedidosProps {
   businessId: string;
   businessName: string;
-  delivery: boolean;
-  deliveryPrice: number;
 }
 
 interface Mensaje {
@@ -33,40 +36,50 @@ interface Mensaje {
   texto: string;
 }
 
-export function GastronomiaPedidos({
-  businessId,
-  delivery,
-  deliveryPrice,
-}: GastronomiaPedidosProps) {
+export function GastronomiaPedidos({ businessId }: GastronomiaPedidosProps) {
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [mensaje, setMensaje] = useState<Mensaje | null>(null);
-  const [precioDeliveryEdit, setPrecioDeliveryEdit] =
-    useState<number>(deliveryPrice);
+  const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
+  const [precioDeliveryEdit, setPrecioDeliveryEdit] = useState<number>(0);
 
   const { isConnected } = useWebSocket(businessId, 'GASTRONOMIA');
 
+  // Cargo el restaurante
   useEffect(() => {
-    setPrecioDeliveryEdit(deliveryPrice ?? 0);
-  }, [deliveryPrice]);
-
-  useEffect(() => {
-    const cargarPedidos = async () => {
+    const cargarRestaurant = async () => {
       try {
-        setLoading(true);
-        const data = await fetchPedidosByRestaurant(businessId);
-        setPedidos(data);
-      } catch (error) {
-        console.error(error);
-        setMensaje({ tipo: 'danger', texto: 'Error al cargar pedidos' });
-      } finally {
-        setLoading(false);
+        const data = await fetchRestaurantById(businessId);
+        if (data) {
+          setRestaurant(data);
+          setPrecioDeliveryEdit(data.deliveryPrice ?? 0);
+        }
+      } catch {
+        setMensaje({ tipo: 'danger', texto: 'Error al cargar restaurante' });
       }
     };
 
+    cargarRestaurant();
+  }, [businessId]);
+
+  // Cargo los pedidos
+  useEffect(() => {
     cargarPedidos();
   }, [businessId]);
 
+  const cargarPedidos = async () => {
+    try {
+      setLoading(true);
+      const data = await fetchPedidosByRestaurant(businessId);
+      setPedidos(data);
+    } catch {
+      setMensaje({ tipo: 'danger', texto: 'Error al cargar pedidos' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Actualiza el estado de un pedido
   const handleCambiarEstado = async (pedido: Pedido) => {
     const siguiente = getSiguienteEstadoPedido(pedido.status, pedido.delivery);
     if (!siguiente) return;
@@ -78,12 +91,44 @@ export function GastronomiaPedidos({
     );
   };
 
+  // Debounce: actualizar backend solo después de 500ms de inactividad
+  useEffect(() => {
+    if (!restaurant) return;
+    const handler = setTimeout(async () => {
+      try {
+        const response = await fetch(
+          `/api/gastronomia/restaurants/${restaurant.idRestaurant}`,
+          {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ deliveryPrice: precioDeliveryEdit }),
+          }
+        );
+
+        if (!response.ok) throw new Error(`Error ${response.status}`);
+        const updated = await response.json();
+        setRestaurant(updated);
+      } catch {
+        setMensaje({
+          tipo: 'danger',
+          texto: 'No se pudo actualizar el precio de delivery',
+        });
+      }
+    }, 500);
+
+    return () => clearTimeout(handler); // limpio el timeout si el valor cambia antes de 500ms
+  }, [precioDeliveryEdit, restaurant]);
+
   if (loading) {
     return (
       <div className="text-center py-5">
         <Spinner animation="border" />
       </div>
     );
+  }
+
+  if (!restaurant) {
+    return <Alert variant="danger">No se encontró el restaurante</Alert>;
   }
 
   return (
@@ -102,7 +147,7 @@ export function GastronomiaPedidos({
         </Alert>
       )}
 
-      {delivery && (
+      {restaurant.delivery && (
         <Card className="mb-3 border-warning">
           <Card.Body>
             <Row className="align-items-end">
@@ -162,7 +207,6 @@ function PedidoCard({
     pedido.status,
     pedido.delivery
   );
-
   const textoBoton = getTextoBotonSiguienteEstado(
     pedido.status,
     pedido.delivery
