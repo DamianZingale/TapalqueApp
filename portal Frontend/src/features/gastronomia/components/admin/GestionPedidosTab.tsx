@@ -62,7 +62,7 @@ export const GestionPedidosTab = () => {
             case EstadoPedido.EN_PREPARACION:
                 return EstadoPedido.LISTO;
             case EstadoPedido.LISTO:
-                return pedido.isDelivery ? EstadoPedido.EN_DELIVERY : EstadoPedido.ENTREGADO;
+                return pedido.delivery ? EstadoPedido.EN_DELIVERY : EstadoPedido.ENTREGADO;
             case EstadoPedido.EN_DELIVERY:
                 return EstadoPedido.ENTREGADO;
             default:
@@ -77,7 +77,7 @@ export const GestionPedidosTab = () => {
             case EstadoPedido.EN_PREPARACION:
                 return 'Marcar como listo';
             case EstadoPedido.LISTO:
-                return pedido.isDelivery ? 'Enviar a delivery' : 'Marcar entregado';
+                return pedido.delivery ? 'Enviar a delivery' : 'Marcar entregado';
             case EstadoPedido.EN_DELIVERY:
                 return 'Marcar entregado';
             default:
@@ -156,7 +156,7 @@ export const GestionPedidosTab = () => {
                                 <Card.Header className="d-flex justify-content-between align-items-center">
                                     <span className="fw-bold">Pedido #{pedido.id.slice(0, 8)}</span>
                                     <div>
-                                        {pedido.isDelivery && <Badge bg="dark" className="me-1">Delivery</Badge>}
+                                        {pedido.delivery && <Badge bg="dark" className="me-1">Delivery</Badge>}
                                         {getEstadoBadge(pedido.status)}
                                     </div>
                                 </Card.Header>
@@ -172,7 +172,7 @@ export const GestionPedidosTab = () => {
                                         <div className="mb-2 p-2 bg-light rounded">
                                             {pedido.userName && <div><strong>Cliente:</strong> {pedido.userName}</div>}
                                             {pedido.userPhone && <div><strong>Tel:</strong> {pedido.userPhone}</div>}
-                                            {pedido.isDelivery && pedido.deliveryAddress && (
+                                            {pedido.delivery && pedido.deliveryAddress && (
                                                 <div><strong>Direccion:</strong> {pedido.deliveryAddress}</div>
                                             )}
                                         </div>

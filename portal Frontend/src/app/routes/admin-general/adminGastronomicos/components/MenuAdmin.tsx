@@ -1,9 +1,9 @@
 import { useState, type FC, type ChangeEvent } from "react";
 import { Table } from "react-bootstrap";
 
-import { useFilterByCategory } from "../../../gastronomia/hooks/useFilterByCategory";
-import type { Imenu } from "../../../gastronomia/types/Imenu";
-import { menuTest } from "../../../gastronomia/mock/MenuMock";
+import { useFilterByCategory } from "../../../../../features/gastronomia/hooks/useFilterByCategory";
+import type { Imenu } from "../../../../../features/gastronomia/types/Imenu";
+import { menuTest } from "../../../../../features/gastronomia/mock/MenuMock";
 
 export const MenuAdmin: FC = () => {
   const [menu, setMenu] = useState<Imenu[]>(menuTest);
@@ -28,7 +28,7 @@ export const MenuAdmin: FC = () => {
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    setEditData((prev) => ({ ...prev, [name]: value }));
+    setEditData((prev: Partial<Imenu>) => ({ ...prev, [name]: value }));
   };
 
   const handleSave = () => {
@@ -37,8 +37,8 @@ export const MenuAdmin: FC = () => {
     // Transformar ingredientes y restricciones en arrays para backend si querés
     const updatedData = {
       ...editData,
-      ingredients: (editData.ingredients || "").toString().split(",").map(s => s.trim()),
-      restrictions: (editData.restrictions || "").toString().split(",").map(s => s.trim()),
+      ingredients: (editData.ingredients || "").toString().split(",").map((s: string) => s.trim()),
+      restrictions: (editData.restrictions || "").toString().split(",").map((s: string) => s.trim()),
     };
 
     setMenu((prev) =>

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Alert,
   Badge,
@@ -40,16 +40,13 @@ interface Mensaje {
 export function GastronomiaPedidos({
   businessId,
   delivery = false,
-  deliveryPrice = 0,
 }: GastronomiaPedidosProps) {
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [loading, setLoading] = useState(true);
   const [mensaje, setMensaje] = useState<Mensaje | null>(null);
-  const [precioDeliveryEdit, setPrecioDeliveryEdit] = useState<number>(
-    deliveryPrice ?? 0
-  );
+  const [precioDeliveryEdit, setPrecioDeliveryEdit] = useState<number>(0);
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
-  const [loaded, setLoaded] = useState(false);
+  const userChanged = useRef(false);
 
   const { isConnected } = useWebSocket(businessId, 'GASTRONOMIA');
 
@@ -71,7 +68,7 @@ export function GastronomiaPedidos({
       const data = await fetchRestaurantById(businessId);
       if (data) {
         setRestaurant(data);
-        setLoaded(true);
+        setPrecioDeliveryEdit(data.deliveryPrice ?? 0);
       }
     } catch {
       setMensaje({ tipo: 'danger', texto: 'Error al cargar restaurant' });
@@ -84,9 +81,9 @@ export function GastronomiaPedidos({
     cargarRestaurant();
   }, [cargarPedidos, cargarRestaurant]);
 
-  // Debounce para actualizar el precio de delivery
+  // Debounce para actualizar el precio de delivery solo cuando el usuario modifica
   useEffect(() => {
-    if (!loaded || !restaurant) return;
+    if (!userChanged.current || !restaurant) return;
 
     const handler = setTimeout(async () => {
       try {
@@ -102,16 +99,21 @@ export function GastronomiaPedidos({
         if (!response.ok) throw new Error(`Error ${response.status}`);
         const updated = await response.json();
         setRestaurant(updated);
+        userChanged.current = false;
+        setMensaje({
+          tipo: 'success',
+          texto: 'Precio de delivery actualizado',
+        });
       } catch {
         setMensaje({
           tipo: 'danger',
           texto: 'No se pudo actualizar el precio de delivery',
         });
       }
-    }, 500);
+    }, 800);
 
     return () => clearTimeout(handler);
-  }, [precioDeliveryEdit, restaurant, loaded]);
+  }, [precioDeliveryEdit, restaurant]);
 
   const handleCambiarEstado = async (pedido: Pedido) => {
     const siguiente = getSiguienteEstadoPedido(pedido.status, pedido.delivery);
@@ -158,9 +160,10 @@ export function GastronomiaPedidos({
                   type="number"
                   min="0"
                   value={precioDeliveryEdit}
-                  onChange={(e) =>
-                    setPrecioDeliveryEdit(Number(e.target.value))
-                  }
+                  onChange={(e) => {
+                    userChanged.current = true;
+                    setPrecioDeliveryEdit(Number(e.target.value));
+                  }}
                 />
               </Col>
               <Col md="auto">

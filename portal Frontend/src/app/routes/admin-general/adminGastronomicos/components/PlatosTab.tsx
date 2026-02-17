@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Button, Col, Form, Image, Row } from 'react-bootstrap';
-import type { Imenu } from '../../../gastronomia/types/Imenu';
+import type { Imenu } from '../../../../../features/gastronomia/types/Imenu';
 import { ingredientesDB } from '../mock';
 import { CategoryTags } from './CategoryTags';
 import { IngredientesSelector } from './IngredientsSelector';

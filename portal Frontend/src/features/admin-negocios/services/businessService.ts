@@ -38,6 +38,8 @@ function normalizeBusiness(
     imageUrl: raw.imageUrl || raw.imagen || (raw.imagenes && raw.imagenes[0]),
     email: raw.email,
     phone: raw.phone || raw.telefono || raw.numWhatsapp,
+    delivery: raw.delivery ?? raw.isDelivery ?? false,
+    deliveryPrice: raw.deliveryPrice ?? 0,
   };
 }
 

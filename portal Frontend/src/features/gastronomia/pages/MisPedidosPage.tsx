@@ -36,7 +36,7 @@ const estadoBadge: Record<string, string> = {
 };
 
 function getProgreso(pedido: Pedido): number {
-  const flujo = pedido.isDelivery ? ESTADOS_FLUJO : ESTADOS_SIN_DELIVERY;
+  const flujo = pedido.delivery ? ESTADOS_FLUJO : ESTADOS_SIN_DELIVERY;
   const idx = flujo.indexOf(pedido.status);
   if (idx === -1) return 0;
   return Math.round(((idx + 1) / flujo.length) * 100);
@@ -102,7 +102,7 @@ export default function MisPedidosPage() {
       ) : (
         <Row>
           {pedidos.map(pedido => {
-            const flujo = pedido.isDelivery ? ESTADOS_FLUJO : ESTADOS_SIN_DELIVERY;
+            const flujo = pedido.delivery ? ESTADOS_FLUJO : ESTADOS_SIN_DELIVERY;
             const idxActual = flujo.indexOf(pedido.status);
 
             return (
@@ -113,7 +113,7 @@ export default function MisPedidosPage() {
                       Pedido #{pedido.id.slice(0, 8)}
                     </span>
                     <div>
-                      {pedido.isDelivery && <Badge bg="dark" className="me-1">Delivery</Badge>}
+                      {pedido.delivery && <Badge bg="dark" className="me-1">Delivery</Badge>}
                       <Badge bg={estadoBadge[pedido.status] ?? 'dark'}>
                         {estadoLabel[pedido.status] ?? pedido.status}
                       </Badge>
@@ -169,7 +169,7 @@ export default function MisPedidosPage() {
                     </ul>
 
                     {/* Direccion delivery */}
-                    {pedido.isDelivery && pedido.deliveryAddress && (
+                    {pedido.delivery && pedido.deliveryAddress && (
                       <div className="mb-2 p-2 bg-light rounded">
                         <small><strong>Direccion de entrega:</strong> {pedido.deliveryAddress}</small>
                       </div>

@@ -1,4 +1,4 @@
-import type { Imenu } from "../../../gastronomia/types/Imenu";
+import type { Imenu } from "../../../../../features/gastronomia/types/Imenu";
 
 export interface Item {
   id: number;

@@ -10,6 +10,7 @@ export interface IRestaurantInfo {
   phones?: string;     // Comma-separated phones
   schedule?: string;   // Format: "1:09:00-22:00; 2:09:00-22:00"
   delivery?: boolean;
+  deliveryPrice?: number;
   // Note: Backend doesn't return imageUrl in RestaurantDTO
   imageUrl?: string;   // For UI compatibility - may be undefined
 }

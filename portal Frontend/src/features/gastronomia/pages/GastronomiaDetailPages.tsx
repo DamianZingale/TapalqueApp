@@ -136,7 +136,9 @@ export default function GastronomiaDetailPage() {
                 <MenuCard
                   items={menu}
                   restaurantId={restaurante.id.toString()}
-                  restaurantName={restaurante.name}
+                  restaurantName={restaurante.name ?? ''}
+                  allowDelivery={restaurante.delivery ?? false}
+                  deliveryPrice={restaurante.deliveryPrice ?? 0}
                 />
               ) : (
                 <div className="alert alert-info text-center">
