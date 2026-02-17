@@ -63,7 +63,7 @@ export interface Pedido {
   totalAmount?: number;
   paidWithMercadoPago: boolean;
   paidWithCash: boolean;
-  delivery: boolean;
+  isDelivery: boolean;
   deliveryPrice?: number;
   deliveryAddress?: string;
   status: EstadoPedido;

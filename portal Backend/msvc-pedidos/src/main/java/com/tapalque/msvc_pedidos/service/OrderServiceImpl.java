@@ -124,7 +124,13 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Scheduled(cron = "0 0 3 * * ?") // limpieza automática a las 3AM
     public void cleanUnpaidOrders() {
-        orderRepository.deleteByPaidWithMercadoPagoFalseAndPaidWithCashFalse()
+        // Solo borrar pedidos de MercadoPago que nunca se pagaron (no tocar pedidos de efectivo)
+        orderRepository.findAll()
+            .filter(order -> Boolean.TRUE.equals(order.getPaidWithMercadoPago()) == false
+                    && Boolean.TRUE.equals(order.getPaidWithCash()) == false
+                    && order.getStatus() == Order.OrderStatus.RECIBIDO
+                    && order.getDateCreated().plusHours(24).isBefore(LocalDateTime.now()))
+            .flatMap(order -> orderRepository.deleteById(order.getId()))
             .subscribe();
     }
 
@@ -161,6 +167,20 @@ public class OrderServiceImpl implements OrderService {
             })
             .doOnSuccess(order -> System.out.println("Pago rechazado para pedido " + pedidoId))
             .doOnError(error -> System.err.println("Error al procesar rechazo de pago del pedido " + pedidoId + ": " + error.getMessage()))
+            .subscribe();
+    }
+
+    @Override
+    public void marcarPagoPendientePedido(@NonNull String pedidoId, @NonNull PagoEventoDTO evento) {
+        orderRepository.findById(pedidoId)
+            .flatMap(order -> {
+                order.setTransaccionId(evento.getTransaccionId());
+                order.setMercadoPagoId(evento.getMercadoPagoId());
+                order.setDateUpdated(LocalDateTime.now());
+                return orderRepository.save(order);
+            })
+            .doOnSuccess(order -> System.out.println("Pago pendiente para pedido " + pedidoId))
+            .doOnError(error -> System.err.println("Error al procesar pago pendiente del pedido " + pedidoId + ": " + error.getMessage()))
             .subscribe();
     }
 

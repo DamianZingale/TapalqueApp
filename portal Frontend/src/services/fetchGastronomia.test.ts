@@ -1,6 +1,24 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { fetchRestaurants, fetchRestaurantById, fetchMenuByRestaurant, type Restaurant, type Menu } from './fetchGastronomia';
 
+function mockRestaurant(overrides: Partial<Restaurant> = {}): Restaurant {
+  return {
+    id: 1,
+    name: 'Restaurant Test',
+    address: 'Calle 123',
+    email: 'test@restaurant.com',
+    delivery: true,
+    deliveryPrice: 0,
+    latitude: -36.0,
+    longitude: -59.0,
+    categories: 'Italiana',
+    phones: '',
+    schedule: '',
+    imageUrl: '',
+    ...overrides
+  };
+}
+
 describe('fetchGastronomia', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -8,21 +26,7 @@ describe('fetchGastronomia', () => {
 
   describe('fetchRestaurants', () => {
     it('debe retornar lista de restaurantes cuando la respuesta es exitosa', async () => {
-      const mockRestaurants: Restaurant[] = [
-        {
-          idRestaurant: 1,
-          name: 'Restaurant Test',
-          address: 'Calle 123',
-          email: 'test@restaurant.com',
-          delivery: true,
-          coordinate_lat: -36.0,
-          coordinate_lon: -59.0,
-          categories: [{ idCategory: 1, name: 'Italiana' }],
-          schedules: [],
-          phoneNumbers: [],
-          images: []
-        }
-      ];
+      const mockRestaurants: Restaurant[] = [mockRestaurant()];
 
       vi.mocked(global.fetch).mockResolvedValueOnce({
         ok: true,
@@ -57,55 +61,31 @@ describe('fetchGastronomia', () => {
 
   describe('fetchRestaurantById', () => {
     it('debe retornar restaurante cuando la respuesta es exitosa', async () => {
-      const mockRestaurant: Restaurant = {
-        idRestaurant: 1,
-        name: 'Restaurant Test',
-        address: 'Calle 123',
-        email: 'test@restaurant.com',
-        delivery: true,
-        coordinate_lat: -36.0,
-        coordinate_lon: -59.0,
-        categories: [],
-        schedules: [],
-        phoneNumbers: [],
-        images: []
-      };
+      const restaurant = mockRestaurant();
 
       vi.mocked(global.fetch).mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve(mockRestaurant)
+        json: () => Promise.resolve(restaurant)
       } as Response);
 
       const result = await fetchRestaurantById(1);
 
       expect(global.fetch).toHaveBeenCalledWith('/api/gastronomia/restaurants/1');
-      expect(result).toEqual(mockRestaurant);
+      expect(result).toEqual(restaurant);
     });
 
     it('debe aceptar id como string', async () => {
-      const mockRestaurant: Restaurant = {
-        idRestaurant: 5,
-        name: 'Test',
-        address: 'Address',
-        email: 'email@test.com',
-        delivery: false,
-        coordinate_lat: 0,
-        coordinate_lon: 0,
-        categories: [],
-        schedules: [],
-        phoneNumbers: [],
-        images: []
-      };
+      const restaurant = mockRestaurant({ id: 5, name: 'Test', address: 'Address', email: 'email@test.com', delivery: false });
 
       vi.mocked(global.fetch).mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve(mockRestaurant)
+        json: () => Promise.resolve(restaurant)
       } as Response);
 
       const result = await fetchRestaurantById('5');
 
       expect(global.fetch).toHaveBeenCalledWith('/api/gastronomia/restaurants/5');
-      expect(result).toEqual(mockRestaurant);
+      expect(result).toEqual(restaurant);
     });
 
     it('debe retornar null cuando hay error HTTP', async () => {

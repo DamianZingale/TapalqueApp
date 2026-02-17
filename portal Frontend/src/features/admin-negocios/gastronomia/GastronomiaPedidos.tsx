@@ -88,7 +88,7 @@ export function GastronomiaPedidos({
     const handler = setTimeout(async () => {
       try {
         const response = await fetch(
-          `/api/gastronomia/restaurants/${restaurant.idRestaurant}`,
+          `/api/gastronomia/restaurants/${businessId}`,
           {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
@@ -113,10 +113,10 @@ export function GastronomiaPedidos({
     }, 800);
 
     return () => clearTimeout(handler);
-  }, [precioDeliveryEdit, restaurant]);
+  }, [precioDeliveryEdit, restaurant, businessId]);
 
   const handleCambiarEstado = async (pedido: Pedido) => {
-    const siguiente = getSiguienteEstadoPedido(pedido.status, pedido.delivery);
+    const siguiente = getSiguienteEstadoPedido(pedido.status, pedido.isDelivery);
     if (!siguiente) return;
 
     await updateEstadoPedido(pedido.id, siguiente);
@@ -205,16 +205,16 @@ function PedidoCard({
   const estadoBadge = getEstadoPedidoBadge(pedido.status);
 
   const baseTotal = pedido.totalPrice || pedido.totalAmount || 0;
-  const total = pedido.delivery ? baseTotal + deliveryPrice : baseTotal;
+  const total = pedido.isDelivery ? baseTotal + deliveryPrice : baseTotal;
 
   const siguienteEstado = getSiguienteEstadoPedido(
     pedido.status,
-    pedido.delivery
+    pedido.isDelivery
   );
 
   const textoBoton = getTextoBotonSiguienteEstado(
     pedido.status,
-    pedido.delivery
+    pedido.isDelivery
   );
 
   return (
@@ -226,7 +226,7 @@ function PedidoCard({
 
       <Card.Body>
         <div className="mb-2">
-          {pedido.delivery ? (
+          {pedido.isDelivery ? (
             <Badge bg="warning" text="dark">
               Delivery (+${deliveryPrice})
             </Badge>

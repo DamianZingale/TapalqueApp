@@ -12,6 +12,7 @@ public interface I_RestaurantService {
     RestaurantDTO getRestaurantById(Long id);
     RestaurantDTO addRestaurant(RestaurantDTO dto);
     void updateRestaurant (Restaurant restaurant);
+    RestaurantDTO updateDeliveryPrice(Long id, Double deliveryPrice);
     void deleteRestaurant (Long id);
     
     

@@ -49,4 +49,6 @@ public interface OrderService {
 
     void rechazarPagoPedido(@NonNull String pedidoId, @NonNull PagoEventoDTO evento);
 
+    void marcarPagoPendientePedido(@NonNull String pedidoId, @NonNull PagoEventoDTO evento);
+
 }

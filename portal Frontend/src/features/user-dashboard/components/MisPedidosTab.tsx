@@ -147,7 +147,7 @@ export const MisPedidosTab = () => {
                                                     <small className="text-muted">Pedido #{pedido.id.slice(0, 8)}</small>
                                                 </div>
                                                 <div>
-                                                    {pedido.delivery && <Badge bg="dark" className="me-1">Delivery</Badge>}
+                                                    {pedido.isDelivery && <Badge bg="dark" className="me-1">Delivery</Badge>}
                                                     {getEstadoBadge(pedido.status)}
                                                 </div>
                                             </Col>
@@ -203,7 +203,7 @@ export const MisPedidosTab = () => {
                                     <div className="mb-2">
                                         <strong>Fecha:</strong> {new Date(pedidoSeleccionado.dateCreated).toLocaleString("es-AR")}
                                     </div>
-                                    {pedidoSeleccionado.delivery && pedidoSeleccionado.deliveryAddress && (
+                                    {pedidoSeleccionado.isDelivery && pedidoSeleccionado.deliveryAddress && (
                                         <div className="mb-2">
                                             <strong>Direccion de entrega:</strong> {pedidoSeleccionado.deliveryAddress}
                                         </div>

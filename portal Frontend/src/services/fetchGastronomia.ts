@@ -1,28 +1,5 @@
 // src/services/fetchGastronomia.ts
 
-export interface RestaurantImage {
-  id: number;
-  imageUrl: string;
-}
-
-export interface Category {
-  idCategory: number;
-  name: string;
-}
-
-export interface Schedule {
-  idSchedule: number;
-  dayOfWeek: string;
-  openingTime: string;
-  closingTime: string;
-}
-
-export interface PhoneNumber {
-  idPhone: number;
-  number: string;
-  phoneType: 'FIJO' | 'CELULAR' | 'WHATSAPP';
-}
-
 export interface DishCategory {
   idDishCategory: number;
   name: string;
@@ -54,19 +31,18 @@ export interface Menu {
 }
 
 export interface Restaurant {
-  idRestaurant: number;
+  id: number;
   name: string;
   address: string;
   email: string;
   delivery: boolean;
   deliveryPrice: number;
-  coordinate_lat: number;
-  coordinate_lon: number;
-  categories: Category[];
-  schedules: Schedule[];
-  phoneNumbers: PhoneNumber[];
-  images: RestaurantImage[];
-  menus?: Menu;
+  latitude: number;
+  longitude: number;
+  categories: string;
+  phones: string;
+  schedule: string;
+  imageUrl: string;
 }
 
 export async function fetchRestaurants(): Promise<Restaurant[]> {

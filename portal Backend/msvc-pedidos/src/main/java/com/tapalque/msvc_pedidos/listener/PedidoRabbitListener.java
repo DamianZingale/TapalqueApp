@@ -22,6 +22,8 @@ public class PedidoRabbitListener {
                 orderService.confirmarPagoPedido(evento.getReferenciaId(), evento);
             } else if ("RECHAZADO".equals(evento.getEstado())) {
                 orderService.rechazarPagoPedido(evento.getReferenciaId(), evento);
+            } else if ("PENDIENTE".equals(evento.getEstado())) {
+                orderService.marcarPagoPendientePedido(evento.getReferenciaId(), evento);
             }
 
             System.out.println("Pedido ID " + evento.getReferenciaId() + " actualizado con estado: " + evento.getEstado());

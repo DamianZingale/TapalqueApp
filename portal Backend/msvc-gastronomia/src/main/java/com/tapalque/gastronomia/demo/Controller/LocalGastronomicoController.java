@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -71,6 +72,18 @@ public class LocalGastronomicoController {
             entity.setIdRestaurant(id);
             localGastronomicoService.updateRestaurant(entity);
             return ResponseEntity.ok(new RestaurantDTO(entity));
+        } catch (EntityNotFoundException ex) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PatchMapping("/updateDeliveryPrice/{id}")
+    public ResponseEntity<RestaurantDTO> updateDeliveryPrice(@PathVariable Long id,
+            @RequestBody java.util.Map<String, Double> body) {
+        try {
+            Double deliveryPrice = body.get("deliveryPrice");
+            RestaurantDTO updated = localGastronomicoService.updateDeliveryPrice(id, deliveryPrice);
+            return ResponseEntity.ok(updated);
         } catch (EntityNotFoundException ex) {
             return ResponseEntity.notFound().build();
         }

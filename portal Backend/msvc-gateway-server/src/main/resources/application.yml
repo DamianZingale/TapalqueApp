@@ -499,6 +499,15 @@ spring:
           filters:
             - RewritePath=/api/gastronomia/(?<id>[0-9]+), /restaurante/update/${id}
 
+        # PATCH /api/gastronomia/restaurants/{id} -> /restaurante/updateDeliveryPrice/{id}
+        - id: msvc-gastronomia-update-delivery-price
+          uri: lb://msvc-gastronomia
+          predicates:
+            - Path=/api/gastronomia/restaurants/{id}
+            - Method=PATCH
+          filters:
+            - RewritePath=/api/gastronomia/restaurants/(?<id>[0-9]+), /restaurante/updateDeliveryPrice/${id}
+
         - id: msvc-gastronomia-delete
           uri: lb://msvc-gastronomia
           predicates:

@@ -59,7 +59,7 @@ export interface Pedido {
   mercadoPagoId?: string;
   fechaPago?: string;
   payment?: Payment;
-  delivery: boolean;
+  isDelivery: boolean;
   deliveryAddress?: string;
 }
 
