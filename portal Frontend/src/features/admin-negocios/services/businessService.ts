@@ -11,6 +11,9 @@ interface BusinessResponse {
   type?: BusinessType;
   tipo?: string;
   address?: string;
+  delivery?: boolean;
+  isDelivery?: boolean;
+  deliveryPrice?: number;
   direccion?: string;
   ubicacion?: string;
   imageUrl?: string;
@@ -23,7 +26,10 @@ interface BusinessResponse {
 }
 
 // Normalizar respuesta del backend a Business
-function normalizeBusiness(raw: BusinessResponse, type: BusinessType): Business {
+function normalizeBusiness(
+  raw: BusinessResponse,
+  type: BusinessType
+): Business {
   return {
     id: String(raw.id),
     name: raw.name || raw.nombre || raw.titulo || 'Sin nombre',
@@ -31,7 +37,7 @@ function normalizeBusiness(raw: BusinessResponse, type: BusinessType): Business 
     address: raw.address || raw.direccion || raw.ubicacion || '',
     imageUrl: raw.imageUrl || raw.imagen || (raw.imagenes && raw.imagenes[0]),
     email: raw.email,
-    phone: raw.phone || raw.telefono || raw.numWhatsapp
+    phone: raw.phone || raw.telefono || raw.numWhatsapp,
   };
 }
 
@@ -54,7 +60,7 @@ function normalizeBusinessDTO(dto: BusinessDTO): Business {
     address: '',
     imageUrl: undefined,
     email: undefined,
-    phone: undefined
+    phone: undefined,
   };
 }
 
@@ -75,11 +81,15 @@ export async function fetchUserBusinesses(userId: string): Promise<Business[]> {
 }
 
 // Obtener un negocio específico por ID y tipo
-export async function fetchBusinessById(id: string, type: BusinessType): Promise<Business | null> {
+export async function fetchBusinessById(
+  id: string,
+  type: BusinessType
+): Promise<Business | null> {
   try {
-    const endpoint = type === 'GASTRONOMIA'
-      ? `/gastronomia/restaurants/${id}`
-      : `/hospedajes/${id}`;
+    const endpoint =
+      type === 'GASTRONOMIA'
+        ? `/gastronomia/restaurants/${id}`
+        : `/hospedajes/${id}`;
 
     const response = await api.get<BusinessResponse>(endpoint);
 
@@ -95,10 +105,14 @@ export async function fetchBusinessById(id: string, type: BusinessType): Promise
 }
 
 // Verificar si el usuario es dueño de un negocio
-export async function isBusinessOwner(userId: string, businessId: string, type: BusinessType): Promise<boolean> {
+export async function isBusinessOwner(
+  userId: string,
+  businessId: string,
+  type: BusinessType
+): Promise<boolean> {
   try {
     const businesses = await fetchUserBusinesses(userId);
-    return businesses.some(b => b.id === businessId && b.type === type);
+    return businesses.some((b) => b.id === businessId && b.type === type);
   } catch (error) {
     console.error('Error checking business ownership:', error);
     return false;

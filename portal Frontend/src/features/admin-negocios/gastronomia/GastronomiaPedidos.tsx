@@ -24,7 +24,7 @@ import {
 interface GastronomiaPedidosProps {
   businessId: string;
   businessName: string;
-  delivery: boolean;
+  isDelivery: boolean;
   deliveryPrice: number;
 }
 
@@ -35,7 +35,7 @@ interface Mensaje {
 
 export function GastronomiaPedidos({
   businessId,
-  delivery,
+  isDelivery,
   deliveryPrice,
 }: GastronomiaPedidosProps) {
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
@@ -104,7 +104,7 @@ export function GastronomiaPedidos({
         </Alert>
       )}
 
-      {delivery && (
+      {isDelivery && (
         <Card className="mb-3 border-warning">
           <Card.Body>
             <Row className="align-items-end">
