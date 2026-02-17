@@ -27,7 +27,7 @@ public class OrderServiceImpl implements OrderService {
     private final RabbitTemplate rabbitTemplate;
     private final AdminNotificationService adminNotificationService;
 
-    @Value("${rabbitmq.pedido.exchange}")
+    @Value("${rabbitmq.exchange}")
     private String orderExchange;
 
     @Value("${rabbitmq.routingKey.mercado.pago}")

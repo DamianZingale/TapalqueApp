@@ -30,6 +30,7 @@ public class Order {
     // Información de delivery
     private Boolean isDelivery;
     private String deliveryAddress;
+    private double deliveryPrice;
 
     // Información del cliente (para que el admin vea quién hizo el pedido)
     private String userName;
@@ -43,7 +44,7 @@ public class Order {
     }
 
     public Order(String id, Double totalPrice, Boolean paidWithMercadoPago, Boolean paidWithCash,
-                 List<Item> items, Restaurant restaurant, String paymentReceiptPath) {
+                 List<Item> items, Restaurant restaurant, String paymentReceiptPath, Boolean isDelivery, String deliveryAddress, double deliveryPrice, String userName, String userPhone) {
         this.id = id;
         this.totalPrice = totalPrice;
         this.paidWithMercadoPago = paidWithMercadoPago;
@@ -54,6 +55,11 @@ public class Order {
         this.dateCreated = LocalDateTime.now();
         this.dateUpdated = LocalDateTime.now();
         this.paymentReceiptPath = paymentReceiptPath;
+        this.isDelivery = isDelivery;
+        this.deliveryAddress = deliveryAddress;
+        this.deliveryPrice = deliveryPrice;
+        this.userName = userName;
+        this.userPhone = userPhone;
     }
 
     // --- Getters y Setters ---
@@ -111,6 +117,10 @@ public class Order {
     public String getUserPhone() { return userPhone; }
     public void setUserPhone(String userPhone) { this.userPhone = userPhone; }
 
+    public double getDeliveryPrice() {return deliveryPrice;}
+
+    public void setDeliveryPrice(double deliveryPrice) {this.deliveryPrice = deliveryPrice;}
+
     // --- Clases internas ---
     public static class Item {
         private String productId;
@@ -137,6 +147,8 @@ public class Order {
 
         public Integer getItemQuantity() { return itemQuantity; }
         public void setItemQuantity(Integer itemQuantity) { this.itemQuantity = itemQuantity; }
+
+
     }
 
     public static class Restaurant {
@@ -166,6 +178,8 @@ public class Order {
         PAID,            // Pagado via Mercado Pago
         FAILED           // Pago fallido
     }
+
+ 
 
     
 }

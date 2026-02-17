@@ -19,9 +19,9 @@ public class PedidoRabbitListener {
             System.out.println("Recibido evento de pago para pedido ID: " + evento.getReferenciaId());
 
             if ("APROBADO".equals(evento.getEstado())) {
-                orderService.confirmarPagoPedido(evento.getReferenciaId().toString(), evento);
+                orderService.confirmarPagoPedido(evento.getReferenciaId(), evento);
             } else if ("RECHAZADO".equals(evento.getEstado())) {
-                orderService.rechazarPagoPedido(evento.getReferenciaId().toString(), evento);
+                orderService.rechazarPagoPedido(evento.getReferenciaId(), evento);
             }
 
             System.out.println("Pedido ID " + evento.getReferenciaId() + " actualizado con estado: " + evento.getEstado());
