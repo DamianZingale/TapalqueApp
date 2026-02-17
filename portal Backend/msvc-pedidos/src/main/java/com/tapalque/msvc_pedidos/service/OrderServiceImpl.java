@@ -54,7 +54,7 @@ public class OrderServiceImpl implements OrderService {
                 Map.of(
                     "idPedido", savedOrder.getId(),
                     "monto", savedOrder.getTotalPrice(),
-                    "fecha", savedOrder.getDateCreated().toString()
+                    "fecha", savedOrder.getDateCreated().toString()                   
                 )
             );
 

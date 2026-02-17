@@ -5,6 +5,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
+import io.micrometer.common.lang.Nullable;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -44,6 +45,10 @@ public class Restaurant {
     @NotNull (message = "Por favor informar existencia de delivery")
     private Boolean delivery;
 
+    @Column(name = "delivery_price")
+    @Nullable
+    private Double deliveryPrice;
+
     @Min(value = -90, message = "La latitud debe estar entre -90 y 90")
     @Max(value = 90, message = "La latitud debe estar entre -90 y 90")
     @Column (name="latitude" ,nullable= false)
@@ -72,6 +77,7 @@ public class Restaurant {
     @JsonManagedReference
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PhoneNumber> phoneNumbers;
+
     @JsonManagedReference
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RestaurantImage> images;
@@ -82,7 +88,7 @@ public class Restaurant {
     
     public Restaurant(){}
   
-    public Restaurant(double lat, double lon, String address, List<Category> categories, Boolean delivery, Menu menu, String email, Long idRestaurant, List<RestaurantImage> images, String name, List<PhoneNumber> phone, List<PhoneNumber> phoneNumbers, List<Schedule> schedules) {
+    public Restaurant(Double deliveryPrice, Double lat, Double lon, String address, List<Category> categories, Boolean delivery, Menu menu, String email, Long idRestaurant, List<RestaurantImage> images, String name, List<PhoneNumber> phone, List<PhoneNumber> phoneNumbers, List<Schedule> schedules) {
         this.address = address;
         this.categories = categories;
         this.delivery = delivery;
@@ -93,6 +99,7 @@ public class Restaurant {
         this.name = name;
         this.phoneNumbers = phone;
         this.phoneNumbers = phoneNumbers;
+        this.deliveryPrice = deliveryPrice;
         this.schedules = schedules;
         this.coordinate_lat = (coordinate_lat != null) ? lat : 0.0;
         this.coordinate_lon = (coordinate_lon != null) ?  lon : 0.0;
@@ -203,4 +210,14 @@ public class Restaurant {
     public void setCoordinate_lon(Double lon){
         coordinate_lon = (lon != null) ? lon : 0.0;
     }
+
+    public Double getDeliveryPrice() {
+        return deliveryPrice;
+    }
+
+    public void setDeliveryPrice(Double deliveryPrice) {
+        this.deliveryPrice = deliveryPrice;
+    }
+
+    
 }

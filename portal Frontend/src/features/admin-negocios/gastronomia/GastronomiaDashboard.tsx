@@ -1,12 +1,12 @@
-import { useState, useEffect } from 'react';
-import { Container, Tabs, Tab, Spinner, Alert, Button } from 'react-bootstrap';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { fetchBusinessById } from '../services/businessService';
+import { useEffect, useState } from 'react';
+import { Alert, Button, Container, Spinner, Tab, Tabs } from 'react-bootstrap';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { authService } from '../../../services/authService';
+import { fetchBusinessById } from '../services/businessService';
 import type { Business } from '../types';
+import { GastronomiaConfiguracion } from './GastronomiaConfiguracion';
 import { GastronomiaMenu } from './GastronomiaMenu';
 import { GastronomiaPedidos } from './GastronomiaPedidos';
-import { GastronomiaConfiguracion } from './GastronomiaConfiguracion';
 
 export function GastronomiaDashboard() {
   const { id } = useParams<{ id: string }>();
@@ -23,7 +23,9 @@ export function GastronomiaDashboard() {
     return 'menu';
   };
 
-  const [activeTab, setActiveTab] = useState<'menu' | 'pedidos' | 'configuracion'>(getActiveTab());
+  const [activeTab, setActiveTab] = useState<
+    'menu' | 'pedidos' | 'configuracion'
+  >(getActiveTab());
 
   useEffect(() => {
     setActiveTab(getActiveTab());
@@ -106,9 +108,7 @@ export function GastronomiaDashboard() {
           >
             ← Volver a Mis Negocios
           </Button>
-          <h1 className="h3 mb-1">
-            🍽️ {business.name}
-          </h1>
+          <h1 className="h3 mb-1">🍽️ {business.name}</h1>
           {business.address && (
             <p className="text-muted mb-0">📍 {business.address}</p>
           )}
@@ -116,26 +116,33 @@ export function GastronomiaDashboard() {
       </div>
 
       {/* Tabs */}
-      <Tabs
-        activeKey={activeTab}
-        onSelect={handleTabChange}
-        className="mb-4"
-      >
+      <Tabs activeKey={activeTab} onSelect={handleTabChange} className="mb-4">
         <Tab eventKey="menu" title="📋 Menú">
           {activeTab === 'menu' && (
-            <GastronomiaMenu businessId={business.id} businessName={business.name} />
+            <GastronomiaMenu
+              businessId={business.id}
+              businessName={business.name}
+            />
           )}
         </Tab>
 
         <Tab eventKey="pedidos" title="📦 Pedidos">
           {activeTab === 'pedidos' && (
-            <GastronomiaPedidos businessId={business.id} businessName={business.name} />
+            <GastronomiaPedidos
+              businessId={business.id}
+              businessName={business.name}
+              allowDelivery={business.allowDelivery ?? false}
+              deliveryPrice={business.deliveryPrice ?? 0}
+            />
           )}
         </Tab>
 
         <Tab eventKey="configuracion" title="⚙️ Configuración">
           {activeTab === 'configuracion' && (
-            <GastronomiaConfiguracion businessId={business.id} businessName={business.name} />
+            <GastronomiaConfiguracion
+              businessId={business.id}
+              businessName={business.name}
+            />
           )}
         </Tab>
       </Tabs>

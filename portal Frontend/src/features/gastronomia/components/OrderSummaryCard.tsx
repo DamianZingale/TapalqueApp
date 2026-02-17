@@ -1,4 +1,4 @@
-import { useState, type FC } from 'react';
+import { useEffect, useState, type FC } from 'react';
 import { Button, Form } from 'react-bootstrap';
 
 import type { PedidoItem } from '../types/Imenu';
@@ -8,6 +8,8 @@ export type PaymentMethod = 'mercadopago' | 'efectivo';
 
 interface Props {
   initialPedido: PedidoItem[];
+  allowDelivery?: boolean;
+  deliveryPrice: number;
   onConfirm: (data: {
     items: PedidoItem[];
     total: number;
@@ -20,6 +22,8 @@ interface Props {
 
 export const OrderSummaryCard: FC<Props> = ({
   initialPedido,
+  allowDelivery,
+  deliveryPrice,
   onConfirm,
   onCancel,
 }) => {
@@ -27,6 +31,12 @@ export const OrderSummaryCard: FC<Props> = ({
   const [delivery, setDelivery] = useState(false);
   const [address, setAddress] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('efectivo');
+  useEffect(() => {
+    if (!allowDelivery) {
+      setDelivery(false);
+      setAddress('');
+    }
+  }, [allowDelivery]);
 
   const handleQuantityChange = (id: number, cantidad: number) =>
     setPedido((prev) =>
@@ -34,8 +44,7 @@ export const OrderSummaryCard: FC<Props> = ({
     );
 
   const subtotal = pedido.reduce((acc, i) => acc + i.price * i.cantidad, 0);
-  const total = subtotal + (delivery ? 500 : 0);
-
+  const total = subtotal + (delivery && allowDelivery ? deliveryPrice : 0);
   return (
     <div className="p-3 border rounded" style={{ backgroundColor: '#d4d2cf' }}>
       <h5>Pedido final:</h5>
@@ -54,26 +63,28 @@ export const OrderSummaryCard: FC<Props> = ({
         </div>
       ))}
 
-      <Form.Check
-        type="checkbox"
-        label="Delivery ($500)"
-        checked={delivery}
-        onChange={(e) => setDelivery(e.target.checked)}
-        className="my-3"
-        style={{
-          accentColor: '#0d6efd',
-        }}
-      />
-      {delivery && (
-        <div className="mb-3">
-          <input
-            type="text"
-            className="form-control"
-            placeholder="Dirección de entrega"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
+      {allowDelivery && (
+        <>
+          <Form.Check
+            type="checkbox"
+            label={`Delivery ($${deliveryPrice.toFixed(2)})`}
+            checked={delivery}
+            onChange={(e) => setDelivery(e.target.checked)}
+            className="my-3"
           />
-        </div>
+
+          {delivery && (
+            <div className="mb-3">
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Dirección de entrega"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+              />
+            </div>
+          )}
+        </>
       )}
 
       <div className="mb-3">
@@ -106,10 +117,20 @@ export const OrderSummaryCard: FC<Props> = ({
         </Button>
         <Button
           variant="primary"
-          onClick={() => onConfirm({ items: pedido, total, delivery, address, paymentMethod })}
+          onClick={() =>
+            onConfirm({
+              items: pedido,
+              total,
+              delivery,
+              address,
+              paymentMethod,
+            })
+          }
           disabled={delivery && !address.trim()}
         >
-          {paymentMethod === 'mercadopago' ? 'Pagar con MercadoPago' : 'Confirmar Pedido'}
+          {paymentMethod === 'mercadopago'
+            ? 'Pagar con MercadoPago'
+            : 'Confirmar Pedido'}
         </Button>
       </div>
     </div>

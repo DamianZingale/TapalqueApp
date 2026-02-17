@@ -23,6 +23,7 @@ public class RestaurantDTO {
     private String phones;     // concatenados con ', '
     private String schedule;    // concatenado tipo "1:09:00-22:00; 2:09:00-22:00"
     private boolean delivery;
+    private Double deliveryPrice;
     private String imageUrl;
 
     // 🔹 Constructor vacío
@@ -30,7 +31,7 @@ public class RestaurantDTO {
 
     // 🔹 Constructor con todos los campos
     public RestaurantDTO(Long id, String name, String address, String email, Double latitude, Double longitude,
-                         String categories, String phones, String schedule, boolean delivery, String imageUrl) {
+                         String categories, String phones, String schedule, boolean delivery, Double deliveryPrice, String imageUrl) {
         this.id = id;
         this.name = name;
         this.address = address;
@@ -41,6 +42,7 @@ public class RestaurantDTO {
         this.phones = phones;
         this.schedule = schedule;
         this.delivery = delivery;
+        this.deliveryPrice = deliveryPrice;
         this.imageUrl = imageUrl;
     }
 
@@ -91,6 +93,7 @@ public class RestaurantDTO {
     entity.setCoordinate_lat(Optional.ofNullable(this.latitude).orElse(0.0));
     entity.setCoordinate_lon(Optional.ofNullable(this.longitude).orElse(0.0));
     entity.setDelivery(this.delivery);
+    entity.setDeliveryPrice(this.deliveryPrice);
 
     // Categories: String -> List<Category>
     if(this.categories != null && !this.categories.isEmpty()) {
@@ -255,4 +258,11 @@ entity.setSchedules(scheduleList);
         this.imageUrl = imageUrl;
     }
 
+        public Double getDeliveryPrice() {
+            return deliveryPrice;
+        }   
+
+    public void setDeliveryPrice(Double deliveryPrice) {
+        this.deliveryPrice = deliveryPrice;
+    }
 }

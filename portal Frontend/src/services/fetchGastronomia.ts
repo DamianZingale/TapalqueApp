@@ -59,6 +59,7 @@ export interface Restaurant {
   address: string;
   email: string;
   delivery: boolean;
+  deliveryPrice: number;
   coordinate_lat: number;
   coordinate_lon: number;
   categories: Category[];

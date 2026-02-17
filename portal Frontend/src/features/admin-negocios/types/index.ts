@@ -12,6 +12,10 @@ export interface Business {
   imageUrl?: string;
   email?: string;
   phone?: string;
+
+  // Configuración Gastronomía
+  allowDelivery?: boolean;
+  deliveryPrice?: number;
 }
 
 // Estados de pedido
@@ -20,14 +24,14 @@ export enum EstadoPedido {
   EN_PREPARACION = 'EN_PREPARACION',
   LISTO = 'LISTO',
   EN_DELIVERY = 'EN_DELIVERY',
-  ENTREGADO = 'ENTREGADO'
+  ENTREGADO = 'ENTREGADO',
 }
 
 // Estados de reserva con colores
 export enum EstadoReservaColor {
-  ROJO = 'ROJO',       // En ejecución / Paga al ingreso
+  ROJO = 'ROJO', // En ejecución / Paga al ingreso
   AMARILLO = 'AMARILLO', // Reserva con adelanto/garantía
-  NARANJA = 'NARANJA'    // Pago completo mediante app
+  NARANJA = 'NARANJA', // Pago completo mediante app
 }
 
 // Item de pedido
@@ -60,6 +64,7 @@ export interface Pedido {
   paidWithMercadoPago: boolean;
   paidWithCash: boolean;
   isDelivery: boolean;
+  deliveryPrice?: number;
   deliveryAddress?: string;
   status: EstadoPedido;
   dateCreated: string;
@@ -200,7 +205,12 @@ export interface FormReservaExterna {
   roomId?: string;
   totalPrice: number;
   amountPaid: number;
-  paymentType: 'EFECTIVO' | 'TRANSFERENCIA' | 'TARJETA_CREDITO' | 'TARJETA_DEBITO' | 'MERCADO_PAGO';
+  paymentType:
+    | 'EFECTIVO'
+    | 'TRANSFERENCIA'
+    | 'TARJETA_CREDITO'
+    | 'TARJETA_DEBITO'
+    | 'MERCADO_PAGO';
   notas: string;
 }
 
@@ -214,7 +224,7 @@ export const CATEGORIAS_MENU = [
   'Ensaladas',
   'Bebidas',
   'Postres',
-  'Otros'
+  'Otros',
 ] as const;
 
 // Restricciones alimentarias
@@ -223,7 +233,7 @@ export const RESTRICCIONES_MENU = [
   'Vegano',
   'Sin Gluten',
   'Sin Lactosa',
-  'Sin Alcohol'
+  'Sin Alcohol',
 ] as const;
 
 // Helper para obtener color de estado de reserva
@@ -250,7 +260,10 @@ export function getColorEstadoReserva(reserva: Reserva): EstadoReservaColor {
 }
 
 // Helper para obtener badge de estado de pedido
-export function getEstadoPedidoBadge(estado: EstadoPedido): { color: string; texto: string } {
+export function getEstadoPedidoBadge(estado: EstadoPedido): {
+  color: string;
+  texto: string;
+} {
   switch (estado) {
     case EstadoPedido.RECIBIDO:
       return { color: 'warning', texto: 'Recibido' };
@@ -270,7 +283,10 @@ export function getEstadoPedidoBadge(estado: EstadoPedido): { color: string; tex
 // Helper para obtener siguiente estado de pedido
 // Si isDelivery es true y el estado es LISTO, el siguiente es EN_DELIVERY
 // Si isDelivery es false y el estado es LISTO, el siguiente es ENTREGADO directamente
-export function getSiguienteEstadoPedido(estadoActual: EstadoPedido, isDelivery?: boolean): EstadoPedido | null {
+export function getSiguienteEstadoPedido(
+  estadoActual: EstadoPedido,
+  isDelivery?: boolean
+): EstadoPedido | null {
   switch (estadoActual) {
     case EstadoPedido.RECIBIDO:
       return EstadoPedido.EN_PREPARACION;
@@ -288,7 +304,10 @@ export function getSiguienteEstadoPedido(estadoActual: EstadoPedido, isDelivery?
 }
 
 // Helper para obtener texto del botón de siguiente estado
-export function getTextoBotonSiguienteEstado(estadoActual: EstadoPedido, isDelivery?: boolean): string {
+export function getTextoBotonSiguienteEstado(
+  estadoActual: EstadoPedido,
+  isDelivery?: boolean
+): string {
   switch (estadoActual) {
     case EstadoPedido.RECIBIDO:
       return 'Comenzar preparación';

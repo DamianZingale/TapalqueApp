@@ -16,24 +16,38 @@ import {
   updateEstadoPedido,
 } from '../../../services/fetchPedidos';
 import { useWebSocket } from '../hooks/useWebSocket';
-import { EstadoPedido, type Pedido } from '../types';
-import { getEstadoPedidoBadge, getSiguienteEstadoPedido, getTextoBotonSiguienteEstado } from '../types';
+import {
+  EstadoPedido,
+  getEstadoPedidoBadge,
+  getSiguienteEstadoPedido,
+  getTextoBotonSiguienteEstado,
+  type Pedido,
+} from '../types';
 
 interface GastronomiaPedidosProps {
   businessId: string;
   businessName: string;
+  allowDelivery: boolean;
+  deliveryPrice: number;
 }
 
-export function GastronomiaPedidos({
-  businessId,
-}: GastronomiaPedidosProps) {
+export function GastronomiaPedidos({ businessId }: GastronomiaPedidosProps) {
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filtroEstado, setFiltroEstado] = useState<EstadoPedido | 'TODOS'>('TODOS');
-  const [ordenPor, setOrdenPor] = useState<'reciente' | 'antiguo' | 'monto'>('reciente');
-  const [mensaje, setMensaje] = useState<{ tipo: 'success' | 'danger'; texto: string } | null>(null);
+  const [filtroEstado, setFiltroEstado] = useState<EstadoPedido | 'TODOS'>(
+    'TODOS'
+  );
+  const [ordenPor, setOrdenPor] = useState<'reciente' | 'antiguo' | 'monto'>(
+    'reciente'
+  );
+  const [mensaje, setMensaje] = useState<{
+    tipo: 'success' | 'danger';
+    texto: string;
+  } | null>(null);
 
-  const [activeTab, setActiveTab] = useState<'activos' | 'historial'>('activos');
+  const [activeTab, setActiveTab] = useState<'activos' | 'historial'>(
+    'activos'
+  );
 
   const [fechaDesde, setFechaDesde] = useState<string>('');
   const [fechaHasta, setFechaHasta] = useState<string>('');
@@ -113,11 +127,20 @@ export function GastronomiaPedidos({
     .sort((a, b) => {
       switch (ordenPor) {
         case 'reciente':
-          return new Date(b.dateCreated).getTime() - new Date(a.dateCreated).getTime();
+          return (
+            new Date(b.dateCreated).getTime() -
+            new Date(a.dateCreated).getTime()
+          );
         case 'antiguo':
-          return new Date(a.dateCreated).getTime() - new Date(b.dateCreated).getTime();
+          return (
+            new Date(a.dateCreated).getTime() -
+            new Date(b.dateCreated).getTime()
+          );
         case 'monto':
-          return (b.totalPrice || b.totalAmount || 0) - (a.totalPrice || a.totalAmount || 0);
+          return (
+            (b.totalPrice || b.totalAmount || 0) -
+            (a.totalPrice || a.totalAmount || 0)
+          );
         default:
           return 0;
       }
@@ -128,7 +151,10 @@ export function GastronomiaPedidos({
   );
 
   const handleCambiarEstado = async (pedido: Pedido) => {
-    const siguienteEstado = getSiguienteEstadoPedido(pedido.status, pedido.isDelivery);
+    const siguienteEstado = getSiguienteEstadoPedido(
+      pedido.status,
+      pedido.isDelivery
+    );
     if (!siguienteEstado) return;
 
     try {
@@ -155,7 +181,10 @@ export function GastronomiaPedidos({
     const filtrados = pedidosFiltrados;
     return {
       cantidad: filtrados.length,
-      total: filtrados.reduce((sum, p) => sum + (p.totalPrice || p.totalAmount || 0), 0),
+      total: filtrados.reduce(
+        (sum, p) => sum + (p.totalPrice || p.totalAmount || 0),
+        0
+      ),
       efectivo: filtrados
         .filter((p) => p.paidWithCash)
         .reduce((sum, p) => sum + (p.totalPrice || p.totalAmount || 0), 0),
@@ -196,7 +225,11 @@ export function GastronomiaPedidos({
       </div>
 
       {mensaje && (
-        <Alert variant={mensaje.tipo} dismissible onClose={() => setMensaje(null)}>
+        <Alert
+          variant={mensaje.tipo}
+          dismissible
+          onClose={() => setMensaje(null)}
+        >
           {mensaje.texto}
         </Alert>
       )}
@@ -211,7 +244,9 @@ export function GastronomiaPedidos({
             <Col md={4}>
               <Form.Select
                 value={filtroEstado}
-                onChange={(e) => setFiltroEstado(e.target.value as typeof filtroEstado)}
+                onChange={(e) =>
+                  setFiltroEstado(e.target.value as typeof filtroEstado)
+                }
               >
                 <option value="TODOS">Todos los estados</option>
                 <option value="RECIBIDO">Recibido</option>
@@ -235,7 +270,10 @@ export function GastronomiaPedidos({
           <Row xs={1} md={2} lg={3} className="g-3">
             {pedidosActivos.map((pedido) => (
               <Col key={pedido.id}>
-                <PedidoCard pedido={pedido} onCambiarEstado={handleCambiarEstado} />
+                <PedidoCard
+                  pedido={pedido}
+                  onCambiarEstado={handleCambiarEstado}
+                />
               </Col>
             ))}
           </Row>
@@ -244,7 +282,9 @@ export function GastronomiaPedidos({
             <div className="text-center py-5">
               <div style={{ fontSize: '4rem' }}>📭</div>
               <h4>No hay pedidos activos</h4>
-              <p className="text-muted">Los nuevos pedidos aparecerán aquí automáticamente</p>
+              <p className="text-muted">
+                Los nuevos pedidos aparecerán aquí automáticamente
+              </p>
             </div>
           )}
         </Tab>
@@ -276,7 +316,9 @@ export function GastronomiaPedidos({
                 <Col md={3}>
                   <Form.Select
                     value={filtroEstado}
-                    onChange={(e) => setFiltroEstado(e.target.value as typeof filtroEstado)}
+                    onChange={(e) =>
+                      setFiltroEstado(e.target.value as typeof filtroEstado)
+                    }
                   >
                     <option value="TODOS">Todos los estados</option>
                     <option value="ENTREGADO">Entregados</option>
@@ -340,14 +382,20 @@ export function GastronomiaPedidos({
           <Row xs={1} md={2} lg={3} className="g-3">
             {pedidosFiltrados.map((pedido) => (
               <Col key={pedido.id}>
-                <PedidoCard pedido={pedido} onCambiarEstado={handleCambiarEstado} showHistorial />
+                <PedidoCard
+                  pedido={pedido}
+                  onCambiarEstado={handleCambiarEstado}
+                  showHistorial
+                />
               </Col>
             ))}
           </Row>
 
           {pedidosFiltrados.length === 0 && (
             <div className="text-center py-5">
-              <p className="text-muted">No hay pedidos en el período seleccionado</p>
+              <p className="text-muted">
+                No hay pedidos en el período seleccionado
+              </p>
             </div>
           )}
         </Tab>
@@ -362,17 +410,31 @@ interface PedidoCardProps {
   showHistorial?: boolean;
 }
 
-function PedidoCard({ pedido, onCambiarEstado, showHistorial }: PedidoCardProps) {
+function PedidoCard({
+  pedido,
+  onCambiarEstado,
+  showHistorial,
+}: PedidoCardProps) {
   const estadoBadge = getEstadoPedidoBadge(pedido.status);
-  const siguienteEstado = getSiguienteEstadoPedido(pedido.status, pedido.isDelivery);
-  const textoBoton = getTextoBotonSiguienteEstado(pedido.status, pedido.isDelivery);
+  const siguienteEstado = getSiguienteEstadoPedido(
+    pedido.status,
+    pedido.isDelivery
+  );
+  const textoBoton = getTextoBotonSiguienteEstado(
+    pedido.status,
+    pedido.isDelivery
+  );
   const total = pedido.totalPrice || pedido.totalAmount || 0;
 
   return (
     <Card className="h-100">
       <Card.Header className="d-flex justify-content-between align-items-center">
-        <small className="text-muted">#{pedido.id.slice(-6).toUpperCase()}</small>
-        <Badge bg={estadoBadge.color as 'secondary' | 'info' | 'success' | 'dark'}>
+        <small className="text-muted">
+          #{pedido.id.slice(-6).toUpperCase()}
+        </small>
+        <Badge
+          bg={estadoBadge.color as 'secondary' | 'info' | 'success' | 'dark'}
+        >
           {estadoBadge.texto}
         </Badge>
       </Card.Header>
@@ -383,7 +445,9 @@ function PedidoCard({ pedido, onCambiarEstado, showHistorial }: PedidoCardProps)
 
         <div className="mb-2">
           {pedido.isDelivery ? (
-            <Badge bg="warning" text="dark">Delivery</Badge>
+            <Badge bg="warning" text="dark">
+              Delivery
+            </Badge>
           ) : (
             <Badge bg="info">Retiro en local</Badge>
           )}
@@ -420,7 +484,9 @@ function PedidoCard({ pedido, onCambiarEstado, showHistorial }: PedidoCardProps)
 
         <div className="mb-2">
           {pedido.paidWithMercadoPago && (
-            <Badge bg="primary" className="me-1">MercadoPago</Badge>
+            <Badge bg="primary" className="me-1">
+              MercadoPago
+            </Badge>
           )}
           {pedido.paidWithCash && <Badge bg="secondary">Efectivo</Badge>}
           {pedido.paymentReceiptPath && (
@@ -437,7 +503,9 @@ function PedidoCard({ pedido, onCambiarEstado, showHistorial }: PedidoCardProps)
 
         <div className="d-flex justify-content-between align-items-center border-top pt-2 mt-2">
           <strong>Total:</strong>
-          <span className="h5 mb-0 text-success">${total.toLocaleString()}</span>
+          <span className="h5 mb-0 text-success">
+            ${total.toLocaleString()}
+          </span>
         </div>
       </Card.Body>
 
