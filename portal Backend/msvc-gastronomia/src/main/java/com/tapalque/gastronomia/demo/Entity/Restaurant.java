@@ -49,6 +49,10 @@ public class Restaurant {
     @Nullable
     private Double deliveryPrice;
 
+    @Column(name = "last_close_date")
+    @Nullable
+    private java.time.LocalDateTime lastCloseDate;
+
     @Min(value = -90, message = "La latitud debe estar entre -90 y 90")
     @Max(value = 90, message = "La latitud debe estar entre -90 y 90")
     @Column (name="latitude" ,nullable= false)
@@ -219,5 +223,11 @@ public class Restaurant {
         this.deliveryPrice = deliveryPrice;
     }
 
-    
+    public java.time.LocalDateTime getLastCloseDate() {
+        return lastCloseDate;
+    }
+
+    public void setLastCloseDate(java.time.LocalDateTime lastCloseDate) {
+        this.lastCloseDate = lastCloseDate;
+    }
 }

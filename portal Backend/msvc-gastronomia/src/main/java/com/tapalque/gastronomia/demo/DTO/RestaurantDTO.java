@@ -25,6 +25,7 @@ public class RestaurantDTO {
     private boolean delivery;
     private Double deliveryPrice;
     private String imageUrl;
+    private java.time.LocalDateTime lastCloseDate;
 
     // 🔹 Constructor vacío
     public RestaurantDTO() {}
@@ -55,6 +56,8 @@ public class RestaurantDTO {
     this.latitude = Optional.ofNullable(entity.getcoordinate_lat()).orElse(0.0);
     this.longitude = Optional.ofNullable(entity.getCoordinate_lon()).orElse(0.0);
     this.delivery = entity.getDelivery();
+    this.deliveryPrice = entity.getDeliveryPrice();
+    this.lastCloseDate = entity.getLastCloseDate();
     // Imagen: tomar la primera imagen del restaurante
     if (entity.getImages() != null && !entity.getImages().isEmpty()) {
         this.imageUrl = entity.getImages().get(0).getImageUrl();
@@ -264,5 +267,13 @@ entity.setSchedules(scheduleList);
 
     public void setDeliveryPrice(Double deliveryPrice) {
         this.deliveryPrice = deliveryPrice;
+    }
+
+    public java.time.LocalDateTime getLastCloseDate() {
+        return lastCloseDate;
+    }
+
+    public void setLastCloseDate(java.time.LocalDateTime lastCloseDate) {
+        this.lastCloseDate = lastCloseDate;
     }
 }

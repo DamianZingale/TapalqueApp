@@ -17,6 +17,7 @@ public class HospedajeDTO {
     private String numWhatsapp;
     private String tipoHospedaje;
     private List<String> imagenes;
+    private java.time.LocalDateTime lastCloseDate;
 
     // Constructor vacío (necesario para algunas herramientas de serialización como Jackson)
     public HospedajeDTO() {
@@ -39,6 +40,7 @@ public class HospedajeDTO {
                         .map(HospedajeImagen::getImagenUrl)
                         .collect(Collectors.toList())
                 : List.of();
+        this.lastCloseDate = hospedaje.getLastCloseDate();
     }
 
     // Getters y setters
@@ -113,5 +115,13 @@ public class HospedajeDTO {
 
     public void setImagenes(List<String> imagenes) {
         this.imagenes = imagenes;
+    }
+
+    public java.time.LocalDateTime getLastCloseDate() {
+        return lastCloseDate;
+    }
+
+    public void setLastCloseDate(java.time.LocalDateTime lastCloseDate) {
+        this.lastCloseDate = lastCloseDate;
     }
 }

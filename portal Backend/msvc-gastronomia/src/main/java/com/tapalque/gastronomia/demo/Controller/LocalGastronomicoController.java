@@ -79,10 +79,25 @@ public class LocalGastronomicoController {
 
     @PatchMapping("/updateDeliveryPrice/{id}")
     public ResponseEntity<RestaurantDTO> updateDeliveryPrice(@PathVariable Long id,
-            @RequestBody java.util.Map<String, Double> body) {
+            @RequestBody java.util.Map<String, Object> body) {
         try {
-            Double deliveryPrice = body.get("deliveryPrice");
-            RestaurantDTO updated = localGastronomicoService.updateDeliveryPrice(id, deliveryPrice);
+            RestaurantDTO updated = null;
+
+            if (body.containsKey("deliveryPrice")) {
+                Double deliveryPrice = Double.valueOf(body.get("deliveryPrice").toString());
+                updated = localGastronomicoService.updateDeliveryPrice(id, deliveryPrice);
+            }
+
+            if (body.containsKey("lastCloseDate")) {
+                java.time.LocalDateTime lastCloseDate = java.time.LocalDateTime.parse(
+                        body.get("lastCloseDate").toString(), java.time.format.DateTimeFormatter.ISO_DATE_TIME);
+                updated = localGastronomicoService.updateLastCloseDate(id, lastCloseDate);
+            }
+
+            if (updated == null) {
+                return ResponseEntity.badRequest().build();
+            }
+
             return ResponseEntity.ok(updated);
         } catch (EntityNotFoundException ex) {
             return ResponseEntity.notFound().build();

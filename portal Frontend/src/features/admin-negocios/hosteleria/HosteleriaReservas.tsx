@@ -1,4 +1,6 @@
-import { useEffect, useState } from 'react';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import { useCallback, useEffect, useState } from 'react';
 import {
   Alert,
   Badge,
@@ -10,8 +12,14 @@ import {
   Row,
   Spinner,
   Tab,
+  Table,
   Tabs,
 } from 'react-bootstrap';
+import { api } from '../../../config/api';
+import {
+  fetchHospedajeById,
+  type Hospedaje,
+} from '../../../services/fetchHospedajes';
 import { PhoneInput } from '../../../shared/components/PhoneInput';
 import {
   actualizarReserva,
@@ -27,6 +35,23 @@ interface HosteleriaReservasProps {
   businessId: string;
   businessName: string;
 }
+
+interface ResumenCierreHospedaje {
+  reservas: Reserva[];
+  totalReservas: number;
+  totalIngresado: number;
+  porMedioDePago: Record<string, number>;
+  desde: string;
+  hasta: string;
+}
+
+const LABEL_MEDIO_PAGO: Record<string, string> = {
+  EFECTIVO: 'Efectivo',
+  TRANSFERENCIA: 'Transferencia',
+  TARJETA_CREDITO: 'Tarjeta Crédito',
+  TARJETA_DEBITO: 'Tarjeta Débito',
+  MERCADO_PAGO: 'MercadoPago',
+};
 
 const initialFormReserva: FormReservaExterna = {
   customerName: '',
@@ -96,11 +121,27 @@ export function HosteleriaReservas({
   const [guardandoPago, setGuardandoPago] = useState(false);
   const [errorPago, setErrorPago] = useState<string | null>(null);
 
+  // Cierre del día
+  const [showCierreModal, setShowCierreModal] = useState(false);
+  const [resumenCierre, setResumenCierre] = useState<ResumenCierreHospedaje | null>(null);
+  const [loadingCierre, setLoadingCierre] = useState(false);
+  const [hospedaje, setHospedaje] = useState<Hospedaje | null>(null);
+
   const { isConnected, lastMessage } = useWebSocket(businessId, 'HOSPEDAJE');
+
+  const cargarHospedaje = useCallback(async () => {
+    try {
+      const data = await fetchHospedajeById(businessId);
+      if (data) setHospedaje(data);
+    } catch {
+      console.error('Error al cargar hospedaje');
+    }
+  }, [businessId]);
 
   useEffect(() => {
     cargarReservas();
-  }, [businessId]);
+    cargarHospedaje();
+  }, [businessId, cargarHospedaje]);
 
   useEffect(() => {
     if (lastMessage) {
@@ -467,6 +508,124 @@ export function HosteleriaReservas({
     const fin = new Date(checkOut);
     const diff = fin.getTime() - inicio.getTime();
     return Math.ceil(diff / (1000 * 60 * 60 * 24));
+  };
+
+  // --- Cierre del día ---
+
+  const handleCerrarDia = async () => {
+    setLoadingCierre(true);
+    try {
+      const desde = hospedaje?.lastCloseDate || new Date(new Date().setHours(0, 0, 0, 0)).toISOString();
+      const hasta = new Date().toISOString();
+
+      // fetchReservasByHotel acepta desde/hasta como LocalDate (YYYY-MM-DD)
+      const desdeDate = desde.slice(0, 10);
+      const hastaDate = hasta.slice(0, 10);
+
+      const data = await fetchReservasByHotel(businessId, desdeDate, hastaDate);
+      // Solo reservas con pagos realizados
+      const conPagos = data.filter((r) => r.payment.amountPaid > 0);
+
+      // Agrupar por medio de pago
+      const porMedioDePago: Record<string, number> = {};
+      for (const r of conPagos) {
+        const tipo = r.payment.paymentType || 'OTRO';
+        porMedioDePago[tipo] = (porMedioDePago[tipo] || 0) + r.payment.amountPaid;
+      }
+
+      const resumen: ResumenCierreHospedaje = {
+        reservas: conPagos,
+        totalReservas: conPagos.length,
+        totalIngresado: conPagos.reduce((sum, r) => sum + r.payment.amountPaid, 0),
+        porMedioDePago,
+        desde,
+        hasta,
+      };
+
+      setResumenCierre(resumen);
+      setShowCierreModal(true);
+    } catch {
+      setMensaje({ tipo: 'danger', texto: 'Error al generar el cierre del día' });
+    } finally {
+      setLoadingCierre(false);
+    }
+  };
+
+  const handleConfirmarCierre = async () => {
+    try {
+      const now = new Date().toISOString();
+      const updated = await api.patch<Hospedaje>(
+        `/hospedajes/${businessId}`,
+        { lastCloseDate: now }
+      );
+      setHospedaje(updated);
+      setShowCierreModal(false);
+      setResumenCierre(null);
+      setMensaje({ tipo: 'success', texto: 'Cierre de día registrado' });
+    } catch {
+      setMensaje({ tipo: 'danger', texto: 'Error al registrar el cierre. Descargue el PDF primero.' });
+    }
+  };
+
+  const handleDescargarPDF = () => {
+    if (!resumenCierre) return;
+
+    const doc = new jsPDF();
+    const desde = new Date(resumenCierre.desde);
+    const hasta = new Date(resumenCierre.hasta);
+    const formatDate = (d: Date) =>
+      d.toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' });
+
+    doc.setFontSize(18);
+    doc.text(`Cierre del día - ${businessName}`, 14, 20);
+    doc.setFontSize(11);
+    doc.text(`Desde: ${formatDate(desde)}`, 14, 30);
+    doc.text(`Hasta: ${formatDate(hasta)}`, 14, 37);
+
+    doc.setFontSize(14);
+    doc.text('Resumen', 14, 50);
+    doc.setFontSize(11);
+    doc.text(`Total de reservas con ingresos: ${resumenCierre.totalReservas}`, 14, 58);
+    doc.text(
+      `Total ingresado: $${resumenCierre.totalIngresado.toLocaleString('es-AR')}`,
+      14,
+      65
+    );
+
+    // Desglose por medio de pago
+    let yPos = 75;
+    doc.setFontSize(12);
+    doc.text('Desglose por medio de pago:', 14, yPos);
+    doc.setFontSize(11);
+    yPos += 8;
+    for (const [tipo, monto] of Object.entries(resumenCierre.porMedioDePago)) {
+      const label = LABEL_MEDIO_PAGO[tipo] || tipo;
+      doc.text(`${label}: $${monto.toLocaleString('es-AR')}`, 18, yPos);
+      yPos += 7;
+    }
+
+    if (resumenCierre.reservas.length > 0) {
+      const tableData = resumenCierre.reservas.map((r) => [
+        `#${r.id.slice(-6)}`,
+        r.customer.customerName,
+        r.roomNumber ? `Hab. #${r.roomNumber}` : '-',
+        new Date(r.stayPeriod.checkInDate).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' }),
+        new Date(r.stayPeriod.checkOutDate).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' }),
+        LABEL_MEDIO_PAGO[r.payment.paymentType] || r.payment.paymentType || '-',
+        `$${r.payment.amountPaid.toLocaleString('es-AR')}`,
+      ]);
+
+      autoTable(doc, {
+        startY: yPos + 5,
+        head: [['Reserva', 'Cliente', 'Habitación', 'Check-in', 'Check-out', 'Medio de pago', 'Ingresado']],
+        body: tableData,
+        styles: { fontSize: 8 },
+        headStyles: { fillColor: [52, 58, 64] },
+      });
+    }
+
+    const fileName = `cierre_${businessName.replace(/\s+/g, '_')}_${hasta.toISOString().slice(0, 10)}.pdf`;
+    doc.save(fileName);
   };
 
   if (loading) {
@@ -1345,6 +1504,105 @@ export function HosteleriaReservas({
             disabled={guardandoPago}
           >
             {guardandoPago ? <Spinner size="sm" /> : 'Registrar Pago'}
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Botón Cerrar el día */}
+      <div className="text-center mt-4 mb-3">
+        <Button variant="outline-dark" size="lg" onClick={handleCerrarDia} disabled={loadingCierre}>
+          {loadingCierre ? <Spinner animation="border" size="sm" /> : 'Cerrar el día'}
+        </Button>
+      </div>
+
+      {/* Modal de cierre */}
+      <Modal
+        show={showCierreModal}
+        onHide={() => setShowCierreModal(false)}
+        size="lg"
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Cierre del día - {businessName}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {resumenCierre && (
+            <>
+              <Alert variant="info">
+                Descargue el PDF antes de confirmar el cierre. Este resumen no se almacena.
+              </Alert>
+
+              <Row className="mb-3">
+                <Col sm={4}>
+                  <Card className="text-center">
+                    <Card.Body>
+                      <h4>{resumenCierre.totalReservas}</h4>
+                      <small className="text-muted">Reservas con ingresos</small>
+                    </Card.Body>
+                  </Card>
+                </Col>
+                <Col sm={4}>
+                  <Card className="text-center">
+                    <Card.Body>
+                      <h4>${resumenCierre.totalIngresado.toLocaleString('es-AR')}</h4>
+                      <small className="text-muted">Total ingresado</small>
+                    </Card.Body>
+                  </Card>
+                </Col>
+                <Col sm={4}>
+                  <Card className="text-center">
+                    <Card.Body>
+                      {Object.entries(resumenCierre.porMedioDePago).map(([tipo, monto]) => (
+                        <div key={tipo}>
+                          <strong>${monto.toLocaleString('es-AR')}</strong>{' '}
+                          <small className="text-muted">{LABEL_MEDIO_PAGO[tipo] || tipo}</small>
+                        </div>
+                      ))}
+                      {Object.keys(resumenCierre.porMedioDePago).length === 0 && (
+                        <small className="text-muted">Sin ingresos</small>
+                      )}
+                    </Card.Body>
+                  </Card>
+                </Col>
+              </Row>
+
+              {resumenCierre.reservas.length > 0 && (
+                <Table size="sm" striped responsive>
+                  <thead>
+                    <tr>
+                      <th>Reserva</th>
+                      <th>Cliente</th>
+                      <th>Hab.</th>
+                      <th>Check-in</th>
+                      <th>Check-out</th>
+                      <th>Medio de pago</th>
+                      <th>Ingresado</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {resumenCierre.reservas.map((r) => (
+                      <tr key={r.id}>
+                        <td>#{r.id.slice(-6)}</td>
+                        <td>{r.customer.customerName}</td>
+                        <td>{r.roomNumber ? `#${r.roomNumber}` : '-'}</td>
+                        <td>{new Date(r.stayPeriod.checkInDate).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' })}</td>
+                        <td>{new Date(r.stayPeriod.checkOutDate).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' })}</td>
+                        <td>{LABEL_MEDIO_PAGO[r.payment.paymentType] || r.payment.paymentType || '-'}</td>
+                        <td>${r.payment.amountPaid.toLocaleString('es-AR')}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              )}
+            </>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="primary" onClick={handleDescargarPDF}>
+            Descargar PDF
+          </Button>
+          <Button variant="success" onClick={handleConfirmarCierre}>
+            Confirmar cierre
           </Button>
         </Modal.Footer>
       </Modal>

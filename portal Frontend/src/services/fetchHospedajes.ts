@@ -10,6 +10,7 @@ export interface Hospedaje {
     numWhatsapp?: string;
     tipoHospedaje: 'HOTEL' | 'DEPARTAMENTO' | 'CABAÑA' | 'CASA' | 'OTRO';
     imagenes: string[];  // Backend returns array of URLs directly
+    lastCloseDate?: string;
     userId?: number; // ID del propietario/administrador
 }
 

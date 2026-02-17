@@ -7,6 +7,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -53,6 +54,29 @@ public class HospedajeController {
             @PathVariable Long id,
             @Valid @RequestBody HospedajeRequestDTO dto) {
                 return hospedajeService.actualizarHospedaje(id, dto);
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<HospedajeDTO> patchHospedaje(@PathVariable Long id,
+            @RequestBody java.util.Map<String, Object> body) {
+        try {
+            HospedajeDTO updated = null;
+
+            if (body.containsKey("lastCloseDate")) {
+                java.time.LocalDateTime lastCloseDate = java.time.LocalDateTime.parse(
+                        body.get("lastCloseDate").toString(),
+                        java.time.format.DateTimeFormatter.ISO_DATE_TIME);
+                updated = hospedajeService.updateLastCloseDate(id, lastCloseDate);
+            }
+
+            if (updated == null) {
+                return ResponseEntity.badRequest().build();
+            }
+
+            return ResponseEntity.ok(updated);
+        } catch (jakarta.persistence.EntityNotFoundException ex) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @DeleteMapping("/{id}")

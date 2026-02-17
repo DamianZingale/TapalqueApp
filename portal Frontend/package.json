@@ -20,6 +20,8 @@
     "bootstrap": "^5.3.8",
     "bootstrap-icons": "^1.13.1",
     "date-fns": "^4.1.0",
+    "jspdf": "^4.1.0",
+    "jspdf-autotable": "^5.0.7",
     "jwt-decode": "^4.0.0",
     "react": "^19.1.1",
     "react-bootstrap": "^2.10.10",

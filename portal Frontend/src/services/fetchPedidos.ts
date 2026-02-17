@@ -143,6 +143,28 @@ export async function updateEstadoPedido(
   }
 }
 
+export async function fetchPedidosByRestaurantAndDateRange(
+  restaurantId: string,
+  desde: string,
+  hasta: string
+): Promise<Pedido[]> {
+  try {
+    const params = new URLSearchParams({ desde, hasta });
+    const response = await fetch(
+      `/api/pedidos/orders/restaurant/${restaurantId}?${params}`,
+      { headers: getAuthHeaders() }
+    );
+    if (!response.ok) {
+      throw new Error(`Error al obtener pedidos: ${response.status}`);
+    }
+    const data = await response.json();
+    return data as Pedido[];
+  } catch (error) {
+    console.error('Error en fetchPedidosByRestaurantAndDateRange:', error);
+    return [];
+  }
+}
+
 export async function crearPedido(
   pedido: CrearPedidoDTO
 ): Promise<Pedido | null> {

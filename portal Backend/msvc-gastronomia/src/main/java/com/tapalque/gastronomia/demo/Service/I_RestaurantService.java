@@ -13,6 +13,7 @@ public interface I_RestaurantService {
     RestaurantDTO addRestaurant(RestaurantDTO dto);
     void updateRestaurant (Restaurant restaurant);
     RestaurantDTO updateDeliveryPrice(Long id, Double deliveryPrice);
+    RestaurantDTO updateLastCloseDate(Long id, java.time.LocalDateTime lastCloseDate);
     void deleteRestaurant (Long id);
     
     

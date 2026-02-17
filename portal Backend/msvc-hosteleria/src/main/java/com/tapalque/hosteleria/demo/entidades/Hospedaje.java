@@ -48,6 +48,9 @@ public class Hospedaje {
     @OneToMany(mappedBy = "hospedaje", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Habitacion> habitaciones = new ArrayList<>();
 
+    @Column(name = "last_close_date")
+    private java.time.LocalDateTime lastCloseDate;
+
     // --- Constructores ---
     public Hospedaje() {
     }
@@ -142,5 +145,13 @@ public class Hospedaje {
 
     public void setHabitaciones(List<Habitacion> habitaciones) {
         this.habitaciones = habitaciones;
+    }
+
+    public java.time.LocalDateTime getLastCloseDate() {
+        return lastCloseDate;
+    }
+
+    public void setLastCloseDate(java.time.LocalDateTime lastCloseDate) {
+        this.lastCloseDate = lastCloseDate;
     }
 }

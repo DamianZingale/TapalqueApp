@@ -428,6 +428,15 @@ spring:
           filters:
             - RewritePath=/api/hospedajes/(?<id>[0-9]+), /hospedajes/${id}
 
+        - id: msvc-hosteleria-patch
+          uri: lb://msvc-hosteleria
+          predicates:
+            - Path=/api/hospedajes/{id}
+            - Method=PATCH
+          filters:
+            - RewritePath=/api/hospedajes/(?<id>[0-9]+), /hospedajes/${id}
+            - JwtAuth
+
         # Habitación - Subir imagen
         - id: msvc-hosteleria-habitacion-imagen-upload
           uri: lb://msvc-hosteleria
@@ -507,6 +516,7 @@ spring:
             - Method=PATCH
           filters:
             - RewritePath=/api/gastronomia/restaurants/(?<id>[0-9]+), /restaurante/updateDeliveryPrice/${id}
+            - JwtAuth
 
         - id: msvc-gastronomia-delete
           uri: lb://msvc-gastronomia
