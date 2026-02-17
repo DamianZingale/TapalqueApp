@@ -1,5 +1,4 @@
-// src/components/admin/gastronomia/GastronomiaPedidos.tsx
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   Alert,
   Badge,
@@ -29,6 +28,8 @@ import {
 interface GastronomiaPedidosProps {
   businessId: string;
   businessName: string;
+  delivery?: boolean;
+  deliveryPrice?: number;
 }
 
 interface Mensaje {
@@ -36,38 +37,24 @@ interface Mensaje {
   texto: string;
 }
 
-export function GastronomiaPedidos({ businessId }: GastronomiaPedidosProps) {
+export function GastronomiaPedidos({
+  businessId,
+  delivery = false,
+  deliveryPrice = 0,
+}: GastronomiaPedidosProps) {
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
   const [mensaje, setMensaje] = useState<Mensaje | null>(null);
+  const [precioDeliveryEdit, setPrecioDeliveryEdit] = useState<number>(
+    deliveryPrice ?? 0
+  );
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
-  const [precioDeliveryEdit, setPrecioDeliveryEdit] = useState<number>(0);
+  const [loaded, setLoaded] = useState(false);
 
   const { isConnected } = useWebSocket(businessId, 'GASTRONOMIA');
 
-  // Cargo el restaurante
-  useEffect(() => {
-    const cargarRestaurant = async () => {
-      try {
-        const data = await fetchRestaurantById(businessId);
-        if (data) {
-          setRestaurant(data);
-          setPrecioDeliveryEdit(data.deliveryPrice ?? 0);
-        }
-      } catch {
-        setMensaje({ tipo: 'danger', texto: 'Error al cargar restaurante' });
-      }
-    };
-
-    cargarRestaurant();
-  }, [businessId]);
-
-  // Cargo los pedidos
-  useEffect(() => {
-    cargarPedidos();
-  }, [businessId]);
-
-  const cargarPedidos = async () => {
+  // Funciones memoizadas
+  const cargarPedidos = useCallback(async () => {
     try {
       setLoading(true);
       const data = await fetchPedidosByRestaurant(businessId);
@@ -77,23 +64,30 @@ export function GastronomiaPedidos({ businessId }: GastronomiaPedidosProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [businessId]);
 
-  // Actualiza el estado de un pedido
-  const handleCambiarEstado = async (pedido: Pedido) => {
-    const siguiente = getSiguienteEstadoPedido(pedido.status, pedido.delivery);
-    if (!siguiente) return;
+  const cargarRestaurant = useCallback(async () => {
+    try {
+      const data = await fetchRestaurantById(businessId);
+      if (data) {
+        setRestaurant(data);
+        setLoaded(true);
+      }
+    } catch {
+      setMensaje({ tipo: 'danger', texto: 'Error al cargar restaurant' });
+    }
+  }, [businessId]);
 
-    await updateEstadoPedido(pedido.id, siguiente);
-
-    setPedidos((prev) =>
-      prev.map((p) => (p.id === pedido.id ? { ...p, status: siguiente } : p))
-    );
-  };
-
-  // Debounce: actualizar backend solo después de 500ms de inactividad
+  // Ejecutar al cambiar businessId
   useEffect(() => {
-    if (!restaurant) return;
+    cargarPedidos();
+    cargarRestaurant();
+  }, [cargarPedidos, cargarRestaurant]);
+
+  // Debounce para actualizar el precio de delivery
+  useEffect(() => {
+    if (!loaded || !restaurant) return;
+
     const handler = setTimeout(async () => {
       try {
         const response = await fetch(
@@ -116,8 +110,19 @@ export function GastronomiaPedidos({ businessId }: GastronomiaPedidosProps) {
       }
     }, 500);
 
-    return () => clearTimeout(handler); // limpio el timeout si el valor cambia antes de 500ms
-  }, [precioDeliveryEdit, restaurant]);
+    return () => clearTimeout(handler);
+  }, [precioDeliveryEdit, restaurant, loaded]);
+
+  const handleCambiarEstado = async (pedido: Pedido) => {
+    const siguiente = getSiguienteEstadoPedido(pedido.status, pedido.delivery);
+    if (!siguiente) return;
+
+    await updateEstadoPedido(pedido.id, siguiente);
+
+    setPedidos((prev) =>
+      prev.map((p) => (p.id === pedido.id ? { ...p, status: siguiente } : p))
+    );
+  };
 
   if (loading) {
     return (
@@ -125,10 +130,6 @@ export function GastronomiaPedidos({ businessId }: GastronomiaPedidosProps) {
         <Spinner animation="border" />
       </div>
     );
-  }
-
-  if (!restaurant) {
-    return <Alert variant="danger">No se encontró el restaurante</Alert>;
   }
 
   return (
@@ -147,7 +148,7 @@ export function GastronomiaPedidos({ businessId }: GastronomiaPedidosProps) {
         </Alert>
       )}
 
-      {restaurant.delivery && (
+      {delivery && (
         <Card className="mb-3 border-warning">
           <Card.Body>
             <Row className="align-items-end">
@@ -207,6 +208,7 @@ function PedidoCard({
     pedido.status,
     pedido.delivery
   );
+
   const textoBoton = getTextoBotonSiguienteEstado(
     pedido.status,
     pedido.delivery

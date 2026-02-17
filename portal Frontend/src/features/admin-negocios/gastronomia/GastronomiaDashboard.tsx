@@ -118,6 +118,8 @@ export function GastronomiaDashboard() {
             <GastronomiaPedidos
               businessId={business.id}
               businessName={business.name}
+              delivery={business.delivery ?? false} // si viene undefined, pasa false
+              deliveryPrice={business.deliveryPrice ?? 0} // si viene undefined, pasa 0
             />
           )}
         </Tab>
