@@ -46,8 +46,8 @@ export default function NavBar() {
 
         <Navbar.Toggle aria-controls="main-navbar" />
 
-        <Navbar.Collapse id="main-navbar">
-          <Nav className="ms-auto">
+        <Navbar.Collapse id="main-navbar" className="d-lg-flex">
+          <Nav className="mx-auto">
             <Nav.Link as={Link} to="/termas" onClick={() => setExpanded(false)}>
               Térmas Tapalque
             </Nav.Link>
@@ -69,17 +69,9 @@ export default function NavBar() {
             </Nav.Link>
           </Nav>
 
-          {/* Forzamos color blanco acá */}
-          <div className="d-flex align-items-center gap-2 ms-lg-3 text-white">
-            {isLoggedIn && (
-              <div className="text-white">
-                <NotificationBell />
-              </div>
-            )}
-
-            <div className="text-white">
-              <BotonSesion isLoggedIn={isLoggedIn} onLogout={handleLogout} />
-            </div>
+          <div className="d-flex align-items-center gap-2 text-white">
+            {isLoggedIn && <NotificationBell />}
+            <BotonSesion isLoggedIn={isLoggedIn} onLogout={handleLogout} />
           </div>
         </Navbar.Collapse>
       </Container>
