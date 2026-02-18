@@ -10,10 +10,8 @@ export default function NavBar() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Verificar autenticación real
   const [isLoggedIn, setIsLoggedIn] = useState(authService.isAuthenticated());
 
-  // Actualizar estado cuando cambia la ruta (por si el usuario hizo login/logout)
   useEffect(() => {
     setExpanded(false);
     setIsLoggedIn(authService.isAuthenticated());
@@ -53,6 +51,7 @@ export default function NavBar() {
             <Nav.Link as={Link} to="/termas" onClick={() => setExpanded(false)}>
               Térmas Tapalque
             </Nav.Link>
+
             <Nav.Link
               as={Link}
               to="/gastronomia"
@@ -60,6 +59,7 @@ export default function NavBar() {
             >
               Gastronomía
             </Nav.Link>
+
             <Nav.Link
               as={Link}
               to="/hospedaje"
@@ -67,6 +67,7 @@ export default function NavBar() {
             >
               Hospedajes
             </Nav.Link>
+
             <Nav.Link
               as={Link}
               to="/comercio"
@@ -76,10 +77,17 @@ export default function NavBar() {
             </Nav.Link>
           </Nav>
 
-          {/* Ahora queda después de los items */}
-          <div className="d-flex align-items-center ms-lg-3">
-            {isLoggedIn && <NotificationBell />}
-            <BotonSesion isLoggedIn={isLoggedIn} onLogout={handleLogout} />
+          {/* Bloque sesión con estilos correctos */}
+          <div className="navbar-nav d-flex align-items-center ms-lg-3">
+            {isLoggedIn && (
+              <div className="nav-item me-2">
+                <NotificationBell />
+              </div>
+            )}
+
+            <div className="nav-item">
+              <BotonSesion isLoggedIn={isLoggedIn} onLogout={handleLogout} />
+            </div>
           </div>
         </Navbar.Collapse>
       </Container>
