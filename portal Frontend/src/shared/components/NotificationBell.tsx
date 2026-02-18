@@ -1,9 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { Badge } from 'react-bootstrap';
-import { useNotifications, type AppNotification } from '../context/NotificationContext';
+import {
+  useNotifications,
+  type AppNotification,
+} from '../context/NotificationContext';
 
 export function NotificationBell() {
-  const { notifications, unreadCount, markAllAsRead, clearNotifications } = useNotifications();
+  const { notifications, unreadCount, markAllAsRead, clearNotifications } =
+    useNotifications();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -16,7 +20,8 @@ export function NotificationBell() {
     }
     if (open) {
       document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
+      return () =>
+        document.removeEventListener('mousedown', handleClickOutside);
     }
   }, [open]);
 
@@ -37,7 +42,10 @@ export function NotificationBell() {
     if (diffMin < 60) return `Hace ${diffMin} min`;
     const diffH = Math.floor(diffMin / 60);
     if (diffH < 24) return `Hace ${diffH}h`;
-    return date.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' });
+    return date.toLocaleDateString('es-AR', {
+      day: '2-digit',
+      month: '2-digit',
+    });
   };
 
   const getIcon = (type: AppNotification['type']) => {
@@ -83,10 +91,8 @@ export function NotificationBell() {
 
       {open && (
         <div
-          className="shadow-lg border rounded"
+          className="shadow-lg border rounded position-absolute end-0"
           style={{
-            position: 'absolute',
-            right: 0,
             top: '100%',
             marginTop: '8px',
             width: '340px',
@@ -102,7 +108,10 @@ export function NotificationBell() {
           {/* Header */}
           <div
             className="d-flex justify-content-between align-items-center px-3 py-2"
-            style={{ borderBottom: '1px solid #e9ecef', backgroundColor: '#f8f9fa' }}
+            style={{
+              borderBottom: '1px solid #e9ecef',
+              backgroundColor: '#f8f9fa',
+            }}
           >
             <strong style={{ fontSize: '0.9rem' }}>Notificaciones</strong>
             {notifications.length > 0 && (
@@ -144,19 +153,32 @@ export function NotificationBell() {
                   }}
                 >
                   <div className="d-flex align-items-start gap-2">
-                    <span style={{ fontSize: '1.1rem' }}>{getIcon(n.type)}</span>
+                    <span style={{ fontSize: '1.1rem' }}>
+                      {getIcon(n.type)}
+                    </span>
                     <div className="flex-grow-1" style={{ minWidth: 0 }}>
                       <div className="d-flex justify-content-between align-items-center">
-                        <strong style={{ fontSize: '0.82rem' }}>{n.title}</strong>
-                        <small className="text-muted" style={{ fontSize: '0.7rem', whiteSpace: 'nowrap' }}>
+                        <strong style={{ fontSize: '0.82rem' }}>
+                          {n.title}
+                        </strong>
+                        <small
+                          className="text-muted"
+                          style={{ fontSize: '0.7rem', whiteSpace: 'nowrap' }}
+                        >
                           {formatTime(n.timestamp)}
                         </small>
                       </div>
-                      <p className="mb-0 text-muted" style={{ fontSize: '0.78rem' }}>
+                      <p
+                        className="mb-0 text-muted"
+                        style={{ fontSize: '0.78rem' }}
+                      >
                         {n.message}
                       </p>
                       {n.businessName && (
-                        <small className="text-muted" style={{ fontSize: '0.7rem' }}>
+                        <small
+                          className="text-muted"
+                          style={{ fontSize: '0.7rem' }}
+                        >
                           {n.businessName}
                         </small>
                       )}

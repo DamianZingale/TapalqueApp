@@ -1,5 +1,13 @@
-import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { Client } from '@stomp/stompjs';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react';
 import SockJS from 'sockjs-client';
 import { authService } from '../../services/authService';
 
@@ -17,7 +25,9 @@ export interface AppNotification {
 interface NotificationContextType {
   notifications: AppNotification[];
   unreadCount: number;
-  addNotification: (notification: Omit<AppNotification, 'id' | 'timestamp' | 'read'>) => void;
+  addNotification: (
+    notification: Omit<AppNotification, 'id' | 'timestamp' | 'read'>
+  ) => void;
   markAllAsRead: () => void;
   clearNotifications: () => void;
 }
@@ -46,7 +56,10 @@ function loadNotifications(): AppNotification[] {
 }
 
 function saveNotifications(notifications: AppNotification[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(notifications.slice(0, MAX_NOTIFICATIONS)));
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify(notifications.slice(0, MAX_NOTIFICATIONS))
+  );
 }
 
 function getWsUrl(): string {
@@ -60,7 +73,8 @@ function getWsUrl(): string {
 }
 
 export function NotificationProvider({ children }: { children: ReactNode }) {
-  const [notifications, setNotifications] = useState<AppNotification[]>(loadNotifications);
+  const [notifications, setNotifications] =
+    useState<AppNotification[]>(loadNotifications);
   const clientRef = useRef<Client | null>(null);
 
   useEffect(() => {
@@ -75,7 +89,9 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         timestamp: new Date().toISOString(),
         read: false,
       };
-      setNotifications((prev) => [newNotification, ...prev].slice(0, MAX_NOTIFICATIONS));
+      setNotifications((prev) =>
+        [newNotification, ...prev].slice(0, MAX_NOTIFICATIONS)
+      );
     },
     []
   );
@@ -88,7 +104,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     // Only connect for regular users (ROL 3)
     // Admins/moderators get notifications via the admin panel WebSocket
     const rol = Number(user.rol);
-    if (rol === 1 || rol === 2) return;
+    if (rol === 2) return;
 
     const userId = String(user.id);
     const wsUrl = getWsUrl();
@@ -108,13 +124,32 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
             if (data.type === 'pedido:estado') {
               const status = data.status || data.payload?.status;
-              const restaurantName = data.restaurantName || data.payload?.restaurant?.restaurantName || 'Restaurante';
+              const restaurantName =
+                data.restaurantName ||
+                data.payload?.restaurant?.restaurantName ||
+                'Restaurante';
               const statusLabel = ESTADO_LABELS[status] || status;
 
               addNotification({
                 type: 'pedido:estado',
                 title: `Pedido ${statusLabel}`,
                 message: `Tu pedido de ${restaurantName} cambio a: ${statusLabel}`,
+                businessName: restaurantName,
+              });
+            }
+            if (data.type === 'reserva') {
+              const restaurantName =
+                data.restaurantName ||
+                data.payload?.restaurant?.restaurantName ||
+                'Restaurante';
+
+              const fecha = data.fecha || data.payload?.fecha;
+              const hora = data.hora || data.payload?.hora;
+
+              addNotification({
+                type: 'reserva',
+                title: 'Reserva confirmada',
+                message: `Tu reserva en ${restaurantName} para el ${fecha} a las ${hora} fue registrada.`,
                 businessName: restaurantName,
               });
             }
@@ -154,17 +189,26 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
   return (
     <NotificationContext.Provider
-      value={{ notifications, unreadCount, addNotification, markAllAsRead, clearNotifications }}
+      value={{
+        notifications,
+        unreadCount,
+        addNotification,
+        markAllAsRead,
+        clearNotifications,
+      }}
     >
       {children}
     </NotificationContext.Provider>
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useNotifications() {
   const context = useContext(NotificationContext);
   if (!context) {
-    throw new Error('useNotifications must be used within a NotificationProvider');
+    throw new Error(
+      'useNotifications must be used within a NotificationProvider'
+    );
   }
   return context;
 }
