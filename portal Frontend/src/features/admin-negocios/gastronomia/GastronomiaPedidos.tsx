@@ -529,7 +529,7 @@ export function GastronomiaPedidos({
 }
 
 // ============================================================
-// PedidoCard — con detalle de items
+// PedidoCard — con detalle de items y modal
 // ============================================================
 interface PedidoCardProps {
   pedido: Pedido;
@@ -538,6 +538,8 @@ interface PedidoCardProps {
 }
 
 function PedidoCard({ pedido, onCambiarEstado, deliveryPrice }: PedidoCardProps) {
+  const [showModal, setShowModal] = useState(false);
+
   const estadoBadge = getEstadoPedidoBadge(pedido.status);
   const baseTotal = pedido.totalPrice || pedido.totalAmount || 0;
   const total = pedido.isDelivery ? baseTotal + deliveryPrice : baseTotal;
@@ -545,83 +547,205 @@ function PedidoCard({ pedido, onCambiarEstado, deliveryPrice }: PedidoCardProps)
   const siguienteEstado = getSiguienteEstadoPedido(pedido.status, pedido.isDelivery);
   const textoBoton = getTextoBotonSiguienteEstado(pedido.status, pedido.isDelivery);
 
+  const fechaPedido = pedido.dateCreated
+    ? new Date(pedido.dateCreated).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' })
+    : null;
+
   return (
-    <Card className="h-100">
-      <Card.Header className="d-flex justify-content-between">
-        <small>#{pedido.id.slice(-6)}</small>
-        <Badge bg={estadoBadge.color}>{estadoBadge.texto}</Badge>
-      </Card.Header>
+    <>
+      <Card
+        className="h-100"
+        style={{ cursor: 'pointer' }}
+        onClick={() => setShowModal(true)}
+      >
+        <Card.Header className="d-flex justify-content-between">
+          <small>#{pedido.id.slice(-6)}</small>
+          <Badge bg={estadoBadge.color}>{estadoBadge.texto}</Badge>
+        </Card.Header>
 
-      <Card.Body>
-        {/* Cliente */}
-        {pedido.userName && (
+        <Card.Body>
+          {/* Cliente */}
+          {pedido.userName && (
+            <div className="mb-2">
+              <strong>{pedido.userName}</strong>
+              {pedido.userPhone && <small className="text-muted ms-2">{pedido.userPhone}</small>}
+            </div>
+          )}
+
+          {/* Tipo de entrega */}
           <div className="mb-2">
-            <strong>{pedido.userName}</strong>
-            {pedido.userPhone && <small className="text-muted ms-2">{pedido.userPhone}</small>}
+            {pedido.isDelivery ? (
+              <>
+                <Badge bg="warning" text="dark">
+                  Delivery (+${deliveryPrice})
+                </Badge>
+                {pedido.deliveryAddress && (
+                  <small className="d-block text-muted mt-1">{pedido.deliveryAddress}</small>
+                )}
+              </>
+            ) : (
+              <Badge bg="info">Retiro en local</Badge>
+            )}
           </div>
-        )}
 
-        {/* Tipo de entrega */}
-        <div className="mb-2">
+          {/* Método de pago */}
+          <div className="mb-2">
+            {pedido.paidWithCash && (
+              <Badge bg="success" className="me-1">
+                Efectivo
+              </Badge>
+            )}
+            {pedido.paidWithMercadoPago && <Badge bg="primary">MercadoPago</Badge>}
+          </div>
+
+          {/* Items resumidos */}
+          {pedido.items && pedido.items.length > 0 && (
+            <div className="border-top pt-2 mt-2">
+              {pedido.items.map((item, idx) => {
+                const nombre = item.itemName || item.productName || 'Item';
+                const cantidad = item.itemQuantity || item.quantity;
+                const precio = item.itemPrice || item.unitPrice || 0;
+                return (
+                  <div key={idx} className="d-flex justify-content-between small">
+                    <span>
+                      {nombre} x{cantidad}
+                    </span>
+                    <span className="text-muted">
+                      ${(precio * cantidad).toLocaleString('es-AR')}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Total */}
+          <div className="d-flex justify-content-between border-top pt-2 mt-2">
+            <strong>Total:</strong>
+            <span className="text-success fw-bold">${total.toLocaleString('es-AR')}</span>
+          </div>
+        </Card.Body>
+
+        {siguienteEstado && (
+          <Card.Footer>
+            <Button
+              className="w-100"
+              onClick={(e) => {
+                e.stopPropagation();
+                onCambiarEstado(pedido);
+              }}
+            >
+              {textoBoton}
+            </Button>
+          </Card.Footer>
+        )}
+      </Card>
+
+      {/* Modal de detalle */}
+      <Modal show={showModal} onHide={() => setShowModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>
+            Pedido #{pedido.id.slice(-6)}{' '}
+            <Badge bg={estadoBadge.color} className="ms-2">
+              {estadoBadge.texto}
+            </Badge>
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {/* Datos del cliente */}
+          <h6 className="text-muted mb-2">Cliente</h6>
+          <p className="mb-1">
+            <strong>{pedido.userName || 'Sin nombre'}</strong>
+          </p>
+          {pedido.userPhone && (
+            <p className="mb-1 small">
+              Teléfono:{' '}
+              <a href={`tel:${pedido.userPhone}`}>{pedido.userPhone}</a>
+            </p>
+          )}
+          {fechaPedido && (
+            <p className="mb-3 small text-muted">Fecha: {fechaPedido}</p>
+          )}
+
+          {/* Tipo de entrega */}
+          <h6 className="text-muted mb-2">Entrega</h6>
           {pedido.isDelivery ? (
             <>
-              <Badge bg="warning" text="dark">
+              <Badge bg="warning" text="dark" className="mb-1">
                 Delivery (+${deliveryPrice})
               </Badge>
               {pedido.deliveryAddress && (
-                <small className="d-block text-muted mt-1">{pedido.deliveryAddress}</small>
+                <p className="small mb-3">{pedido.deliveryAddress}</p>
               )}
             </>
           ) : (
-            <Badge bg="info">Retiro en local</Badge>
+            <p className="mb-3">
+              <Badge bg="info">Retiro en local</Badge>
+            </p>
           )}
-        </div>
 
-        {/* Método de pago */}
-        <div className="mb-2">
-          {pedido.paidWithCash && (
-            <Badge bg="success" className="me-1">
-              Efectivo
-            </Badge>
-          )}
-          {pedido.paidWithMercadoPago && <Badge bg="primary">MercadoPago</Badge>}
-        </div>
-
-        {/* Items */}
-        {pedido.items && pedido.items.length > 0 && (
-          <div className="border-top pt-2 mt-2">
-            {pedido.items.map((item, idx) => {
-              const nombre = item.itemName || item.productName || 'Item';
-              const cantidad = item.itemQuantity || item.quantity;
-              const precio = item.itemPrice || item.unitPrice || 0;
-              return (
-                <div key={idx} className="d-flex justify-content-between small">
-                  <span>
-                    {nombre} x{cantidad}
-                  </span>
-                  <span className="text-muted">
-                    ${(precio * cantidad).toLocaleString('es-AR')}
-                  </span>
-                </div>
-              );
-            })}
+          {/* Método de pago */}
+          <h6 className="text-muted mb-2">Pago</h6>
+          <div className="mb-3">
+            {pedido.paidWithCash && <Badge bg="success" className="me-1">Efectivo</Badge>}
+            {pedido.paidWithMercadoPago && <Badge bg="primary">MercadoPago</Badge>}
           </div>
-        )}
 
-        {/* Total */}
-        <div className="d-flex justify-content-between border-top pt-2 mt-2">
-          <strong>Total:</strong>
-          <span className="text-success fw-bold">${total.toLocaleString('es-AR')}</span>
-        </div>
-      </Card.Body>
+          {/* Items detallados */}
+          {pedido.items && pedido.items.length > 0 && (
+            <>
+              <h6 className="text-muted mb-2">Items</h6>
+              <Table size="sm" bordered>
+                <thead>
+                  <tr>
+                    <th>Producto</th>
+                    <th className="text-center">Cant.</th>
+                    <th className="text-end">Precio</th>
+                    <th className="text-end">Subtotal</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {pedido.items.map((item, idx) => {
+                    const nombre = item.itemName || item.productName || 'Item';
+                    const cantidad = item.itemQuantity || item.quantity || 1;
+                    const precio = item.itemPrice || item.unitPrice || 0;
+                    return (
+                      <tr key={idx}>
+                        <td>{nombre}</td>
+                        <td className="text-center">{cantidad}</td>
+                        <td className="text-end">${precio.toLocaleString('es-AR')}</td>
+                        <td className="text-end">${(precio * cantidad).toLocaleString('es-AR')}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </Table>
+            </>
+          )}
 
-      {siguienteEstado && (
-        <Card.Footer>
-          <Button className="w-100" onClick={() => onCambiarEstado(pedido)}>
-            {textoBoton}
+          {/* Total */}
+          <div className="d-flex justify-content-between fw-bold border-top pt-2">
+            <span>Total</span>
+            <span className="text-success">${total.toLocaleString('es-AR')}</span>
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>
+            Cerrar
           </Button>
-        </Card.Footer>
-      )}
-    </Card>
+          {siguienteEstado && (
+            <Button
+              variant="primary"
+              onClick={() => {
+                onCambiarEstado(pedido);
+                setShowModal(false);
+              }}
+            >
+              {textoBoton}
+            </Button>
+          )}
+        </Modal.Footer>
+      </Modal>
+    </>
   );
 }

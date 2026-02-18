@@ -12,35 +12,35 @@ export default function GastronomiaDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  // Intentar obtener datos del state primero (viene del clic en la card)
+  // Usar state del navegador como placeholder mientras carga
   const [restaurante, setRestaurante] = useState<IRestaurantInfo | null>(
     location.state?.restaurante || null
   );
-  const [loading, setLoading] = useState(!restaurante);
+  const [loading, setLoading] = useState(true);
   const [showMenu, setShowMenu] = useState(false);
 
   const [menu, setMenu] = useState<Imenu[]>([]);
   const [loadingMenu, setLoadingMenu] = useState(false);
 
+  // Siempre re-fetcha datos frescos del backend para garantizar precio de delivery actualizado
   useEffect(() => {
-    if (!restaurante && id) {
-      const fetchRestaurantDetail = async () => {
-        try {
-          const response = await api.get<IRestaurantInfo>(
-            `/api/gastronomia/restaurants/${id}`
-          );
-          setRestaurante(response);
-        } catch (error) {
-          console.error('Error fetching restaurant detail:', error);
-          navigate('/gastronomia');
-        } finally {
-          setLoading(false);
-        }
-      };
-
-      fetchRestaurantDetail();
-    }
-  }, [id, restaurante, navigate]);
+    if (!id) return;
+    const fetchRestaurantDetail = async () => {
+      try {
+        const response = await api.get<IRestaurantInfo>(
+          `/gastronomia/restaurants/${id}`
+        );
+        setRestaurante(response);
+      } catch (error) {
+        console.error('Error fetching restaurant detail:', error);
+        if (!restaurante) navigate('/gastronomia');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchRestaurantDetail();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
   // fetch al menu
   const fetchMenu = async () => {
     if (!id) return;

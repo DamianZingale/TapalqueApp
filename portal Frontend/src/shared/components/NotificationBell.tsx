@@ -90,6 +90,7 @@ export function NotificationBell() {
             top: '100%',
             marginTop: '8px',
             width: '340px',
+            maxWidth: 'calc(100vw - 10px)',
             maxHeight: '420px',
             backgroundColor: '#fff',
             zIndex: 1050,
