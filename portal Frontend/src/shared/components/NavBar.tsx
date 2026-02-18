@@ -43,7 +43,9 @@ export default function NavBar() {
           />
           Tapalqué App
         </Navbar.Brand>
-
+        <div className="d-flex align-items-center gap-2 text-white">
+          {isLoggedIn && <NotificationBell />}
+        </div>
         <Navbar.Toggle aria-controls="main-navbar" />
 
         <Navbar.Collapse id="main-navbar" className="d-lg-flex">
@@ -70,7 +72,6 @@ export default function NavBar() {
           </Nav>
 
           <div className="d-flex align-items-center gap-2 text-white">
-            {isLoggedIn && <NotificationBell />}
             <BotonSesion isLoggedIn={isLoggedIn} onLogout={handleLogout} />
           </div>
         </Navbar.Collapse>
