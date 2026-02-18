@@ -24,6 +24,7 @@ import {
   fetchPedidosByRestaurantAndDateRange,
   updateEstadoPedido,
 } from '../../../services/fetchPedidos';
+import { useNotifications } from '../../../shared/context/NotificationContext';
 import { useWebSocket } from '../hooks/useWebSocket';
 import {
   getEstadoPedidoBadge,
@@ -77,7 +78,34 @@ export function GastronomiaPedidos({
   const [resumenCierre, setResumenCierre] = useState<ResumenCierre | null>(null);
   const [loadingCierre, setLoadingCierre] = useState(false);
 
-  const { isConnected } = useWebSocket(businessId, 'GASTRONOMIA');
+  const { isConnected, lastMessage } = useWebSocket(businessId, 'GASTRONOMIA');
+  const { addNotification } = useNotifications();
+
+  // Manejar mensajes WebSocket (nuevos pedidos / actualizaciones)
+  useEffect(() => {
+    if (lastMessage) {
+      if (lastMessage.type === 'pedido:nuevo') {
+        const nuevoPedido = lastMessage.payload as Pedido;
+        setPedidos((prev) => [nuevoPedido, ...prev]);
+        addNotification({
+          type: 'pedido',
+          title: 'Nuevo pedido',
+          message: `${nuevoPedido.userName || 'Cliente'} - $${(nuevoPedido.totalPrice || nuevoPedido.totalAmount || 0).toLocaleString('es-AR')}`,
+          businessId,
+          businessName,
+        });
+        try {
+          const audio = new Audio('/notification.mp3');
+          audio.play().catch(() => {});
+        } catch { /* ignore */ }
+      } else if (lastMessage.type === 'pedido:actualizado') {
+        const pedidoActualizado = lastMessage.payload as Pedido;
+        setPedidos((prev) =>
+          prev.map((p) => (p.id === pedidoActualizado.id ? pedidoActualizado : p))
+        );
+      }
+    }
+  }, [lastMessage, addNotification, businessId, businessName]);
 
   const cargarPedidos = useCallback(async () => {
     try {
@@ -254,8 +282,12 @@ export function GastronomiaPedidos({
     doc.save(fileName);
   };
 
-  // Filtrado: solo pedidos activos (no entregados)
-  const pedidosActivos = pedidos.filter((p) => p.status !== EstadoPedido.ENTREGADO);
+  // Filtrado: solo pedidos activos (no entregados) y con pago confirmado o en efectivo
+  const pedidosActivos = pedidos.filter(
+    (p) =>
+      p.status !== EstadoPedido.ENTREGADO &&
+      (p.paidWithCash || (p.paidWithMercadoPago && p.payment?.paymentId))
+  );
 
   if (loading) {
     return (

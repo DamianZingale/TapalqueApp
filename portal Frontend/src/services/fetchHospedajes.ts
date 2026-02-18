@@ -1,4 +1,5 @@
 // src/services/fetchHospedajes.ts
+import { apiRequest } from '../config/api';
 
 export interface Hospedaje {
     id: number;
@@ -9,21 +10,14 @@ export interface Hospedaje {
     longitud?: number;
     numWhatsapp?: string;
     tipoHospedaje: 'HOTEL' | 'DEPARTAMENTO' | 'CABAÑA' | 'CASA' | 'OTRO';
-    imagenes: string[];  // Backend returns array of URLs directly
+    imagenes: string[];
     lastCloseDate?: string;
-    userId?: number; // ID del propietario/administrador
+    userId?: number;
 }
 
 export async function fetchHospedajes(): Promise<Hospedaje[]> {
     try {
-        const response = await fetch("/api/hospedajes");
-
-        if (!response.ok) {
-            throw new Error(`Error al obtener hospedajes: ${response.status}`);
-        }
-
-        const data = await response.json();
-        return data as Hospedaje[];
+        return await apiRequest<Hospedaje[]>('/hospedajes', { method: 'GET' });
     } catch (error) {
         console.error("Error en fetchHospedajes:", error);
         return [];
@@ -32,14 +26,7 @@ export async function fetchHospedajes(): Promise<Hospedaje[]> {
 
 export async function fetchHospedajeById(id: string | number): Promise<Hospedaje | null> {
     try {
-        const response = await fetch(`/api/hospedajes/${id}`);
-
-        if (!response.ok) {
-            throw new Error(`Error al obtener hospedaje: ${response.status}`);
-        }
-
-        const data = await response.json();
-        return data as Hospedaje;
+        return await apiRequest<Hospedaje>(`/hospedajes/${id}`, { method: 'GET' });
     } catch (error) {
         console.error("Error en fetchHospedajeById:", error);
         return null;
@@ -53,15 +40,10 @@ export async function consultarDisponibilidad(
     cantidadPersonas: number
 ): Promise<{ disponible: boolean; precioTotal?: number }> {
     try {
-        const response = await fetch(
-            `/api/hospedajes/${hospedajeId}/disponibilidad?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}&personas=${cantidadPersonas}`
+        return await apiRequest<{ disponible: boolean; precioTotal?: number }>(
+            `/hospedajes/${hospedajeId}/disponibilidad?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}&personas=${cantidadPersonas}`,
+            { method: 'GET' }
         );
-
-        if (!response.ok) {
-            throw new Error(`Error al consultar disponibilidad: ${response.status}`);
-        }
-
-        return await response.json();
     } catch (error) {
         console.error("Error en consultarDisponibilidad:", error);
         return { disponible: false };

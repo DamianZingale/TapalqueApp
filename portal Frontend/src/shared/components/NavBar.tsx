@@ -3,6 +3,7 @@ import { Container, Nav, Navbar } from 'react-bootstrap';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import authService from '../../services/authService';
 import { BotonSesion } from './BotonSesion';
+import { NotificationBell } from './NotificationBell';
 
 export default function NavBar() {
   const [expanded, setExpanded] = useState(false);
@@ -59,7 +60,10 @@ export default function NavBar() {
             <Nav.Link as={Link} to="/comercio">
               Comercios
             </Nav.Link>
-            <BotonSesion isLoggedIn={isLoggedIn} onLogout={handleLogout} />
+            <div className="d-flex align-items-center">
+              {isLoggedIn && <NotificationBell />}
+              <BotonSesion isLoggedIn={isLoggedIn} onLogout={handleLogout} />
+            </div>
           </Nav>
         </Navbar.Collapse>
       </Container>

@@ -35,6 +35,7 @@ public class SecurityConfig {
                         // Crear/modificar requiere autenticación (para Mercado Pago)
                         .requestMatchers(HttpMethod.POST, "/hospedajes/**").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/hospedajes/**").authenticated()
+                        .requestMatchers(HttpMethod.PATCH, "/hospedajes/**").authenticated()
                         .requestMatchers(HttpMethod.POST, "/habitaciones/**").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/habitaciones/**").authenticated()
                         .requestMatchers(HttpMethod.PATCH, "/habitaciones/**").authenticated()

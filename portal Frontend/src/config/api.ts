@@ -46,7 +46,9 @@ export const apiRequest = async <T = unknown>(
   try {
     const response = await fetch(url, buildConfig());
 
-    if (response.status === 401) {
+    if (response.status === 401 || response.status === 403) {
+      // 401 = token expirado, 403 = token inválido/sin permisos
+      // En ambos casos intentamos refresh; si falla, redirigimos al login
       const refreshed = await tryRefresh();
       if (refreshed) {
         const retryResponse = await fetch(url, buildConfig());
@@ -58,7 +60,7 @@ export const apiRequest = async <T = unknown>(
 
       authService.logout();
       alert('Tu sesión ha expirado. Por favor, iniciá sesión nuevamente.');
-      window.location.href = '/public/login';
+      window.location.href = '/login';
       throw new Error('Sesión expirada');
     }
 

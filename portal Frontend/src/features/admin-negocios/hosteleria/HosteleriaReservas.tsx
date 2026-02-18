@@ -27,6 +27,7 @@ import {
   crearReservaExterna,
   fetchReservasByHotel,
 } from '../../../services/fetchReservas';
+import { useNotifications } from '../../../shared/context/NotificationContext';
 import { useWebSocket } from '../hooks/useWebSocket';
 import type { FormReservaExterna, Reserva } from '../types';
 import { getColorEstadoReserva } from '../types';
@@ -128,6 +129,7 @@ export function HosteleriaReservas({
   const [hospedaje, setHospedaje] = useState<Hospedaje | null>(null);
 
   const { isConnected, lastMessage } = useWebSocket(businessId, 'HOSPEDAJE');
+  const { addNotification } = useNotifications();
 
   const cargarHospedaje = useCallback(async () => {
     try {
@@ -150,6 +152,13 @@ export function HosteleriaReservas({
         setReservas((prev) => [nuevaReserva, ...prev]);
         playNotificationSound();
         setMensaje({ tipo: 'success', texto: '¡Nueva reserva recibida!' });
+        addNotification({
+          type: 'reserva',
+          title: 'Nueva reserva',
+          message: `${nuevaReserva.customer.customerName} - ${new Date(nuevaReserva.stayPeriod.checkInDate).toLocaleDateString('es-AR')}`,
+          businessId,
+          businessName,
+        });
       } else if (lastMessage.type === 'reserva:actualizada') {
         const reservaActualizada = lastMessage.payload as Reserva;
         setReservas((prev) =>
@@ -159,7 +168,7 @@ export function HosteleriaReservas({
         );
       }
     }
-  }, [lastMessage]);
+  }, [lastMessage, addNotification, businessId, businessName]);
 
   useEffect(() => {
     if (mensaje) {
@@ -190,7 +199,12 @@ export function HosteleriaReservas({
     }
   };
 
-  const reservasFiltradas = reservas
+  // Pre-filtro: solo reservas con pago confirmado o medio de pago en efectivo
+  const reservasConPago = reservas.filter(
+    (r) => r.payment.isPaid || r.payment.amountPaid > 0 || r.payment.paymentType === 'EFECTIVO' || r.transaccionId
+  );
+
+  const reservasFiltradas = reservasConPago
     .filter((r) => {
       if (filtroEstado === 'ACTIVAS' && !r.isActive) return false;
       if (filtroEstado === 'PAGADAS' && !r.payment.isPaid) return false;
