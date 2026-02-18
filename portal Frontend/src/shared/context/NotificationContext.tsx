@@ -1,8 +1,11 @@
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
+import { Client } from '@stomp/stompjs';
+import SockJS from 'sockjs-client';
+import { authService } from '../../services/authService';
 
 export interface AppNotification {
   id: string;
-  type: 'pedido' | 'reserva';
+  type: 'pedido' | 'reserva' | 'pedido:estado';
   title: string;
   message: string;
   timestamp: string;
@@ -24,6 +27,14 @@ const NotificationContext = createContext<NotificationContextType | null>(null);
 const STORAGE_KEY = 'app_notifications';
 const MAX_NOTIFICATIONS = 50;
 
+const ESTADO_LABELS: Record<string, string> = {
+  RECIBIDO: 'Recibido',
+  EN_PREPARACION: 'En preparacion',
+  LISTO: 'Listo',
+  EN_DELIVERY: 'En camino',
+  ENTREGADO: 'Entregado',
+};
+
 function loadNotifications(): AppNotification[] {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
@@ -38,8 +49,19 @@ function saveNotifications(notifications: AppNotification[]) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(notifications.slice(0, MAX_NOTIFICATIONS)));
 }
 
+function getWsUrl(): string {
+  const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
+  let origin = '';
+  if (API_BASE.startsWith('http')) {
+    const url = new URL(API_BASE);
+    origin = url.origin;
+  }
+  return `${origin}/ws/pedidos`;
+}
+
 export function NotificationProvider({ children }: { children: ReactNode }) {
   const [notifications, setNotifications] = useState<AppNotification[]>(loadNotifications);
+  const clientRef = useRef<Client | null>(null);
 
   useEffect(() => {
     saveNotifications(notifications);
@@ -57,6 +79,68 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     },
     []
   );
+
+  // WebSocket connection for user-specific notifications
+  useEffect(() => {
+    const user = authService.getUser();
+    if (!user?.id) return;
+
+    // Only connect for regular users (ROL 3)
+    // Admins/moderators get notifications via the admin panel WebSocket
+    const rol = Number(user.rol);
+    if (rol === 1 || rol === 2) return;
+
+    const userId = String(user.id);
+    const wsUrl = getWsUrl();
+
+    const client = new Client({
+      webSocketFactory: () => new SockJS(wsUrl),
+      reconnectDelay: 5000,
+      heartbeatIncoming: 10000,
+      heartbeatOutgoing: 10000,
+
+      onConnect: () => {
+        console.log('WebSocket usuario conectado');
+
+        client.subscribe(`/topic/pedidos/user/${userId}`, (message) => {
+          try {
+            const data = JSON.parse(message.body);
+
+            if (data.type === 'pedido:estado') {
+              const status = data.status || data.payload?.status;
+              const restaurantName = data.restaurantName || data.payload?.restaurant?.restaurantName || 'Restaurante';
+              const statusLabel = ESTADO_LABELS[status] || status;
+
+              addNotification({
+                type: 'pedido:estado',
+                title: `Pedido ${statusLabel}`,
+                message: `Tu pedido de ${restaurantName} cambio a: ${statusLabel}`,
+                businessName: restaurantName,
+              });
+            }
+          } catch (error) {
+            console.error('Error parsing user notification:', error);
+          }
+        });
+      },
+
+      onStompError: (frame) => {
+        console.error('STOMP error (user):', frame.headers['message']);
+      },
+
+      onWebSocketClose: () => {
+        console.log('WebSocket usuario desconectado');
+      },
+    });
+
+    client.activate();
+    clientRef.current = client;
+
+    return () => {
+      client.deactivate();
+      clientRef.current = null;
+    };
+  }, [addNotification]);
 
   const markAllAsRead = useCallback(() => {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));

@@ -3,6 +3,7 @@ import { Container, Card, Badge, Alert, Row, Col, ProgressBar } from 'react-boot
 import { useNavigate } from 'react-router-dom';
 import { fetchPedidosByUser, Pedido, EstadoPedido } from '../../../services/fetchPedidos';
 import { authService } from '../../../services/authService';
+import { useNotifications } from '../../../shared/context/NotificationContext';
 
 const ESTADOS_FLUJO = [
   EstadoPedido.RECIBIDO,
@@ -53,8 +54,12 @@ export default function MisPedidosPage() {
   const navigate = useNavigate();
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [loading, setLoading] = useState(true);
+  const { notifications } = useNotifications();
 
   const user = authService.getUser();
+
+  // Re-fetch when a pedido:estado notification arrives
+  const lastEstadoNotif = notifications.find((n) => n.type === 'pedido:estado');
 
   useEffect(() => {
     if (!user?.id) {
@@ -64,7 +69,6 @@ export default function MisPedidosPage() {
 
     const cargar = async () => {
       const data = await fetchPedidosByUser(String(user.id));
-      // Ordenar: activos primero (no entregados), luego por fecha desc
       data.sort((a, b) => {
         const aActivo = a.status !== EstadoPedido.ENTREGADO ? 1 : 0;
         const bActivo = b.status !== EstadoPedido.ENTREGADO ? 1 : 0;
@@ -78,7 +82,7 @@ export default function MisPedidosPage() {
     cargar();
     const interval = setInterval(cargar, 15000);
     return () => clearInterval(interval);
-  }, []);
+  }, [lastEstadoNotif?.id]);
 
   if (loading) {
     return (

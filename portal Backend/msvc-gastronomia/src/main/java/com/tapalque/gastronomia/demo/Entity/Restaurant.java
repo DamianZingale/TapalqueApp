@@ -49,6 +49,10 @@ public class Restaurant {
     @Nullable
     private Double deliveryPrice;
 
+    @Column(name = "estimated_wait_time")
+    @Nullable
+    private Integer estimatedWaitTime;
+
     @Column(name = "last_close_date")
     @Nullable
     private java.time.LocalDateTime lastCloseDate;
@@ -221,6 +225,14 @@ public class Restaurant {
 
     public void setDeliveryPrice(Double deliveryPrice) {
         this.deliveryPrice = deliveryPrice;
+    }
+
+    public Integer getEstimatedWaitTime() {
+        return estimatedWaitTime;
+    }
+
+    public void setEstimatedWaitTime(Integer estimatedWaitTime) {
+        this.estimatedWaitTime = estimatedWaitTime;
     }
 
     public java.time.LocalDateTime getLastCloseDate() {

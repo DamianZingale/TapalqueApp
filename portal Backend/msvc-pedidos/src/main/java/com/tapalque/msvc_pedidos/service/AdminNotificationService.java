@@ -52,4 +52,24 @@ public class AdminNotificationService {
                 )
         );
     }
+
+    public void notificarUsuarioPedidoActualizado(Order order) {
+        String userId = order.getUserId();
+        if (userId == null) return;
+
+        String restaurantName = order.getRestaurant() != null
+                ? order.getRestaurant().getRestaurantName()
+                : "Restaurante";
+
+        messagingTemplate.convertAndSend(
+                "/topic/pedidos/user/" + userId,
+                Map.of(
+                        "type", "pedido:estado",
+                        "payload", order,
+                        "status", order.getStatus().name(),
+                        "restaurantName", restaurantName,
+                        "timestamp", LocalDateTime.now().toString()
+                )
+        );
+    }
 }

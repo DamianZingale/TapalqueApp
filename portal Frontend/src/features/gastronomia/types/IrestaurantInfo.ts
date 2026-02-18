@@ -11,6 +11,7 @@ export interface IRestaurantInfo {
   schedule?: string;   // Format: "1:09:00-22:00; 2:09:00-22:00"
   delivery?: boolean;
   deliveryPrice?: number;
+  estimatedWaitTime?: number;
   // Note: Backend doesn't return imageUrl in RestaurantDTO
   imageUrl?: string;   // For UI compatibility - may be undefined
 }

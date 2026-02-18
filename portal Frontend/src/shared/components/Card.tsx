@@ -2,8 +2,8 @@ import type { CardProps } from "../types/ICardProps"
 
 export const Card: React.FC<CardProps> = ({ id, titulo, direccion_local, imagenUrl, tipo, schedule, descripcion, onClick }) => {
     return (
-        <div className="col-auto my-2">
-            <div className="card h-100 d-flex flex-column" style={{ width: "18rem" }}>
+        <div className="col-12 col-sm-6 col-md-4 col-lg-3 my-2 d-flex justify-content-center">
+            <div className="card h-100 d-flex flex-column" style={{ width: "18rem", maxWidth: "100%" }}>
                 <img
                     src={imagenUrl}
                     className="card-img-top p-1"

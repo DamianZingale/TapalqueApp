@@ -37,6 +37,7 @@ export interface Restaurant {
   email: string;
   delivery: boolean;
   deliveryPrice: number;
+  estimatedWaitTime?: number;
   latitude: number;
   longitude: number;
   lastCloseDate?: string;

@@ -54,11 +54,16 @@ public class OrderServiceImpl implements OrderService {
                 Map.of(
                     "idPedido", savedOrder.getId(),
                     "monto", savedOrder.getTotalPrice(),
-                    "fecha", savedOrder.getDateCreated().toString()                   
+                    "fecha", savedOrder.getDateCreated().toString()
                 )
             );
 
-            adminNotificationService.notificarNuevoPedido(savedOrder);
+            // Solo notificar al admin si paga en efectivo (al recibir).
+            // Los pagos con MercadoPago se notifican cuando el pago es confirmado
+            // (ver confirmarPagoPedido).
+            if (Boolean.TRUE.equals(savedOrder.getPaidWithCash())) {
+                adminNotificationService.notificarNuevoPedido(savedOrder);
+            }
 
             return mapToDTO(savedOrder);
         });
@@ -117,7 +122,10 @@ public class OrderServiceImpl implements OrderService {
                 return orderRepository.save(order);
             })
             .doOnSuccess(order -> {
-                if (order != null) adminNotificationService.notificarPedidoActualizado(order);
+                if (order != null) {
+                    adminNotificationService.notificarPedidoActualizado(order);
+                    adminNotificationService.notificarUsuarioPedidoActualizado(order);
+                }
             });
     }
 
@@ -148,7 +156,7 @@ public class OrderServiceImpl implements OrderService {
             })
             .doOnSuccess(order -> {
                 System.out.println("Pedido " + pedidoId + " confirmado como PAGADO");
-                if (order != null) adminNotificationService.notificarPedidoActualizado(order);
+                if (order != null) adminNotificationService.notificarNuevoPedido(order);
             })
             .doOnError(error -> System.err.println("Error al confirmar pago del pedido " + pedidoId + ": " + error.getMessage()))
             .subscribe();

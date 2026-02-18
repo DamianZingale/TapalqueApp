@@ -88,6 +88,11 @@ public class LocalGastronomicoController {
                 updated = localGastronomicoService.updateDeliveryPrice(id, deliveryPrice);
             }
 
+            if (body.containsKey("estimatedWaitTime")) {
+                Integer waitTime = Integer.valueOf(body.get("estimatedWaitTime").toString());
+                updated = localGastronomicoService.updateEstimatedWaitTime(id, waitTime);
+            }
+
             if (body.containsKey("lastCloseDate")) {
                 java.time.LocalDateTime lastCloseDate = java.time.LocalDateTime.parse(
                         body.get("lastCloseDate").toString(), java.time.format.DateTimeFormatter.ISO_DATE_TIME);

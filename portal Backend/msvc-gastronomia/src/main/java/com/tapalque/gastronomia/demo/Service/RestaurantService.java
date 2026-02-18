@@ -205,6 +205,17 @@ public RestaurantDTO addRestaurant(RestaurantDTO dto) {
     @Caching(evict = {@CacheEvict(value = "restaurantes", allEntries = true), @CacheEvict(value = "restaurante", allEntries = true)})
     @Transactional
     @Override
+    public RestaurantDTO updateEstimatedWaitTime(Long id, Integer estimatedWaitTime) {
+        Restaurant existing = localGastronomicoRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("No existe el local con id " + id));
+        existing.setEstimatedWaitTime(estimatedWaitTime);
+        localGastronomicoRepository.save(existing);
+        return new RestaurantDTO(existing);
+    }
+
+    @Caching(evict = {@CacheEvict(value = "restaurantes", allEntries = true), @CacheEvict(value = "restaurante", allEntries = true)})
+    @Transactional
+    @Override
     public void deleteRestaurant(Long id) {
         Long idLong = (long) id;
         if (!localGastronomicoRepository.existsById(idLong)) {

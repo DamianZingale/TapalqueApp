@@ -14,6 +14,7 @@ public interface I_RestaurantService {
     void updateRestaurant (Restaurant restaurant);
     RestaurantDTO updateDeliveryPrice(Long id, Double deliveryPrice);
     RestaurantDTO updateLastCloseDate(Long id, java.time.LocalDateTime lastCloseDate);
+    RestaurantDTO updateEstimatedWaitTime(Long id, Integer estimatedWaitTime);
     void deleteRestaurant (Long id);
     
     

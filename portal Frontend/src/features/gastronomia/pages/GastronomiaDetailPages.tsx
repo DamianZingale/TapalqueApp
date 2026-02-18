@@ -139,6 +139,7 @@ export default function GastronomiaDetailPage() {
                   restaurantName={restaurante.name ?? ''}
                   allowDelivery={restaurante.delivery ?? false}
                   deliveryPrice={restaurante.deliveryPrice ?? 0}
+                  estimatedWaitTime={restaurante.estimatedWaitTime ?? 0}
                 />
               ) : (
                 <div className="alert alert-info text-center">

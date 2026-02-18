@@ -14,7 +14,7 @@ export const CardResto: React.FC<CardProps> = ({
   const status = schedule ? getStatusText(schedule) : null;
 
   return (
-    <div className="card my-2 me-3" style={{ width: '18rem' }}>
+    <div className="card my-2" style={{ width: '18rem', maxWidth: '100%' }}>
       <img src={imagenUrl} className="card-img-top p-1" alt={titulo} />
       <div className="card-body">
         <h5 className="card-title text-center">{titulo}</h5>

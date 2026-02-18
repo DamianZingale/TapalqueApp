@@ -41,6 +41,7 @@ export function NotificationBell() {
   };
 
   const getIcon = (type: AppNotification['type']) => {
+    if (type === 'pedido:estado') return '📦';
     return type === 'pedido' ? '🍽️' : '🏨';
   };
 

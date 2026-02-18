@@ -43,7 +43,7 @@ export default function GastronomiaListPage() {
       <div className="row justify-content-center">
         {locales.length > 0 ? (
           locales.map((local) => (
-            <div key={local.id} className="col-md-4 col-sm-6">
+            <div key={local.id} className="col-12 col-sm-6 col-md-4 col-lg-3 my-2 d-flex justify-content-center">
               <CardResto
                 id={String(local.id)}
                 titulo={local.name || 'Nombre no disponible'}

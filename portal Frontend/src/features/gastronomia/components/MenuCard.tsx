@@ -20,9 +20,10 @@ interface Props {
   restaurantName: string;
   allowDelivery?: boolean;
   deliveryPrice?: number;
+  estimatedWaitTime?: number;
 }
 
-export const MenuCard: FC<Props> = ({ items, restaurantId, restaurantName, allowDelivery = false, deliveryPrice = 0 }) => {
+export const MenuCard: FC<Props> = ({ items, restaurantId, restaurantName, allowDelivery = false, deliveryPrice = 0, estimatedWaitTime = 0 }) => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitResult, setSubmitResult] = useState<{ success: boolean; message: string } | null>(null);
@@ -334,6 +335,7 @@ export const MenuCard: FC<Props> = ({ items, restaurantId, restaurantName, allow
                 initialPedido={pedidoFinal}
                 allowDelivery={allowDelivery}
                 deliveryPrice={deliveryPrice}
+                estimatedWaitTime={estimatedWaitTime}
                 onCancel={() => setIsFinalizing(false)}
                 onConfirm={handleConfirmOrder}
               />

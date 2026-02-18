@@ -52,16 +52,15 @@ export default function EspaciosListPage() {
             <div className="row justify-content-center">
                 {espacios.length > 0 ? (
                     espacios.map((espacio) => (
-                        <div key={espacio.id} className="col-md-4 mb-4">
-                            <Card
-                                id={String(espacio.id)}
-                                titulo={espacio.titulo}
-                                imagenUrl={espacio.imagenes?.[0]?.imagenUrl || "https://via.placeholder.com/400x200.png?text=Sin+Imagen"}
-                                direccion_local={espacio.direccion}
-                                tipo={SECCION_TYPE.ESP_PUBLICOS}
-                                onClick={() => handleCardClick(espacio)}
-                            />
-                        </div>
+                        <Card
+                            key={espacio.id}
+                            id={String(espacio.id)}
+                            titulo={espacio.titulo}
+                            imagenUrl={espacio.imagenes?.[0]?.imagenUrl || "https://via.placeholder.com/400x200.png?text=Sin+Imagen"}
+                            direccion_local={espacio.direccion}
+                            tipo={SECCION_TYPE.ESP_PUBLICOS}
+                            onClick={() => handleCardClick(espacio)}
+                        />
                     ))
                 ) : (
                     <p className="text-center my-5">No hay espacios públicos disponibles por el momento.</p>

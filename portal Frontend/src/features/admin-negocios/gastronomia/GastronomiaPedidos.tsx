@@ -71,6 +71,8 @@ export function GastronomiaPedidos({
   const [precioDeliveryInput, setPrecioDeliveryInput] = useState<string>('0');
   const [precioDelivery, setPrecioDelivery] = useState<number>(0);
   const [updatingPrice, setUpdatingPrice] = useState(false);
+  const [tiempoEsperaInput, setTiempoEsperaInput] = useState<string>('0');
+  const [updatingWaitTime, setUpdatingWaitTime] = useState(false);
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
 
   // Cierre del día
@@ -81,29 +83,33 @@ export function GastronomiaPedidos({
   const { isConnected, lastMessage } = useWebSocket(businessId, 'GASTRONOMIA');
   const { addNotification } = useNotifications();
 
-  // Manejar mensajes WebSocket (nuevos pedidos / actualizaciones)
+  // Manejar mensajes WebSocket
+  // El backend solo envía pedido:nuevo cuando el pago está confirmado
+  // (efectivo al crear, MercadoPago al confirmar el webhook)
   useEffect(() => {
-    if (lastMessage) {
-      if (lastMessage.type === 'pedido:nuevo') {
-        const nuevoPedido = lastMessage.payload as Pedido;
-        setPedidos((prev) => [nuevoPedido, ...prev]);
-        addNotification({
-          type: 'pedido',
-          title: 'Nuevo pedido',
-          message: `${nuevoPedido.userName || 'Cliente'} - $${(nuevoPedido.totalPrice || nuevoPedido.totalAmount || 0).toLocaleString('es-AR')}`,
-          businessId,
-          businessName,
-        });
-        try {
-          const audio = new Audio('/notification.mp3');
-          audio.play().catch(() => {});
-        } catch { /* ignore */ }
-      } else if (lastMessage.type === 'pedido:actualizado') {
-        const pedidoActualizado = lastMessage.payload as Pedido;
-        setPedidos((prev) =>
-          prev.map((p) => (p.id === pedidoActualizado.id ? pedidoActualizado : p))
-        );
-      }
+    if (!lastMessage) return;
+    const pedido = lastMessage.payload as Pedido;
+
+    if (lastMessage.type === 'pedido:nuevo') {
+      setPedidos((prev) => {
+        const existe = prev.some((p) => p.id === pedido.id);
+        if (existe) return prev.map((p) => (p.id === pedido.id ? pedido : p));
+        return [pedido, ...prev];
+      });
+
+      addNotification({
+        type: 'pedido',
+        title: 'Nuevo pedido',
+        message: `${pedido.userName || 'Cliente'} - $${(pedido.totalPrice || pedido.totalAmount || 0).toLocaleString('es-AR')}`,
+        businessId,
+        businessName,
+      });
+      try { new Audio('/notification.mp3').play().catch(() => {}); } catch { /* ignore */ }
+
+    } else if (lastMessage.type === 'pedido:actualizado') {
+      setPedidos((prev) =>
+        prev.map((p) => (p.id === pedido.id ? pedido : p))
+      );
     }
   }, [lastMessage, addNotification, businessId, businessName]);
 
@@ -127,6 +133,7 @@ export function GastronomiaPedidos({
         const precio = data.deliveryPrice ?? 0;
         setPrecioDelivery(precio);
         setPrecioDeliveryInput(String(precio));
+        setTiempoEsperaInput(String(data.estimatedWaitTime ?? 0));
       }
     } catch {
       setMensaje({ tipo: 'danger', texto: 'Error al cargar restaurant' });
@@ -161,6 +168,29 @@ export function GastronomiaPedidos({
       setMensaje({ tipo: 'danger', texto: 'No se pudo actualizar el precio de delivery' });
     } finally {
       setUpdatingPrice(false);
+    }
+  };
+
+  const handleActualizarTiempoEspera = async () => {
+    const parsed = parseInt(tiempoEsperaInput, 10);
+    if (isNaN(parsed) || parsed < 0) {
+      setMensaje({ tipo: 'danger', texto: 'Ingrese un tiempo válido (número entero mayor o igual a 0)' });
+      return;
+    }
+
+    setUpdatingWaitTime(true);
+    try {
+      const updated = await api.patch<Restaurant>(
+        `/gastronomia/restaurants/${businessId}`,
+        { estimatedWaitTime: parsed }
+      );
+      setRestaurant(updated);
+      setTiempoEsperaInput(String(updated.estimatedWaitTime ?? parsed));
+      setMensaje({ tipo: 'success', texto: 'Tiempo de espera actualizado' });
+    } catch {
+      setMensaje({ tipo: 'danger', texto: 'No se pudo actualizar el tiempo de espera' });
+    } finally {
+      setUpdatingWaitTime(false);
     }
   };
 
@@ -282,12 +312,20 @@ export function GastronomiaPedidos({
     doc.save(fileName);
   };
 
-  // Filtrado: solo pedidos activos (no entregados) y con pago confirmado o en efectivo
-  const pedidosActivos = pedidos.filter(
-    (p) =>
-      p.status !== EstadoPedido.ENTREGADO &&
-      (p.paidWithCash || (p.paidWithMercadoPago && p.payment?.paymentId))
-  );
+  // Filtrado: solo pedidos activos y con pago confirmado o en efectivo
+  const pedidosActivos = pedidos.filter((p) => {
+    if (p.status === EstadoPedido.ENTREGADO) return false;
+
+    // Efectivo: siempre visible
+    if (p.paidWithCash) return true;
+
+    // MercadoPago: solo si tiene confirmación de pago
+    if (p.paidWithMercadoPago) {
+      return !!(p.transaccionId || p.mercadoPagoId || p.fechaPago);
+    }
+
+    return false;
+  });
 
   if (loading) {
     return (
@@ -312,8 +350,8 @@ export function GastronomiaPedidos({
       {delivery && (
         <Card className="mb-3 border-warning">
           <Card.Body>
-            <Row className="align-items-center">
-              <Col md={4}>
+            <Row className="align-items-center g-2">
+              <Col md={3}>
                 <Form.Label>Precio Delivery</Form.Label>
                 <Form.Control
                   type="text"
@@ -329,6 +367,24 @@ export function GastronomiaPedidos({
                   disabled={updatingPrice}
                 >
                   {updatingPrice ? <Spinner animation="border" size="sm" /> : 'Actualizar precio'}
+                </Button>
+              </Col>
+              <Col md={3}>
+                <Form.Label>Tiempo espera (min)</Form.Label>
+                <Form.Control
+                  type="text"
+                  inputMode="numeric"
+                  value={tiempoEsperaInput}
+                  onChange={(e) => setTiempoEsperaInput(e.target.value)}
+                />
+              </Col>
+              <Col md="auto">
+                <Button
+                  variant="warning"
+                  onClick={handleActualizarTiempoEspera}
+                  disabled={updatingWaitTime}
+                >
+                  {updatingWaitTime ? <Spinner animation="border" size="sm" /> : 'Actualizar tiempo'}
                 </Button>
               </Col>
               <Col md="auto">

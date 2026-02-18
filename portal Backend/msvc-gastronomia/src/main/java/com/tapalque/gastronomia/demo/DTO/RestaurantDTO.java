@@ -24,6 +24,7 @@ public class RestaurantDTO {
     private String schedule;    // concatenado tipo "1:09:00-22:00; 2:09:00-22:00"
     private boolean delivery;
     private Double deliveryPrice;
+    private Integer estimatedWaitTime;
     private String imageUrl;
     private java.time.LocalDateTime lastCloseDate;
 
@@ -57,6 +58,7 @@ public class RestaurantDTO {
     this.longitude = Optional.ofNullable(entity.getCoordinate_lon()).orElse(0.0);
     this.delivery = entity.getDelivery();
     this.deliveryPrice = entity.getDeliveryPrice();
+    this.estimatedWaitTime = entity.getEstimatedWaitTime();
     this.lastCloseDate = entity.getLastCloseDate();
     // Imagen: tomar la primera imagen del restaurante
     if (entity.getImages() != null && !entity.getImages().isEmpty()) {
@@ -267,6 +269,14 @@ entity.setSchedules(scheduleList);
 
     public void setDeliveryPrice(Double deliveryPrice) {
         this.deliveryPrice = deliveryPrice;
+    }
+
+    public Integer getEstimatedWaitTime() {
+        return estimatedWaitTime;
+    }
+
+    public void setEstimatedWaitTime(Integer estimatedWaitTime) {
+        this.estimatedWaitTime = estimatedWaitTime;
     }
 
     public java.time.LocalDateTime getLastCloseDate() {

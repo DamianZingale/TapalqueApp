@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Card, Row, Col, Badge, Button, Alert, Modal } from "react-bootstrap";
 import authService from "../../../services/authService";
 import { fetchPedidosByUser, type Pedido, EstadoPedido } from "../../../services/fetchPedidos";
+import { useNotifications } from "../../../shared/context/NotificationContext";
 
 const estadoLabel: Record<string, { bg: string; text: string }> = {
     [EstadoPedido.RECIBIDO]: { bg: "warning", text: "Recibido" },
@@ -17,12 +18,15 @@ export const MisPedidosTab = () => {
     const [filtroEstado, setFiltroEstado] = useState<EstadoPedido | "TODOS">("TODOS");
     const [pedidoSeleccionado, setPedidoSeleccionado] = useState<Pedido | null>(null);
     const [modalDetalle, setModalDetalle] = useState(false);
+    const { notifications } = useNotifications();
+
+    const lastEstadoNotif = notifications.find((n) => n.type === 'pedido:estado');
 
     useEffect(() => {
         cargarPedidos();
         const interval = setInterval(cargarPedidos, 30000);
         return () => clearInterval(interval);
-    }, []);
+    }, [lastEstadoNotif?.id]);
 
     const cargarPedidos = async () => {
         try {

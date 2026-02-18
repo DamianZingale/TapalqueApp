@@ -10,6 +10,7 @@ interface Props {
   initialPedido: PedidoItem[];
   allowDelivery?: boolean;
   deliveryPrice: number;
+  estimatedWaitTime?: number;
   onConfirm: (data: {
     items: PedidoItem[];
     total: number;
@@ -24,6 +25,7 @@ export const OrderSummaryCard: FC<Props> = ({
   initialPedido,
   allowDelivery,
   deliveryPrice,
+  estimatedWaitTime = 0,
   onConfirm,
   onCancel,
 }) => {
@@ -106,6 +108,13 @@ export const OrderSummaryCard: FC<Props> = ({
           onChange={() => setPaymentMethod('mercadopago')}
         />
       </div>
+
+      {estimatedWaitTime > 0 && (
+        <div className="mb-3 text-muted">
+          <i className="bi bi-clock me-1"></i>
+          Tiempo de espera aproximado: <strong>{estimatedWaitTime} min</strong>
+        </div>
+      )}
 
       <div className="mb-3">
         <strong>Total: ${total.toFixed(2)}</strong>
