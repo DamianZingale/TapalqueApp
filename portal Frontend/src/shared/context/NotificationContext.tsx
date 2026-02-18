@@ -104,7 +104,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     // Only connect for regular users (ROL 3)
     // Admins/moderators get notifications via the admin panel WebSocket
     const rol = Number(user.rol);
-    if (rol === 2) return;
+    if (rol === 1) return;
 
     const userId = String(user.id);
     const wsUrl = getWsUrl();

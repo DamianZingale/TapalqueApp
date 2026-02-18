@@ -32,7 +32,7 @@ public class RestaurantDTO {
     public RestaurantDTO() {}
 
     // 🔹 Constructor con todos los campos
-    public RestaurantDTO(Long id, String name, String address, String email, Double latitude, Double longitude,
+    public RestaurantDTO(Integer estimatedWaitTime, Long id, String name, String address, String email, Double latitude, Double longitude,
                          String categories, String phones, String schedule, boolean delivery, Double deliveryPrice, String imageUrl) {
         this.id = id;
         this.name = name;
@@ -46,6 +46,7 @@ public class RestaurantDTO {
         this.delivery = delivery;
         this.deliveryPrice = deliveryPrice;
         this.imageUrl = imageUrl;
+        this.estimatedWaitTime = estimatedWaitTime;
     }
 
     // 🔹 Constructor que recibe una entidad
@@ -99,6 +100,7 @@ public class RestaurantDTO {
     entity.setCoordinate_lon(Optional.ofNullable(this.longitude).orElse(0.0));
     entity.setDelivery(this.delivery);
     entity.setDeliveryPrice(this.deliveryPrice);
+    entity.setEstimatedWaitTime(this.estimatedWaitTime);
 
     // Categories: String -> List<Category>
     if(this.categories != null && !this.categories.isEmpty()) {

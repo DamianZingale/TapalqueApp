@@ -96,7 +96,7 @@ public class Restaurant {
     
     public Restaurant(){}
   
-    public Restaurant(Double deliveryPrice, Double lat, Double lon, String address, List<Category> categories, Boolean delivery, Menu menu, String email, Long idRestaurant, List<RestaurantImage> images, String name, List<PhoneNumber> phone, List<PhoneNumber> phoneNumbers, List<Schedule> schedules) {
+    public Restaurant(Integer estimatedWaitTime, Double deliveryPrice, Double lat, Double lon, String address, List<Category> categories, Boolean delivery, Menu menu, String email, Long idRestaurant, List<RestaurantImage> images, String name, List<PhoneNumber> phone, List<PhoneNumber> phoneNumbers, List<Schedule> schedules) {
         this.address = address;
         this.categories = categories;
         this.delivery = delivery;
@@ -107,6 +107,7 @@ public class Restaurant {
         this.name = name;
         this.phoneNumbers = phone;
         this.phoneNumbers = phoneNumbers;
+        this.estimatedWaitTime = estimatedWaitTime;
         this.deliveryPrice = deliveryPrice;
         this.schedules = schedules;
         this.coordinate_lat = (coordinate_lat != null) ? lat : 0.0;

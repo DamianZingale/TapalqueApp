@@ -7,6 +7,7 @@ export type BusinessType = 'GASTRONOMIA' | 'HOSPEDAJE';
 export interface Business {
   id: string;
   name: string;
+  externalBusinessId: string;
   type: BusinessType;
   address: string;
   imageUrl?: string;

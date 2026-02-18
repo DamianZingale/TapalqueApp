@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
 import { Client } from '@stomp/stompjs';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import SockJS from 'sockjs-client';
-import type { WebSocketMessage, BusinessType } from '../types';
+import type { BusinessType, WebSocketMessage } from '../types';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
 const RECONNECT_DELAY = 5000;
@@ -33,7 +33,10 @@ interface UseWebSocketReturn {
   reconnect: () => void;
 }
 
-export function useWebSocket(businessId: string, businessType: BusinessType): UseWebSocketReturn {
+export function useWebSocket(
+  businessId: string,
+  businessType: BusinessType
+): UseWebSocketReturn {
   const [isConnected, setIsConnected] = useState(false);
   const [lastMessage, setLastMessage] = useState<WebSocketMessage | null>(null);
 
@@ -101,19 +104,23 @@ export function useWebSocket(businessId: string, businessType: BusinessType): Us
     setIsConnected(false);
   }, []);
 
-  const sendMessage = useCallback((message: WebSocketMessage) => {
-    if (clientRef.current?.active) {
-      const destination = businessType === 'GASTRONOMIA'
-        ? `/app/pedidos/${businessId}`
-        : `/app/reservas/${businessId}`;
-      clientRef.current.publish({
-        destination,
-        body: JSON.stringify(message),
-      });
-    } else {
-      console.warn('STOMP no está conectado');
-    }
-  }, [businessId, businessType]);
+  const sendMessage = useCallback(
+    (message: WebSocketMessage) => {
+      if (clientRef.current?.active) {
+        const destination =
+          businessType === 'GASTRONOMIA'
+            ? `/app/pedidos/${businessId}`
+            : `/app/reservas/${businessId}`;
+        clientRef.current.publish({
+          destination,
+          body: JSON.stringify(message),
+        });
+      } else {
+        console.warn('STOMP no está conectado');
+      }
+    },
+    [businessId, businessType]
+  );
 
   const reconnect = useCallback(() => {
     disconnect();

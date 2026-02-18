@@ -34,7 +34,7 @@ import {
 } from '../types';
 
 interface GastronomiaPedidosProps {
-  businessId: string;
+  externalBusinessId: string;
   businessName: string;
   delivery?: boolean;
   deliveryPrice?: number;
@@ -61,7 +61,7 @@ interface ResumenCierre {
 // Componente principal
 // ============================================================
 export function GastronomiaPedidos({
-  businessId,
+  externalBusinessId,
   businessName,
   delivery = false,
 }: GastronomiaPedidosProps) {
@@ -77,10 +77,15 @@ export function GastronomiaPedidos({
 
   // Cierre del día
   const [showCierreModal, setShowCierreModal] = useState(false);
-  const [resumenCierre, setResumenCierre] = useState<ResumenCierre | null>(null);
+  const [resumenCierre, setResumenCierre] = useState<ResumenCierre | null>(
+    null
+  );
   const [loadingCierre, setLoadingCierre] = useState(false);
 
-  const { isConnected, lastMessage } = useWebSocket(businessId, 'GASTRONOMIA');
+  const { isConnected, lastMessage } = useWebSocket(
+    externalBusinessId,
+    'GASTRONOMIA'
+  );
   const { addNotification } = useNotifications();
 
   // Manejar mensajes WebSocket
@@ -101,33 +106,34 @@ export function GastronomiaPedidos({
         type: 'pedido',
         title: 'Nuevo pedido',
         message: `${pedido.userName || 'Cliente'} - $${(pedido.totalPrice || pedido.totalAmount || 0).toLocaleString('es-AR')}`,
-        businessId,
+        businessId: externalBusinessId,
         businessName,
       });
-      try { new Audio('/notification.mp3').play().catch(() => {}); } catch { /* ignore */ }
-
+      try {
+        new Audio('/notification.mp3').play().catch(() => {});
+      } catch {
+        /* ignore */
+      }
     } else if (lastMessage.type === 'pedido:actualizado') {
-      setPedidos((prev) =>
-        prev.map((p) => (p.id === pedido.id ? pedido : p))
-      );
+      setPedidos((prev) => prev.map((p) => (p.id === pedido.id ? pedido : p)));
     }
-  }, [lastMessage, addNotification, businessId, businessName]);
+  }, [lastMessage, addNotification, externalBusinessId, businessName]);
 
   const cargarPedidos = useCallback(async () => {
     try {
       setLoading(true);
-      const data = await fetchPedidosByRestaurant(businessId);
+      const data = await fetchPedidosByRestaurant(externalBusinessId);
       setPedidos(data);
     } catch {
       setMensaje({ tipo: 'danger', texto: 'Error al cargar pedidos' });
     } finally {
       setLoading(false);
     }
-  }, [businessId]);
+  }, [externalBusinessId]);
 
   const cargarRestaurant = useCallback(async () => {
     try {
-      const data = await fetchRestaurantById(businessId);
+      const data = await fetchRestaurantById(externalBusinessId);
       if (data) {
         setRestaurant(data);
         const precio = data.deliveryPrice ?? 0;
@@ -138,7 +144,7 @@ export function GastronomiaPedidos({
     } catch {
       setMensaje({ tipo: 'danger', texto: 'Error al cargar restaurant' });
     }
-  }, [businessId]);
+  }, [externalBusinessId]);
 
   useEffect(() => {
     cargarPedidos();
@@ -150,14 +156,17 @@ export function GastronomiaPedidos({
   const handleActualizarPrecioDelivery = async () => {
     const parsed = parseFloat(precioDeliveryInput);
     if (isNaN(parsed) || parsed < 0) {
-      setMensaje({ tipo: 'danger', texto: 'Ingrese un precio válido (número mayor o igual a 0)' });
+      setMensaje({
+        tipo: 'danger',
+        texto: 'Ingrese un precio válido (número mayor o igual a 0)',
+      });
       return;
     }
 
     setUpdatingPrice(true);
     try {
       const updated = await api.patch<Restaurant>(
-        `/gastronomia/restaurants/${businessId}`,
+        `/gastronomia/restaurants/${externalBusinessId}`,
         { deliveryPrice: parsed }
       );
       setRestaurant(updated);
@@ -165,7 +174,10 @@ export function GastronomiaPedidos({
       setPrecioDeliveryInput(String(updated.deliveryPrice ?? parsed));
       setMensaje({ tipo: 'success', texto: 'Precio de delivery actualizado' });
     } catch {
-      setMensaje({ tipo: 'danger', texto: 'No se pudo actualizar el precio de delivery' });
+      setMensaje({
+        tipo: 'danger',
+        texto: 'No se pudo actualizar el precio de delivery',
+      });
     } finally {
       setUpdatingPrice(false);
     }
@@ -174,28 +186,37 @@ export function GastronomiaPedidos({
   const handleActualizarTiempoEspera = async () => {
     const parsed = parseInt(tiempoEsperaInput, 10);
     if (isNaN(parsed) || parsed < 0) {
-      setMensaje({ tipo: 'danger', texto: 'Ingrese un tiempo válido (número entero mayor o igual a 0)' });
+      setMensaje({
+        tipo: 'danger',
+        texto: 'Ingrese un tiempo válido (número entero mayor o igual a 0)',
+      });
       return;
     }
 
     setUpdatingWaitTime(true);
     try {
       const updated = await api.patch<Restaurant>(
-        `/gastronomia/restaurants/${businessId}`,
+        `/gastronomia/restaurants/${externalBusinessId}`,
         { estimatedWaitTime: parsed }
       );
       setRestaurant(updated);
       setTiempoEsperaInput(String(updated.estimatedWaitTime ?? parsed));
       setMensaje({ tipo: 'success', texto: 'Tiempo de espera actualizado' });
     } catch {
-      setMensaje({ tipo: 'danger', texto: 'No se pudo actualizar el tiempo de espera' });
+      setMensaje({
+        tipo: 'danger',
+        texto: 'No se pudo actualizar el tiempo de espera',
+      });
     } finally {
       setUpdatingWaitTime(false);
     }
   };
 
   const handleCambiarEstado = async (pedido: Pedido) => {
-    const siguiente = getSiguienteEstadoPedido(pedido.status, pedido.isDelivery);
+    const siguiente = getSiguienteEstadoPedido(
+      pedido.status,
+      pedido.isDelivery
+    );
     if (!siguiente) return;
 
     await updateEstadoPedido(pedido.id, siguiente);
@@ -208,20 +229,35 @@ export function GastronomiaPedidos({
   const handleCerrarDia = async () => {
     setLoadingCierre(true);
     try {
-      const desde = restaurant?.lastCloseDate || new Date(new Date().setHours(0, 0, 0, 0)).toISOString();
+      const desde =
+        restaurant?.lastCloseDate ||
+        new Date(new Date().setHours(0, 0, 0, 0)).toISOString();
       const hasta = new Date().toISOString();
 
-      const data = await fetchPedidosByRestaurantAndDateRange(businessId, desde, hasta);
-      const entregados = data.filter((p) => p.status === EstadoPedido.ENTREGADO);
+      const data = await fetchPedidosByRestaurantAndDateRange(
+        externalBusinessId,
+        desde,
+        hasta
+      );
+      const entregados = data.filter(
+        (p) => p.status === EstadoPedido.ENTREGADO
+      );
 
       const resumen: ResumenCierre = {
         pedidos: entregados,
         totalPedidos: entregados.length,
         pedidosDelivery: entregados.filter((p) => p.isDelivery).length,
         pedidosRetiro: entregados.filter((p) => !p.isDelivery).length,
-        totalFacturado: entregados.reduce((sum, p) => sum + (p.totalPrice || p.totalAmount || 0), 0),
-        totalEfectivo: entregados.filter((p) => p.paidWithCash).reduce((sum, p) => sum + (p.totalPrice || p.totalAmount || 0), 0),
-        totalMercadoPago: entregados.filter((p) => p.paidWithMercadoPago).reduce((sum, p) => sum + (p.totalPrice || p.totalAmount || 0), 0),
+        totalFacturado: entregados.reduce(
+          (sum, p) => sum + (p.totalPrice || p.totalAmount || 0),
+          0
+        ),
+        totalEfectivo: entregados
+          .filter((p) => p.paidWithCash)
+          .reduce((sum, p) => sum + (p.totalPrice || p.totalAmount || 0), 0),
+        totalMercadoPago: entregados
+          .filter((p) => p.paidWithMercadoPago)
+          .reduce((sum, p) => sum + (p.totalPrice || p.totalAmount || 0), 0),
         desde,
         hasta,
       };
@@ -229,7 +265,10 @@ export function GastronomiaPedidos({
       setResumenCierre(resumen);
       setShowCierreModal(true);
     } catch {
-      setMensaje({ tipo: 'danger', texto: 'Error al generar el cierre del día' });
+      setMensaje({
+        tipo: 'danger',
+        texto: 'Error al generar el cierre del día',
+      });
     } finally {
       setLoadingCierre(false);
     }
@@ -239,7 +278,7 @@ export function GastronomiaPedidos({
     try {
       const now = new Date().toISOString();
       const updated = await api.patch<Restaurant>(
-        `/gastronomia/restaurants/${businessId}`,
+        `/gastronomia/restaurants/${externalBusinessId}`,
         { lastCloseDate: now }
       );
       setRestaurant(updated);
@@ -247,7 +286,10 @@ export function GastronomiaPedidos({
       setResumenCierre(null);
       setMensaje({ tipo: 'success', texto: 'Cierre de día registrado' });
     } catch {
-      setMensaje({ tipo: 'danger', texto: 'Error al registrar el cierre. Descargue el PDF primero.' });
+      setMensaje({
+        tipo: 'danger',
+        texto: 'Error al registrar el cierre. Descargue el PDF primero.',
+      });
     }
   };
 
@@ -291,9 +333,16 @@ export function GastronomiaPedidos({
         `#${p.id.slice(-6)}`,
         p.userName || '-',
         p.isDelivery ? 'Delivery' : 'Retiro',
-        p.paidWithCash ? 'Efectivo' : p.paidWithMercadoPago ? 'MercadoPago' : '-',
+        p.paidWithCash
+          ? 'Efectivo'
+          : p.paidWithMercadoPago
+            ? 'MercadoPago'
+            : '-',
         (p.items || [])
-          .map((i) => `${i.itemName || i.productName || '?'} x${i.itemQuantity || i.quantity}`)
+          .map(
+            (i) =>
+              `${i.itemName || i.productName || '?'} x${i.itemQuantity || i.quantity}`
+          )
           .join(', '),
         `$${(p.totalPrice || p.totalAmount || 0).toLocaleString('es-AR')}`,
       ]);
@@ -342,7 +391,11 @@ export function GastronomiaPedidos({
       </div>
 
       {mensaje && (
-        <Alert variant={mensaje.tipo} dismissible onClose={() => setMensaje(null)}>
+        <Alert
+          variant={mensaje.tipo}
+          dismissible
+          onClose={() => setMensaje(null)}
+        >
           {mensaje.texto}
         </Alert>
       )}
@@ -366,7 +419,11 @@ export function GastronomiaPedidos({
                   onClick={handleActualizarPrecioDelivery}
                   disabled={updatingPrice}
                 >
-                  {updatingPrice ? <Spinner animation="border" size="sm" /> : 'Actualizar precio'}
+                  {updatingPrice ? (
+                    <Spinner animation="border" size="sm" />
+                  ) : (
+                    'Actualizar precio'
+                  )}
                 </Button>
               </Col>
               <Col md={3}>
@@ -384,7 +441,11 @@ export function GastronomiaPedidos({
                   onClick={handleActualizarTiempoEspera}
                   disabled={updatingWaitTime}
                 >
-                  {updatingWaitTime ? <Spinner animation="border" size="sm" /> : 'Actualizar tiempo'}
+                  {updatingWaitTime ? (
+                    <Spinner animation="border" size="sm" />
+                  ) : (
+                    'Actualizar tiempo'
+                  )}
                 </Button>
               </Col>
               <Col md="auto">
@@ -415,8 +476,17 @@ export function GastronomiaPedidos({
 
       {/* Botón Cerrar el día */}
       <div className="text-center mt-4 mb-3">
-        <Button variant="outline-dark" size="lg" onClick={handleCerrarDia} disabled={loadingCierre}>
-          {loadingCierre ? <Spinner animation="border" size="sm" /> : 'Cerrar el día'}
+        <Button
+          variant="outline-dark"
+          size="lg"
+          onClick={handleCerrarDia}
+          disabled={loadingCierre}
+        >
+          {loadingCierre ? (
+            <Spinner animation="border" size="sm" />
+          ) : (
+            'Cerrar el día'
+          )}
         </Button>
       </div>
 
@@ -434,7 +504,8 @@ export function GastronomiaPedidos({
           {resumenCierre && (
             <>
               <Alert variant="info">
-                Descargue el PDF antes de confirmar el cierre. Este resumen no se almacena.
+                Descargue el PDF antes de confirmar el cierre. Este resumen no
+                se almacena.
               </Alert>
 
               <Row className="mb-3">
@@ -449,7 +520,9 @@ export function GastronomiaPedidos({
                 <Col sm={4}>
                   <Card className="text-center">
                     <Card.Body>
-                      <h4>${resumenCierre.totalFacturado.toLocaleString('es-AR')}</h4>
+                      <h4>
+                        ${resumenCierre.totalFacturado.toLocaleString('es-AR')}
+                      </h4>
                       <small className="text-muted">Total facturado</small>
                     </Card.Body>
                   </Card>
@@ -458,7 +531,8 @@ export function GastronomiaPedidos({
                   <Card className="text-center">
                     <Card.Body>
                       <div>
-                        <strong>{resumenCierre.pedidosDelivery}</strong> delivery
+                        <strong>{resumenCierre.pedidosDelivery}</strong>{' '}
+                        delivery
                       </div>
                       <div>
                         <strong>{resumenCierre.pedidosRetiro}</strong> retiro
@@ -471,13 +545,18 @@ export function GastronomiaPedidos({
               <Row className="mb-3">
                 <Col sm={6}>
                   <small className="text-muted">
-                    Efectivo: <strong>${resumenCierre.totalEfectivo.toLocaleString('es-AR')}</strong>
+                    Efectivo:{' '}
+                    <strong>
+                      ${resumenCierre.totalEfectivo.toLocaleString('es-AR')}
+                    </strong>
                   </small>
                 </Col>
                 <Col sm={6}>
                   <small className="text-muted">
                     Mercado Pago:{' '}
-                    <strong>${resumenCierre.totalMercadoPago.toLocaleString('es-AR')}</strong>
+                    <strong>
+                      ${resumenCierre.totalMercadoPago.toLocaleString('es-AR')}
+                    </strong>
                   </small>
                 </Col>
               </Row>
@@ -502,11 +581,17 @@ export function GastronomiaPedidos({
                         <td>
                           {(p.items || []).map((i, idx) => (
                             <div key={idx}>
-                              {i.itemName || i.productName || '?'} x{i.itemQuantity || i.quantity}
+                              {i.itemName || i.productName || '?'} x
+                              {i.itemQuantity || i.quantity}
                             </div>
                           ))}
                         </td>
-                        <td>${(p.totalPrice || p.totalAmount || 0).toLocaleString('es-AR')}</td>
+                        <td>
+                          $
+                          {(p.totalPrice || p.totalAmount || 0).toLocaleString(
+                            'es-AR'
+                          )}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -537,18 +622,31 @@ interface PedidoCardProps {
   deliveryPrice: number;
 }
 
-function PedidoCard({ pedido, onCambiarEstado, deliveryPrice }: PedidoCardProps) {
+function PedidoCard({
+  pedido,
+  onCambiarEstado,
+  deliveryPrice,
+}: PedidoCardProps) {
   const [showModal, setShowModal] = useState(false);
 
   const estadoBadge = getEstadoPedidoBadge(pedido.status);
   const baseTotal = pedido.totalPrice || pedido.totalAmount || 0;
-  const total = pedido.isDelivery ? baseTotal + deliveryPrice : baseTotal;
+  const total = baseTotal;
 
-  const siguienteEstado = getSiguienteEstadoPedido(pedido.status, pedido.isDelivery);
-  const textoBoton = getTextoBotonSiguienteEstado(pedido.status, pedido.isDelivery);
+  const siguienteEstado = getSiguienteEstadoPedido(
+    pedido.status,
+    pedido.isDelivery
+  );
+  const textoBoton = getTextoBotonSiguienteEstado(
+    pedido.status,
+    pedido.isDelivery
+  );
 
   const fechaPedido = pedido.dateCreated
-    ? new Date(pedido.dateCreated).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' })
+    ? new Date(pedido.dateCreated).toLocaleString('es-AR', {
+        dateStyle: 'short',
+        timeStyle: 'short',
+      })
     : null;
 
   return (
@@ -568,7 +666,9 @@ function PedidoCard({ pedido, onCambiarEstado, deliveryPrice }: PedidoCardProps)
           {pedido.userName && (
             <div className="mb-2">
               <strong>{pedido.userName}</strong>
-              {pedido.userPhone && <small className="text-muted ms-2">{pedido.userPhone}</small>}
+              {pedido.userPhone && (
+                <small className="text-muted ms-2">{pedido.userPhone}</small>
+              )}
             </div>
           )}
 
@@ -580,7 +680,9 @@ function PedidoCard({ pedido, onCambiarEstado, deliveryPrice }: PedidoCardProps)
                   Delivery (+${deliveryPrice})
                 </Badge>
                 {pedido.deliveryAddress && (
-                  <small className="d-block text-muted mt-1">{pedido.deliveryAddress}</small>
+                  <small className="d-block text-muted mt-1">
+                    {pedido.deliveryAddress}
+                  </small>
                 )}
               </>
             ) : (
@@ -595,7 +697,9 @@ function PedidoCard({ pedido, onCambiarEstado, deliveryPrice }: PedidoCardProps)
                 Efectivo
               </Badge>
             )}
-            {pedido.paidWithMercadoPago && <Badge bg="primary">MercadoPago</Badge>}
+            {pedido.paidWithMercadoPago && (
+              <Badge bg="primary">MercadoPago</Badge>
+            )}
           </div>
 
           {/* Items resumidos */}
@@ -606,7 +710,10 @@ function PedidoCard({ pedido, onCambiarEstado, deliveryPrice }: PedidoCardProps)
                 const cantidad = item.itemQuantity || item.quantity;
                 const precio = item.itemPrice || item.unitPrice || 0;
                 return (
-                  <div key={idx} className="d-flex justify-content-between small">
+                  <div
+                    key={idx}
+                    className="d-flex justify-content-between small"
+                  >
                     <span>
                       {nombre} x{cantidad}
                     </span>
@@ -622,7 +729,9 @@ function PedidoCard({ pedido, onCambiarEstado, deliveryPrice }: PedidoCardProps)
           {/* Total */}
           <div className="d-flex justify-content-between border-top pt-2 mt-2">
             <strong>Total:</strong>
-            <span className="text-success fw-bold">${total.toLocaleString('es-AR')}</span>
+            <span className="text-success fw-bold">
+              ${total.toLocaleString('es-AR')}
+            </span>
           </div>
         </Card.Body>
 
@@ -687,8 +796,14 @@ function PedidoCard({ pedido, onCambiarEstado, deliveryPrice }: PedidoCardProps)
           {/* Método de pago */}
           <h6 className="text-muted mb-2">Pago</h6>
           <div className="mb-3">
-            {pedido.paidWithCash && <Badge bg="success" className="me-1">Efectivo</Badge>}
-            {pedido.paidWithMercadoPago && <Badge bg="primary">MercadoPago</Badge>}
+            {pedido.paidWithCash && (
+              <Badge bg="success" className="me-1">
+                Efectivo
+              </Badge>
+            )}
+            {pedido.paidWithMercadoPago && (
+              <Badge bg="primary">MercadoPago</Badge>
+            )}
           </div>
 
           {/* Items detallados */}
@@ -713,8 +828,12 @@ function PedidoCard({ pedido, onCambiarEstado, deliveryPrice }: PedidoCardProps)
                       <tr key={idx}>
                         <td>{nombre}</td>
                         <td className="text-center">{cantidad}</td>
-                        <td className="text-end">${precio.toLocaleString('es-AR')}</td>
-                        <td className="text-end">${(precio * cantidad).toLocaleString('es-AR')}</td>
+                        <td className="text-end">
+                          ${precio.toLocaleString('es-AR')}
+                        </td>
+                        <td className="text-end">
+                          ${(precio * cantidad).toLocaleString('es-AR')}
+                        </td>
                       </tr>
                     );
                   })}
@@ -726,7 +845,9 @@ function PedidoCard({ pedido, onCambiarEstado, deliveryPrice }: PedidoCardProps)
           {/* Total */}
           <div className="d-flex justify-content-between fw-bold border-top pt-2">
             <span>Total</span>
-            <span className="text-success">${total.toLocaleString('es-AR')}</span>
+            <span className="text-success">
+              ${total.toLocaleString('es-AR')}
+            </span>
           </div>
         </Modal.Body>
         <Modal.Footer>
