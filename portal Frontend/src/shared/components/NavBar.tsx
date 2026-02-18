@@ -45,28 +45,42 @@ export default function NavBar() {
           />
           Tapalqué App
         </Navbar.Brand>
-        {/* Bell y sesión siempre visibles (fuera del collapse) */}
-        <div className="d-flex align-items-center ms-auto me-1">
-          {isLoggedIn && <NotificationBell />}
-          <BotonSesion isLoggedIn={isLoggedIn} onLogout={handleLogout} />
-        </div>
 
         <Navbar.Toggle aria-controls="main-navbar" />
+
         <Navbar.Collapse id="main-navbar">
-          <Nav className="ms-lg-auto">
+          <Nav className="ms-auto">
             <Nav.Link as={Link} to="/termas" onClick={() => setExpanded(false)}>
               Térmas Tapalque
             </Nav.Link>
-            <Nav.Link as={Link} to="/gastronomia" onClick={() => setExpanded(false)}>
+            <Nav.Link
+              as={Link}
+              to="/gastronomia"
+              onClick={() => setExpanded(false)}
+            >
               Gastronomía
             </Nav.Link>
-            <Nav.Link as={Link} to="/hospedaje" onClick={() => setExpanded(false)}>
+            <Nav.Link
+              as={Link}
+              to="/hospedaje"
+              onClick={() => setExpanded(false)}
+            >
               Hospedajes
             </Nav.Link>
-            <Nav.Link as={Link} to="/comercio" onClick={() => setExpanded(false)}>
+            <Nav.Link
+              as={Link}
+              to="/comercio"
+              onClick={() => setExpanded(false)}
+            >
               Comercios
             </Nav.Link>
           </Nav>
+
+          {/* Ahora queda después de los items */}
+          <div className="d-flex align-items-center ms-lg-3">
+            {isLoggedIn && <NotificationBell />}
+            <BotonSesion isLoggedIn={isLoggedIn} onLogout={handleLogout} />
+          </div>
         </Navbar.Collapse>
       </Container>
     </Navbar>
