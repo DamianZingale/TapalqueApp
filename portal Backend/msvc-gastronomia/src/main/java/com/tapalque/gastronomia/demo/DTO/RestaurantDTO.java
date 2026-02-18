@@ -32,23 +32,35 @@ public class RestaurantDTO {
     public RestaurantDTO() {}
 
     // 🔹 Constructor con todos los campos
-    public RestaurantDTO(Integer estimatedWaitTime, Long id, String name, String address, String email, Double latitude, Double longitude,
-                         String categories, String phones, String schedule, boolean delivery, Double deliveryPrice, String imageUrl) {
-        this.id = id;
-        this.name = name;
-        this.address = address;
-        this.email = email;
-        this.latitude = (latitude != null) ? latitude : 0.0;
-        this.longitude = (longitude != null) ? longitude : 0.0;
-        this.categories = categories;
-        this.phones = phones;
-        this.schedule = schedule;
-        this.delivery = delivery;
-        this.deliveryPrice = deliveryPrice;
-        this.estimatedWaitTime = estimatedWaitTime;
-        this.imageUrl = imageUrl;
-        
-    }
+    public RestaurantDTO(
+    Long idRestaurant,
+    String name,
+    String address,
+    String email,
+    Double latitude,
+    Double longitude,
+    String categories,
+    String phones,
+    String schedule,
+    Boolean delivery,
+    Double deliveryPrice,
+    Integer estimatedWaitTime,
+    String imageUrl
+) {
+    this.id = idRestaurant;
+    this.name = name;
+    this.address = address;
+    this.email = email;
+    this.latitude = (latitude != null) ? latitude : 0.0;
+    this.longitude = (longitude != null) ? longitude : 0.0;
+    this.categories = categories;
+    this.phones = phones;
+    this.schedule = schedule;
+    this.delivery = (delivery != null) ? delivery : false;
+    this.deliveryPrice = deliveryPrice;
+    this.estimatedWaitTime = estimatedWaitTime;
+    this.imageUrl = imageUrl;
+}
 
     // 🔹 Constructor que recibe una entidad
     public RestaurantDTO(Restaurant entity) {
