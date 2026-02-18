@@ -69,18 +69,9 @@ export default function NavBar() {
             </Nav.Link>
           </Nav>
 
-          <div className="navbar-nav ms-lg-3">
-            <div className="d-flex align-items-center gap-2">
-              {isLoggedIn && (
-                <div className="nav-item">
-                  <NotificationBell />
-                </div>
-              )}
-
-              <div className="nav-item">
-                <BotonSesion isLoggedIn={isLoggedIn} onLogout={handleLogout} />
-              </div>
-            </div>
+          <div className="d-flex align-items-center gap-2 ms-lg-3">
+            {isLoggedIn && <NotificationBell />}
+            <BotonSesion isLoggedIn={isLoggedIn} onLogout={handleLogout} />
           </div>
         </Navbar.Collapse>
       </Container>
