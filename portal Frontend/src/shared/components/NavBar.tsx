@@ -67,26 +67,19 @@ export default function NavBar() {
             >
               Hospedajes
             </Nav.Link>
-
-            <Nav.Link
-              as={Link}
-              to="/comercio"
-              onClick={() => setExpanded(false)}
-            >
-              Comercios
-            </Nav.Link>
           </Nav>
 
-          {/* Bloque sesión con estilos correctos */}
-          <div className="navbar-nav d-flex align-items-center ms-lg-3">
-            {isLoggedIn && (
-              <div className="nav-item me-2">
-                <NotificationBell />
-              </div>
-            )}
+          <div className="navbar-nav ms-lg-3">
+            <div className="d-flex align-items-center gap-2">
+              {isLoggedIn && (
+                <div className="nav-item">
+                  <NotificationBell />
+                </div>
+              )}
 
-            <div className="nav-item">
-              <BotonSesion isLoggedIn={isLoggedIn} onLogout={handleLogout} />
+              <div className="nav-item">
+                <BotonSesion isLoggedIn={isLoggedIn} onLogout={handleLogout} />
+              </div>
             </div>
           </div>
         </Navbar.Collapse>
