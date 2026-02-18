@@ -24,7 +24,7 @@ export const BotonSesion = ({ isLoggedIn, onLogout }: BotonSesionProps) => {
       <NavDropdown
         title={user?.nombre || user?.firtName || 'Mi Cuenta'}
         id="user-dropdown"
-        align="end"
+        align={{ lg: 'end' }}
       >
         {/* Solo usuarios comunes ven el panel de usuario */}
         {esUsuarioComun && (
