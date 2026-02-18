@@ -45,8 +45,9 @@ public class RestaurantDTO {
         this.schedule = schedule;
         this.delivery = delivery;
         this.deliveryPrice = deliveryPrice;
-        this.imageUrl = imageUrl;
         this.estimatedWaitTime = estimatedWaitTime;
+        this.imageUrl = imageUrl;
+        
     }
 
     // 🔹 Constructor que recibe una entidad

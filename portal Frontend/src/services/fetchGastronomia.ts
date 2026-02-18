@@ -33,18 +33,18 @@ export interface Menu {
 export interface Restaurant {
   id: number;
   name: string;
-  address: string;
-  email: string;
+  address?: string;
+  email?: string;
   delivery: boolean;
-  deliveryPrice: number;
+  deliveryPrice?: number;
   estimatedWaitTime?: number;
-  latitude: number;
-  longitude: number;
+  latitude?: number;
+  longitude?: number;
   lastCloseDate?: string;
-  categories: string;
-  phones: string;
-  schedule: string;
-  imageUrl: string;
+  categories?: string;
+  phones?: string;
+  schedule?: string;
+  imageUrl?: string;
 }
 
 export async function fetchRestaurants(): Promise<Restaurant[]> {
