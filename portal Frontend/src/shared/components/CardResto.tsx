@@ -15,7 +15,12 @@ export const CardResto: React.FC<CardProps> = ({
 
   return (
     <div className="card my-2" style={{ width: '18rem', maxWidth: '100%' }}>
-      <img src={imagenUrl} className="card-img-top p-1" alt={titulo} />
+      <img
+        src={imagenUrl}
+        className="card-img-top p-1"
+        alt={titulo}
+        style={{ height: '180px', objectFit: 'cover' }}
+      />
       <div className="card-body">
         <h5 className="card-title text-center">{titulo}</h5>
 

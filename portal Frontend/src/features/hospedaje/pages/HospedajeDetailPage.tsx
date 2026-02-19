@@ -153,6 +153,7 @@ export default function HospedajeDetailPage() {
         totalPrice: precioTotal,
         isActive: false, // Se activa cuando se paga
         isCancelled: false,
+        roomNumber: habitacionSeleccionada.numero,
       });
 
       if (!reserva) {

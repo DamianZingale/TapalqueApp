@@ -34,15 +34,26 @@ export function ImageManager({ images, onChange, maxImages = 5, entityType = 'co
     if (!files || files.length === 0 || (currentImages.length + pendingFiles.length) >= maxImages) return;
 
     const file = files[0];
-    if (!file.type.match(/image\/(jpeg|jpg|png)/)) {
-      alert('Solo se permiten archivos JPEG, JPG o PNG');
+
+    const allowedExtensions = ['jpg', 'jpeg', 'png'];
+    const fileExtension = file.name.split('.').pop()?.toLowerCase();
+    if (!fileExtension || !allowedExtensions.includes(fileExtension)) {
+      alert('Solo se permiten archivos JPG, JPEG o PNG. No se admiten .webp, .gif, .bmp ni otros formatos.');
+      event.target.value = '';
       return;
     }
 
-      if (file.size > 5 * 1024 * 1024) { // 5MB
-        alert('El archivo no puede superar los 5MB');
-        return;
-      }
+    if (!file.type.match(/^image\/(jpeg|png)$/)) {
+      alert('Solo se permiten archivos JPG, JPEG o PNG. No se admiten .webp, .gif, .bmp ni otros formatos.');
+      event.target.value = '';
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) { // 5MB
+      alert('El archivo no puede superar los 5MB');
+      event.target.value = '';
+      return;
+    }
 
       setUploading(true);
       try {
@@ -111,8 +122,8 @@ export function ImageManager({ images, onChange, maxImages = 5, entityType = 'co
 
   const handleRemoveImage = async (indexToRemove: number) => {
     const imageToRemove = currentImages[indexToRemove];
-    
-    // Si tenemos ID y tipo de entidad, intentamos eliminar del backend
+
+    // Si tenemos ID y tipo de entidad, eliminamos del backend primero
     if (entityId && entityType) {
       try {
         const endpointMap: { [key: string]: string } = {
@@ -125,7 +136,7 @@ export function ImageManager({ images, onChange, maxImages = 5, entityType = 'co
           'espacio-publico': `/api/espacio-publico/${entityId}/imagenes`
         };
         const endpoint = endpointMap[entityType] || `/api/comercio/imagen/${entityId}`;
-        
+
         const response = await fetch(endpoint, {
           method: 'DELETE',
           headers: {
@@ -136,14 +147,18 @@ export function ImageManager({ images, onChange, maxImages = 5, entityType = 'co
         });
 
         if (!response.ok) {
-          console.warn('No se pudo eliminar la imagen del servidor:', response.status);
+          const errorData = await response.json().catch(() => ({}));
+          const errorMsg = errorData.message || errorData.error || `Error ${response.status}`;
+          alert(`No se pudo eliminar la imagen: ${errorMsg}`);
+          return; // No actualizar el estado local si el backend rechazó la eliminación
         }
       } catch (error) {
         console.error('Error eliminando imagen del backend:', error);
-        // Continuamos con la eliminación local incluso si falla el backend
+        alert('Error de conexión al intentar eliminar la imagen.');
+        return;
       }
     }
-    
+
     const updatedImages = currentImages.filter((_, index) => index !== indexToRemove);
     onChange(updatedImages);
   };

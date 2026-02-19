@@ -19,7 +19,7 @@ export default function EventosListPage() {
   }, []);
 
   const handleCardClick = (evento: Evento) => {
-    navigate(`api/evento/${evento.id}`, {
+    navigate(`/eventos/${evento.id}`, {
       state: { evento },
     });
   };

@@ -10,6 +10,7 @@ import java.util.List;
 public class HabitacionDTO {
 
     private Long id;
+    private Integer numero;
     private String titulo;
     private String descripcion;
     private Integer maxPersonas;
@@ -24,6 +25,9 @@ public class HabitacionDTO {
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+
+    public Integer getNumero() { return numero; }
+    public void setNumero(Integer numero) { this.numero = numero; }
 
     public String getTitulo() { return titulo; }
     public void setTitulo(String titulo) { this.titulo = titulo; }

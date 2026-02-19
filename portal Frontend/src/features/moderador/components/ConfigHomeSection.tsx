@@ -99,9 +99,11 @@ export function ConfigHomeSection() {
   const handleFileUpload = async (seccion: string, file: File) => {
     if (!file) return;
 
-    // Validar que sea imagen
-    if (!file.type.startsWith('image/')) {
-      setMensaje({ tipo: 'danger', texto: 'El archivo debe ser una imagen' });
+    // Validar extensión y tipo
+    const allowedExtensions = ['jpg', 'jpeg', 'png'];
+    const fileExtension = file.name.split('.').pop()?.toLowerCase();
+    if (!fileExtension || !allowedExtensions.includes(fileExtension) || !file.type.match(/^image\/(jpeg|png)$/)) {
+      setMensaje({ tipo: 'danger', texto: 'Solo se permiten imágenes JPG, JPEG o PNG. No se admiten .webp, .gif ni otros formatos.' });
       setTimeout(() => setMensaje(null), 3000);
       return;
     }
@@ -202,7 +204,7 @@ export function ConfigHomeSection() {
                 {/* Input file oculto */}
                 <input
                   type="file"
-                  accept="image/*"
+                  accept=".jpg,.jpeg,.png"
                   ref={(el) => {
                     fileInputRefs.current[config.seccion] = el;
                   }}

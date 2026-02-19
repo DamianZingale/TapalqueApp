@@ -57,6 +57,7 @@ export function EventosSection() {
             const { id: _id, imagenes: _imagenes, ...dataWithoutIdAndImages } = formData;
             const cleanedData = {
                 ...(isNew ? dataWithoutIdAndImages : { ...dataWithoutIdAndImages, id: formData.id }),
+                fechaFin: dataWithoutIdAndImages.fechaFin || null,
             };
 
             const res = isNew

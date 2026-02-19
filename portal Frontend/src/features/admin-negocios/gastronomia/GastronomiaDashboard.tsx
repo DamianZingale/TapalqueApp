@@ -116,10 +116,10 @@ export function GastronomiaDashboard() {
         <Tab eventKey="pedidos" title="Pedidos">
           {activeTab === 'pedidos' && (
             <GastronomiaPedidos
-              businessId={business.id}
+              externalBusinessId={business.id}
               businessName={business.name}
-              delivery={business.delivery ?? false} // si viene undefined, pasa false
-              deliveryPrice={business.deliveryPrice ?? 0} // si viene undefined, pasa 0
+              delivery={business.delivery ?? false}
+              deliveryPrice={business.deliveryPrice ?? 0}
             />
           )}
         </Tab>

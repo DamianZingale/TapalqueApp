@@ -77,6 +77,9 @@ export function GastronomiaMenu({ businessId }: GastronomiaMenuProps) {
   } | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
 
+  const [modalDetalle, setModalDetalle] = useState(false);
+  const [platoDetalle, setPlatoDetalle] = useState<MenuItem | null>(null);
+
   // Estados para datos del backend
   const [categorias, setCategorias] = useState<string[]>([]);
   const [restricciones, setRestricciones] = useState<string[]>([]);
@@ -378,8 +381,14 @@ export function GastronomiaMenu({ businessId }: GastronomiaMenuProps) {
     if (!file) return;
 
     // Validar archivo
-    if (!file.type.match(/image\/(jpeg|jpg|png)/)) {
-      setErrorForm('Solo se permiten archivos JPEG, JPG o PNG');
+    const allowedExtensions = ['jpg', 'jpeg', 'png'];
+    const fileExtension = file.name.split('.').pop()?.toLowerCase();
+    if (!fileExtension || !allowedExtensions.includes(fileExtension)) {
+      setErrorForm('Solo se permiten archivos JPG, JPEG o PNG. No se admiten .webp, .gif ni otros formatos.');
+      return;
+    }
+    if (!file.type.match(/^image\/(jpeg|png)$/)) {
+      setErrorForm('Solo se permiten archivos JPG, JPEG o PNG. No se admiten .webp, .gif ni otros formatos.');
       return;
     }
 
@@ -400,15 +409,6 @@ export function GastronomiaMenu({ businessId }: GastronomiaMenuProps) {
       setUploadingImage(false);
     }
   };
-
-  const menuPorCategoria = menuFiltrado.reduce(
-    (acc, item) => {
-      if (!acc[item.category]) acc[item.category] = [];
-      acc[item.category].push(item);
-      return acc;
-    },
-    {} as Record<string, MenuItem[]>
-  );
 
   if (loading) {
     return (
@@ -432,7 +432,7 @@ export function GastronomiaMenu({ businessId }: GastronomiaMenuProps) {
       )}
 
       <Row>
-        <Col lg={7}>
+        <Col>
           <Card className="mb-4">
             <Card.Header className="d-flex justify-content-between align-items-center">
               <h5 className="mb-0">Gestión del Menú</h5>
@@ -497,7 +497,14 @@ export function GastronomiaMenu({ businessId }: GastronomiaMenuProps) {
                   </thead>
                   <tbody>
                     {menuFiltrado.map((item, idx) => (
-                      <tr key={item.id}>
+                      <tr
+                        key={item.id}
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => {
+                          setPlatoDetalle(item);
+                          setModalDetalle(true);
+                        }}
+                      >
                         <td>{idx + 1}</td>
                         <td>
                           <strong>{item.dish_name}</strong>
@@ -520,7 +527,7 @@ export function GastronomiaMenu({ businessId }: GastronomiaMenuProps) {
                         <td>
                           <Badge bg="secondary">{item.category}</Badge>
                         </td>
-                        <td>
+                        <td onClick={(e) => e.stopPropagation()}>
                           <Form.Check
                             type="switch"
                             checked={item.available}
@@ -528,7 +535,7 @@ export function GastronomiaMenu({ businessId }: GastronomiaMenuProps) {
                             label={item.available ? 'Sí' : 'No'}
                           />
                         </td>
-                        <td>
+                        <td onClick={(e) => e.stopPropagation()}>
                           <Button
                             variant="outline-primary"
                             size="sm"
@@ -563,51 +570,84 @@ export function GastronomiaMenu({ businessId }: GastronomiaMenuProps) {
             </Card.Body>
           </Card>
         </Col>
-
-        <Col lg={5}>
-          <Card className="sticky-top" style={{ top: '1rem' }}>
-            <Card.Header>
-              <h5 className="mb-0">Vista Previa del Menú</h5>
-              <small className="text-muted">Así lo verán tus clientes</small>
-            </Card.Header>
-            <Card.Body style={{ maxHeight: '500px', overflowY: 'auto' }}>
-              {Object.keys(menuPorCategoria).length === 0 ? (
-                <p className="text-center text-muted">
-                  No hay platos disponibles
-                </p>
-              ) : (
-                Object.entries(menuPorCategoria).map(([categoria, items]) => (
-                  <div key={categoria} className="mb-4">
-                    <h6 className="border-bottom pb-2 text-primary">
-                      {categoria}
-                    </h6>
-                    {items
-                      .filter((i) => i.available)
-                      .map((item) => (
-                        <div
-                          key={item.id}
-                          className="d-flex justify-content-between mb-2"
-                        >
-                          <div>
-                            <strong>{item.dish_name}</strong>
-                            {item.description && (
-                              <p className="text-muted small mb-0">
-                                {item.description}
-                              </p>
-                            )}
-                          </div>
-                          <span className="text-success fw-bold">
-                            ${item.price.toLocaleString()}
-                          </span>
-                        </div>
-                      ))}
-                  </div>
-                ))
-              )}
-            </Card.Body>
-          </Card>
-        </Col>
       </Row>
+
+      {/* Modal Detalle Plato */}
+      <Modal show={modalDetalle} onHide={() => setModalDetalle(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>{platoDetalle?.dish_name}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {platoDetalle && (
+            <>
+              {platoDetalle.picture && (
+                <img
+                  src={platoDetalle.picture}
+                  alt={platoDetalle.dish_name}
+                  className="img-fluid rounded mb-3"
+                  style={{ width: '100%', maxHeight: '200px', objectFit: 'cover' }}
+                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                />
+              )}
+              <div className="d-flex justify-content-between align-items-center mb-2">
+                <Badge bg="secondary">{platoDetalle.category}</Badge>
+                <strong className="text-success fs-5">
+                  ${platoDetalle.price.toLocaleString()}
+                </strong>
+              </div>
+              <Badge bg={platoDetalle.available ? 'success' : 'danger'} className="mb-3">
+                {platoDetalle.available ? 'Disponible' : 'No disponible'}
+              </Badge>
+              {platoDetalle.description && (
+                <p className="text-muted mb-3">{platoDetalle.description}</p>
+              )}
+              {platoDetalle.ingredients.length > 0 && (
+                <div className="mb-2">
+                  <small className="fw-bold text-muted d-block mb-1">Ingredientes:</small>
+                  <div>
+                    {platoDetalle.ingredients.map((ing, idx) => (
+                      <Badge key={idx} bg="light" text="dark" className="me-1 mb-1 border">
+                        {ing}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {platoDetalle.restrictions.length > 0 && (
+                <div>
+                  <small className="fw-bold text-muted d-block mb-1">Restricciones:</small>
+                  <div>
+                    {platoDetalle.restrictions.map((r, idx) => (
+                      <Badge key={idx} bg="info" className="me-1 mb-1">
+                        {r}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="outline-primary"
+            size="sm"
+            onClick={() => {
+              if (platoDetalle) {
+                setPlatoSeleccionado(platoDetalle);
+                setNuevoPrecioInput(platoDetalle.price.toString());
+                setModalDetalle(false);
+                setModalEditar(true);
+              }
+            }}
+          >
+            Editar precio
+          </Button>
+          <Button variant="secondary" onClick={() => setModalDetalle(false)}>
+            Cerrar
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
       {/* Modal Agregar Plato */}
       <Modal
