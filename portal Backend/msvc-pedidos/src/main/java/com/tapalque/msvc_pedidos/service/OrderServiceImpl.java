@@ -1,6 +1,7 @@
 package com.tapalque.msvc_pedidos.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -9,6 +10,8 @@ import org.springframework.lang.NonNull;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import com.tapalque.msvc_pedidos.client.GastronomiaClient;
+import com.tapalque.msvc_pedidos.client.MercadoPagoClient;
 import com.tapalque.msvc_pedidos.dto.ItemDTO;
 import com.tapalque.msvc_pedidos.dto.OrderDTO;
 import com.tapalque.msvc_pedidos.dto.PagoEventoDTO;
@@ -26,6 +29,8 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final RabbitTemplate rabbitTemplate;
     private final AdminNotificationService adminNotificationService;
+    private final GastronomiaClient gastronomiaClient;
+    private final MercadoPagoClient mercadoPagoClient;
 
     @Value("${rabbitmq.exchange}")
     private String orderExchange;
@@ -34,40 +39,80 @@ public class OrderServiceImpl implements OrderService {
     private String routingKeyMercadoPago;
 
     public OrderServiceImpl(OrderRepository orderRepository, RabbitTemplate rabbitTemplate,
-                            AdminNotificationService adminNotificationService) {
+                            AdminNotificationService adminNotificationService,
+                            GastronomiaClient gastronomiaClient,
+                            MercadoPagoClient mercadoPagoClient) {
         this.orderRepository = orderRepository;
         this.rabbitTemplate = rabbitTemplate;
         this.adminNotificationService = adminNotificationService;
+        this.gastronomiaClient = gastronomiaClient;
+        this.mercadoPagoClient = mercadoPagoClient;
     }
-    
+
     @Override
     public Mono<OrderDTO> createOrder(@NonNull OrderDTO orderDto) {
-    Order order = mapToEntity(orderDto);
-    order.setDateCreated(LocalDateTime.now());
-    order.setDateUpdated(LocalDateTime.now());
+        if (orderDto.getItems() == null || orderDto.getItems().isEmpty()) {
+            return Mono.error(new IllegalArgumentException("El pedido debe contener al menos un ítem"));
+        }
 
-    return orderRepository.save(order)
-        .map(savedOrder -> {
-            rabbitTemplate.convertAndSend(
-                orderExchange,
-                routingKeyMercadoPago,
-                Map.of(
-                    "idPedido", savedOrder.getId(),
-                    "monto", savedOrder.getTotalPrice(),
-                    "fecha", savedOrder.getDateCreated().toString()
-                )
-            );
+        // Validar y recalcular precio de cada ítem desde msvc-gastronomia
+        List<ItemDTO> items = orderDto.getItems();
+        return Flux.fromIterable(items)
+            .flatMap(item -> {
+                if (item.getProductId() == null) {
+                    return Mono.error(new IllegalArgumentException("Ítem sin productId"));
+                }
+                Long dishId;
+                try {
+                    dishId = Long.parseLong(item.getProductId());
+                } catch (NumberFormatException e) {
+                    return Mono.error(new IllegalArgumentException("productId inválido: " + item.getProductId()));
+                }
+                return gastronomiaClient.getDishById(dishId)
+                    .map(dish -> {
+                        if (Boolean.FALSE.equals(dish.getAvailable())) {
+                            throw new IllegalArgumentException("Plato no disponible: " + item.getItemName());
+                        }
+                        // Sobreescribir precio con el valor real de la BD
+                        item.setItemPrice(dish.getPrice());
+                        return item;
+                    });
+            })
+            .collectList()
+            .flatMap(validatedItems -> {
+                // Recalcular total desde precios verificados
+                double realTotal = validatedItems.stream()
+                    .mapToDouble(i -> i.getItemPrice() * i.getItemQuantity())
+                    .sum();
 
-            // Solo notificar al admin si paga en efectivo (al recibir).
-            // Los pagos con MercadoPago se notifican cuando el pago es confirmado
-            // (ver confirmarPagoPedido).
-            if (Boolean.TRUE.equals(savedOrder.getPaidWithCash())) {
-                adminNotificationService.notificarNuevoPedido(savedOrder);
-            }
+                Order order = mapToEntity(orderDto);
+                order.setTotalPrice(realTotal);
+                order.setDateCreated(LocalDateTime.now());
+                order.setDateUpdated(LocalDateTime.now());
 
-            return mapToDTO(savedOrder);
-        });
-}
+                return orderRepository.save(order)
+                    .map(savedOrder -> {
+                        rabbitTemplate.convertAndSend(
+                            orderExchange,
+                            routingKeyMercadoPago,
+                            Map.of(
+                                "idPedido", savedOrder.getId(),
+                                "monto", savedOrder.getTotalPrice(),
+                                "fecha", savedOrder.getDateCreated().toString()
+                            )
+                        );
+
+                        // Solo notificar al admin si paga en efectivo (al recibir).
+                        // Los pagos con MercadoPago se notifican cuando el pago es confirmado
+                        // (ver confirmarPagoPedido).
+                        if (Boolean.TRUE.equals(savedOrder.getPaidWithCash())) {
+                            adminNotificationService.notificarNuevoPedido(savedOrder);
+                        }
+
+                        return mapToDTO(savedOrder);
+                    });
+            });
+    }
 
     @Override
     public Mono<Order> updateOrder(@NonNull OrderDTO orderDto) {
@@ -110,7 +155,27 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Mono<Void> deleteOrder(@NonNull String id) {
-        return orderRepository.deleteById(id);
+        return orderRepository.findById(id)
+                .flatMap(order -> {
+                    order.setStatus(Order.OrderStatus.FAILED);
+                    order.setDateUpdated(LocalDateTime.now());
+                    return orderRepository.save(order);
+                })
+                .doOnSuccess(order -> {
+                    if (order != null) {
+                        // Notificar al admin del restaurante y al usuario que hizo el pedido
+                        adminNotificationService.notificarPedidoActualizado(order);
+                        adminNotificationService.notificarUsuarioPedidoActualizado(order);
+                        // Si pagó con Mercado Pago, iniciar reembolso automático
+                        if (Boolean.TRUE.equals(order.getPaidWithMercadoPago()) && order.getMercadoPagoId() != null) {
+                            mercadoPagoClient.reembolsar(order.getMercadoPagoId())
+                                    .doOnSuccess(v -> System.out.println("Reembolso automático iniciado para pedido " + order.getId()))
+                                    .doOnError(e -> System.err.println("Error al reembolsar pedido " + order.getId() + ": " + e.getMessage()))
+                                    .subscribe();
+                        }
+                    }
+                })
+                .then();
     }
 
     @Override

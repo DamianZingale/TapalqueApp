@@ -3,6 +3,10 @@ import { Container } from 'react-bootstrap';
 export const TerminosYCondiciones = () => {
   return (
     <Container className="py-5">
+      <title>Términos y Condiciones | Tapalqué App</title>
+      <meta name="description" content="Términos y condiciones de uso de la plataforma Tapalqué App." />
+      <link rel="canonical" href="https://tapalqueapp.com.ar/terminos-y-condiciones" />
+      <meta name="robots" content="noindex, follow" />
       <h1 className="mb-4">Términos y Condiciones</h1>
       <p className="text-muted">
         Última actualización: {new Date().toLocaleDateString('es-AR')}

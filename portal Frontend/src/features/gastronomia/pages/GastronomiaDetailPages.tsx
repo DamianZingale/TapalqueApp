@@ -99,6 +99,8 @@ export default function GastronomiaDetailPage() {
 
   return (
     <div className="container my-4">
+      <title>{restaurante.name} | Gastronomía - Tapalqué App</title>
+      <meta name="description" content={`${restaurante.name} en Tapalqué.${restaurante.address ? ` ${restaurante.address}.` : ''} Consultá el menú y realizá pedidos online.`} />
       {/* Botón volver */}
       <button
         onClick={() => navigate(-1)}

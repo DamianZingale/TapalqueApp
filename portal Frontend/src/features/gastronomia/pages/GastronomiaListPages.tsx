@@ -39,6 +39,9 @@ export default function GastronomiaListPage() {
 
   return (
     <div className="container">
+      <title>Gastronomía en Tapalqué | Restaurantes y Locales</title>
+      <meta name="description" content="Encontrá los mejores restaurantes y locales gastronómicos de Tapalqué. Pedí delivery o comé en el local." />
+      <link rel="canonical" href="https://tapalqueapp.com.ar/gastronomia" />
       <h1 className="text-center my-4">Locales Gastronómicos</h1>
       <div className="row justify-content-center">
         {locales.length > 0 ? (

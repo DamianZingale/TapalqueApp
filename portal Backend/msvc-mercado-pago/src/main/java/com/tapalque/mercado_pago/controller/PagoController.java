@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -70,6 +71,16 @@ public class PagoController {
             return ResponseEntity.ok(initPoint);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Error al crear preferencia: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/reembolsar/{mercadoPagoId}")
+    public ResponseEntity<?> reembolsarPago(@PathVariable String mercadoPagoId) {
+        boolean exito = mercadoPagoService.reembolsarPago(mercadoPagoId);
+        if (exito) {
+            return ResponseEntity.ok("Reembolso procesado correctamente");
+        } else {
+            return ResponseEntity.status(500).body("No se pudo procesar el reembolso");
         }
     }
 

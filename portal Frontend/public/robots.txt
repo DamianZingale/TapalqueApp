@@ -1,0 +1,25 @@
+User-agent: *
+Allow: /
+Allow: /gastronomia
+Allow: /hospedaje
+Allow: /comercio
+Allow: /servicios
+Allow: /eventos
+Allow: /termas
+Allow: /espublicos
+Allow: /nosotros
+Allow: /terminos-y-condiciones
+
+Disallow: /pago
+Disallow: /perfil
+Disallow: /dashboard
+Disallow: /admin
+Disallow: /moderador
+Disallow: /mis-pedidos
+Disallow: /login
+Disallow: /register
+Disallow: /verify-email
+Disallow: /forgot-password
+Disallow: /reset-password
+
+Sitemap: https://tapalqueapp.com.ar/sitemap.xml

@@ -5,7 +5,11 @@ import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
 import { es } from 'date-fns/locale';
 import { fetchReservasByHotel, cancelarReserva, crearReservaExterna, Reserva } from '../../../../services/fetchReservas';
+import { fetchHospedajes } from '../../../../services/fetchHospedajes';
 import { PhoneInput } from '../../../../shared/components/PhoneInput';
+import { authService } from '../../../../services/authService';
+import { useWebSocket } from '../../../admin-negocios/hooks/useWebSocket';
+import { useNotifications } from '../../../../shared/context/NotificationContext';
 
 interface FormReservaExterna {
     customerName: string;
@@ -47,12 +51,42 @@ export const GestionReservasTab = () => {
         key: 'selection'
     });
 
-    // TODO: Obtener hotelId del usuario logueado
-    const hotelId = '1';
+    const [hotelId, setHotelId] = useState('');
+    const { registerAdminTopic } = useNotifications();
+    const { lastMessage } = useWebSocket(hotelId, 'HOSPEDAJE');
 
+    // Carga el hospedaje que pertenece al usuario logueado
     useEffect(() => {
-        cargarReservas();
+        const loadHotelId = async () => {
+            const user = authService.getUser();
+            if (!user?.id) return;
+            const hospedajes = await fetchHospedajes();
+            const mio = hospedajes.find(h => String(h.userId) === String(user.id));
+            if (mio) setHotelId(String(mio.id));
+        };
+        loadHotelId();
     }, []);
+
+    // Cuando se tiene hotelId: cargar reservas y registrar tópico persistente
+    useEffect(() => {
+        if (!hotelId) return;
+        cargarReservas();
+        registerAdminTopic(hotelId, 'HOSPEDAJE');
+    }, [hotelId]);
+
+    // Actualizaciones en tiempo real vía WebSocket (UI local)
+    useEffect(() => {
+        if (!lastMessage) return;
+        if (lastMessage.type === 'reserva:nueva') {
+            const nueva = lastMessage.payload as Reserva;
+            setReservas(prev => [nueva, ...prev]);
+        } else if (lastMessage.type === 'reserva:actualizada') {
+            const actualizada = lastMessage.payload as Reserva;
+            setReservas(prev =>
+                prev.map(r => r.id === actualizada.id ? actualizada : r)
+            );
+        }
+    }, [lastMessage]);
 
     const cargarReservas = async () => {
         setLoading(true);

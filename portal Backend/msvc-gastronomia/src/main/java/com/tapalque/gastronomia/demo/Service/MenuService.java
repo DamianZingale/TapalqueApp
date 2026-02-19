@@ -362,4 +362,11 @@ public class MenuService implements MenuServiceInterface {
         Dish updatedDish = dishRepository.save(dish);
         return DishDTO.fromEntity(updatedDish);
     }
+
+    @Override
+    public DishDTO getDishById(Long dishId) {
+        Dish dish = dishRepository.findById(dishId)
+            .orElseThrow(() -> new IllegalArgumentException("Plato no encontrado con ID: " + dishId));
+        return DishDTO.fromEntity(dish);
+    }
 }

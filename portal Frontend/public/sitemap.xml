@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <!-- Inicio -->
+  <url>
+    <loc>https://tapalqueapp.com.ar/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- Gastronomía -->
+  <url>
+    <loc>https://tapalqueapp.com.ar/gastronomia</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Hospedaje -->
+  <url>
+    <loc>https://tapalqueapp.com.ar/hospedaje</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Comercios -->
+  <url>
+    <loc>https://tapalqueapp.com.ar/comercio</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Servicios -->
+  <url>
+    <loc>https://tapalqueapp.com.ar/servicios</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Eventos -->
+  <url>
+    <loc>https://tapalqueapp.com.ar/eventos</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Termas -->
+  <url>
+    <loc>https://tapalqueapp.com.ar/termas</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Espacios Públicos -->
+  <url>
+    <loc>https://tapalqueapp.com.ar/espublicos</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Institucionales -->
+  <url>
+    <loc>https://tapalqueapp.com.ar/nosotros</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://tapalqueapp.com.ar/terminos-y-condiciones</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+</urlset>

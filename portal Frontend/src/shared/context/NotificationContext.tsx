@@ -30,6 +30,10 @@ interface NotificationContextType {
   ) => void;
   markAllAsRead: () => void;
   clearNotifications: () => void;
+  /** Registra un tópico admin para mantener la conexión WebSocket de forma persistente
+   * aunque el componente se desmonte. Útil para que el admin reciba notificaciones
+   * en la campana aunque navegue a otra sección. */
+  registerAdminTopic: (businessId: string, businessType: 'HOSPEDAJE' | 'GASTRONOMIA') => void;
 }
 
 const NotificationContext = createContext<NotificationContextType | null>(null);
@@ -43,6 +47,7 @@ const ESTADO_LABELS: Record<string, string> = {
   LISTO: 'Listo',
   EN_DELIVERY: 'En camino',
   ENTREGADO: 'Entregado',
+  FAILED: 'Cancelado',
 };
 
 function loadNotifications(): AppNotification[] {
@@ -62,20 +67,24 @@ function saveNotifications(notifications: AppNotification[]) {
   );
 }
 
-function getWsUrl(): string {
+function getWsOrigin(): string {
   const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
-  let origin = '';
   if (API_BASE.startsWith('http')) {
-    const url = new URL(API_BASE);
-    origin = url.origin;
+    return new URL(API_BASE).origin;
   }
-  return `${origin}/ws/pedidos`;
+  return '';
+}
+
+function getWsUrl(): string {
+  return `${getWsOrigin()}/ws/pedidos`;
 }
 
 export function NotificationProvider({ children }: { children: ReactNode }) {
   const [notifications, setNotifications] =
     useState<AppNotification[]>(loadNotifications);
   const clientRef = useRef<Client | null>(null);
+  // Mapa de conexiones persistentes para admin (businessId → Client)
+  const adminClientsRef = useRef<Map<string, Client>>(new Map());
 
   useEffect(() => {
     saveNotifications(notifications);
@@ -177,6 +186,78 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     };
   }, [addNotification]);
 
+  const registerAdminTopic = useCallback(
+    (businessId: string, businessType: 'HOSPEDAJE' | 'GASTRONOMIA') => {
+      if (!businessId || adminClientsRef.current.has(businessId)) return;
+
+      const wsService = businessType === 'GASTRONOMIA' ? 'pedidos' : 'reservas';
+      const wsUrl = `${getWsOrigin()}/ws/${wsService}`;
+      const topic =
+        businessType === 'GASTRONOMIA'
+          ? `/topic/pedidos/${businessId}`
+          : `/topic/reservas/${businessId}`;
+
+      const client = new Client({
+        webSocketFactory: () => new SockJS(wsUrl),
+        reconnectDelay: 5000,
+        heartbeatIncoming: 10000,
+        heartbeatOutgoing: 10000,
+
+        onConnect: () => {
+          client.subscribe(topic, (message) => {
+            try {
+              const data = JSON.parse(message.body);
+
+              if (data.type === 'reserva:nueva') {
+                const p = data.payload;
+                addNotification({
+                  type: 'reserva',
+                  title: 'Nueva reserva',
+                  message: `${p?.customer?.customerName ?? 'Cliente'} — Check-in: ${new Date(p?.stayPeriod?.checkInDate).toLocaleDateString('es-AR')}`,
+                  businessId,
+                });
+              } else if (data.type === 'reserva:actualizada' && data.payload?.isCancelled) {
+                const p = data.payload;
+                addNotification({
+                  type: 'reserva',
+                  title: 'Reserva cancelada',
+                  message: `Cancelada: ${p?.customer?.customerName ?? 'Cliente'}`,
+                  businessId,
+                });
+              } else if (data.type === 'pedido:nuevo') {
+                addNotification({
+                  type: 'pedido',
+                  title: 'Nuevo pedido',
+                  message: `Pedido recibido en tu negocio`,
+                  businessId,
+                });
+              } else if (data.type === 'pedido:actualizado' && data.payload?.status === 'FAILED') {
+                const p = data.payload;
+                const cliente = p?.userName ?? 'Cliente';
+                addNotification({
+                  type: 'pedido',
+                  title: 'Pedido cancelado',
+                  message: `${cliente} canceló su pedido`,
+                  businessId,
+                });
+              }
+            } catch {
+              // ignorar mensajes malformados
+            }
+          });
+        },
+
+        onWebSocketClose: () => {
+          adminClientsRef.current.delete(businessId);
+        },
+      });
+
+      client.activate();
+      adminClientsRef.current.set(businessId, client);
+    },
+    [addNotification]
+  );
+
   const markAllAsRead = useCallback(() => {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
   }, []);
@@ -195,6 +276,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         addNotification,
         markAllAsRead,
         clearNotifications,
+        registerAdminTopic,
       }}
     >
       {children}

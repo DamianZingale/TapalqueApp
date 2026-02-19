@@ -113,6 +113,19 @@ public class MenuController {
 
     // ===================== CRUD DE DISHES =====================
 
+    @GetMapping("/dish/{dishId}")
+    public ResponseEntity<DishDTO> getDishById(@PathVariable Long dishId) {
+        try {
+            DishDTO dish = menuService.getDishById(dishId);
+            return ResponseEntity.ok(dish);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            System.err.println("Error fetching dish " + dishId + ": " + e.getMessage());
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
     @PostMapping("/restaurant/{restaurantId}/dish")
     public ResponseEntity<DishDTO> createDish(
             @PathVariable Long restaurantId,

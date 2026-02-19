@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card, Row, Col, Badge, Button, Alert, Modal } from "react-bootstrap";
 import authService from "../../../services/authService";
-import { fetchPedidosByUser, type Pedido, EstadoPedido } from "../../../services/fetchPedidos";
+import { fetchPedidosByUser, cancelarPedido, type Pedido, EstadoPedido } from "../../../services/fetchPedidos";
 import { useNotifications } from "../../../shared/context/NotificationContext";
 
 const estadoLabel: Record<string, { bg: string; text: string }> = {
@@ -10,6 +10,7 @@ const estadoLabel: Record<string, { bg: string; text: string }> = {
     [EstadoPedido.LISTO]: { bg: "primary", text: "Listo" },
     [EstadoPedido.EN_DELIVERY]: { bg: "dark", text: "En camino" },
     [EstadoPedido.ENTREGADO]: { bg: "success", text: "Entregado" },
+    [EstadoPedido.FAILED]: { bg: "danger", text: "Cancelado" },
 };
 
 export const MisPedidosTab = () => {
@@ -18,6 +19,7 @@ export const MisPedidosTab = () => {
     const [filtroEstado, setFiltroEstado] = useState<EstadoPedido | "TODOS">("TODOS");
     const [pedidoSeleccionado, setPedidoSeleccionado] = useState<Pedido | null>(null);
     const [modalDetalle, setModalDetalle] = useState(false);
+    const [cancelando, setCancelando] = useState<string | null>(null);
     const { notifications } = useNotifications();
 
     const lastEstadoNotif = notifications.find((n) => n.type === 'pedido:estado');
@@ -58,6 +60,19 @@ export const MisPedidosTab = () => {
     const verDetalle = (pedido: Pedido) => {
         setPedidoSeleccionado(pedido);
         setModalDetalle(true);
+    };
+
+    const handleCancelar = async (pedido: Pedido) => {
+        const restaurante = pedido.restaurantName ?? pedido.restaurant?.restaurantName ?? 'el restaurante';
+        if (!window.confirm(`¿Cancelar el pedido en ${restaurante}? Esta acción no se puede deshacer.`)) return;
+        setCancelando(pedido.id);
+        const ok = await cancelarPedido(pedido.id);
+        if (ok) {
+            setPedidos(prev => prev.map(p => p.id === pedido.id ? { ...p, status: EstadoPedido.FAILED } : p));
+        } else {
+            alert('No se pudo cancelar el pedido. Intentá nuevamente.');
+        }
+        setCancelando(null);
     };
 
     if (loading) {
@@ -169,7 +184,7 @@ export const MisPedidosTab = () => {
                                                     ${(pedido.totalPrice ?? pedido.totalAmount ?? 0).toLocaleString()}
                                                 </strong>
                                             </Col>
-                                            <Col md={2} className="text-end">
+                                            <Col md={2} className="text-end d-flex flex-column gap-1">
                                                 <Button
                                                     size="sm"
                                                     variant="outline-primary"
@@ -177,6 +192,16 @@ export const MisPedidosTab = () => {
                                                 >
                                                     Ver detalle
                                                 </Button>
+                                                {pedido.status === EstadoPedido.RECIBIDO && (
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline-danger"
+                                                        disabled={cancelando === pedido.id}
+                                                        onClick={() => handleCancelar(pedido)}
+                                                    >
+                                                        {cancelando === pedido.id ? 'Cancelando…' : 'Cancelar'}
+                                                    </Button>
+                                                )}
                                             </Col>
                                         </Row>
                                     </Card.Body>
@@ -271,6 +296,18 @@ export const MisPedidosTab = () => {
                     )}
                 </Modal.Body>
                 <Modal.Footer>
+                    {pedidoSeleccionado?.status === EstadoPedido.RECIBIDO && (
+                        <Button
+                            variant="danger"
+                            disabled={cancelando === pedidoSeleccionado?.id}
+                            onClick={() => {
+                                setModalDetalle(false);
+                                if (pedidoSeleccionado) handleCancelar(pedidoSeleccionado);
+                            }}
+                        >
+                            {cancelando === pedidoSeleccionado?.id ? 'Cancelando…' : 'Cancelar Pedido'}
+                        </Button>
+                    )}
                     <Button variant="secondary" onClick={() => setModalDetalle(false)}>
                         Cerrar
                     </Button>

@@ -34,6 +34,9 @@ export default function EventosListPage() {
 
   return (
     <div className="container">
+      <title>Eventos en Tapalqué | Agenda de Actividades</title>
+      <meta name="description" content="Agenda de eventos y actividades en Tapalqué. Enterate de los próximos espectáculos, ferias y celebraciones de la ciudad." />
+      <link rel="canonical" href="https://tapalqueapp.com.ar/eventos" />
       <h1 className="text-center my-4">Eventos</h1>
       {eventos.length === 0 ? (
         <p className="text-center">

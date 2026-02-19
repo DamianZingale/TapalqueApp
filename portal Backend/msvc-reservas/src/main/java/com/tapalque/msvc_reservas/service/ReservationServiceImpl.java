@@ -1,11 +1,14 @@
 package com.tapalque.msvc_reservas.service;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import com.tapalque.msvc_reservas.client.HospedajeClient;
+import com.tapalque.msvc_reservas.client.MercadoPagoClient;
 import com.tapalque.msvc_reservas.dto.PagoEventoDTO;
 import com.tapalque.msvc_reservas.dto.ReservationDTO;
 import com.tapalque.msvc_reservas.entity.Reservation;
@@ -20,26 +23,71 @@ public class ReservationServiceImpl implements ReservationService {
 
     private final ReservationRepositoryInterface reservationRepository;
     private final AdminNotificationService adminNotificationService;
+    private final HospedajeClient hospedajeClient;
+    private final MercadoPagoClient mercadoPagoClient;
 
     public ReservationServiceImpl(ReservationRepositoryInterface reservationRepository,
-                                  AdminNotificationService adminNotificationService) {
+                                  AdminNotificationService adminNotificationService,
+                                  HospedajeClient hospedajeClient,
+                                  MercadoPagoClient mercadoPagoClient) {
         this.reservationRepository = reservationRepository;
         this.adminNotificationService = adminNotificationService;
+        this.hospedajeClient = hospedajeClient;
+        this.mercadoPagoClient = mercadoPagoClient;
     }
 
     @Override
     public Mono<ReservationDTO> createReservation(ReservationDTO reservationDto) {
-        // Mapeo DTO -> Entity usando método estático
-        Reservation reservation = ReservationMapper.toEntity(reservationDto);
-        reservation.setDateCreated(LocalDateTime.now());
-        reservation.setDateUpdated(LocalDateTime.now());
+        if (reservationDto.getHotel() == null || reservationDto.getHotel().getHotelId() == null) {
+            return Mono.error(new IllegalArgumentException("La reserva debe incluir el hotel"));
+        }
+        if (reservationDto.getStayPeriod() == null
+                || reservationDto.getStayPeriod().getCheckInDate() == null
+                || reservationDto.getStayPeriod().getCheckOutDate() == null) {
+            return Mono.error(new IllegalArgumentException("La reserva debe incluir fechas de check-in y check-out"));
+        }
+        if (reservationDto.getRoomNumber() == null) {
+            return Mono.error(new IllegalArgumentException("La reserva debe incluir el número de habitación"));
+        }
 
-        // Guardamos en Mongo y mapeamos de nuevo a DTO para devolver
-        return reservationRepository.save(reservation)
-                .map(ReservationMapper::toDto)
-                .doOnSuccess(dto -> {
-                    if (dto != null) adminNotificationService.notificarNuevaReserva(dto);
-                });
+        String hotelId = reservationDto.getHotel().getHotelId();
+        Integer roomNumber = reservationDto.getRoomNumber();
+        LocalDateTime checkIn = reservationDto.getStayPeriod().getCheckInDate();
+        LocalDateTime checkOut = reservationDto.getStayPeriod().getCheckOutDate();
+        long noches = ChronoUnit.DAYS.between(checkIn.toLocalDate(), checkOut.toLocalDate());
+
+        if (noches <= 0) {
+            return Mono.error(new IllegalArgumentException("Las fechas de estadía son inválidas"));
+        }
+
+        return hospedajeClient.fetchHabitaciones(hotelId)
+            .flatMap(habitaciones -> {
+                return habitaciones.stream()
+                    .filter(h -> roomNumber.equals(h.getNumero()))
+                    .findFirst()
+                    .map(habitacion -> {
+                        double precioReal = habitacion.getPrecio().doubleValue() * noches;
+
+                        Reservation reservation = ReservationMapper.toEntity(reservationDto);
+                        reservation.setTotalPrice(precioReal);
+                        // Sobreescribir montos de pago con valores calculados en el servidor.
+                        // setTotalAmount + setAmountPaid(0) recalcula remainingAmount, isPaid y hasPendingAmount.
+                        if (reservation.getPayment() != null) {
+                            reservation.getPayment().setTotalAmount(precioReal);
+                            reservation.getPayment().setAmountPaid(0.0);
+                        }
+                        reservation.setDateCreated(LocalDateTime.now());
+                        reservation.setDateUpdated(LocalDateTime.now());
+
+                        return reservationRepository.save(reservation)
+                                .map(ReservationMapper::toDto)
+                                .doOnSuccess(dto -> {
+                                    if (dto != null) adminNotificationService.notificarNuevaReserva(dto);
+                                });
+                    })
+                    .orElse(Mono.error(new IllegalArgumentException(
+                        "Habitación número " + roomNumber + " no encontrada en el hospedaje")));
+            });
     }
 
     @Override
@@ -70,7 +118,30 @@ public Mono<ReservationDTO> updateReservation(ReservationDTO reservationDto) {
 
     @Override
     public Mono<Void> deleteReservation(String id) {
-        return Objects.requireNonNull(reservationRepository.deleteById(id), "id cant be null");
+        Objects.requireNonNull(id, "id cant be null");
+        return reservationRepository.findById(id)
+                .flatMap(reservation -> {
+                    reservation.setIsCancelled(true);
+                    reservation.setIsActive(false);
+                    reservation.setDateUpdated(LocalDateTime.now());
+                    return reservationRepository.save(reservation);
+                })
+                .doOnSuccess(saved -> {
+                    if (saved != null) {
+                        adminNotificationService.notificarReservaActualizada(ReservationMapper.toDto(saved));
+                        // Si ya pagó con Mercado Pago, iniciar reembolso automático
+                        String mpId = saved.getMercadoPagoId();
+                        double pagado = saved.getPayment() != null && saved.getPayment().getAmountPaid() != null
+                                ? saved.getPayment().getAmountPaid() : 0.0;
+                        if (mpId != null && pagado > 0) {
+                            mercadoPagoClient.reembolsar(mpId)
+                                    .doOnSuccess(v -> System.out.println("Reembolso automático iniciado para reserva " + saved.getId()))
+                                    .doOnError(e -> System.err.println("Error al reembolsar reserva " + saved.getId() + ": " + e.getMessage()))
+                                    .subscribe();
+                        }
+                    }
+                })
+                .then();
     }
 
     @Override

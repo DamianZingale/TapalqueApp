@@ -129,7 +129,7 @@ export function HosteleriaReservas({
   const [hospedaje, setHospedaje] = useState<Hospedaje | null>(null);
 
   const { isConnected, lastMessage } = useWebSocket(businessId, 'HOSPEDAJE');
-  const { addNotification } = useNotifications();
+  const { registerAdminTopic } = useNotifications();
 
   const cargarHospedaje = useCallback(async () => {
     try {
@@ -143,6 +143,9 @@ export function HosteleriaReservas({
   useEffect(() => {
     cargarReservas();
     cargarHospedaje();
+    // Registra el tópico en el contexto global para mantener la conexión
+    // activa aunque el admin navegue a otra sección
+    registerAdminTopic(businessId, 'HOSPEDAJE');
   }, [businessId, cargarHospedaje]);
 
   useEffect(() => {
@@ -152,13 +155,7 @@ export function HosteleriaReservas({
         setReservas((prev) => [nuevaReserva, ...prev]);
         playNotificationSound();
         setMensaje({ tipo: 'success', texto: '¡Nueva reserva recibida!' });
-        addNotification({
-          type: 'reserva',
-          title: 'Nueva reserva',
-          message: `${nuevaReserva.customer.customerName} - ${new Date(nuevaReserva.stayPeriod.checkInDate).toLocaleDateString('es-AR')}`,
-          businessId,
-          businessName,
-        });
+        // La campana es manejada por registerAdminTopic en el contexto
       } else if (lastMessage.type === 'reserva:actualizada') {
         const reservaActualizada = lastMessage.payload as Reserva;
         setReservas((prev) =>
@@ -168,7 +165,7 @@ export function HosteleriaReservas({
         );
       }
     }
-  }, [lastMessage, addNotification, businessId, businessName]);
+  }, [lastMessage]);
 
   useEffect(() => {
     if (mensaje) {

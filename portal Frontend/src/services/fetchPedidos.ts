@@ -6,6 +6,7 @@ export enum EstadoPedido {
   LISTO = 'LISTO',
   EN_DELIVERY = 'EN_DELIVERY',
   ENTREGADO = 'ENTREGADO',
+  FAILED = 'FAILED',
 }
 
 // Helper para obtener headers con autenticación
@@ -182,5 +183,18 @@ export async function crearPedido(
   } catch (error) {
     console.error('Error en crearPedido:', error);
     return null;
+  }
+}
+
+export async function cancelarPedido(pedidoId: string): Promise<boolean> {
+  try {
+    const response = await fetch(`/api/pedidos/orders/${pedidoId}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+    });
+    return response.ok || response.status === 204;
+  } catch (error) {
+    console.error('Error en cancelarPedido:', error);
+    return false;
   }
 }

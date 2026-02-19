@@ -43,6 +43,7 @@ export function PagoExitoPage() {
 
   return (
     <Container className="py-5">
+      <meta name="robots" content="noindex, nofollow" />
       <Card className="text-center mx-auto" style={{ maxWidth: '550px' }}>
         <Card.Body className="py-5">
           <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>

@@ -61,6 +61,9 @@ export default function ComercioListPage() {
 
     return (
         <div className="container">
+            <title>Comercios en Tapalqué | Directorio Local</title>
+            <meta name="description" content="Directorio completo de comercios de Tapalqué. Encontrá tiendas, negocios y servicios locales organizados por categoría." />
+            <link rel="canonical" href="https://tapalqueapp.com.ar/comercio" />
             <h1 className="text-center my-4">Comercios</h1>
 
             {tags.length > 0 && (

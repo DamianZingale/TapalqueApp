@@ -48,6 +48,9 @@ export default function EspaciosListPage() {
 
     return (
         <div className="container my-4">
+            <title>Espacios Públicos en Tapalqué | Plazas y Lugares</title>
+            <meta name="description" content="Descubrí los espacios públicos, plazas y lugares de interés de Tapalqué. Información actualizada para residentes y turistas." />
+            <link rel="canonical" href="https://tapalqueapp.com.ar/espublicos" />
             <h1 className="text-center mb-4">Espacios Públicos</h1>
             <div className="row justify-content-center">
                 {espacios.length > 0 ? (

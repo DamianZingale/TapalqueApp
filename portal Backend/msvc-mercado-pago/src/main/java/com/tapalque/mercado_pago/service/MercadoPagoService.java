@@ -19,6 +19,7 @@ import org.springframework.web.client.RestTemplate;
 import com.mercadopago.MercadoPagoConfig;
 import com.mercadopago.client.payment.PaymentClient;
 import com.mercadopago.client.common.IdentificationRequest;
+import com.mercadopago.exceptions.MPApiException;
 import com.mercadopago.client.preference.PreferenceBackUrlsRequest;
 import com.mercadopago.client.preference.PreferenceClient;
 import com.mercadopago.client.preference.PreferenceItemRequest;
@@ -307,23 +308,38 @@ public class MercadoPagoService {
         }
     }
 
-    // private void reembolsarPago(String paymentId, String accessToken) {
-    //     try {
-    //         MercadoPagoConfig.setAccessToken(accessToken);
-    //         // Obtener el pago con PaymentClient
-    //         PaymentClient client = new PaymentClient();
-    //         Payment payment = client.get(Long.parseLong(paymentId));
-    //         // Ejecutar el reembolso
-    //         PaymentRefund refundPayment = client.refund(payment.getId());
+    /**
+     * Realiza el reembolso de un pago en Mercado Pago usando el ID de pago de MP.
+     * Marca la transacción en la base de datos como "Reembolsado".
+     * Usa el appAccessToken como fallback. En producción con OAuth,
+     * el admin puede tramitar el reembolso también desde el panel de MP.
+     *
+     * @param mercadoPagoId ID del pago en Mercado Pago (String numérico)
+     * @return true si el reembolso fue exitoso, false en caso de error
+     */
+    public boolean reembolsarPago(String mercadoPagoId) {
+        try {
+            MercadoPagoConfig.setAccessToken(appAccessToken);
+            PaymentClient client = new PaymentClient();
+            Payment payment = client.get(Long.parseLong(mercadoPagoId));
+            client.refund(payment.getId());
 
-    //         System.out.println("Reembolso exitoso: " + refundPayment.getId());
+            // Marcar la transacción como reembolsada en la BD
+            transaccionRepository.findByMercadoPagoId(mercadoPagoId).ifPresent(t -> {
+                t.setEstado("Reembolsado");
+                transaccionRepository.save(t);
+            });
 
-    //     } catch (MPApiException e) {
-    //         System.out.println("Error MercadoPago: " + e.getApiResponse().getContent());
-    //     } catch (Exception e) {
-    //         System.out.println("Error inesperado: " + e.getMessage());
-    //     }
-    // }
+            System.out.println("Reembolso exitoso para pago MP: " + mercadoPagoId);
+            return true;
+        } catch (MPApiException e) {
+            System.out.println("Error MercadoPago al reembolsar " + mercadoPagoId + ": " + e.getApiResponse().getContent());
+            return false;
+        } catch (Exception e) {
+            System.out.println("Error inesperado al reembolsar " + mercadoPagoId + ": " + e.getMessage());
+            return false;
+        }
+    }
 
     public OauthTokenRequestDTO refrescarToken(String refreshToken) {
         try {

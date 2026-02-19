@@ -67,6 +67,9 @@ export default function ServiciosListPage() {
 
     return (
         <div className="container">
+            <title>Servicios en Tapalqué | Profesionales y Empresas</title>
+            <meta name="description" content="Encontrá servicios profesionales y empresas de Tapalqué. Médicos, talleres, peluquerías y más en un solo lugar." />
+            <link rel="canonical" href="https://tapalqueapp.com.ar/servicios" />
             <h1 className="text-center my-4">Servicios</h1>
 
             {tags.length > 0 && (

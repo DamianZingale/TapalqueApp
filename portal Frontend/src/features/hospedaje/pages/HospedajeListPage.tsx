@@ -77,6 +77,9 @@ export default function HospedajeListPage() {
 
     return (
         <div className="container">
+        <title>Hospedajes en Tapalqué | Hoteles, Cabañas y más</title>
+        <meta name="description" content="Reservá tu estadía en Tapalqué. Hoteles, departamentos, cabañas y casas disponibles. Buscá por disponibilidad de fechas." />
+        <link rel="canonical" href="https://tapalqueapp.com.ar/hospedaje" />
         <h1 className="text-center my-4">Hospedajes</h1>
 
         {/* Filtro de disponibilidad por fechas */}

@@ -3,6 +3,9 @@ import { Container, Row, Col, Card } from 'react-bootstrap';
 export const Nosotros = () => {
   return (
     <Container className="py-5">
+      <title>Sobre Nosotros | Tapalqué App</title>
+      <meta name="description" content="Conocé el equipo detrás de Tapalqué App. Plataforma digital que conecta residentes, comerciantes y visitantes con la ciudad de Tapalqué." />
+      <link rel="canonical" href="https://tapalqueapp.com.ar/nosotros" />
       <h1 className="mb-4">Sobre Nosotros</h1>
 
       <section className="mb-5">

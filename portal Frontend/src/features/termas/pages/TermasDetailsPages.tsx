@@ -44,6 +44,9 @@ export default function TermasDetailPage({
 
   return (
     <div className="container my-4">
+      <title>{data.titulo} | Termas de Tapalqué App</title>
+      <meta name="description" content={`${data.description || 'Las Termas de Tapalqué, principal atractivo turístico de la ciudad.'}${data.horario ? ` Horarios: ${data.horario}.` : ''}`} />
+      <link rel="canonical" href="https://tapalqueapp.com.ar/termas" />
       <h1 className="text-center mb-3">{data.titulo}</h1>
 
       {/* Carrusel de imágenes */}

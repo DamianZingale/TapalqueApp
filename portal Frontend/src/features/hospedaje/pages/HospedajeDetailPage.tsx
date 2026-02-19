@@ -209,6 +209,8 @@ export default function HospedajeDetailPage() {
 
   return (
     <div className="container">
+      <title>{data.titulo} | Hospedaje - Tapalqué App</title>
+      <meta name="description" content={`${data.titulo} en Tapalqué.${data.ubicacion ? ` ${data.ubicacion}.` : ''} Reservá habitaciones online con confirmación inmediata.`} />
       <Title text={data.titulo} />
       <p className="text-center text-muted mb-3">
         <span className="badge bg-info">{tipoLabel}</span>

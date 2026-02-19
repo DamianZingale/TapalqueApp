@@ -25,4 +25,6 @@ public interface MenuServiceInterface {
     void deleteDish(Long dishId);
 
     DishDTO updateDishAvailability(Long dishId, Boolean available);
+
+    DishDTO getDishById(Long dishId);
 }
