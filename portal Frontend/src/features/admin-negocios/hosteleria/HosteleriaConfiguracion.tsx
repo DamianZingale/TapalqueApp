@@ -150,7 +150,7 @@ export function HosteleriaConfiguracion({ businessId, businessName }: Props) {
             />
             <Button
               variant="primary"
-              onClick={handleGuardarFecha}
+              onClick={() => handleGuardarFecha()}
               disabled={loadingFecha}
             >
               {loadingFecha ? <Spinner animation="border" size="sm" /> : 'Guardar'}
