@@ -229,6 +229,20 @@ export default function HospedajeDetailPage() {
         maxDate={data.fechaLimiteReservas ? new Date(data.fechaLimiteReservas) : undefined}
       />
 
+      {data.fechaLimiteReservas && (
+        <p className="text-center text-muted small mt-2">
+          Reservas disponibles hasta el{' '}
+          <strong>
+            {new Date(data.fechaLimiteReservas + 'T00:00:00').toLocaleDateString('es-AR', {
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric',
+            })}
+          </strong>
+          . Para fechas posteriores, comunicarse con el establecimiento.
+        </p>
+      )}
+
       {cargandoDisp && (
         <p className="text-center text-muted my-3">
           <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true" />
