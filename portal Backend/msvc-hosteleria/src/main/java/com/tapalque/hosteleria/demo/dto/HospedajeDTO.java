@@ -18,6 +18,7 @@ public class HospedajeDTO {
     private String tipoHospedaje;
     private List<String> imagenes;
     private java.time.LocalDateTime lastCloseDate;
+    private java.time.LocalDate fechaLimiteReservas;
 
     // Constructor vacío (necesario para algunas herramientas de serialización como Jackson)
     public HospedajeDTO() {
@@ -41,6 +42,7 @@ public class HospedajeDTO {
                         .collect(Collectors.toList())
                 : List.of();
         this.lastCloseDate = hospedaje.getLastCloseDate();
+        this.fechaLimiteReservas = hospedaje.getFechaLimiteReservas();
     }
 
     // Getters y setters
@@ -123,5 +125,13 @@ public class HospedajeDTO {
 
     public void setLastCloseDate(java.time.LocalDateTime lastCloseDate) {
         this.lastCloseDate = lastCloseDate;
+    }
+
+    public java.time.LocalDate getFechaLimiteReservas() {
+        return fechaLimiteReservas;
+    }
+
+    public void setFechaLimiteReservas(java.time.LocalDate fechaLimiteReservas) {
+        this.fechaLimiteReservas = fechaLimiteReservas;
     }
 }

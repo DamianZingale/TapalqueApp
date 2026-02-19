@@ -133,6 +133,16 @@ public class HospedajeService {
         return new HospedajeDTO(hospedaje);
     }
 
+    @CacheEvict(value = "hospedajes", allEntries = true)
+    @Transactional
+    public HospedajeDTO updateFechaLimiteReservas(Long id, java.time.LocalDate fechaLimiteReservas) {
+        Hospedaje hospedaje = hospedajeRepository.findById(id)
+                .orElseThrow(() -> new jakarta.persistence.EntityNotFoundException("No existe el hospedaje con id " + id));
+        hospedaje.setFechaLimiteReservas(fechaLimiteReservas);
+        hospedajeRepository.save(hospedaje);
+        return new HospedajeDTO(hospedaje);
+    }
+
     // Método para mapear de DTORequest a Entidad
     private Hospedaje mapToEntity(HospedajeRequestDTO dto) {
         Hospedaje hospedaje = new Hospedaje();

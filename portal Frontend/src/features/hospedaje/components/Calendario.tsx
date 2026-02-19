@@ -9,6 +9,7 @@ interface CalendarioProps {
   fechasReservadas?: string[]; // "YYYY-MM-DD"
   onAgregarReserva?: (idHabitacion: string, start: Date, end: Date) => void;
   onDateChange?: (start: Date | null, end: Date | null) => void;
+  maxDate?: Date;
 }
 
 const MESES = [
@@ -31,6 +32,7 @@ export const Calendario = ({
   fechasReservadas = [],
   onAgregarReserva,
   onDateChange,
+  maxDate,
 }: CalendarioProps) => {
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
@@ -91,6 +93,7 @@ export const Calendario = ({
             setEndDate(end);
             onDateChange?.(start, end);
           }}
+          maxDate={maxDate}
           dayClassName={(date) => {
             const isReserved = fechasBloqueadas.some(
               (d) => d.toDateString() === date.toDateString()

@@ -51,6 +51,9 @@ public class Hospedaje {
     @Column(name = "last_close_date")
     private java.time.LocalDateTime lastCloseDate;
 
+    @Column(name = "fecha_limite_reservas")
+    private java.time.LocalDate fechaLimiteReservas;
+
     // --- Constructores ---
     public Hospedaje() {
     }
@@ -153,5 +156,13 @@ public class Hospedaje {
 
     public void setLastCloseDate(java.time.LocalDateTime lastCloseDate) {
         this.lastCloseDate = lastCloseDate;
+    }
+
+    public java.time.LocalDate getFechaLimiteReservas() {
+        return fechaLimiteReservas;
+    }
+
+    public void setFechaLimiteReservas(java.time.LocalDate fechaLimiteReservas) {
+        this.fechaLimiteReservas = fechaLimiteReservas;
     }
 }

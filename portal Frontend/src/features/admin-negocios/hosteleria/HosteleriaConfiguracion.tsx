@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, Button, Alert, Spinner } from 'react-bootstrap';
 import { authService } from '../../../services/authService';
 import { obtenerUrlOAuthMercadoPago } from '../../../services/fetchMercadoPago';
+import { fetchHospedajeById } from '../../../services/fetchHospedajes';
+import { api } from '../../../config/api';
 
 interface Props {
   businessId: string;
@@ -11,6 +13,35 @@ interface Props {
 export function HosteleriaConfiguracion({ businessId, businessName }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fechaLimite, setFechaLimite] = useState<string>('');
+  const [fechaLimiteActual, setFechaLimiteActual] = useState<string | null>(null);
+  const [loadingFecha, setLoadingFecha] = useState(false);
+  const [successFecha, setSuccessFecha] = useState(false);
+
+  useEffect(() => {
+    fetchHospedajeById(businessId).then((h) => {
+      if (h?.fechaLimiteReservas) {
+        setFechaLimiteActual(h.fechaLimiteReservas);
+        setFechaLimite(h.fechaLimiteReservas);
+      }
+    });
+  }, [businessId]);
+
+  const handleGuardarFecha = async (valor?: string) => {
+    const fecha = valor !== undefined ? valor : fechaLimite;
+    setLoadingFecha(true);
+    setSuccessFecha(false);
+    try {
+      await api.patch(`/hospedajes/${businessId}`, { fechaLimiteReservas: fecha || null });
+      setFechaLimiteActual(fecha || null);
+      setSuccessFecha(true);
+      setTimeout(() => setSuccessFecha(false), 3000);
+    } catch {
+      setError('No se pudo guardar la fecha límite');
+    } finally {
+      setLoadingFecha(false);
+    }
+  };
 
   const handleConectarMercadoPago = async () => {
     const user = authService.getUser();
@@ -90,6 +121,53 @@ export function HosteleriaConfiguracion({ businessId, businessName }: Props) {
               </>
             )}
           </Button>
+        </Card.Body>
+      </Card>
+
+      {/* Fecha límite de reservas */}
+      <Card className="mb-4">
+        <Card.Header>Fecha límite de reservas</Card.Header>
+        <Card.Body>
+          <Card.Text>
+            Definí hasta qué fecha los huéspedes pueden realizar reservas. Si no configurás ninguna fecha, las reservas están habilitadas sin límite.
+          </Card.Text>
+          {fechaLimiteActual && (
+            <p className="text-muted small">
+              Fecha actual: <strong>{new Date(fechaLimiteActual + 'T00:00:00').toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' })}</strong>
+            </p>
+          )}
+          {!fechaLimiteActual && (
+            <p className="text-muted small">Sin límite configurado.</p>
+          )}
+          <div className="d-flex gap-2 align-items-center flex-wrap">
+            <input
+              type="date"
+              className="form-control"
+              style={{ maxWidth: 200 }}
+              value={fechaLimite}
+              min={new Date().toISOString().split('T')[0]}
+              onChange={(e) => setFechaLimite(e.target.value)}
+            />
+            <Button
+              variant="primary"
+              onClick={handleGuardarFecha}
+              disabled={loadingFecha}
+            >
+              {loadingFecha ? <Spinner animation="border" size="sm" /> : 'Guardar'}
+            </Button>
+            {(fechaLimite || fechaLimiteActual) && (
+              <Button
+                variant="outline-secondary"
+                onClick={() => { setFechaLimite(''); handleGuardarFecha(''); }}
+                disabled={loadingFecha}
+              >
+                Quitar límite
+              </Button>
+            )}
+          </div>
+          {successFecha && (
+            <p className="text-success small mt-2 mb-0">Fecha guardada correctamente.</p>
+          )}
         </Card.Body>
       </Card>
 

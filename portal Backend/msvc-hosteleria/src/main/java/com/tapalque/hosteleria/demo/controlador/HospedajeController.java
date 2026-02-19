@@ -69,6 +69,14 @@ public class HospedajeController {
                 updated = hospedajeService.updateLastCloseDate(id, lastCloseDate);
             }
 
+            if (body.containsKey("fechaLimiteReservas")) {
+                Object value = body.get("fechaLimiteReservas");
+                java.time.LocalDate fechaLimite = (value != null)
+                        ? java.time.LocalDate.parse(value.toString())
+                        : null;
+                updated = hospedajeService.updateFechaLimiteReservas(id, fechaLimite);
+            }
+
             if (updated == null) {
                 return ResponseEntity.badRequest().build();
             }

@@ -12,6 +12,7 @@ export interface Hospedaje {
     tipoHospedaje: 'HOTEL' | 'DEPARTAMENTO' | 'CABAÑA' | 'CASA' | 'OTRO';
     imagenes: string[];
     lastCloseDate?: string;
+    fechaLimiteReservas?: string;
     userId?: number;
 }
 

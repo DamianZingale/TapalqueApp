@@ -226,6 +226,7 @@ export default function HospedajeDetailPage() {
         idHabitacion={habitacionSeleccionada ? String(habitacionSeleccionada.id) : String(data.id)}
         onDateChange={handleDateChange}
         onAgregarReserva={handleAgregarReserva}
+        maxDate={data.fechaLimiteReservas ? new Date(data.fechaLimiteReservas) : undefined}
       />
 
       {cargandoDisp && (
