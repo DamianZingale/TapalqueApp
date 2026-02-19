@@ -18,6 +18,9 @@ public interface ReservationService {
     public Flux<ReservationDTO> getReservationsByCustomer(String customerId);
     public void cleanUnpaidReservations();
 
+    // limpieza de reservas pagadas con más de 3 meses
+    public void cleanOldPaidReservations();
+
     // Filtrado por fechas (fecha de creación)
     public Flux<ReservationDTO> getReservationsByHotelAndDateRange(
             String hotelId, LocalDateTime desde, LocalDateTime hasta);

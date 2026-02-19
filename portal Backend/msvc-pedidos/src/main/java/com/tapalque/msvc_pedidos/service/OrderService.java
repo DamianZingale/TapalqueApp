@@ -44,6 +44,9 @@ public interface OrderService {
     // limpieza de pedidos no pagados
     void cleanUnpaidOrders();
 
+    // limpieza de pedidos pagados con más de 3 meses
+    void cleanOldPaidOrders();
+
     // Métodos para RabbitMQ - confirmación de pagos
     void confirmarPagoPedido(@NonNull String pedidoId, @NonNull PagoEventoDTO evento);
 

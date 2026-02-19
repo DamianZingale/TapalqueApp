@@ -157,6 +157,19 @@ public Mono<ReservationDTO> updateReservation(ReservationDTO reservationDto) {
 }
 
     @Override
+    @Scheduled(cron = "0 0 3 * * SUN") // limpieza de reservas pagadas con más de 3 meses, domingos 3AM
+    public void cleanOldPaidReservations() {
+        LocalDateTime tresMesesAtras = LocalDateTime.now().minusMonths(3);
+        reservationRepository.findAll()
+            .filter(r -> r.getPayment() != null
+                         && Boolean.TRUE.equals(r.getPayment().getIsPaid())
+                         && r.getDateCreated().isBefore(tresMesesAtras))
+            .flatMap(r -> reservationRepository.deleteById(r.getId()))
+            .subscribe();
+        System.out.println("Limpieza de reservas pagadas con más de 3 meses realizada.");
+    }
+
+    @Override
     public Flux<ReservationDTO> getReservationsByCustomer(String customerId) {
         return reservationRepository.findByCustomer_CustomerId(customerId).map(ReservationMapper::toDto);
     }

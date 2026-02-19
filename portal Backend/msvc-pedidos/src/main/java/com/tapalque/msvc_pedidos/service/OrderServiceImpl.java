@@ -208,6 +208,18 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Scheduled(cron = "0 0 3 * * ?") // limpieza de pedidos pagados con más de 3 meses, 3AM diario
+    public void cleanOldPaidOrders() {
+        LocalDateTime tresMesesAtras = LocalDateTime.now().minusMonths(3);
+        orderRepository.findAll()
+            .filter(order -> (Boolean.TRUE.equals(order.getPaidWithMercadoPago())
+                              || Boolean.TRUE.equals(order.getPaidWithCash()))
+                             && order.getDateCreated().isBefore(tresMesesAtras))
+            .flatMap(order -> orderRepository.deleteById(order.getId()))
+            .subscribe();
+    }
+
+    @Override
     public void confirmarPagoPedido(@NonNull String pedidoId, @NonNull PagoEventoDTO evento) {
         orderRepository.findById(pedidoId)
             .flatMap(order -> {
