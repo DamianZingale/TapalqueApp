@@ -46,7 +46,7 @@ export const Carrusel: React.FC<CarruselExtendedProps> = ({
                             src={url}
                             className="d-block w-100"
                             alt={`Imagen ${index + 1}`}
-                            style={{ height: "500px", objectFit: "cover" }}
+                            style={{ height: "500px", objectFit: "contain", background: "#000" }}
                         />
                     </div>
                 ))}
