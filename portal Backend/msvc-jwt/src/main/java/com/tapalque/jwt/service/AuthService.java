@@ -27,13 +27,28 @@ public class AuthService {
     
 
     public TokenResponse authenticate(final AuthRequestDTO request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
-                        request.getPassword()));
-        final UserResponseDTO user = userClient.getUser(request.getEmail());
+        // 1. Verificar si el email existe en el sistema
+        final UserResponseDTO user;
+        try {
+            user = userClient.getUser(request.getEmail());
+            if (user == null) {
+                throw new RuntimeException("El email ingresado no está registrado en el sistema");
+            }
+        } catch (RuntimeException e) {
+            throw new RuntimeException("El email ingresado no está registrado en el sistema");
+        }
 
-        // Verificar si el email está verificado
+        // 2. Verificar la contraseña
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getEmail(),
+                            request.getPassword()));
+        } catch (Exception e) {
+            throw new RuntimeException("La contraseña ingresada es incorrecta");
+        }
+
+        // 3. Verificar si el email está verificado
         if (!user.isEmailVerified()) {
             throw new IllegalStateException("Debes verificar tu email antes de iniciar sesión. Revisa tu correo electrónico.");
         }

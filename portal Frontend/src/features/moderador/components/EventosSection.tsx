@@ -150,7 +150,7 @@ export function EventosSection() {
                             <Col md={6}><Form.Group className="mb-2"><Form.Label className="small mb-0">Teléfono Contacto *</Form.Label><Form.Control size="sm" value={formData.telefonoContacto || ""} onChange={e => handleChange("telefonoContacto", e.target.value)} /></Form.Group></Col>
                         </Row>
                         <Row>
-                            <Col md={12}><Form.Group className="mb-2"><Form.Label className="small mb-0">Descripcion</Form.Label><Form.Control as="textarea" rows={3} size="sm" value={formData.descripcion || ""} onChange={e => handleChange("descripcion", e.target.value)} /></Form.Group></Col>
+                            <Col md={12}><Form.Group className="mb-2"><Form.Label className="small mb-0">Descripcion</Form.Label><Form.Control as="textarea" rows={3} size="sm" value={formData.descripcion || ""} onChange={e => handleChange("descripcion", e.target.value)} onKeyDown={e => { if (e.key === 'Enter') e.stopPropagation(); }} /></Form.Group></Col>
                         </Row>
                         <ImageManager
                             images={formData.imagenes || []}

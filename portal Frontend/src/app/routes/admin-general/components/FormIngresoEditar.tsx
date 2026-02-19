@@ -48,10 +48,12 @@ export const FormIngresoEditar: React.FC<PropsFormIngresoAdminGeneral> = ({ tipo
                             className="form-control"
                             name={field.name}
                             id={field.name}
+                            rows={3}
                             value={String(formData[field.name] ?? '')}
                             onChange={(e) =>
                                 setFormData({ ...formData, [field.name]: e.target.value })
                             }
+                            onKeyDown={(e) => { if (e.key === 'Enter') e.stopPropagation(); }}
                         />
                     ) : field.type === 'dropdownlist' ? (
                         <select

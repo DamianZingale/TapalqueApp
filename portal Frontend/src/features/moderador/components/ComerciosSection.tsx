@@ -288,9 +288,10 @@ export function ComerciosSection() {
               <Form.Control
                 size="sm"
                 as="textarea"
-                rows={2}
+                rows={3}
                 value={formData.descripcion || ''}
                 onChange={(e) => handleChange('descripcion', e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') e.stopPropagation(); }}
               />
             </Form.Group>
             <Row>

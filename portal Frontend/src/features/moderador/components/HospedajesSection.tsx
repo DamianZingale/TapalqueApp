@@ -387,9 +387,10 @@ export function HospedajesSection() {
               <Form.Control
                 size="sm"
                 as="textarea"
-                rows={2}
+                rows={3}
                 value={formData.description || ''}
                 onChange={(e) => handleChange('description', e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') e.stopPropagation(); }}
               />
             </Form.Group>
             <Row>

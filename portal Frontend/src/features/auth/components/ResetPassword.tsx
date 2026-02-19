@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { BsEye, BsEyeSlash } from 'react-icons/bs';
 import { authAPI } from '../api/authApi';
 
 interface PasswordStrength {
@@ -17,6 +18,8 @@ export const ResetPassword = () => {
 
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [validating, setValidating] = useState(true);
   const [error, setError] = useState('');
@@ -240,16 +243,27 @@ export const ResetPassword = () => {
             <label htmlFor="password" className="form-label">
               Nueva contraseña
             </label>
-            <input
-              type="password"
-              className="form-control rounded-3"
-              id="password"
-              placeholder="Crea una contraseña segura"
-              value={password}
-              onChange={handlePasswordChange}
-              required
-              disabled={loading}
-            />
+            <div className="position-relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                className="form-control rounded-3 pe-5"
+                id="password"
+                placeholder="Crea una contraseña segura"
+                value={password}
+                onChange={handlePasswordChange}
+                required
+                disabled={loading}
+              />
+              <button
+                type="button"
+                className="btn btn-link position-absolute top-50 end-0 translate-middle-y text-muted px-3 border-0"
+                onClick={() => setShowPassword(!showPassword)}
+                tabIndex={-1}
+                style={{ zIndex: 10 }}
+              >
+                {showPassword ? <BsEyeSlash size={18} /> : <BsEye size={18} />}
+              </button>
+            </div>
 
             {/* Indicadores de fortaleza */}
             {password && (
@@ -314,16 +328,27 @@ export const ResetPassword = () => {
             <label htmlFor="confirmPassword" className="form-label">
               Confirmar contraseña
             </label>
-            <input
-              type="password"
-              className="form-control rounded-3"
-              id="confirmPassword"
-              placeholder="Repite la contraseña"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              disabled={loading}
-            />
+            <div className="position-relative">
+              <input
+                type={showConfirmPassword ? 'text' : 'password'}
+                className="form-control rounded-3 pe-5"
+                id="confirmPassword"
+                placeholder="Repite la contraseña"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                disabled={loading}
+              />
+              <button
+                type="button"
+                className="btn btn-link position-absolute top-50 end-0 translate-middle-y text-muted px-3 border-0"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                tabIndex={-1}
+                style={{ zIndex: 10 }}
+              >
+                {showConfirmPassword ? <BsEyeSlash size={18} /> : <BsEye size={18} />}
+              </button>
+            </div>
             {confirmPassword && password !== confirmPassword && (
               <small className="text-danger d-block mt-1">
                 Las contraseñas no coinciden
@@ -341,7 +366,7 @@ export const ResetPassword = () => {
             <button
               type="submit"
               className="btn btn-secondary p-2"
-              disabled={loading || !isPasswordStrong()}
+              disabled={loading || !isPasswordStrong() || password !== confirmPassword || !confirmPassword}
             >
               {loading ? (
                 <>

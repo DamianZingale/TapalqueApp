@@ -154,7 +154,7 @@ export function EspaciosPublicosSection() {
                             <Col md={6}><Form.Group className="mb-2"><Form.Label className="small mb-0">Título *</Form.Label><Form.Control size="sm" value={formData.titulo || ""} onChange={e => handleChange("titulo", e.target.value)} /></Form.Group></Col>
                             <Col md={6}><Form.Group className="mb-2"><Form.Label className="small mb-0">Categoría</Form.Label><Form.Control size="sm" value={formData.categoria || ""} onChange={e => handleChange("categoria", e.target.value)} /></Form.Group></Col>
                         </Row>
-                        <Form.Group className="mb-2"><Form.Label className="small mb-0">Descripción</Form.Label><Form.Control size="sm" as="textarea" rows={2} value={formData.descripcion || ""} onChange={e => handleChange("descripcion", e.target.value)} /></Form.Group>
+                        <Form.Group className="mb-2"><Form.Label className="small mb-0">Descripción</Form.Label><Form.Control size="sm" as="textarea" rows={3} value={formData.descripcion || ""} onChange={e => handleChange("descripcion", e.target.value)} onKeyDown={e => { if (e.key === 'Enter') e.stopPropagation(); }} /></Form.Group>
                         <Row>
                             <Col md={6}><Form.Group className="mb-2"><Form.Label className="small mb-0">Dirección</Form.Label><Form.Control size="sm" value={formData.direccion || ""} onChange={e => handleChange("direccion", e.target.value)} /></Form.Group></Col>
                             <Col md={3}><Form.Group className="mb-2"><Form.Label className="small mb-0">Teléfono</Form.Label><Form.Control size="sm" value={formData.telefono || ""} onChange={e => handleChange("telefono", e.target.value)} /></Form.Group></Col>
