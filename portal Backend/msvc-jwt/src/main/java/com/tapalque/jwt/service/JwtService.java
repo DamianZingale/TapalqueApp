@@ -1,7 +1,7 @@
 package com.tapalque.jwt.service;
 
-import java.security.Key;
 import java.util.Date;
+import javax.crypto.SecretKey;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
@@ -34,12 +34,12 @@ public class JwtService {
 
     public String extractEmail(String token) {
         try {
-            return Jwts.parserBuilder()
-                    .setSigningKey(getSignInKey())
-                    .setAllowedClockSkewSeconds(60) // evita errores por diferencias de hora
+            return Jwts.parser()
+                    .verifyWith(getSignInKey())
+                    .clockSkewSeconds(60) // evita errores por diferencias de hora
                     .build()
-                    .parseClaimsJws(token)
-                    .getBody()
+                    .parseSignedClaims(token)
+                    .getPayload()
                     .getSubject();
         } catch (io.jsonwebtoken.security.SignatureException ex) {
             throw new RuntimeException("Token con firma inválida", ex);
@@ -59,9 +59,9 @@ public class JwtService {
     private String buildToken(final UserResponseDTO user, final long expiration) {
         return Jwts
                 .builder()
-                .setSubject(user.getEmail())
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + expiration))
+                .subject(user.getEmail())
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + expiration))
                 .claim("fullName", user.getFirtName())
                 .claim("rol", user.getRol().name())
                 .signWith(getSignInKey())
@@ -78,30 +78,29 @@ public class JwtService {
     }
 
     public Claims extractAllClaims(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(getSignInKey())
+        return Jwts.parser()
+                .verifyWith(getSignInKey())
                 .build()
-                .parseClaimsJws(token)
-                .getBody();
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
     private boolean isTokenExpired(Claims claims) {
         return claims.getExpiration().before(new Date());
     }
 
-    
     @SuppressWarnings("unused")
     private Date extractExpiration(String token) {
         return Jwts
-                .parserBuilder()
-                .setSigningKey(getSignInKey())
+                .parser()
+                .verifyWith(getSignInKey())
                 .build()
-                .parseClaimsJws(token)
-                .getBody()
+                .parseSignedClaims(token)
+                .getPayload()
                 .getExpiration();
     }
 
-    private Key getSignInKey() {
+    private SecretKey getSignInKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }

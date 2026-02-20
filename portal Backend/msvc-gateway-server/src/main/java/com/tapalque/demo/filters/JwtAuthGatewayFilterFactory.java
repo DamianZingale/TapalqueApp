@@ -1,6 +1,6 @@
 package com.tapalque.demo.filters;
 
-import java.security.Key;
+import javax.crypto.SecretKey;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
@@ -40,12 +40,12 @@ public class JwtAuthGatewayFilterFactory extends AbstractGatewayFilterFactory<Jw
             String token = authHeader.substring(7);
 
             try {
-                Claims claims = Jwts.parserBuilder()
-                        .setSigningKey(getSignInKey())
-                        .setAllowedClockSkewSeconds(60)
+                Claims claims = Jwts.parser()
+                        .verifyWith(getSignInKey())
+                        .clockSkewSeconds(60)
                         .build()
-                        .parseClaimsJws(token)
-                        .getBody();
+                        .parseSignedClaims(token)
+                        .getPayload();
 
                 // Propagar email y rol como headers para los microservicios
                 var mutatedRequest = exchange.getRequest().mutate()
@@ -55,17 +55,14 @@ public class JwtAuthGatewayFilterFactory extends AbstractGatewayFilterFactory<Jw
 
                 return chain.filter(exchange.mutate().request(mutatedRequest).build());
 
-            } catch (ExpiredJwtException e) {
-                exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-                return exchange.getResponse().setComplete();
-            } catch (SignatureException | MalformedJwtException | UnsupportedJwtException | IllegalArgumentException e) {
+            } catch (ExpiredJwtException | SignatureException | MalformedJwtException | UnsupportedJwtException | IllegalArgumentException e) {
                 exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
                 return exchange.getResponse().setComplete();
             }
         };
     }
 
-    private Key getSignInKey() {
+    private SecretKey getSignInKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
