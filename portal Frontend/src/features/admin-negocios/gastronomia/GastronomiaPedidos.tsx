@@ -361,19 +361,16 @@ export function GastronomiaPedidos({
     doc.save(fileName);
   };
 
-  // Filtrado: solo pedidos activos y con pago confirmado o en efectivo
+  // Filtrado: excluir pedidos finalizados/cancelados y MP sin confirmación
   const pedidosActivos = pedidos.filter((p) => {
-    if (p.status === EstadoPedido.ENTREGADO) return false;
+    if (p.status === EstadoPedido.ENTREGADO || (p.status as string) === 'FAILED') return false;
 
-    // Efectivo: siempre visible
-    if (p.paidWithCash) return true;
-
-    // MercadoPago: solo si tiene confirmación de pago
-    if (p.paidWithMercadoPago) {
-      return !!(p.transaccionId || p.mercadoPagoId || p.fechaPago);
+    // MercadoPago sin confirmación de pago: ocultar hasta que el webhook llegue
+    if (p.paidWithMercadoPago && !(p.transaccionId || p.mercadoPagoId || p.fechaPago)) {
+      return false;
     }
 
-    return false;
+    return true;
   });
 
   if (loading) {

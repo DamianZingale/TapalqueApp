@@ -187,14 +187,5 @@ export async function crearPedido(
 }
 
 export async function cancelarPedido(pedidoId: string): Promise<boolean> {
-  try {
-    const response = await fetch(`/api/pedidos/orders/${pedidoId}`, {
-      method: 'DELETE',
-      headers: getAuthHeaders(),
-    });
-    return response.ok || response.status === 204;
-  } catch (error) {
-    console.error('Error en cancelarPedido:', error);
-    return false;
-  }
+  return updateEstadoPedido(pedidoId, EstadoPedido.FAILED);
 }

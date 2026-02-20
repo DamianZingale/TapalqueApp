@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Badge } from 'react-bootstrap';
 import {
   useNotifications,
@@ -10,6 +10,7 @@ export function NotificationBell() {
     useNotifications();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   // Cerrar dropdown al hacer click afuera
   useEffect(() => {
@@ -30,6 +31,22 @@ export function NotificationBell() {
     if (!open && unreadCount > 0) {
       markAllAsRead();
     }
+  };
+
+  const getDropdownStyle = (): React.CSSProperties => {
+    const rect = buttonRef.current?.getBoundingClientRect();
+    const top = rect ? rect.bottom + 8 : 60;
+    const vw = window.innerWidth;
+    const dropW = Math.min(340, vw - 16);
+    // Alinear borde derecho con el botón, pero clampear para no salir del viewport
+    const naturalRight = rect ? vw - rect.right : 8;
+    const right = Math.max(8, Math.min(naturalRight, vw - dropW - 8));
+    return {
+      position: 'fixed',
+      top,
+      right,
+      width: dropW,
+    };
   };
 
   const formatTime = (timestamp: string) => {
@@ -56,6 +73,7 @@ export function NotificationBell() {
   return (
     <div ref={ref} style={{ position: 'relative' }}>
       <button
+        ref={buttonRef}
         onClick={handleToggle}
         className="btn btn-link nav-link position-relative p-1 ms-2"
         style={{ fontSize: '1.25rem', lineHeight: 1, color: '#dee2e6' }}
@@ -91,12 +109,9 @@ export function NotificationBell() {
 
       {open && (
         <div
-          className="shadow-lg border rounded position-absolute end-0"
+          className="shadow-lg border rounded"
           style={{
-            top: '100%',
-            marginTop: '8px',
-            width: '340px',
-            maxWidth: 'calc(100vw - 10px)',
+            ...getDropdownStyle(),
             maxHeight: '420px',
             backgroundColor: '#fff',
             zIndex: 1050,
