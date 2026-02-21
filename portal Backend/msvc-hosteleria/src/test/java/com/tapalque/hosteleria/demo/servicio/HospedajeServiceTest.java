@@ -1,31 +1,37 @@
 package com.tapalque.hosteleria.demo.servicio;
 
-import com.tapalque.hosteleria.demo.dto.HospedajeDTO;
-import com.tapalque.hosteleria.demo.dto.HospedajeRequestDTO;
-import com.tapalque.hosteleria.demo.entidades.Hospedaje;
-import com.tapalque.hosteleria.demo.entidades.TipoHospedaje;
-import com.tapalque.hosteleria.demo.repositorio.HospedajeRepository;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.anyLong;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+import com.tapalque.hosteleria.demo.dto.HospedajeDTO;
+import com.tapalque.hosteleria.demo.dto.HospedajeRequestDTO;
+import com.tapalque.hosteleria.demo.entidades.Hospedaje;
+import com.tapalque.hosteleria.demo.entidades.TipoHospedaje;
+import com.tapalque.hosteleria.demo.repositorio.HospedajeRepository;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("HospedajeService Tests")
@@ -47,7 +53,7 @@ class HospedajeServiceTest {
         testHospedaje.setTitulo("Hotel Test");
         testHospedaje.setDescription("Un hotel de prueba para testing");
         testHospedaje.setUbicacion("Calle Principal 123, Tapalqué");
-        testHospedaje.setGoogleMapsUrl("https://maps.google.com/test");
+        
         testHospedaje.setNumWhatsapp("+5491234567890");
         testHospedaje.setTipoHospedaje(TipoHospedaje.HOTEL);
         testHospedaje.setImagenes(new ArrayList<>());
@@ -56,7 +62,7 @@ class HospedajeServiceTest {
         testRequestDTO.setTitulo("Hotel Test");
         testRequestDTO.setDescription("Un hotel de prueba para testing");
         testRequestDTO.setUbicacion("Calle Principal 123, Tapalqué");
-        testRequestDTO.setGoogleMapsUrl("https://maps.google.com/test");
+        
         testRequestDTO.setNumWhatsapp("+5491234567890");
         testRequestDTO.setTipoHospedaje(TipoHospedaje.HOTEL);
         testRequestDTO.setImagenes(Collections.emptyList());
@@ -236,7 +242,7 @@ class HospedajeServiceTest {
             updateDto.setTitulo("Hotel Actualizado");
             updateDto.setDescription("Nueva descripción del hotel");
             updateDto.setUbicacion("Nueva Ubicación");
-            updateDto.setGoogleMapsUrl("https://maps.google.com/nuevo");
+            
             updateDto.setNumWhatsapp("+5499876543210");
             updateDto.setTipoHospedaje(TipoHospedaje.DEPARTAMENTO);
 
@@ -276,7 +282,7 @@ class HospedajeServiceTest {
             updateDto.setTitulo("Hotel Test");
             updateDto.setDescription("Descripción actualizada");
             updateDto.setUbicacion("Ubicación");
-            updateDto.setGoogleMapsUrl("https://maps.google.com");
+            
             updateDto.setNumWhatsapp("+5491234567890");
             updateDto.setTipoHospedaje(TipoHospedaje.HOTEL);
             updateDto.setImagenes(Arrays.asList("http://nueva-img1.jpg", "http://nueva-img2.jpg"));

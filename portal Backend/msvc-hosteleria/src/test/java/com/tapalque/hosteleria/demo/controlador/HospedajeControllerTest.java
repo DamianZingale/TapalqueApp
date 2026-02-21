@@ -1,30 +1,35 @@
 package com.tapalque.hosteleria.demo.controlador;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tapalque.hosteleria.demo.dto.HospedajeDTO;
-import com.tapalque.hosteleria.demo.dto.HospedajeRequestDTO;
-import com.tapalque.hosteleria.demo.entidades.TipoHospedaje;
-import com.tapalque.hosteleria.demo.servicio.HospedajeService;
+import java.util.Arrays;
+import java.util.Collections;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.Arrays;
-import java.util.Collections;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tapalque.hosteleria.demo.dto.HospedajeDTO;
+import com.tapalque.hosteleria.demo.dto.HospedajeRequestDTO;
+import com.tapalque.hosteleria.demo.entidades.TipoHospedaje;
+import com.tapalque.hosteleria.demo.servicio.HospedajeService;
 
 @WebMvcTest(HospedajeController.class)
 @DisplayName("HospedajeController Tests")
@@ -49,7 +54,7 @@ class HospedajeControllerTest {
         testHospedajeDTO.setTitulo("Hotel Test");
         testHospedajeDTO.setDescription("Un hotel de prueba");
         testHospedajeDTO.setUbicacion("Calle Principal 123");
-        testHospedajeDTO.setGoogleMapsUrl("https://maps.google.com/test");
+        
         testHospedajeDTO.setNumWhatsapp("+5491234567890");
         testHospedajeDTO.setTipoHospedaje("HOTEL");
         testHospedajeDTO.setImagenes(Collections.emptyList());
@@ -58,7 +63,7 @@ class HospedajeControllerTest {
         testRequestDTO.setTitulo("Hotel Test");
         testRequestDTO.setDescription("Un hotel de prueba para testing");
         testRequestDTO.setUbicacion("Calle Principal 123");
-        testRequestDTO.setGoogleMapsUrl("https://maps.google.com/test");
+        
         testRequestDTO.setNumWhatsapp("+5491234567890");
         testRequestDTO.setTipoHospedaje(TipoHospedaje.HOTEL);
     }
