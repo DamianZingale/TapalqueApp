@@ -21,6 +21,7 @@ import com.tapalque.msvc_pedidos.repository.OrderRepository;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 
 @Service
@@ -91,26 +92,29 @@ public class OrderServiceImpl implements OrderService {
                 order.setDateUpdated(LocalDateTime.now());
 
                 return orderRepository.save(order)
-                    .map(savedOrder -> {
-                        rabbitTemplate.convertAndSend(
-                            orderExchange,
-                            routingKeyMercadoPago,
-                            Map.of(
-                                "idPedido", savedOrder.getId(),
-                                "monto", savedOrder.getTotalPrice(),
-                                "fecha", savedOrder.getDateCreated().toString()
-                            )
-                        );
+                    .flatMap(savedOrder ->
+                        Mono.fromCallable(() -> {
+                            rabbitTemplate.convertAndSend(
+                                orderExchange,
+                                routingKeyMercadoPago,
+                                Map.of(
+                                    "idPedido", savedOrder.getId(),
+                                    "monto", savedOrder.getTotalPrice(),
+                                    "fecha", savedOrder.getDateCreated().toString()
+                                )
+                            );
 
-                        // Solo notificar al admin si paga en efectivo (al recibir).
-                        // Los pagos con MercadoPago se notifican cuando el pago es confirmado
-                        // (ver confirmarPagoPedido).
-                        if (Boolean.TRUE.equals(savedOrder.getPaidWithCash())) {
-                            adminNotificationService.notificarNuevoPedido(savedOrder);
-                        }
+                            // Solo notificar al admin si paga en efectivo (al recibir).
+                            // Los pagos con MercadoPago se notifican cuando el pago es confirmado
+                            // (ver confirmarPagoPedido).
+                            if (Boolean.TRUE.equals(savedOrder.getPaidWithCash())) {
+                                adminNotificationService.notificarNuevoPedido(savedOrder);
+                            }
 
-                        return mapToDTO(savedOrder);
-                    });
+                            return mapToDTO(savedOrder);
+                        })
+                        .subscribeOn(Schedulers.boundedElastic())
+                    );
             });
     }
 
