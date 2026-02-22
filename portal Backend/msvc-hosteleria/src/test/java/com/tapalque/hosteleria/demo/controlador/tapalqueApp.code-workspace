@@ -1,0 +1,33 @@
+{
+	"folders": [
+		{
+			"path": "../../../../../../../../../../init-scripts"
+		},
+		{
+			"path": "../../../../../../../../../../nginx-proxy"
+		},
+		{
+			"path": "../../../../../../../../../../node_modules"
+		},
+		{
+			"path": "../../../../../../../../.."
+		},
+		{
+			"path": "../../../../../../../../../../portal Frontend"
+		},
+		{
+			"path": "../../../../../../../../../../.claude"
+		},
+		{
+			"path": "../../../../../../../../../../.git"
+		},
+		{
+			"path": "../../../../../../../../../../.vscode"
+		}
+	],
+	"settings": {
+		"java.compile.nullAnalysis.mode": "disabled",
+		"java.configuration.updateBuildConfiguration": "disabled",
+		"maven.view": "flat"
+	}
+}

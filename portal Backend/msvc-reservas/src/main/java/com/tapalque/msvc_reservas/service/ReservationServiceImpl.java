@@ -1,5 +1,7 @@
 package com.tapalque.msvc_reservas.service;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
@@ -25,15 +27,18 @@ public class ReservationServiceImpl implements ReservationService {
     private final AdminNotificationService adminNotificationService;
     private final HospedajeClient hospedajeClient;
     private final MercadoPagoClient mercadoPagoClient;
+    private final PoliticaService politicaService;
 
     public ReservationServiceImpl(ReservationRepositoryInterface reservationRepository,
                                   AdminNotificationService adminNotificationService,
                                   HospedajeClient hospedajeClient,
-                                  MercadoPagoClient mercadoPagoClient) {
+                                  MercadoPagoClient mercadoPagoClient,
+                                  PoliticaService politicaService) {
         this.reservationRepository = reservationRepository;
         this.adminNotificationService = adminNotificationService;
         this.hospedajeClient = hospedajeClient;
         this.mercadoPagoClient = mercadoPagoClient;
+        this.politicaService = politicaService;
     }
 
     @Override
@@ -60,7 +65,28 @@ public class ReservationServiceImpl implements ReservationService {
             return Mono.error(new IllegalArgumentException("Las fechas de estadía son inválidas"));
         }
 
-        return hospedajeClient.fetchHabitaciones(hotelId)
+        return politicaService.obtenerPolitica(hotelId)
+            .flatMap(politica -> {
+                // Validar política de mínimo de noches para fin de semana (solo cuando está activa)
+                if (Boolean.TRUE.equals(politica.getPoliticaFdsActiva())) {
+                    DayOfWeek checkInDia = checkIn.toLocalDate().getDayOfWeek();
+                    boolean esFds = checkInDia == DayOfWeek.THURSDAY
+                            || checkInDia == DayOfWeek.FRIDAY
+                            || checkInDia == DayOfWeek.SATURDAY
+                            || checkInDia == DayOfWeek.SUNDAY;
+                    if (esFds && noches < 2) {
+                        LocalDate hoy = LocalDate.now();
+                        boolean esHoyMiercoles = hoy.getDayOfWeek() == DayOfWeek.WEDNESDAY;
+                        long diasHastaCheckIn = ChronoUnit.DAYS.between(hoy, checkIn.toLocalDate());
+                        boolean esFdsSiguiente = diasHastaCheckIn >= 0 && diasHastaCheckIn <= 4;
+                        if (!(esHoyMiercoles && esFdsSiguiente)) {
+                            return Mono.error(new IllegalArgumentException(
+                                    "De jueves a domingo la estadía mínima es de 2 noches. Solo el miércoles previo se permite reservar 1 noche para ese fin de semana."));
+                        }
+                    }
+                }
+                return hospedajeClient.fetchHabitaciones(hotelId);
+            })
             .flatMap(habitaciones -> {
                 return habitaciones.stream()
                     .filter(h -> roomNumber.equals(h.getNumero()))

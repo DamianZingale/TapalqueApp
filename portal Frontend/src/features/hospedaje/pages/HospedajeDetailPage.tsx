@@ -15,6 +15,7 @@ import type { Habitacion } from '../../../services/fetchHabitaciones';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { authService } from '../../../services/authService';
 import { crearPreferenciaPago } from '../../../services/fetchMercadoPago';
+import { fetchPolitica, type PoliticaReservas } from '../../../services/fetchPolitica';
 
 export default function HospedajeDetailPage() {
   const { id } = useParams();
@@ -26,14 +27,19 @@ export default function HospedajeDetailPage() {
   const [cargandoDisp, setCargandoDisp] = useState(false);
   const [habitacionSeleccionada, setHabitacionSeleccionada] = useState<Habitacion | null>(null);
   const [creandoReserva, setCreandoReserva] = useState(false);
+  const [politica, setPolitica] = useState<PoliticaReservas | null>(null);
   const fetchIdRef = useRef(0);
 
   useEffect(() => {
     const cargarHospedaje = async () => {
       if (id) {
         setLoading(true);
-        const hospedaje = await fetchHospedajeById(id);
+        const [hospedaje, pol] = await Promise.all([
+          fetchHospedajeById(id),
+          fetchPolitica(id),
+        ]);
         setData(hospedaje);
+        setPolitica(pol);
         setLoading(false);
       }
     };
@@ -75,11 +81,29 @@ export default function HospedajeDetailPage() {
     }
   };
 
+  const esExcepcionMiercoles = (checkIn: Date): boolean => {
+    const hoy = new Date();
+    const esHoyMiercoles = hoy.getDay() === 3; // 0=dom, 3=mie
+    const diasHastaCheckIn = Math.round((checkIn.getTime() - hoy.setHours(0,0,0,0)) / (1000 * 60 * 60 * 24));
+    return esHoyMiercoles && diasHastaCheckIn >= 0 && diasHastaCheckIn <= 4;
+  };
+
   const handleAgregarReserva = async (_idHabitacion: string, start: Date, end: Date) => {
     // Verificar que haya habitación seleccionada
     if (!habitacionSeleccionada) {
       alert('Por favor, seleccioná una habitación de la lista antes de reservar.');
       return;
+    }
+
+    // Validar mínimo de noches según política de fin de semana (solo cuando está activa)
+    if (politica?.politicaFdsActiva) {
+      const noches = Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+      const checkInDia = start.getDay(); // 0=dom, 1=lun, 2=mar, 3=mie, 4=jue, 5=vie, 6=sab
+      const esFds = checkInDia === 4 || checkInDia === 5 || checkInDia === 6 || checkInDia === 0;
+      if (esFds && noches < 2 && !esExcepcionMiercoles(start)) {
+        alert('De jueves a domingo la estadía mínima es de 2 noches.\nSolo el miércoles previo al fin de semana se permite reservar 1 noche.');
+        return;
+      }
     }
 
     // Verificar autenticación
@@ -222,6 +246,15 @@ export default function HospedajeDetailPage() {
       {data.numWhatsapp && <WhatsAppButton num={data.numWhatsapp} />}
 
       <Subtitle text="¡Reserva ahora!" />
+
+      {/* Banner de política de estadía mínima */}
+      {politica?.politicaFdsActiva && (
+        <div className="alert alert-info py-2 mb-3" role="alert">
+          <strong>Política de estadía mínima:</strong> De jueves a domingo se requieren mínimo 2 noches.
+          El miércoles previo podés reservar 1 sola noche para ese fin de semana.
+        </div>
+      )}
+
       <Calendario
         idHabitacion={habitacionSeleccionada ? String(habitacionSeleccionada.id) : String(data.id)}
         onDateChange={handleDateChange}

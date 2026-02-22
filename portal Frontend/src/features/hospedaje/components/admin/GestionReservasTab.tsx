@@ -6,6 +6,7 @@ import 'react-date-range/dist/theme/default.css';
 import { es } from 'date-fns/locale';
 import { fetchReservasByHotel, cancelarReserva, crearReservaExterna, Reserva } from '../../../../services/fetchReservas';
 import { fetchHospedajes } from '../../../../services/fetchHospedajes';
+import { fetchPolitica, type PoliticaReservas } from '../../../../services/fetchPolitica';
 import { PhoneInput } from '../../../../shared/components/PhoneInput';
 import { authService } from '../../../../services/authService';
 import { useWebSocket } from '../../../admin-negocios/hooks/useWebSocket';
@@ -52,6 +53,7 @@ export const GestionReservasTab = () => {
     });
 
     const [hotelId, setHotelId] = useState('');
+    const [politica, setPolitica] = useState<PoliticaReservas | null>(null);
     const { registerAdminTopic } = useNotifications();
     const { lastMessage } = useWebSocket(hotelId, 'HOSPEDAJE');
 
@@ -67,11 +69,12 @@ export const GestionReservasTab = () => {
         loadHotelId();
     }, []);
 
-    // Cuando se tiene hotelId: cargar reservas y registrar tópico persistente
+    // Cuando se tiene hotelId: cargar reservas, política y registrar tópico persistente
     useEffect(() => {
         if (!hotelId) return;
         cargarReservas();
         registerAdminTopic(hotelId, 'HOSPEDAJE');
+        fetchPolitica(hotelId).then(pol => { if (pol) setPolitica(pol); });
     }, [hotelId]);
 
     // Actualizaciones en tiempo real vía WebSocket (UI local)
@@ -249,6 +252,23 @@ export const GestionReservasTab = () => {
 
     return (
         <div>
+            {/* Indicador de política de reservas */}
+            {politica && (
+                <Alert variant={politica.reservasHabilitadas ? 'success' : 'danger'} className="py-2 mb-3">
+                    <div className="d-flex align-items-center gap-2 flex-wrap">
+                        <strong>
+                            {politica.reservasHabilitadas ? 'Reservas online activas' : 'Reservas online desactivadas'}
+                        </strong>
+                        {politica.reservasHabilitadas && politica.politicaFdsActiva && (
+                            <Badge bg="info">Mín. 2 noches Jue-Dom activo</Badge>
+                        )}
+                        <small className="text-muted ms-auto">
+                            Gestioná la política desde el panel de Reservas
+                        </small>
+                    </div>
+                </Alert>
+            )}
+
             {/* Filtros y controles */}
             <Row className="mb-4">
                 <Col md={6}>

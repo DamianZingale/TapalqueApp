@@ -20,6 +20,7 @@ import {
   fetchHospedajeById,
   type Hospedaje,
 } from '../../../services/fetchHospedajes';
+import { fetchPolitica, actualizarPolitica, type PoliticaReservas } from '../../../services/fetchPolitica';
 import { PhoneInput } from '../../../shared/components/PhoneInput';
 import {
   actualizarReserva,
@@ -122,6 +123,10 @@ export function HosteleriaReservas({
   const [guardandoPago, setGuardandoPago] = useState(false);
   const [errorPago, setErrorPago] = useState<string | null>(null);
 
+  // Política de reservas
+  const [politica, setPolitica] = useState<PoliticaReservas | null>(null);
+  const [guardandoPolitica, setGuardandoPolitica] = useState(false);
+
   // Cierre del día
   const [showCierreModal, setShowCierreModal] = useState(false);
   const [resumenCierre, setResumenCierre] = useState<ResumenCierreHospedaje | null>(null);
@@ -133,12 +138,39 @@ export function HosteleriaReservas({
 
   const cargarHospedaje = useCallback(async () => {
     try {
-      const data = await fetchHospedajeById(businessId);
+      const [data, pol] = await Promise.all([
+        fetchHospedajeById(businessId),
+        fetchPolitica(businessId),
+      ]);
       if (data) setHospedaje(data);
+      if (pol) setPolitica(pol);
     } catch {
       console.error('Error al cargar hospedaje');
     }
   }, [businessId]);
+
+  const handleTogglePolitica = async (campo: 'reservasHabilitadas' | 'politicaFdsActiva') => {
+    if (!politica) return;
+    setGuardandoPolitica(true);
+    try {
+      const nuevo = { ...politica, [campo]: !politica[campo] };
+      const resultado = await actualizarPolitica(businessId, { [campo]: !politica[campo] });
+      if (resultado) {
+        setPolitica(resultado);
+        setMensaje({ tipo: 'success', texto: 'Política actualizada correctamente' });
+      } else {
+        // Revert optimistic update
+        setPolitica(politica);
+        setMensaje({ tipo: 'danger', texto: 'Error al actualizar la política' });
+      }
+      void nuevo;
+    } catch {
+      setPolitica(politica);
+      setMensaje({ tipo: 'danger', texto: 'Error al actualizar la política' });
+    } finally {
+      setGuardandoPolitica(false);
+    }
+  };
 
   useEffect(() => {
     cargarReservas();
@@ -688,6 +720,37 @@ export function HosteleriaReservas({
         >
           {mensaje.texto}
         </Alert>
+      )}
+
+      {/* Panel de política de estadía mínima */}
+      {politica && (
+        <Card className="mb-3 border-2" style={{ borderColor: politica.politicaFdsActiva ? '#0dcaf0' : '#6c757d' }}>
+          <Card.Body className="py-2">
+            <div className="d-flex align-items-center justify-content-between flex-wrap gap-2">
+              <div className="d-flex align-items-center gap-3">
+                <strong className="text-muted">Política de estadía mínima</strong>
+                <Badge bg={politica.politicaFdsActiva ? 'info' : 'secondary'} className="fs-6">
+                  {politica.politicaFdsActiva ? 'ACTIVA' : 'INACTIVA'}
+                </Badge>
+              </div>
+              <Button
+                variant={politica.politicaFdsActiva ? 'outline-secondary' : 'outline-info'}
+                size="sm"
+                onClick={() => handleTogglePolitica('politicaFdsActiva')}
+                disabled={guardandoPolitica}
+              >
+                {politica.politicaFdsActiva ? 'Desactivar política' : 'Activar política Jue-Dom'}
+              </Button>
+            </div>
+            <div className="mt-1">
+              <small className="text-muted">
+                {politica.politicaFdsActiva
+                  ? 'De jueves a domingo se requieren mínimo 2 noches. El miércoles previo se permite 1 noche para ese fin de semana.'
+                  : 'Sin restricción de noches mínimas. Los huéspedes pueden reservar cualquier duración.'}
+              </small>
+            </div>
+          </Card.Body>
+        </Card>
       )}
 
       <Card className="mb-3">
