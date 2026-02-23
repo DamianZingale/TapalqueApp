@@ -14,6 +14,8 @@ export interface Hospedaje {
     lastCloseDate?: string;
     fechaLimiteReservas?: string;
     userId?: number;
+    permiteFacturacion?: boolean;
+    tipoIva?: 'INCLUIDO' | 'ADICIONAL' | 'NO_APLICA';
 }
 
 export async function fetchHospedajes(): Promise<Hospedaje[]> {
@@ -48,5 +50,22 @@ export async function consultarDisponibilidad(
     } catch (error) {
         console.error("Error en consultarDisponibilidad:", error);
         return { disponible: false };
+    }
+}
+
+export async function actualizarConfiguracionFacturacion(
+    hospedajeId: string | number,
+    permiteFacturacion: boolean,
+    tipoIva: 'INCLUIDO' | 'ADICIONAL' | 'NO_APLICA'
+): Promise<boolean> {
+    try {
+        await apiRequest(`/hospedajes/${hospedajeId}`, {
+            method: 'PATCH',
+            body: JSON.stringify({ permiteFacturacion, tipoIva })
+        });
+        return true;
+    } catch (error) {
+        console.error("Error en actualizarConfiguracionFacturacion:", error);
+        return false;
     }
 }

@@ -33,6 +33,7 @@ public class PoliticaController {
                 hotelId,
                 body.getReservasHabilitadas(),
                 body.getPoliticaFdsActiva(),
+                body.getEstadiaMinima(),
                 body.getActualizadoPor()
         );
     }

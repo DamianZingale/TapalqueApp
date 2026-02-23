@@ -54,6 +54,13 @@ public class Hospedaje {
     @Column(name = "fecha_limite_reservas")
     private java.time.LocalDate fechaLimiteReservas;
 
+    @Column(name = "permite_facturacion")
+    private Boolean permiteFacturacion = false;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tipo_iva")
+    private TipoIVA tipoIva = TipoIVA.NO_APLICA;
+
     // --- Constructores ---
     public Hospedaje() {
     }
@@ -164,5 +171,21 @@ public class Hospedaje {
 
     public void setFechaLimiteReservas(java.time.LocalDate fechaLimiteReservas) {
         this.fechaLimiteReservas = fechaLimiteReservas;
+    }
+
+    public Boolean getPermiteFacturacion() {
+        return permiteFacturacion;
+    }
+
+    public void setPermiteFacturacion(Boolean permiteFacturacion) {
+        this.permiteFacturacion = permiteFacturacion;
+    }
+
+    public TipoIVA getTipoIva() {
+        return tipoIva;
+    }
+
+    public void setTipoIva(TipoIVA tipoIva) {
+        this.tipoIva = tipoIva;
     }
 }

@@ -15,6 +15,9 @@ public class ReservationDTO {
     private LocalDateTime dateUpdated;
     private Integer roomNumber;
     private String notas;
+    private Integer cantidadHuespedes;
+    private Boolean requiereFacturacion;
+    private BillingInfoDTO billingInfo;
 
     public ReservationDTO() {}
 
@@ -120,5 +123,29 @@ public class ReservationDTO {
 
     public void setNotas(String notas) {
         this.notas = notas;
+    }
+
+    public Integer getCantidadHuespedes() {
+        return cantidadHuespedes;
+    }
+
+    public void setCantidadHuespedes(Integer cantidadHuespedes) {
+        this.cantidadHuespedes = cantidadHuespedes;
+    }
+
+    public Boolean getRequiereFacturacion() {
+        return requiereFacturacion;
+    }
+
+    public void setRequiereFacturacion(Boolean requiereFacturacion) {
+        this.requiereFacturacion = requiereFacturacion;
+    }
+
+    public BillingInfoDTO getBillingInfo() {
+        return billingInfo;
+    }
+
+    public void setBillingInfo(BillingInfoDTO billingInfo) {
+        this.billingInfo = billingInfo;
     }
 }

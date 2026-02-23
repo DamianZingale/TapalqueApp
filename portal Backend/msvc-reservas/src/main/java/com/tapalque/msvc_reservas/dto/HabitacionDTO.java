@@ -16,6 +16,7 @@ public class HabitacionDTO {
     private Integer maxPersonas;
     private BigDecimal precio;
     private String tipoPrecio;
+    private Integer minimoPersonasAPagar;
     private List<String> fotos;
     private List<String> servicios;
     private Boolean disponible;
@@ -55,4 +56,7 @@ public class HabitacionDTO {
 
     public Long getHospedajeId() { return hospedajeId; }
     public void setHospedajeId(Long hospedajeId) { this.hospedajeId = hospedajeId; }
+
+    public Integer getMinimoPersonasAPagar() { return minimoPersonasAPagar; }
+    public void setMinimoPersonasAPagar(Integer minimoPersonasAPagar) { this.minimoPersonasAPagar = minimoPersonasAPagar; }
 }

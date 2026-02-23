@@ -67,6 +67,7 @@ public class HabitacionService {
         habitacion.setFotos(dto.getFotos());
         habitacion.setServicios(dto.getServicios());
         habitacion.setDisponible(dto.getDisponible() != null ? dto.getDisponible() : true);
+        habitacion.setMinimoPersonasAPagar(dto.getMinimoPersonasAPagar());
         habitacion.setHospedaje(hospedaje);
 
         Habitacion guardada = habitacionRepository.save(habitacion);
@@ -109,6 +110,9 @@ public class HabitacionService {
         }
         if (dto.getDisponible() != null) {
             habitacion.setDisponible(dto.getDisponible());
+        }
+        if (dto.getMinimoPersonasAPagar() != null) {
+            habitacion.setMinimoPersonasAPagar(dto.getMinimoPersonasAPagar());
         }
 
         Habitacion actualizada = habitacionRepository.save(habitacion);

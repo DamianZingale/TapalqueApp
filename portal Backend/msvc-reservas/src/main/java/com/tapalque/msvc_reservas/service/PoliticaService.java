@@ -5,5 +5,5 @@ import reactor.core.publisher.Mono;
 
 public interface PoliticaService {
     Mono<PoliticaGlobal> obtenerPolitica(String hotelId);
-    Mono<PoliticaGlobal> actualizarPolitica(String hotelId, Boolean reservasHabilitadas, Boolean politicaFdsActiva, String actualizadoPor);
+    Mono<PoliticaGlobal> actualizarPolitica(String hotelId, Boolean reservasHabilitadas, Boolean politicaFdsActiva, Integer estadiaMinima, String actualizadoPor);
 }

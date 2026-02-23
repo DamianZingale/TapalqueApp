@@ -45,6 +45,9 @@ public class Habitacion {
     @Column(name = "tipo_precio", nullable = false)
     private TipoPrecio tipoPrecio = TipoPrecio.POR_HABITACION;
 
+    @Column(name = "minimo_personas_a_pagar")
+    private Integer minimoPersonasAPagar;
+
     @ElementCollection
     @CollectionTable(name = "habitacion_fotos", joinColumns = @JoinColumn(name = "habitacion_id"))
     @Column(name = "foto_url")
@@ -170,5 +173,13 @@ public class Habitacion {
 
     public void setHospedaje(Hospedaje hospedaje) {
         this.hospedaje = hospedaje;
+    }
+
+    public Integer getMinimoPersonasAPagar() {
+        return minimoPersonasAPagar;
+    }
+
+    public void setMinimoPersonasAPagar(Integer minimoPersonasAPagar) {
+        this.minimoPersonasAPagar = minimoPersonasAPagar;
     }
 }

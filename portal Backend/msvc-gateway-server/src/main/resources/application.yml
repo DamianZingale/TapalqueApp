@@ -733,6 +733,15 @@ spring:
           filters:
             - RewritePath=/api/reservas/reservations/by-customer/(?<id>[0-9]+), /reservations/by-customer/${id}
 
+        # RESERVAS - Políticas de hospedaje
+        - id: msvc-reservas-politica
+          uri: lb://msvc-reservas
+          predicates:
+            - Path=/api/reservas/politica/{hotelId}
+            - Method=GET,PUT
+          filters:
+            - RewritePath=/api/reservas/politica/(?<hotelId>.*), /politica/${hotelId}
+
           # EVENTOS
         - id: msvc-eventos-imagen
           uri: lb://msvc-eventos

@@ -14,6 +14,7 @@ public class HabitacionDTO {
     private Integer maxPersonas;
     private BigDecimal precio;
     private String tipoPrecio;
+    private Integer minimoPersonasAPagar;
     private List<String> fotos;
     private List<String> servicios;
     private Boolean disponible;
@@ -32,6 +33,7 @@ public class HabitacionDTO {
         this.tipoPrecio = habitacion.getTipoPrecio() != null
             ? habitacion.getTipoPrecio().name().toLowerCase()
             : "por_habitacion";
+        this.minimoPersonasAPagar = habitacion.getMinimoPersonasAPagar();
         this.fotos = habitacion.getFotos() != null ? new java.util.ArrayList<>(habitacion.getFotos()) : new java.util.ArrayList<>();
         this.servicios = habitacion.getServicios() != null ? new java.util.ArrayList<>(habitacion.getServicios()) : new java.util.ArrayList<>();
         this.disponible = habitacion.getDisponible();
@@ -127,5 +129,13 @@ public class HabitacionDTO {
 
     public void setHospedajeId(Long hospedajeId) {
         this.hospedajeId = hospedajeId;
+    }
+
+    public Integer getMinimoPersonasAPagar() {
+        return minimoPersonasAPagar;
+    }
+
+    public void setMinimoPersonasAPagar(Integer minimoPersonasAPagar) {
+        this.minimoPersonasAPagar = minimoPersonasAPagar;
     }
 }

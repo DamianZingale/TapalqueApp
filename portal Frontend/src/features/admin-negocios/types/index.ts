@@ -117,6 +117,15 @@ export interface PagoReserva {
   remainingAmount: number;
 }
 
+// Información de facturación
+export interface BillingInfo {
+  cuitCuil: string;
+  razonSocial: string;
+  domicilioComercial: string;
+  tipoFactura: 'A' | 'B';
+  condicionFiscal: 'Monotributista' | 'Responsable Inscripto' | 'Consumidor Final';
+}
+
 // Reserva completa
 export interface Reserva {
   id: string;
@@ -128,6 +137,9 @@ export interface Reserva {
   roomId?: string;
   roomNumber?: number;
   totalPrice: number;
+  cantidadHuespedes?: number;
+  requiereFacturacion?: boolean;
+  billingInfo?: BillingInfo;
   isActive: boolean;
   isCancelled: boolean;
   dateCreated: string;
@@ -173,6 +185,7 @@ export interface Habitacion {
   maxPersonas: number;
   precio: number;
   tipoPrecio: 'por_habitacion' | 'por_persona';
+  minimoPersonasAPagar?: number;
   fotos?: string[];
   servicios?: string[];
   disponible: boolean;
@@ -213,6 +226,12 @@ export interface FormReservaExterna {
     | 'TARJETA_DEBITO'
     | 'MERCADO_PAGO';
   notas: string;
+}
+
+// Configuración de facturación de hospedaje
+export interface HospedajeConfig {
+  permiteFacturacion: boolean;
+  tipoIva: 'INCLUIDO' | 'ADICIONAL' | 'NO_APLICA';
 }
 
 // Categorías de menú

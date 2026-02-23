@@ -77,6 +77,16 @@ public class HospedajeController {
                 updated = hospedajeService.updateFechaLimiteReservas(id, fechaLimite);
             }
 
+            if (body.containsKey("permiteFacturacion") || body.containsKey("tipoIva")) {
+                Boolean permiteFacturacion = body.containsKey("permiteFacturacion")
+                        ? Boolean.valueOf(body.get("permiteFacturacion").toString())
+                        : null;
+                String tipoIva = body.containsKey("tipoIva")
+                        ? body.get("tipoIva").toString()
+                        : null;
+                updated = hospedajeService.updateConfiguracionFacturacion(id, permiteFacturacion, tipoIva);
+            }
+
             if (updated == null) {
                 return ResponseEntity.badRequest().build();
             }

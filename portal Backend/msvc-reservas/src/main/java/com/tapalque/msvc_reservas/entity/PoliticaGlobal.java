@@ -19,6 +19,7 @@ public class PoliticaGlobal {
 
     private Boolean reservasHabilitadas;   // ON/OFF de reservas para este hospedaje
     private Boolean politicaFdsActiva;     // Activa regla mínimo 2 noches jue-dom
+    private Integer estadiaMinima;         // Noches mínimas requeridas para cualquier reserva
 
     private LocalDateTime fechaActualizacion;
     private String actualizadoPor;
@@ -26,6 +27,7 @@ public class PoliticaGlobal {
     public PoliticaGlobal() {
         this.reservasHabilitadas = true;
         this.politicaFdsActiva = false;
+        this.estadiaMinima = 1;
     }
 
     public String getId() { return id; }
@@ -45,4 +47,7 @@ public class PoliticaGlobal {
 
     public String getActualizadoPor() { return actualizadoPor; }
     public void setActualizadoPor(String actualizadoPor) { this.actualizadoPor = actualizadoPor; }
+
+    public Integer getEstadiaMinima() { return estadiaMinima; }
+    public void setEstadiaMinima(Integer estadiaMinima) { this.estadiaMinima = estadiaMinima; }
 }

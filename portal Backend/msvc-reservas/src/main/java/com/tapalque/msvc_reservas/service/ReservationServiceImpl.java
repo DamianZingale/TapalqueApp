@@ -85,6 +85,13 @@ public class ReservationServiceImpl implements ReservationService {
                         }
                     }
                 }
+
+                // Validar estadía mínima general
+                if (politica.getEstadiaMinima() != null && noches < politica.getEstadiaMinima()) {
+                    return Mono.error(new IllegalArgumentException(
+                            "La estadía mínima para este hospedaje es de " + politica.getEstadiaMinima() + " noche(s)"));
+                }
+
                 return hospedajeClient.fetchHabitaciones(hotelId);
             })
             .flatMap(habitaciones -> {
@@ -92,7 +99,28 @@ public class ReservationServiceImpl implements ReservationService {
                     .filter(h -> roomNumber.equals(h.getNumero()))
                     .findFirst()
                     .map(habitacion -> {
-                        double precioReal = habitacion.getPrecio().doubleValue() * noches;
+                        // Calcular precio según tipo de tarifa
+                        double precioPorNoche;
+                        if ("por_persona".equalsIgnoreCase(habitacion.getTipoPrecio())) {
+                            // Validar cantidad de huéspedes
+                            Integer cantidadHuespedes = reservationDto.getCantidadHuespedes();
+                            if (cantidadHuespedes == null || cantidadHuespedes <= 0) {
+                                throw new IllegalArgumentException("Debe especificar la cantidad de huéspedes");
+                            }
+
+                            // Determinar cuántas personas se cobrarán
+                            Integer minimoPersonasAPagar = habitacion.getMinimoPersonasAPagar();
+                            int personasACobrar = (minimoPersonasAPagar != null && minimoPersonasAPagar > cantidadHuespedes)
+                                    ? minimoPersonasAPagar
+                                    : cantidadHuespedes;
+
+                            precioPorNoche = habitacion.getPrecio().doubleValue() * personasACobrar;
+                        } else {
+                            // POR_HABITACION
+                            precioPorNoche = habitacion.getPrecio().doubleValue();
+                        }
+
+                        double precioReal = precioPorNoche * noches;
 
                         Reservation reservation = ReservationMapper.toEntity(reservationDto);
                         reservation.setTotalPrice(precioReal);

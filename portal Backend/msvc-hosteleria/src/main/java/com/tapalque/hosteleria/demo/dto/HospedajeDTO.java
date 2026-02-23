@@ -19,6 +19,8 @@ public class HospedajeDTO {
     private List<String> imagenes;
     private java.time.LocalDateTime lastCloseDate;
     private java.time.LocalDate fechaLimiteReservas;
+    private Boolean permiteFacturacion;
+    private String tipoIva;
 
     // Constructor vacío (necesario para algunas herramientas de serialización como Jackson)
     public HospedajeDTO() {
@@ -43,6 +45,10 @@ public class HospedajeDTO {
                 : List.of();
         this.lastCloseDate = hospedaje.getLastCloseDate();
         this.fechaLimiteReservas = hospedaje.getFechaLimiteReservas();
+        this.permiteFacturacion = hospedaje.getPermiteFacturacion();
+        this.tipoIva = hospedaje.getTipoIva() != null
+                ? hospedaje.getTipoIva().name()
+                : "NO_APLICA";
     }
 
     // Getters y setters
@@ -133,5 +139,21 @@ public class HospedajeDTO {
 
     public void setFechaLimiteReservas(java.time.LocalDate fechaLimiteReservas) {
         this.fechaLimiteReservas = fechaLimiteReservas;
+    }
+
+    public Boolean getPermiteFacturacion() {
+        return permiteFacturacion;
+    }
+
+    public void setPermiteFacturacion(Boolean permiteFacturacion) {
+        this.permiteFacturacion = permiteFacturacion;
+    }
+
+    public String getTipoIva() {
+        return tipoIva;
+    }
+
+    public void setTipoIva(String tipoIva) {
+        this.tipoIva = tipoIva;
     }
 }

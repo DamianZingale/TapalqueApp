@@ -7,9 +7,10 @@ import {
   Col,
   Form,
   Modal,
+  Nav,
   Row,
   Spinner,
-  Table,
+  Tab,
 } from 'react-bootstrap';
 import {
   actualizarHabitacion,
@@ -36,6 +37,7 @@ interface NuevaHabitacionForm {
   maxPersonas: number;
   precio: number;
   tipoPrecio: 'por_habitacion' | 'por_persona';
+  minimoPersonasAPagar?: number;
   fotos: string[];
   servicios: string;
 }
@@ -131,6 +133,7 @@ export function HosteleriaHabitaciones({
         maxPersonas: nuevaHabitacion.maxPersonas,
         precio: precioNumerico,
         tipoPrecio: nuevaHabitacion.tipoPrecio,
+        minimoPersonasAPagar: nuevaHabitacion.minimoPersonasAPagar,
         fotos: nuevaHabitacion.fotos.slice(0, MAX_FOTOS),
         servicios: nuevaHabitacion.servicios
           .split(',')
@@ -345,155 +348,127 @@ export function HosteleriaHabitaciones({
         </Alert>
       )}
 
-      <Row>
-        <Col lg={7}>
-          <Card className="mb-4">
-            <Card.Header className="d-flex justify-content-between align-items-center">
-              <h5 className="mb-0">Gestión de Habitaciones</h5>
-              <Button
-                variant="success"
-                size="sm"
-                onClick={() => setModalAgregar(true)}
-              >
-                + Agregar Habitación
-              </Button>
-            </Card.Header>
-            <Card.Body>
-              {habitaciones.length === 0 ? (
-                <div className="text-center py-4">
-                  <div style={{ fontSize: '3rem' }}>🛏️</div>
-                  <p className="text-muted">No hay habitaciones configuradas</p>
-                  <Button
-                    variant="primary"
-                    onClick={() => setModalAgregar(true)}
-                  >
-                    Agregar primera habitación
-                  </Button>
-                </div>
-              ) : (
-                <Table hover>
-                  <thead>
-                    <tr>
-                      <th>N°</th>
-                      <th>Habitación</th>
-                      <th>Capacidad</th>
-                      <th>Precio</th>
-                      <th>Estado</th>
-                      <th>Acciones</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {habitaciones.map((habitacion) => (
-                      <tr key={habitacion.id}>
-                        <td>
-                          <strong>#{habitacion.numero}</strong>
-                        </td>
-                        <td>
-                          <div className="d-flex align-items-center gap-2">
-                            {habitacion.fotos && habitacion.fotos.length > 0 ? (
-                              <div className="position-relative">
-                                <img
-                                  src={habitacion.fotos[0]}
-                                  alt={habitacion.titulo}
-                                  style={{
-                                    width: '50px',
-                                    height: '50px',
-                                    objectFit: 'cover',
-                                    borderRadius: '4px',
-                                  }}
-                                  onError={(e) => {
-                                    e.currentTarget.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50"><rect fill="%23f8f9fa" width="50" height="50"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%23999" font-size="24">🛏️</text></svg>';
-                                  }}
-                                />
-                                {habitacion.fotos.length > 1 && (
-                                  <Badge
-                                    bg="dark"
-                                    className="position-absolute"
-                                    style={{
-                                      bottom: '2px',
-                                      right: '2px',
-                                      fontSize: '0.6rem',
-                                    }}
-                                  >
-                                    +{habitacion.fotos.length - 1}
-                                  </Badge>
-                                )}
-                              </div>
-                            ) : (
-                              <div
-                                className="bg-light d-flex align-items-center justify-content-center"
-                                style={{
-                                  width: '50px',
-                                  height: '50px',
-                                  borderRadius: '4px',
-                                }}
-                              >
-                                🛏️
-                              </div>
-                            )}
-                            <div>
-                              <strong>{habitacion.titulo}</strong>
-                              {habitacion.servicios &&
-                                habitacion.servicios.length > 0 && (
-                                  <div>
-                                    {habitacion.servicios
-                                      .slice(0, 2)
-                                      .map((s) => (
-                                        <Badge
-                                          key={s}
-                                          bg="light"
-                                          text="dark"
-                                          className="me-1"
-                                          style={{ fontSize: '0.7rem' }}
-                                        >
-                                          {s}
-                                        </Badge>
-                                      ))}
-                                    {habitacion.servicios.length > 2 && (
-                                      <Badge
-                                        bg="light"
-                                        text="dark"
-                                        style={{ fontSize: '0.7rem' }}
-                                      >
-                                        +{habitacion.servicios.length - 2}
-                                      </Badge>
-                                    )}
-                                  </div>
-                                )}
-                            </div>
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h5 className="mb-0">Gestión de Habitaciones</h5>
+        <Button
+          variant="success"
+          size="sm"
+          onClick={() => setModalAgregar(true)}
+        >
+          + Agregar Habitación
+        </Button>
+      </div>
+
+      <Tab.Container defaultActiveKey="gestion">
+        <Nav variant="tabs" className="mb-3">
+          <Nav.Item>
+            <Nav.Link eventKey="gestion">Habitaciones ({habitaciones.length})</Nav.Link>
+          </Nav.Item>
+          <Nav.Item>
+            <Nav.Link eventKey="vista-previa">Vista Previa</Nav.Link>
+          </Nav.Item>
+        </Nav>
+
+        <Tab.Content>
+          {/* Pestaña Gestión */}
+          <Tab.Pane eventKey="gestion">
+            {habitaciones.length === 0 ? (
+              <div className="text-center py-4">
+                <div style={{ fontSize: '3rem' }}>🛏️</div>
+                <p className="text-muted">No hay habitaciones configuradas</p>
+                <Button
+                  variant="primary"
+                  onClick={() => setModalAgregar(true)}
+                >
+                  Agregar primera habitación
+                </Button>
+              </div>
+            ) : (
+              <Row xs={1} sm={2} lg={3} className="g-3">
+                {habitaciones.map((habitacion) => (
+                  <Col key={habitacion.id}>
+                    <Card className="h-100">
+                      {habitacion.fotos && habitacion.fotos.length > 0 ? (
+                        <div className="position-relative">
+                          <Card.Img
+                            variant="top"
+                            src={habitacion.fotos[0]}
+                            style={{ height: '120px', objectFit: 'cover' }}
+                            onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
+                              e.currentTarget.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="120"><rect fill="%23f8f9fa" width="200" height="120"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%23999" font-size="40">🛏️</text></svg>';
+                            }}
+                          />
+                          {habitacion.fotos.length > 1 && (
+                            <Badge
+                              bg="dark"
+                              className="position-absolute"
+                              style={{ bottom: '6px', right: '6px', fontSize: '0.7rem' }}
+                            >
+                              +{habitacion.fotos.length - 1}
+                            </Badge>
+                          )}
+                        </div>
+                      ) : (
+                        <div
+                          className="bg-light d-flex align-items-center justify-content-center"
+                          style={{ height: '120px', fontSize: '2.5rem' }}
+                        >
+                          🛏️
+                        </div>
+                      )}
+                      <Card.Body className="pb-2">
+                        <div className="d-flex justify-content-between align-items-start mb-1">
+                          <div>
+                            <strong>#{habitacion.numero}</strong>{' '}
+                            <span>{habitacion.titulo}</span>
                           </div>
-                        </td>
-                        <td>
+                        </div>
+                        <div className="d-flex flex-wrap gap-1 mb-2">
                           <Badge bg="info">
                             {habitacion.maxPersonas}{' '}
-                            {habitacion.maxPersonas === 1
-                              ? 'persona'
-                              : 'personas'}
+                            {habitacion.maxPersonas === 1 ? 'pers.' : 'pers.'}
                           </Badge>
-                        </td>
-                        <td>
+                          <Badge bg={habitacion.disponible ? 'success' : 'secondary'}>
+                            {habitacion.disponible ? 'Disponible' : 'No disponible'}
+                          </Badge>
+                        </div>
+                        <div className="mb-2">
                           <strong>${habitacion.precio.toLocaleString()}</strong>
-                          <div className="text-muted small">
+                          <span className="text-muted small ms-1">
                             {habitacion.tipoPrecio === 'por_habitacion'
-                              ? 'por noche'
-                              : 'por persona/noche'}
+                              ? '/noche'
+                              : '/pers./noche'}
+                          </span>
+                        </div>
+                        {habitacion.servicios && habitacion.servicios.length > 0 && (
+                          <div className="mb-2">
+                            {habitacion.servicios.slice(0, 3).map((s) => (
+                              <Badge
+                                key={s}
+                                bg="light"
+                                text="dark"
+                                className="me-1 mb-1"
+                                style={{ fontSize: '0.7rem' }}
+                              >
+                                {s}
+                              </Badge>
+                            ))}
+                            {habitacion.servicios.length > 3 && (
+                              <Badge bg="light" text="dark" style={{ fontSize: '0.7rem' }}>
+                                +{habitacion.servicios.length - 3}
+                              </Badge>
+                            )}
                           </div>
-                        </td>
-                        <td>
-                          <Form.Check
-                            type="switch"
-                            checked={habitacion.disponible}
-                            onChange={() =>
-                              handleCambiarDisponibilidad(habitacion)
-                            }
-                            label={
-                              habitacion.disponible
-                                ? 'Disponible'
-                                : 'No disponible'
-                            }
-                          />
-                        </td>
-                        <td>
+                        )}
+                      </Card.Body>
+                      <Card.Footer className="d-flex justify-content-between align-items-center bg-white">
+                        <Form.Check
+                          type="switch"
+                          checked={habitacion.disponible}
+                          onChange={() => handleCambiarDisponibilidad(habitacion)}
+                          label=""
+                        />
+                        <div>
                           <Button
                             variant="outline-primary"
                             size="sm"
@@ -513,86 +488,86 @@ export function HosteleriaHabitaciones({
                           >
                             🗑️
                           </Button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </Table>
-              )}
-            </Card.Body>
-          </Card>
-        </Col>
+                        </div>
+                      </Card.Footer>
+                    </Card>
+                  </Col>
+                ))}
+              </Row>
+            )}
+          </Tab.Pane>
 
-        <Col lg={5}>
-          <Card className="sticky-top" style={{ top: '1rem' }}>
-            <Card.Header>
-              <h5 className="mb-0">Vista Previa</h5>
-              <small className="text-muted">Así lo verán tus huéspedes</small>
-            </Card.Header>
-            <Card.Body style={{ maxHeight: '500px', overflowY: 'auto' }}>
-              {habitaciones.filter((h) => h.disponible).length === 0 ? (
-                <p className="text-center text-muted">
-                  No hay habitaciones disponibles
-                </p>
-              ) : (
-                habitaciones
+          {/* Pestaña Vista Previa */}
+          <Tab.Pane eventKey="vista-previa">
+            <p className="text-muted small mb-3">Así lo verán tus huéspedes</p>
+            {habitaciones.filter((h) => h.disponible).length === 0 ? (
+              <p className="text-center text-muted">
+                No hay habitaciones disponibles
+              </p>
+            ) : (
+              <Row xs={1} sm={2} lg={3} className="g-3">
+                {habitaciones
                   .filter((h) => h.disponible)
                   .map((habitacion) => (
-                    <Card key={habitacion.id} className="mb-3">
-                      {habitacion.fotos && habitacion.fotos.length > 0 && (
-                        <Card.Img
-                          variant="top"
-                          src={habitacion.fotos[0]}
-                          style={{ height: '120px', objectFit: 'cover' }}
-                          onError={(e) => {
-                            e.currentTarget.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="120"><rect fill="%23f8f9fa" width="200" height="120"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%23999" font-size="40">🛏️</text></svg>';
-                          }}
-                        />
-                      )}
-                      <Card.Body>
-                        <Card.Title>#{habitacion.numero} - {habitacion.titulo}</Card.Title>
-                        {habitacion.descripcion && (
-                          <Card.Text className="text-muted small">
-                            {habitacion.descripcion}
-                          </Card.Text>
+                    <Col key={habitacion.id}>
+                      <Card className="h-100">
+                        {habitacion.fotos && habitacion.fotos.length > 0 && (
+                          <Card.Img
+                            variant="top"
+                            src={habitacion.fotos[0]}
+                            style={{ height: '140px', objectFit: 'cover' }}
+                            onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
+                              e.currentTarget.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="140"><rect fill="%23f8f9fa" width="200" height="140"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%23999" font-size="40">🛏️</text></svg>';
+                            }}
+                          />
                         )}
-                        <div className="d-flex justify-content-between align-items-center">
-                          <Badge bg="secondary">
-                            Hasta {habitacion.maxPersonas} personas
-                          </Badge>
-                          <span className="text-success fw-bold">
-                            ${habitacion.precio.toLocaleString()}
-                            <small className="text-muted fw-normal">
-                              /
-                              {habitacion.tipoPrecio === 'por_habitacion'
-                                ? 'noche'
-                                : 'pers.'}
-                            </small>
-                          </span>
-                        </div>
-                        {habitacion.servicios &&
-                          habitacion.servicios.length > 0 && (
-                            <div className="mt-2">
-                              {habitacion.servicios.map((s) => (
-                                <Badge
-                                  key={s}
-                                  bg="light"
-                                  text="dark"
-                                  className="me-1"
-                                >
-                                  {s}
-                                </Badge>
-                              ))}
-                            </div>
+                        <Card.Body>
+                          <Card.Title className="fs-6">
+                            #{habitacion.numero} - {habitacion.titulo}
+                          </Card.Title>
+                          {habitacion.descripcion && (
+                            <Card.Text className="text-muted small">
+                              {habitacion.descripcion}
+                            </Card.Text>
                           )}
-                      </Card.Body>
-                    </Card>
-                  ))
-              )}
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
+                          <div className="d-flex justify-content-between align-items-center">
+                            <Badge bg="secondary">
+                              Hasta {habitacion.maxPersonas} personas
+                            </Badge>
+                            <span className="text-success fw-bold">
+                              ${habitacion.precio.toLocaleString()}
+                              <small className="text-muted fw-normal">
+                                /
+                                {habitacion.tipoPrecio === 'por_habitacion'
+                                  ? 'noche'
+                                  : 'pers.'}
+                              </small>
+                            </span>
+                          </div>
+                          {habitacion.servicios &&
+                            habitacion.servicios.length > 0 && (
+                              <div className="mt-2">
+                                {habitacion.servicios.map((s) => (
+                                  <Badge
+                                    key={s}
+                                    bg="light"
+                                    text="dark"
+                                    className="me-1 mb-1"
+                                  >
+                                    {s}
+                                  </Badge>
+                                ))}
+                              </div>
+                            )}
+                        </Card.Body>
+                      </Card>
+                    </Col>
+                  ))}
+              </Row>
+            )}
+          </Tab.Pane>
+        </Tab.Content>
+      </Tab.Container>
 
       {/* Modal Agregar Habitación */}
       <Modal
@@ -725,6 +700,28 @@ export function HosteleriaHabitaciones({
               </Form.Group>
             </Col>
           </Row>
+
+          {nuevaHabitacion.tipoPrecio === 'por_persona' && (
+            <Form.Group className="mb-3">
+              <Form.Label>Mínimo de personas a pagar (opcional)</Form.Label>
+              <Form.Control
+                type="number"
+                min={1}
+                max={nuevaHabitacion.maxPersonas}
+                value={nuevaHabitacion.minimoPersonasAPagar || ''}
+                onChange={(e) =>
+                  setNuevaHabitacion({
+                    ...nuevaHabitacion,
+                    minimoPersonasAPagar: e.target.value ? Number(e.target.value) : undefined,
+                  })
+                }
+                placeholder="Ej: 2"
+              />
+              <Form.Text className="text-muted">
+                Si viene 1 persona pero configuras mínimo 2, se cobrará por 2 personas. No puede ser mayor que la capacidad máxima.
+              </Form.Text>
+            </Form.Group>
+          )}
 
           <Form.Group className="mb-3">
             <Form.Label>Servicios incluidos</Form.Label>
@@ -936,6 +933,28 @@ export function HosteleriaHabitaciones({
                   </Form.Group>
                 </Col>
               </Row>
+
+              {habitacionSeleccionada.tipoPrecio === 'por_persona' && (
+                <Form.Group className="mb-3">
+                  <Form.Label>Mínimo de personas a pagar (opcional)</Form.Label>
+                  <Form.Control
+                    type="number"
+                    min={1}
+                    max={habitacionSeleccionada.maxPersonas}
+                    value={habitacionSeleccionada.minimoPersonasAPagar || ''}
+                    onChange={(e) =>
+                      setHabitacionSeleccionada({
+                        ...habitacionSeleccionada,
+                        minimoPersonasAPagar: e.target.value ? Number(e.target.value) : undefined,
+                      })
+                    }
+                    placeholder="Ej: 2"
+                  />
+                  <Form.Text className="text-muted">
+                    Si viene 1 persona pero configuras mínimo 2, se cobrará por 2 personas. No puede ser mayor que la capacidad máxima.
+                  </Form.Text>
+                </Form.Group>
+              )}
 
               <Form.Group className="mb-3">
                 <Form.Label>Fotos de la Habitación (máx. {MAX_FOTOS})</Form.Label>

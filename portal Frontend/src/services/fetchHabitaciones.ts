@@ -9,6 +9,7 @@ export interface Habitacion {
   maxPersonas: number;
   precio: number;
   tipoPrecio: 'por_habitacion' | 'por_persona';
+  minimoPersonasAPagar?: number;
   fotos?: string[];
   servicios?: string[];
   disponible: boolean;
@@ -22,6 +23,7 @@ export interface NuevaHabitacion {
   maxPersonas: number;
   precio: number;
   tipoPrecio: 'por_habitacion' | 'por_persona';
+  minimoPersonasAPagar?: number;
   fotos?: string[];
   servicios?: string[];
   disponible?: boolean;

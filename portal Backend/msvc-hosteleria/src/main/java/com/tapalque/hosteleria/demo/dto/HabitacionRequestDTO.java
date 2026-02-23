@@ -37,6 +37,8 @@ public class HabitacionRequestDTO {
     @NotBlank(message = "El tipo de precio es obligatorio")
     private String tipoPrecio;
 
+    private Integer minimoPersonasAPagar;
+
     private List<String> fotos;
 
     private List<String> servicios;
@@ -117,5 +119,13 @@ public class HabitacionRequestDTO {
 
     public void setDisponible(Boolean disponible) {
         this.disponible = disponible;
+    }
+
+    public Integer getMinimoPersonasAPagar() {
+        return minimoPersonasAPagar;
+    }
+
+    public void setMinimoPersonasAPagar(Integer minimoPersonasAPagar) {
+        this.minimoPersonasAPagar = minimoPersonasAPagar;
     }
 }

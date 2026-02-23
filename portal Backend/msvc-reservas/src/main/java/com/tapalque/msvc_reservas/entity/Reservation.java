@@ -36,6 +36,13 @@ public class Reservation {
     // Notas adicionales del administrador
     private String notas;
 
+    // Cantidad de huéspedes
+    private Integer cantidadHuespedes;
+
+    // Información de facturación
+    private Boolean requiereFacturacion = false;
+    private BillingInfo billingInfo;
+
     public Reservation() {}
 
     public Reservation(Customer customer, Hotel hotel, StayPeriod stayPeriod, Payment payment, Double totalPrice) {
@@ -169,6 +176,30 @@ public String getNotas() {
 
 public void setNotas(String notas) {
     this.notas = notas;
+}
+
+public Integer getCantidadHuespedes() {
+    return cantidadHuespedes;
+}
+
+public void setCantidadHuespedes(Integer cantidadHuespedes) {
+    this.cantidadHuespedes = cantidadHuespedes;
+}
+
+public Boolean getRequiereFacturacion() {
+    return requiereFacturacion;
+}
+
+public void setRequiereFacturacion(Boolean requiereFacturacion) {
+    this.requiereFacturacion = requiereFacturacion;
+}
+
+public BillingInfo getBillingInfo() {
+    return billingInfo;
+}
+
+public void setBillingInfo(BillingInfo billingInfo) {
+    this.billingInfo = billingInfo;
 }
 
     // --- Inner classes --- //
@@ -392,7 +423,62 @@ public void setNotas(String notas) {
     }
 }
 
+    public static class BillingInfo {
+        private String cuitCuil;
+        private String razonSocial;
+        private String domicilioComercial;
+        private String tipoFactura; // "A" o "B"
+        private String condicionFiscal; // "Monotributista", "Responsable Inscripto", "Consumidor Final"
 
+        public BillingInfo() {}
 
+        public BillingInfo(String cuitCuil, String razonSocial, String domicilioComercial,
+                          String tipoFactura, String condicionFiscal) {
+            this.cuitCuil = cuitCuil;
+            this.razonSocial = razonSocial;
+            this.domicilioComercial = domicilioComercial;
+            this.tipoFactura = tipoFactura;
+            this.condicionFiscal = condicionFiscal;
+        }
 
+        public String getCuitCuil() {
+            return cuitCuil;
+        }
+
+        public void setCuitCuil(String cuitCuil) {
+            this.cuitCuil = cuitCuil;
+        }
+
+        public String getRazonSocial() {
+            return razonSocial;
+        }
+
+        public void setRazonSocial(String razonSocial) {
+            this.razonSocial = razonSocial;
+        }
+
+        public String getDomicilioComercial() {
+            return domicilioComercial;
+        }
+
+        public void setDomicilioComercial(String domicilioComercial) {
+            this.domicilioComercial = domicilioComercial;
+        }
+
+        public String getTipoFactura() {
+            return tipoFactura;
+        }
+
+        public void setTipoFactura(String tipoFactura) {
+            this.tipoFactura = tipoFactura;
+        }
+
+        public String getCondicionFiscal() {
+            return condicionFiscal;
+        }
+
+        public void setCondicionFiscal(String condicionFiscal) {
+            this.condicionFiscal = condicionFiscal;
+        }
+    }
 }

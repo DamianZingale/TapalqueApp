@@ -25,11 +25,17 @@ public class PoliticaServiceImpl implements PoliticaService {
     }
 
     @Override
-    public Mono<PoliticaGlobal> actualizarPolitica(String hotelId, Boolean reservasHabilitadas, Boolean politicaFdsActiva, String actualizadoPor) {
+    public Mono<PoliticaGlobal> actualizarPolitica(String hotelId, Boolean reservasHabilitadas, Boolean politicaFdsActiva, Integer estadiaMinima, String actualizadoPor) {
         return obtenerPolitica(hotelId)
                 .flatMap(politica -> {
                     if (reservasHabilitadas != null) politica.setReservasHabilitadas(reservasHabilitadas);
                     if (politicaFdsActiva != null) politica.setPoliticaFdsActiva(politicaFdsActiva);
+                    if (estadiaMinima != null) {
+                        if (estadiaMinima < 1) {
+                            throw new IllegalArgumentException("La estadía mínima debe ser al menos 1 noche");
+                        }
+                        politica.setEstadiaMinima(estadiaMinima);
+                    }
                     politica.setFechaActualizacion(LocalDateTime.now());
                     politica.setActualizadoPor(actualizadoPor);
                     return politicaRepository.save(politica);

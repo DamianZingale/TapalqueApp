@@ -29,6 +29,14 @@ export interface Payment {
   remainingAmount: number;
 }
 
+export interface BillingInfo {
+  cuitCuil: string;
+  razonSocial: string;
+  domicilioComercial: string;
+  tipoFactura: 'A' | 'B';
+  condicionFiscal: 'Monotributista' | 'Responsable Inscripto' | 'Consumidor Final';
+}
+
 export interface Reserva {
   id: string;
   customer: Customer;
@@ -36,6 +44,9 @@ export interface Reserva {
   stayPeriod: StayPeriod;
   payment: Payment;
   totalPrice: number;
+  cantidadHuespedes?: number;
+  requiereFacturacion?: boolean;
+  billingInfo?: BillingInfo;
   isActive: boolean;
   isCancelled: boolean;
   dateCreated: string;
@@ -197,5 +208,51 @@ export async function fetchDisponibilidad(
   } catch (error) {
     console.error('Error en fetchDisponibilidad:', error);
     return [];
+  }
+}
+
+// Política de reservas
+export interface PoliticaGlobal {
+  hotelId: string;
+  reservasHabilitadas: boolean;
+  politicaFdsActiva: boolean;
+  estadiaMinima: number;
+  fechaActualizacion: string;
+  actualizadoPor?: string;
+}
+
+export async function fetchPoliticaGlobal(hotelId: string): Promise<PoliticaGlobal | null> {
+  try {
+    const response = await fetch(
+      `/api/reservas/politica/${hotelId}`,
+      { headers: getAuthHeaders() }
+    );
+    if (!response.ok) {
+      throw new Error(`Error al obtener política: ${response.status}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error en fetchPoliticaGlobal:', error);
+    return null;
+  }
+}
+
+export async function actualizarPoliticaGlobal(
+  hotelId: string,
+  politica: Partial<PoliticaGlobal>
+): Promise<PoliticaGlobal | null> {
+  try {
+    const response = await fetch(`/api/reservas/politica/${hotelId}`, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(politica),
+    });
+    if (!response.ok) {
+      throw new Error(`Error al actualizar política: ${response.status}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error al actualizar política:', error);
+    return null;
   }
 }

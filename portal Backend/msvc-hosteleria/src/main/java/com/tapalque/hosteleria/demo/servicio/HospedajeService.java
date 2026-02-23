@@ -143,6 +143,30 @@ public class HospedajeService {
         return new HospedajeDTO(hospedaje);
     }
 
+    @CacheEvict(value = "hospedajes", allEntries = true)
+    @Transactional
+    public HospedajeDTO updateConfiguracionFacturacion(Long id, Boolean permiteFacturacion, String tipoIva) {
+        Hospedaje hospedaje = hospedajeRepository.findById(id)
+                .orElseThrow(() -> new jakarta.persistence.EntityNotFoundException("No existe el hospedaje con id " + id));
+
+        if (permiteFacturacion != null) {
+            hospedaje.setPermiteFacturacion(permiteFacturacion);
+        }
+
+        if (tipoIva != null) {
+            try {
+                com.tapalque.hosteleria.demo.entidades.TipoIVA tipoIvaEnum =
+                    com.tapalque.hosteleria.demo.entidades.TipoIVA.valueOf(tipoIva);
+                hospedaje.setTipoIva(tipoIvaEnum);
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Tipo de IVA inválido: " + tipoIva);
+            }
+        }
+
+        hospedajeRepository.save(hospedaje);
+        return new HospedajeDTO(hospedaje);
+    }
+
     // Método para mapear de DTORequest a Entidad
     private Hospedaje mapToEntity(HospedajeRequestDTO dto) {
         Hospedaje hospedaje = new Hospedaje();
