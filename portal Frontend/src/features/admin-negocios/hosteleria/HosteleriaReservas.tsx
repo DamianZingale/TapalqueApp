@@ -27,6 +27,7 @@ import {
   cancelarReserva,
   crearReservaExterna,
   fetchReservasByHotel,
+  fetchReservasParaCierre,
 } from '../../../services/fetchReservas';
 import { useNotifications } from '../../../shared/context/NotificationContext';
 import { useWebSocket } from '../hooks/useWebSocket';
@@ -38,8 +39,14 @@ interface HosteleriaReservasProps {
   businessName: string;
 }
 
+interface ResumenCierreReserva {
+  reserva: Reserva;
+  montoPeriodo: number; // monto pagado solo en este período
+  medioPagoPeriodo: string; // medio de pago predominante del período
+}
+
 interface ResumenCierreHospedaje {
-  reservas: Reserva[];
+  items: ResumenCierreReserva[];
   totalReservas: number;
   totalIngresado: number;
   porMedioDePago: Record<string, number>;
@@ -430,6 +437,9 @@ export function HosteleriaReservas({
         isActive: true,
         isCancelled: false,
         notas: formReserva.notas,
+        paymentHistory: amountPaid > 0
+          ? [{ date: new Date().toISOString(), amount: amountPaid, paymentType: formReserva.paymentType, description: 'Pago inicial al crear reserva' }]
+          : [],
       };
 
       const creada = await crearReservaExterna(nuevaReserva);
@@ -492,6 +502,18 @@ export function HosteleriaReservas({
         ? `${reservaSeleccionada.notas}\n${notaPagoNueva}`
         : notaPagoNueva;
 
+      // Agregar registro al historial de pagos
+      const nuevoPaymentRecord = {
+        date: new Date().toISOString(),
+        amount: montoAdicional,
+        paymentType: metodoPagoRestante,
+        description: notasPago || 'Pago registrado manualmente',
+      };
+      const historialActualizado = [
+        ...(reservaSeleccionada.paymentHistory || []),
+        nuevoPaymentRecord,
+      ];
+
       const reservaActualizada: Reserva = {
         ...reservaSeleccionada,
         payment: {
@@ -504,6 +526,7 @@ export function HosteleriaReservas({
           paymentType: metodoPagoRestante,
         },
         notas: notasActualizadas,
+        paymentHistory: historialActualizado,
       };
 
       const resultado = await actualizarReserva(reservaActualizada);
@@ -561,25 +584,47 @@ export function HosteleriaReservas({
       const desde = hospedaje?.lastCloseDate || new Date(new Date().setHours(0, 0, 0, 0)).toISOString();
       const hasta = new Date().toISOString();
 
-      // fetchReservasByHotel acepta desde/hasta como LocalDate (YYYY-MM-DD)
-      const desdeDate = desde.slice(0, 10);
-      const hastaDate = hasta.slice(0, 10);
+      const data = await fetchReservasParaCierre(businessId, desde, hasta);
 
-      const data = await fetchReservasByHotel(businessId, desdeDate, hastaDate);
-      // Solo reservas con pagos realizados
-      const conPagos = data.filter((r) => r.payment.amountPaid > 0);
-
-      // Agrupar por medio de pago
+      // Para cada reserva, calcular solo el monto pagado en este período
+      const items: ResumenCierreReserva[] = [];
       const porMedioDePago: Record<string, number> = {};
-      for (const r of conPagos) {
-        const tipo = r.payment.paymentType || 'OTRO';
-        porMedioDePago[tipo] = (porMedioDePago[tipo] || 0) + r.payment.amountPaid;
+      let totalIngresado = 0;
+
+      const desdeDate = new Date(desde);
+      const hastaDate = new Date(hasta);
+
+      for (const r of data) {
+        const pagosEnPeriodo = (r.paymentHistory || []).filter((p) => {
+          const fechaPago = new Date(p.date);
+          return fechaPago >= desdeDate && fechaPago <= hastaDate;
+        });
+
+        if (pagosEnPeriodo.length === 0) continue;
+
+        let montoPeriodo = 0;
+        for (const p of pagosEnPeriodo) {
+          montoPeriodo += p.amount;
+          const tipo = p.paymentType || 'OTRO';
+          porMedioDePago[tipo] = (porMedioDePago[tipo] || 0) + p.amount;
+        }
+
+        // Medio de pago predominante del período (el que más monto acumula)
+        const mediosPago: Record<string, number> = {};
+        for (const p of pagosEnPeriodo) {
+          const tipo = p.paymentType || 'OTRO';
+          mediosPago[tipo] = (mediosPago[tipo] || 0) + p.amount;
+        }
+        const medioPagoPeriodo = Object.entries(mediosPago).sort((a, b) => b[1] - a[1])[0]?.[0] || '-';
+
+        totalIngresado += montoPeriodo;
+        items.push({ reserva: r, montoPeriodo, medioPagoPeriodo });
       }
 
       const resumen: ResumenCierreHospedaje = {
-        reservas: conPagos,
-        totalReservas: conPagos.length,
-        totalIngresado: conPagos.reduce((sum, r) => sum + r.payment.amountPaid, 0),
+        items,
+        totalReservas: items.length,
+        totalIngresado,
         porMedioDePago,
         desde,
         hasta,
@@ -647,15 +692,15 @@ export function HosteleriaReservas({
       yPos += 7;
     }
 
-    if (resumenCierre.reservas.length > 0) {
-      const tableData = resumenCierre.reservas.map((r) => [
+    if (resumenCierre.items.length > 0) {
+      const tableData = resumenCierre.items.map(({ reserva: r, montoPeriodo, medioPagoPeriodo }) => [
         `#${r.id.slice(-6)}`,
         r.customer.customerName,
         r.roomNumber ? `Hab. #${r.roomNumber}` : '-',
         new Date(r.stayPeriod.checkInDate).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' }),
         new Date(r.stayPeriod.checkOutDate).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' }),
-        LABEL_MEDIO_PAGO[r.payment.paymentType] || r.payment.paymentType || '-',
-        `$${r.payment.amountPaid.toLocaleString('es-AR')}`,
+        LABEL_MEDIO_PAGO[medioPagoPeriodo] || medioPagoPeriodo || '-',
+        `$${montoPeriodo.toLocaleString('es-AR')}`,
       ]);
 
       autoTable(doc, {
@@ -1640,7 +1685,7 @@ export function HosteleriaReservas({
                 </Col>
               </Row>
 
-              {resumenCierre.reservas.length > 0 && (
+              {resumenCierre.items.length > 0 && (
                 <Table size="sm" striped responsive>
                   <thead>
                     <tr>
@@ -1650,19 +1695,19 @@ export function HosteleriaReservas({
                       <th>Check-in</th>
                       <th>Check-out</th>
                       <th>Medio de pago</th>
-                      <th>Ingresado</th>
+                      <th>Ingresado en período</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {resumenCierre.reservas.map((r) => (
+                    {resumenCierre.items.map(({ reserva: r, montoPeriodo, medioPagoPeriodo }) => (
                       <tr key={r.id}>
                         <td>#{r.id.slice(-6)}</td>
                         <td>{r.customer.customerName}</td>
                         <td>{r.roomNumber ? `#${r.roomNumber}` : '-'}</td>
                         <td>{new Date(r.stayPeriod.checkInDate).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' })}</td>
                         <td>{new Date(r.stayPeriod.checkOutDate).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' })}</td>
-                        <td>{LABEL_MEDIO_PAGO[r.payment.paymentType] || r.payment.paymentType || '-'}</td>
-                        <td>${r.payment.amountPaid.toLocaleString('es-AR')}</td>
+                        <td>{LABEL_MEDIO_PAGO[medioPagoPeriodo] || medioPagoPeriodo || '-'}</td>
+                        <td>${montoPeriodo.toLocaleString('es-AR')}</td>
                       </tr>
                     ))}
                   </tbody>

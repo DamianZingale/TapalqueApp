@@ -106,6 +106,19 @@ public class ReservationController {
             });
     }
 
+    @GetMapping("/cierre/{hotelId}")
+    public Flux<ReservationDTO> getReservationsForCierre(
+            @PathVariable String hotelId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime desde,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime hasta) {
+        Objects.requireNonNull(hotelId, "Hotel ID cannot be null");
+        return reservationService.getReservationsWithPaymentsInRange(hotelId, desde, hasta)
+            .onErrorResume(e -> {
+                logger.log(System.Logger.Level.ERROR, () -> "Error fetching reservations for cierre: " + e.getMessage());
+                return Flux.empty();
+            });
+    }
+
     @GetMapping("/by-customer/{customerId}")
     public Flux<ReservationDTO> getReservationsByCustomer(
             @PathVariable String customerId,

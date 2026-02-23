@@ -326,17 +326,6 @@ export function HosteleriaConfiguracion({ businessId, businessName }: Props) {
           )}
         </Card.Body>
       </Card>
-
-      {/* Info adicional */}
-      <Card>
-        <Card.Header>Información del negocio</Card.Header>
-        <Card.Body>
-          <p><strong>ID del negocio:</strong> {businessId}</p>
-          <p className="text-muted small mb-0">
-            Este ID se utiliza para identificar tu negocio en el sistema de pagos.
-          </p>
-        </Card.Body>
-      </Card>
     </div>
   );
 }

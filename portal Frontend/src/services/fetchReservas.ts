@@ -37,6 +37,13 @@ export interface BillingInfo {
   condicionFiscal: 'Monotributista' | 'Responsable Inscripto' | 'Consumidor Final';
 }
 
+export interface PaymentRecord {
+  date: string;
+  amount: number;
+  paymentType: string;
+  description?: string;
+}
+
 export interface Reserva {
   id: string;
   customer: Customer;
@@ -56,6 +63,7 @@ export interface Reserva {
   fechaPago?: string;
   roomNumber?: number;
   notas?: string;
+  paymentHistory?: PaymentRecord[];
 }
 
 function getAuthHeaders(): HeadersInit {
@@ -185,6 +193,27 @@ export async function fetchReservaById(reservaId: string): Promise<Reserva | nul
   } catch (error) {
     console.error('Error en fetchReservaById:', error);
     return null;
+  }
+}
+
+// Reservas con pagos en un rango de fechas (para cierre del día)
+export async function fetchReservasParaCierre(
+  hotelId: string,
+  desde: string,
+  hasta: string
+): Promise<Reserva[]> {
+  try {
+    const response = await fetch(
+      `/api/reservas/reservations/cierre/${hotelId}?desde=${encodeURIComponent(desde)}&hasta=${encodeURIComponent(hasta)}`,
+      { headers: getAuthHeaders() }
+    );
+    if (!response.ok) {
+      throw new Error(`Error al obtener reservas para cierre: ${response.status}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error en fetchReservasParaCierre:', error);
+    return [];
   }
 }
 

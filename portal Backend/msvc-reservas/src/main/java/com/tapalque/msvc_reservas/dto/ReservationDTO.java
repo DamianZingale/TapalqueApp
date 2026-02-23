@@ -1,6 +1,7 @@
 package com.tapalque.msvc_reservas.dto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class ReservationDTO {
     private String id;
@@ -18,6 +19,7 @@ public class ReservationDTO {
     private Integer cantidadHuespedes;
     private Boolean requiereFacturacion;
     private BillingInfoDTO billingInfo;
+    private List<PaymentRecordDTO> paymentHistory;
 
     public ReservationDTO() {}
 
@@ -147,5 +149,13 @@ public class ReservationDTO {
 
     public void setBillingInfo(BillingInfoDTO billingInfo) {
         this.billingInfo = billingInfo;
+    }
+
+    public List<PaymentRecordDTO> getPaymentHistory() {
+        return paymentHistory;
+    }
+
+    public void setPaymentHistory(List<PaymentRecordDTO> paymentHistory) {
+        this.paymentHistory = paymentHistory;
     }
 }

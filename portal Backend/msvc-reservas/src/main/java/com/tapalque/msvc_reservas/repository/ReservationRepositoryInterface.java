@@ -30,6 +30,10 @@ public interface ReservationRepositoryInterface extends ReactiveMongoRepository<
     @Query("{ 'hotel.hotelId': ?0, 'stayPeriod.checkInDate': { $lt: ?2 }, 'stayPeriod.checkOutDate': { $gt: ?1 }, 'isActive': true, 'isCancelled': false }")
     Flux<Reservation> findByHotelAndStayPeriodOverlap(String hotelId, LocalDateTime desde, LocalDateTime hasta);
 
+    // Reservas de un hotel que tienen al menos un pago registrado en el rango de fechas (para cierre del día)
+    @Query("{ 'hotel.hotelId': ?0, 'paymentHistory': { $elemMatch: { 'date': { $gte: ?1, $lte: ?2 } } } }")
+    Flux<Reservation> findByHotelIdWithPaymentsInRange(String hotelId, LocalDateTime desde, LocalDateTime hasta);
+
     // Igual que la anterior pero también incluye reservas pendientes de pago (creadas hace menos de X minutos)
     // Esto bloquea temporalmente la habitación mientras el usuario completa el pago
     @Query("{ 'hotel.hotelId': ?0, 'stayPeriod.checkInDate': { $lt: ?2 }, 'stayPeriod.checkOutDate': { $gt: ?1 }, 'isCancelled': false, $or: [ { 'isActive': true }, { 'isActive': false, 'payment.isPaid': false, 'dateCreated': { $gte: ?3 } } ] }")

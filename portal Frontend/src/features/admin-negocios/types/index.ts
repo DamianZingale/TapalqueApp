@@ -117,6 +117,14 @@ export interface PagoReserva {
   remainingAmount: number;
 }
 
+// Registro individual de pago (historial)
+export interface PaymentRecord {
+  date: string;
+  amount: number;
+  paymentType: string;
+  description?: string;
+}
+
 // Información de facturación
 export interface BillingInfo {
   cuitCuil: string;
@@ -148,6 +156,7 @@ export interface Reserva {
   mercadoPagoId?: string;
   fechaPago?: string;
   notas?: string;
+  paymentHistory?: PaymentRecord[];
 }
 
 // Item de menú

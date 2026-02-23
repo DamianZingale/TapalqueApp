@@ -4,6 +4,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Objects;
 
 import org.springframework.scheduling.annotation.Scheduled;
@@ -14,6 +15,7 @@ import com.tapalque.msvc_reservas.client.MercadoPagoClient;
 import com.tapalque.msvc_reservas.dto.PagoEventoDTO;
 import com.tapalque.msvc_reservas.dto.ReservationDTO;
 import com.tapalque.msvc_reservas.entity.Reservation;
+import com.tapalque.msvc_reservas.enums.PaymentType;
 import com.tapalque.msvc_reservas.maper.dto.ReservationMapper;
 import com.tapalque.msvc_reservas.repository.ReservationRepositoryInterface;
 
@@ -134,10 +136,8 @@ public class ReservationServiceImpl implements ReservationService {
                         reservation.setDateUpdated(LocalDateTime.now());
 
                         return reservationRepository.save(reservation)
-                                .map(ReservationMapper::toDto)
-                                .doOnSuccess(dto -> {
-                                    if (dto != null) adminNotificationService.notificarNuevaReserva(dto);
-                                });
+                                .map(ReservationMapper::toDto);
+                                // Nota: No notificamos aquí. La notificación se envía cuando se confirma el pago en confirmarPagoReserva()
                     })
                     .orElse(Mono.error(new IllegalArgumentException(
                         "Habitación número " + roomNumber + " no encontrada en el hospedaje")));
@@ -259,15 +259,29 @@ public Mono<ReservationDTO> updateReservation(ReservationDTO reservationDto) {
     }
 
     @Override
+    public Flux<ReservationDTO> getReservationsWithPaymentsInRange(
+            String hotelId, LocalDateTime desde, LocalDateTime hasta) {
+        return reservationRepository.findByHotelIdWithPaymentsInRange(hotelId, desde, hasta)
+                .map(ReservationMapper::toDto);
+    }
+
+    @Override
     public void confirmarPagoReserva(String reservaId, PagoEventoDTO evento) {
         reservationRepository.findById(reservaId)
             .flatMap(reservation -> {
                 // Actualizar estado de pago con el monto recibido
+                double montoRecibido = evento.getMonto() != null ? evento.getMonto().doubleValue() : 0.0;
                 if (reservation.getPayment() != null) {
-                    double montoRecibido = evento.getMonto() != null ? evento.getMonto().doubleValue() : 0.0;
                     // setAmountPaid recalcula remainingAmount, isPaid y hasPendingAmount
                     reservation.getPayment().setAmountPaid(montoRecibido);
                 }
+                // Registrar en historial de pagos
+                if (reservation.getPaymentHistory() == null) {
+                    reservation.setPaymentHistory(new ArrayList<>());
+                }
+                reservation.getPaymentHistory().add(new Reservation.PaymentRecord(
+                    LocalDateTime.now(), montoRecibido, PaymentType.MERCADO_PAGO, "Pago confirmado via Mercado Pago"
+                ));
                 reservation.setIsActive(true);
                 reservation.setTransaccionId(evento.getTransaccionId());
                 reservation.setMercadoPagoId(evento.getMercadoPagoId());
@@ -278,7 +292,8 @@ public Mono<ReservationDTO> updateReservation(ReservationDTO reservationDto) {
             .doOnSuccess(reservation -> {
                 System.out.println("Reserva " + reservaId + " confirmada como PAGADA");
                 if (reservation != null) {
-                    adminNotificationService.notificarReservaActualizada(ReservationMapper.toDto(reservation));
+                    // Notificamos como NUEVA reserva cuando se confirma el pago (es cuando realmente se crea para el admin)
+                    adminNotificationService.notificarNuevaReserva(ReservationMapper.toDto(reservation));
                 }
             })
             .doOnError(error -> System.err.println("Error al confirmar pago de reserva " + reservaId + ": " + error.getMessage()))

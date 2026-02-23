@@ -35,6 +35,10 @@ public interface ReservationService {
     public Flux<ReservationDTO> getReservationsByHotelAndStayOverlapIncludingPending(
             String hotelId, LocalDateTime desde, LocalDateTime hasta);
 
+    // Reservas con pagos registrados en un rango de fechas (para cierre del día)
+    public Flux<ReservationDTO> getReservationsWithPaymentsInRange(
+            String hotelId, LocalDateTime desde, LocalDateTime hasta);
+
     // Métodos para RabbitMQ - confirmación de pagos
     void confirmarPagoReserva(String reservaId, PagoEventoDTO evento);
     void rechazarPagoReserva(String reservaId, PagoEventoDTO evento);

@@ -481,15 +481,8 @@ export default function HospedajeDetailPage() {
 
                       {/* Alerta de IVA adicional */}
                       {requiereFacturacion && data?.tipoIva === 'ADICIONAL' && (
-                        <div className="alert alert-info mt-2 mb-0 py-2 small">
-                          <strong>Información:</strong> Se agregará un 21% de IVA al total
-                        </div>
-                      )}
-
-                      {/* Info de IVA incluido */}
-                      {requiereFacturacion && data?.tipoIva === 'INCLUIDO' && (
-                        <div className="alert alert-info mt-2 mb-0 py-2 small">
-                          <strong>Información:</strong> El precio ya incluye IVA
+                        <div className="alert alert-warning mt-2 mb-0 py-2 small">
+                          <strong>⚠️ Atención:</strong> Se agregará un 21% de IVA adicional al precio total
                         </div>
                       )}
                     </div>

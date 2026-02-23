@@ -1,6 +1,8 @@
 package com.tapalque.msvc_reservas.entity;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -42,6 +44,9 @@ public class Reservation {
     // Información de facturación
     private Boolean requiereFacturacion = false;
     private BillingInfo billingInfo;
+
+    // Historial de pagos (cada pago individual con fecha, monto y método)
+    private List<PaymentRecord> paymentHistory = new ArrayList<>();
 
     public Reservation() {}
 
@@ -200,6 +205,14 @@ public BillingInfo getBillingInfo() {
 
 public void setBillingInfo(BillingInfo billingInfo) {
     this.billingInfo = billingInfo;
+}
+
+public List<PaymentRecord> getPaymentHistory() {
+    return paymentHistory;
+}
+
+public void setPaymentHistory(List<PaymentRecord> paymentHistory) {
+    this.paymentHistory = paymentHistory;
 }
 
     // --- Inner classes --- //
@@ -479,6 +492,54 @@ public void setBillingInfo(BillingInfo billingInfo) {
 
         public void setCondicionFiscal(String condicionFiscal) {
             this.condicionFiscal = condicionFiscal;
+        }
+    }
+
+    public static class PaymentRecord {
+        private LocalDateTime date;
+        private Double amount;
+        private PaymentType paymentType;
+        private String description;
+
+        public PaymentRecord() {}
+
+        public PaymentRecord(LocalDateTime date, Double amount, PaymentType paymentType, String description) {
+            this.date = date;
+            this.amount = amount;
+            this.paymentType = paymentType;
+            this.description = description;
+        }
+
+        public LocalDateTime getDate() {
+            return date;
+        }
+
+        public void setDate(LocalDateTime date) {
+            this.date = date;
+        }
+
+        public Double getAmount() {
+            return amount;
+        }
+
+        public void setAmount(Double amount) {
+            this.amount = amount;
+        }
+
+        public PaymentType getPaymentType() {
+            return paymentType;
+        }
+
+        public void setPaymentType(PaymentType paymentType) {
+            this.paymentType = paymentType;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public void setDescription(String description) {
+            this.description = description;
         }
     }
 }
