@@ -38,4 +38,13 @@ public interface ReservationRepositoryInterface extends ReactiveMongoRepository<
     // Esto bloquea temporalmente la habitación mientras el usuario completa el pago
     @Query("{ 'hotel.hotelId': ?0, 'stayPeriod.checkInDate': { $lt: ?2 }, 'stayPeriod.checkOutDate': { $gt: ?1 }, 'isCancelled': false, $or: [ { 'isActive': true }, { 'isActive': false, 'payment.isPaid': false, 'dateCreated': { $gte: ?3 } } ] }")
     Flux<Reservation> findByHotelAndStayPeriodOverlapIncludingPending(String hotelId, LocalDateTime desde, LocalDateTime hasta, LocalDateTime creadoDespuesDe);
+
+    // Reservas online (MercadoPago) abandonadas: sin evento de pago recibido (transaccionId null),
+    // no pagadas, no canceladas, y creadas antes del límite de tiempo
+    @Query("{ 'payment.paymentType': 'MERCADO_PAGO', 'payment.isPaid': false, 'isCancelled': false, 'transaccionId': null, 'dateCreated': { $lt: ?0 } }")
+    Flux<Reservation> findAbandonedOnlineReservations(LocalDateTime creadoAntesDe);
+
+    // Reservas canceladas sin pago (para limpieza semanal)
+    @Query("{ 'isCancelled': true, 'payment.isPaid': false }")
+    Flux<Reservation> findCancelledUnpaidReservations();
 }

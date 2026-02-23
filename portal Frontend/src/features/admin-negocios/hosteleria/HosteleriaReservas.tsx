@@ -1,6 +1,8 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 import {
   Alert,
   Badge,
@@ -16,6 +18,10 @@ import {
   Tabs,
 } from 'react-bootstrap';
 import { api } from '../../../config/api';
+import {
+  fetchHabitacionesByHospedaje,
+  type Habitacion,
+} from '../../../services/fetchHabitaciones';
 import {
   fetchHospedajeById,
   type Hospedaje,
@@ -114,6 +120,8 @@ export function HosteleriaReservas({
   const [errorForm, setErrorForm] = useState<string | null>(null);
 
   const [roomNumberInput, setRoomNumberInput] = useState('');
+  const [habitaciones, setHabitaciones] = useState<Habitacion[]>([]);
+  const [selectedHabitacion, setSelectedHabitacion] = useState<Habitacion | null>(null);
 
   // Estado para modal de detalle de reserva
   const [modalDetalle, setModalDetalle] = useState(false);
@@ -182,6 +190,7 @@ export function HosteleriaReservas({
   useEffect(() => {
     cargarReservas();
     cargarHospedaje();
+    fetchHabitacionesByHospedaje(businessId).then(setHabitaciones).catch(() => {});
     // Registra el tópico en el contexto global para mantener la conexión
     // activa aunque el admin navegue a otra sección
     registerAdminTopic(businessId, 'HOSPEDAJE');
@@ -373,6 +382,36 @@ export function HosteleriaReservas({
     }
   };
 
+  // --- Calendario con disponibilidad por habitación ---
+  const formatLocalDate = (date: Date): string => {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  };
+
+  const diasOcupadosHabitacion = useMemo((): Set<string> => {
+    if (!selectedHabitacion) return new Set();
+    const occupied = new Set<string>();
+    for (const r of reservas) {
+      if (r.roomNumber !== selectedHabitacion.numero) continue;
+      if (r.isCancelled) continue;
+      // Usar noon local para evitar problemas de DST
+      const cur = new Date(r.stayPeriod.checkInDate.slice(0, 10) + 'T12:00:00');
+      const end = new Date(r.stayPeriod.checkOutDate.slice(0, 10) + 'T12:00:00');
+      while (cur <= end) {
+        occupied.add(formatLocalDate(cur));
+        cur.setDate(cur.getDate() + 1);
+      }
+    }
+    return occupied;
+  }, [selectedHabitacion, reservas]);
+
+  const getDayClassName = (date: Date): string => {
+    if (!selectedHabitacion) return '';
+    return diasOcupadosHabitacion.has(formatLocalDate(date)) ? 'dia-ocupado' : 'dia-libre';
+  };
+
   const handleCrearReserva = async () => {
     setErrorForm(null);
 
@@ -451,6 +490,7 @@ export function HosteleriaReservas({
         setTotalPriceInput('');
         setAmountPaidInput('');
         setRoomNumberInput('');
+        setSelectedHabitacion(null);
         setMensaje({ tipo: 'success', texto: 'Reserva creada correctamente' });
       }
     } catch (error) {
@@ -1080,7 +1120,7 @@ export function HosteleriaReservas({
       </Tabs>
 
       {/* Modal Crear Reserva */}
-      <Modal show={modalCrear} onHide={() => setModalCrear(false)} size="lg">
+      <Modal show={modalCrear} onHide={() => { setModalCrear(false); setSelectedHabitacion(null); }} size="lg">
         <Modal.Header closeButton>
           <Modal.Title>Crear Reserva Manual</Modal.Title>
         </Modal.Header>
@@ -1153,48 +1193,96 @@ export function HosteleriaReservas({
             </Col>
           </Row>
 
+          <style>{`
+            .react-datepicker__day.dia-ocupado {
+              background-color: #dc3545 !important;
+              color: white !important;
+              border-radius: 50%;
+              font-weight: bold;
+            }
+            .react-datepicker__day.dia-ocupado:hover {
+              background-color: #b02a37 !important;
+            }
+            .react-datepicker__day.dia-libre {
+              background-color: #198754 !important;
+              color: white !important;
+              border-radius: 50%;
+            }
+            .react-datepicker__day.dia-libre:hover {
+              background-color: #146c43 !important;
+            }
+            .react-datepicker-wrapper { width: 100%; }
+          `}</style>
+
           <hr />
           <h6 className="text-muted mb-3">Datos de la Reserva</h6>
 
           <Row>
             <Col md={4}>
               <Form.Group className="mb-3">
-                <Form.Label>N° de habitación</Form.Label>
-                <Form.Control
-                  type="number"
-                  min={1}
-                  value={roomNumberInput}
-                  onChange={(e) => setRoomNumberInput(e.target.value)}
-                  placeholder="Ej: 101"
-                />
+                <Form.Label>Habitación</Form.Label>
+                <Form.Select
+                  value={selectedHabitacion?.id ?? ''}
+                  onChange={(e) => {
+                    const hab = habitaciones.find((h) => h.id === e.target.value) ?? null;
+                    setSelectedHabitacion(hab);
+                    setRoomNumberInput(hab ? String(hab.numero) : '');
+                    setFormReserva((prev) => ({ ...prev, checkInDate: '', checkOutDate: '' }));
+                  }}
+                >
+                  <option value="">Seleccionar habitación...</option>
+                  {habitaciones.map((h) => (
+                    <option key={h.id} value={h.id}>
+                      Hab. {h.numero} – {h.titulo}
+                    </option>
+                  ))}
+                </Form.Select>
+                {selectedHabitacion && (
+                  <Form.Text className="text-muted">
+                    Rojo = ocupado · Verde = libre
+                  </Form.Text>
+                )}
               </Form.Group>
             </Col>
             <Col md={4}>
               <Form.Group className="mb-3">
                 <Form.Label>Check-in *</Form.Label>
-                <Form.Control
-                  type="date"
-                  value={formReserva.checkInDate}
-                  onChange={(e) =>
+                <DatePicker
+                  selected={formReserva.checkInDate ? new Date(formReserva.checkInDate + 'T12:00:00') : null}
+                  onChange={(date) =>
                     setFormReserva({
                       ...formReserva,
-                      checkInDate: e.target.value,
+                      checkInDate: date ? formatLocalDate(date) : '',
+                      checkOutDate: '',
                     })
                   }
+                  dateFormat="dd/MM/yyyy"
+                  className="form-control"
+                  placeholderText="dd/mm/aaaa"
+                  dayClassName={getDayClassName}
+                  minDate={new Date()}
                 />
               </Form.Group>
             </Col>
             <Col md={4}>
               <Form.Group className="mb-3">
                 <Form.Label>Check-out *</Form.Label>
-                <Form.Control
-                  type="date"
-                  value={formReserva.checkOutDate}
-                  onChange={(e) =>
+                <DatePicker
+                  selected={formReserva.checkOutDate ? new Date(formReserva.checkOutDate + 'T12:00:00') : null}
+                  onChange={(date) =>
                     setFormReserva({
                       ...formReserva,
-                      checkOutDate: e.target.value,
+                      checkOutDate: date ? formatLocalDate(date) : '',
                     })
+                  }
+                  dateFormat="dd/MM/yyyy"
+                  className="form-control"
+                  placeholderText="dd/mm/aaaa"
+                  dayClassName={getDayClassName}
+                  minDate={
+                    formReserva.checkInDate
+                      ? new Date(formReserva.checkInDate + 'T12:00:00')
+                      : new Date()
                   }
                 />
               </Form.Group>

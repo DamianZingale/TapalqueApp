@@ -18,6 +18,9 @@ public interface ReservationService {
     public Flux<ReservationDTO> getReservationsByCustomer(String customerId);
     public void cleanUnpaidReservations();
 
+    // Cancela reservas online abandonadas (MercadoPago, sin pago, sin evento recibido) tras 5 minutos
+    public void cancelarReservasOnlineAbandonadas();
+
     // limpieza de reservas pagadas con más de 3 meses
     public void cleanOldPaidReservations();
 

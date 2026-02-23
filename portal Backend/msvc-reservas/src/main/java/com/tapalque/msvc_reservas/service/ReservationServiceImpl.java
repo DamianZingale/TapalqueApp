@@ -204,11 +204,30 @@ public Mono<ReservationDTO> updateReservation(ReservationDTO reservationDto) {
     }
 
     @Override
+    @Scheduled(fixedDelay = 600000) // cada 10 minutos
+    public void cancelarReservasOnlineAbandonadas() {
+        LocalDateTime limite = LocalDateTime.now().minusMinutes(5);
+        reservationRepository.findAbandonedOnlineReservations(limite)
+            .flatMap(r -> {
+                r.setIsCancelled(true);
+                r.setIsActive(false);
+                r.setDateUpdated(LocalDateTime.now());
+                return reservationRepository.save(r);
+            })
+            .doOnComplete(() -> System.out.println("Limpieza de reservas online abandonadas completada."))
+            .subscribe();
+    }
+
+    @Override
     @Scheduled(cron = "0 0 3 * * SUN")
     public void cleanUnpaidReservations() {
-    reservationRepository.deleteAllByPayment_IsPaidFalse();
-    System.out.println("Limpieza de reservas no pagadas realizada el domingo a las 3am.");
-}
+        // Solo elimina registros ya cancelados sin pago (garbage collection semanal).
+        // Las reservas manuales con EFECTIVO/TRANSFERENCIA/etc. activas NO se tocan aunque no estén pagadas.
+        reservationRepository.findCancelledUnpaidReservations()
+            .flatMap(r -> reservationRepository.deleteById(r.getId()))
+            .doOnComplete(() -> System.out.println("Limpieza semanal de reservas canceladas sin pago realizada."))
+            .subscribe();
+    }
 
     @Override
     @Scheduled(cron = "0 0 3 * * SUN") // limpieza de reservas pagadas con más de 3 meses, domingos 3AM

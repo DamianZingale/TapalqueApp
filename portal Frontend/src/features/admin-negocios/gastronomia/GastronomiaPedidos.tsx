@@ -86,11 +86,11 @@ export function GastronomiaPedidos({
     externalBusinessId,
     'GASTRONOMIA'
   );
-  const { addNotification } = useNotifications();
+  const { registerAdminTopic } = useNotifications();
 
-  // Manejar mensajes WebSocket
-  // El backend solo envía pedido:nuevo cuando el pago está confirmado
-  // (efectivo al crear, MercadoPago al confirmar el webhook)
+  // Manejar mensajes WebSocket (actualización de panel local)
+  // La notificación global (campana) la gestiona registerAdminTopic en el contexto,
+  // lo que garantiza que se reciba aunque el admin esté en otra sección.
   useEffect(() => {
     if (!lastMessage) return;
     const pedido = lastMessage.payload as Pedido;
@@ -101,14 +101,6 @@ export function GastronomiaPedidos({
         if (existe) return prev.map((p) => (p.id === pedido.id ? pedido : p));
         return [pedido, ...prev];
       });
-
-      addNotification({
-        type: 'pedido',
-        title: 'Nuevo pedido',
-        message: `${pedido.userName || 'Cliente'} - $${(pedido.totalPrice || pedido.totalAmount || 0).toLocaleString('es-AR')}`,
-        businessId: externalBusinessId,
-        businessName,
-      });
       try {
         new Audio('/notification.mp3').play().catch(() => {});
       } catch {
@@ -117,7 +109,7 @@ export function GastronomiaPedidos({
     } else if (lastMessage.type === 'pedido:actualizado') {
       setPedidos((prev) => prev.map((p) => (p.id === pedido.id ? pedido : p)));
     }
-  }, [lastMessage, addNotification, externalBusinessId, businessName]);
+  }, [lastMessage]);
 
   const cargarPedidos = useCallback(async () => {
     try {
@@ -150,7 +142,10 @@ export function GastronomiaPedidos({
   useEffect(() => {
     cargarPedidos();
     cargarRestaurant();
-  }, [cargarPedidos, cargarRestaurant]);
+    // Registra el tópico en el contexto global para mantener la conexión
+    // activa aunque el admin navegue a otra sección
+    registerAdminTopic(externalBusinessId, 'GASTRONOMIA');
+  }, [cargarPedidos, cargarRestaurant, externalBusinessId, registerAdminTopic]);
 
   // --- Handlers ---
 
