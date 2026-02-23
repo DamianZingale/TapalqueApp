@@ -1222,9 +1222,9 @@ export function HosteleriaReservas({
               <Form.Group className="mb-3">
                 <Form.Label>Habitación</Form.Label>
                 <Form.Select
-                  value={selectedHabitacion?.id ?? ''}
+                  value={selectedHabitacion ? String(selectedHabitacion.id) : ''}
                   onChange={(e) => {
-                    const hab = habitaciones.find((h) => h.id === e.target.value) ?? null;
+                    const hab = habitaciones.find((h) => String(h.id) === e.target.value) ?? null;
                     setSelectedHabitacion(hab);
                     setRoomNumberInput(hab ? String(hab.numero) : '');
                     setFormReserva((prev) => ({ ...prev, checkInDate: '', checkOutDate: '' }));
@@ -1232,7 +1232,7 @@ export function HosteleriaReservas({
                 >
                   <option value="">Seleccionar habitación...</option>
                   {habitaciones.map((h) => (
-                    <option key={h.id} value={h.id}>
+                    <option key={h.id} value={String(h.id)}>
                       Hab. {h.numero} – {h.titulo}
                     </option>
                   ))}
