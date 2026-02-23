@@ -431,6 +431,11 @@ export function HosteleriaHabitaciones({
                           <Badge bg={habitacion.disponible ? 'success' : 'secondary'}>
                             {habitacion.disponible ? 'Disponible' : 'No disponible'}
                           </Badge>
+                          {habitacion.tipoPrecio === 'por_persona' && habitacion.minimoPersonasAPagar && (
+                            <Badge bg="warning" text="dark">
+                              Mín. {habitacion.minimoPersonasAPagar} pers.
+                            </Badge>
+                          )}
                         </div>
                         <div className="mb-2">
                           <strong>${habitacion.precio.toLocaleString()}</strong>
@@ -517,9 +522,16 @@ export function HosteleriaHabitaciones({
                             </Card.Text>
                           )}
                           <div className="d-flex justify-content-between align-items-center">
-                            <Badge bg="secondary">
-                              Hasta {habitacion.maxPersonas} personas
-                            </Badge>
+                            <div className="d-flex flex-wrap gap-1">
+                              <Badge bg="secondary">
+                                Hasta {habitacion.maxPersonas} personas
+                              </Badge>
+                              {habitacion.tipoPrecio === 'por_persona' && habitacion.minimoPersonasAPagar && (
+                                <Badge bg="warning" text="dark">
+                                  Mín. {habitacion.minimoPersonasAPagar} pers.
+                                </Badge>
+                              )}
+                            </div>
                             <span className="text-success fw-bold">
                               ${habitacion.precio.toLocaleString()}
                               <small className="text-muted fw-normal">

@@ -1,4 +1,5 @@
 // Servicios para gestión de reservas
+import { api } from '../config/api';
 
 export interface Customer {
   customerId: string;
@@ -66,73 +67,35 @@ export interface Reserva {
   paymentHistory?: PaymentRecord[];
 }
 
-function getAuthHeaders(): HeadersInit {
-  const token = localStorage.getItem('token');
-  return {
-    'Content-Type': 'application/json',
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-  };
-}
-
 export async function fetchReservasByHotel(
   hotelId: string,
   desde?: string,
   hasta?: string
 ): Promise<Reserva[]> {
-  try {
-    const params = new URLSearchParams();
-    if (desde) params.append('desde', desde);
-    if (hasta) params.append('hasta', hasta);
-    const query = params.toString();
-
-    const response = await fetch(
-      `/api/reservas/reservations/by-hotel/${hotelId}${query ? '?' + query : ''}`,
-      {
-        headers: getAuthHeaders(),
-      }
-    );
-    if (!response.ok) {
-      throw new Error(`Error al obtener reservas: ${response.status}`);
-    }
-    const data = await response.json();
-    return data as Reserva[];
-  } catch (error) {
-    console.error('Error en fetchReservasByHotel:', error);
-    return [];
-  }
+  const params = new URLSearchParams();
+  if (desde) params.append('desde', desde);
+  if (hasta) params.append('hasta', hasta);
+  const query = params.toString();
+  const data = await api.get<Reserva[]>(
+    `/reservas/reservations/by-hotel/${hotelId}${query ? '?' + query : ''}`
+  );
+  return data ?? [];
 }
 
 export async function cancelarReserva(reservaId: string): Promise<boolean> {
   try {
-    const response = await fetch(
-      `/api/reservas/reservations/delete/${reservaId}`,
-      {
-        method: 'DELETE',
-        headers: getAuthHeaders(),
-      }
-    );
-    return response.ok;
-  } catch (error) {
-    console.error('Error al cancelar reserva:', error);
+    await api.delete(`/reservas/reservations/delete/${reservaId}`);
+    return true;
+  } catch {
     return false;
   }
 }
 
 export async function fetchReservasByUser(userId: string): Promise<Reserva[]> {
   try {
-    const response = await fetch(
-      `/api/reservas/reservations/by-customer/${userId}`,
-      {
-        headers: getAuthHeaders(),
-      }
-    );
-    if (!response.ok) {
-      throw new Error(`Error al obtener reservas: ${response.status}`);
-    }
-    const data = await response.json();
-    return data as Reserva[];
-  } catch (error) {
-    console.error('Error en fetchReservasByUser:', error);
+    const data = await api.get<Reserva[]>(`/reservas/reservations/by-customer/${userId}`);
+    return data ?? [];
+  } catch {
     return [];
   }
 }
@@ -141,20 +104,8 @@ export async function crearReservaExterna(
   reserva: Partial<Reserva>
 ): Promise<Reserva | null> {
   try {
-    console.log('Enviando reserva:', JSON.stringify(reserva, null, 2));
-    const response = await fetch('/api/reservas/reservations/new', {
-      method: 'POST',
-      headers: getAuthHeaders(),
-      body: JSON.stringify(reserva),
-    });
-    if (!response.ok) {
-      const errorBody = await response.text();
-      console.error('Error response body:', errorBody);
-      throw new Error(`Error al crear reserva: ${response.status}`);
-    }
-    return await response.json();
-  } catch (error) {
-    console.error('Error al crear reserva externa:', error);
+    return await api.post<Reserva>('/reservas/reservations/new', reserva);
+  } catch {
     return null;
   }
 }
@@ -164,17 +115,8 @@ export async function actualizarReserva(
   reserva: Reserva
 ): Promise<Reserva | null> {
   try {
-    const response = await fetch(`/api/reservas/reservations/update/${reserva.id}`, {
-      method: 'PUT',
-      headers: getAuthHeaders(),
-      body: JSON.stringify(reserva),
-    });
-    if (!response.ok) {
-      throw new Error(`Error al actualizar reserva: ${response.status}`);
-    }
-    return await response.json();
-  } catch (error) {
-    console.error('Error al actualizar reserva:', error);
+    return await api.put<Reserva>(`/reservas/reservations/update/${reserva.id}`, reserva);
+  } catch {
     return null;
   }
 }
@@ -182,16 +124,10 @@ export async function actualizarReserva(
 // Obtener una reserva por su ID
 export async function fetchReservaById(reservaId: string): Promise<Reserva | null> {
   try {
-    const response = await fetch(
-      `/api/reservas/reservations/by-id/${reservaId}`,
-      { headers: getAuthHeaders() }
-    );
-    if (!response.ok) return null;
-    const data = await response.json();
+    const data = await api.get<Reserva | Reserva[]>(`/reservas/reservations/by-id/${reservaId}`);
     // El endpoint retorna un array (Flux), tomamos el primer elemento
     return Array.isArray(data) ? data[0] || null : data;
-  } catch (error) {
-    console.error('Error en fetchReservaById:', error);
+  } catch {
     return null;
   }
 }
@@ -202,19 +138,16 @@ export async function fetchReservasParaCierre(
   desde: string,
   hasta: string
 ): Promise<Reserva[]> {
-  try {
-    const response = await fetch(
-      `/api/reservas/reservations/cierre/${hotelId}?desde=${encodeURIComponent(desde)}&hasta=${encodeURIComponent(hasta)}`,
-      { headers: getAuthHeaders() }
-    );
-    if (!response.ok) {
-      throw new Error(`Error al obtener reservas para cierre: ${response.status}`);
-    }
-    return await response.json();
-  } catch (error) {
-    console.error('Error en fetchReservasParaCierre:', error);
-    return [];
-  }
+  // Backend espera LocalDateTime (sin zona) → quitar 'Z' y milisegundos sobrantes
+  const formatDT = (iso: string) => iso.replace('Z', '').replace(/\.\d{3}$/, '');
+  const params = new URLSearchParams({
+    desde: formatDT(desde),
+    hasta: formatDT(hasta),
+  });
+  const data = await api.get<Reserva[]>(
+    `/reservas/reservations/cierre/${hotelId}?${params}`
+  );
+  return data ?? [];
 }
 
 // Consulta pública: habitaciones libres de un hospedaje para un rango de fechas.
@@ -252,16 +185,8 @@ export interface PoliticaGlobal {
 
 export async function fetchPoliticaGlobal(hotelId: string): Promise<PoliticaGlobal | null> {
   try {
-    const response = await fetch(
-      `/api/reservas/politica/${hotelId}`,
-      { headers: getAuthHeaders() }
-    );
-    if (!response.ok) {
-      throw new Error(`Error al obtener política: ${response.status}`);
-    }
-    return await response.json();
-  } catch (error) {
-    console.error('Error en fetchPoliticaGlobal:', error);
+    return await api.get<PoliticaGlobal>(`/reservas/politica/${hotelId}`);
+  } catch {
     return null;
   }
 }
@@ -271,17 +196,8 @@ export async function actualizarPoliticaGlobal(
   politica: Partial<PoliticaGlobal>
 ): Promise<PoliticaGlobal | null> {
   try {
-    const response = await fetch(`/api/reservas/politica/${hotelId}`, {
-      method: 'PUT',
-      headers: getAuthHeaders(),
-      body: JSON.stringify(politica),
-    });
-    if (!response.ok) {
-      throw new Error(`Error al actualizar política: ${response.status}`);
-    }
-    return await response.json();
-  } catch (error) {
-    console.error('Error al actualizar política:', error);
+    return await api.put<PoliticaGlobal>(`/reservas/politica/${hotelId}`, politica);
+  } catch {
     return null;
   }
 }

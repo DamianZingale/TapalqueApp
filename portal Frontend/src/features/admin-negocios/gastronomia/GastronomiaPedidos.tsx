@@ -230,10 +230,14 @@ export function GastronomiaPedidos({
   const handleCerrarDia = async () => {
     setLoadingCierre(true);
     try {
-      const desde =
+      const desdeRaw =
         restaurant?.lastCloseDate ||
         new Date(new Date().setHours(0, 0, 0, 0)).toISOString();
-      const hasta = new Date().toISOString();
+      const hastaRaw = new Date().toISOString();
+
+      // Backend espera LocalDate yyyy-MM-dd
+      const desde = desdeRaw.slice(0, 10);
+      const hasta = hastaRaw.slice(0, 10);
 
       const data = await fetchPedidosByRestaurantAndDateRange(
         externalBusinessId,
