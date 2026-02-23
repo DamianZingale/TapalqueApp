@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Card, Row, Col, Badge, Button, ButtonGroup, Form, Alert, Modal, InputGroup } from 'react-bootstrap';
-import { Calendar, DateRange } from 'react-date-range';
+import { DateRangePicker, DateRange } from 'react-date-range';
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
 import { es } from 'date-fns/locale';
 import { fetchReservasByHotel, cancelarReserva, crearReservaExterna, Reserva } from '../../../../services/fetchReservas';
 import { fetchHospedajes } from '../../../../services/fetchHospedajes';
+import { fetchHabitacionesByHospedaje, type Habitacion } from '../../../../services/fetchHabitaciones';
 import { fetchPolitica, type PoliticaReservas } from '../../../../services/fetchPolitica';
 import { PhoneInput } from '../../../../shared/components/PhoneInput';
 import { authService } from '../../../../services/authService';
@@ -55,6 +56,7 @@ export const GestionReservasTab = () => {
     });
 
     const [hotelId, setHotelId] = useState('');
+    const [habitaciones, setHabitaciones] = useState<Habitacion[]>([]);
     const [politica, setPolitica] = useState<PoliticaReservas | null>(null);
     const { registerAdminTopic } = useNotifications();
     const { lastMessage } = useWebSocket(hotelId, 'HOSPEDAJE');
@@ -71,10 +73,11 @@ export const GestionReservasTab = () => {
         loadHotelId();
     }, []);
 
-    // Cuando se tiene hotelId: cargar reservas, política y registrar tópico persistente
+    // Cuando se tiene hotelId: cargar reservas, habitaciones, política y registrar tópico persistente
     useEffect(() => {
         if (!hotelId) return;
         cargarReservas();
+        fetchHabitacionesByHospedaje(hotelId).then(habs => setHabitaciones(habs));
         registerAdminTopic(hotelId, 'HOSPEDAJE');
         fetchPolitica(hotelId).then(pol => { if (pol) setPolitica(pol); });
     }, [hotelId]);
@@ -299,6 +302,7 @@ export const GestionReservasTab = () => {
                 margin: 'auto',
                 color: isOccupied ? '#842029' : '#0a3622',
                 fontWeight: 500,
+                pointerEvents: 'none',
             }}>
                 {date.getDate()}
             </div>
@@ -509,10 +513,8 @@ export const GestionReservasTab = () => {
                     <Row>
                         <Col md={4}>
                             <Form.Group className="mb-3">
-                                <Form.Label>Número de Habitación *</Form.Label>
-                                <Form.Control
-                                    type="number"
-                                    min="1"
+                                <Form.Label>Habitación *</Form.Label>
+                                <Form.Select
                                     value={formData.roomNumber}
                                     onChange={(e) => {
                                         const val = e.target.value;
@@ -521,8 +523,14 @@ export const GestionReservasTab = () => {
                                         setShowCalendar(false);
                                         setDateRange({ startDate: undefined, endDate: undefined, key: 'selection' });
                                     }}
-                                    placeholder="Ej: 101"
-                                />
+                                >
+                                    <option value="">-- Seleccionar habitación --</option>
+                                    {habitaciones.map(hab => (
+                                        <option key={hab.id} value={hab.numero}>
+                                            {hab.numero} - {hab.titulo}
+                                        </option>
+                                    ))}
+                                </Form.Select>
                                 {formData.roomNumber !== '' && (
                                     <Form.Text className="text-muted">
                                         {reservas.filter(r => r.roomNumber === Number(formData.roomNumber) && r.isActive && !r.isCancelled).length} reserva(s) activa(s)
@@ -579,7 +587,7 @@ export const GestionReservasTab = () => {
                                                 </Button>
                                             </div>
                                         </div>
-                                        <Calendar
+                                        <DateRangePicker
                                             onChange={handleDateSelect}
                                             ranges={[dateRange]}
                                             months={2}
