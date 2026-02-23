@@ -101,9 +101,23 @@ export default function HospedajeDetailPage() {
 
   const esExcepcionMiercoles = (checkIn: Date): boolean => {
     const hoy = new Date();
-    const esHoyMiercoles = hoy.getDay() === 3; // 0=dom, 3=mie
-    const diasHastaCheckIn = Math.round((checkIn.getTime() - hoy.setHours(0,0,0,0)) / (1000 * 60 * 60 * 24));
-    return esHoyMiercoles && diasHastaCheckIn >= 0 && diasHastaCheckIn <= 4;
+    hoy.setHours(0, 0, 0, 0);
+
+    const checkInCopy = new Date(checkIn);
+    checkInCopy.setHours(0, 0, 0, 0);
+
+    // Encontrar el lunes de la semana del check-in
+    const diaCheckIn = checkInCopy.getDay(); // 0=dom, 1=lun, ..., 6=sab
+    const diasDesdeLunes = diaCheckIn === 0 ? 6 : diaCheckIn - 1;
+    const lunesDeLaSemana = new Date(checkInCopy);
+    lunesDeLaSemana.setDate(lunesDeLaSemana.getDate() - diasDesdeLunes);
+
+    // El miércoles es 2 días después del lunes
+    const miercolesPrevi = new Date(lunesDeLaSemana);
+    miercolesPrevi.setDate(miercolesPrevi.getDate() + 2);
+
+    // Permitir si hoy es >= miércoles previo y <= check-in
+    return hoy >= miercolesPrevi && hoy <= checkInCopy;
   };
 
   const calcularPrecioTotal = (habitacion: Habitacion, noches: number): number => {
