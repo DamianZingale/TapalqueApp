@@ -41,6 +41,9 @@ public class Habitacion {
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal precio;
 
+    @Column(name = "precio_una_persona", precision = 10, scale = 2)
+    private BigDecimal precioUnaPersona;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "tipo_precio", nullable = false)
     private TipoPrecio tipoPrecio = TipoPrecio.POR_HABITACION;
@@ -181,5 +184,13 @@ public class Habitacion {
 
     public void setMinimoPersonasAPagar(Integer minimoPersonasAPagar) {
         this.minimoPersonasAPagar = minimoPersonasAPagar;
+    }
+
+    public BigDecimal getPrecioUnaPersona() {
+        return precioUnaPersona;
+    }
+
+    public void setPrecioUnaPersona(BigDecimal precioUnaPersona) {
+        this.precioUnaPersona = precioUnaPersona;
     }
 }

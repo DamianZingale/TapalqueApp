@@ -194,6 +194,7 @@ export interface Habitacion {
   descripcion?: string;
   maxPersonas: number;
   precio: number;
+  precioUnaPersona?: number;
   tipoPrecio: 'por_habitacion' | 'por_persona';
   minimoPersonasAPagar?: number;
   fotos?: string[];

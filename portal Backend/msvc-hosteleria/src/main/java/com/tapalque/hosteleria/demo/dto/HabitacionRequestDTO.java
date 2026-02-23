@@ -39,6 +39,8 @@ public class HabitacionRequestDTO {
 
     private Integer minimoPersonasAPagar;
 
+    private BigDecimal precioUnaPersona;
+
     private List<String> fotos;
 
     private List<String> servicios;
@@ -127,5 +129,13 @@ public class HabitacionRequestDTO {
 
     public void setMinimoPersonasAPagar(Integer minimoPersonasAPagar) {
         this.minimoPersonasAPagar = minimoPersonasAPagar;
+    }
+
+    public BigDecimal getPrecioUnaPersona() {
+        return precioUnaPersona;
+    }
+
+    public void setPrecioUnaPersona(BigDecimal precioUnaPersona) {
+        this.precioUnaPersona = precioUnaPersona;
     }
 }

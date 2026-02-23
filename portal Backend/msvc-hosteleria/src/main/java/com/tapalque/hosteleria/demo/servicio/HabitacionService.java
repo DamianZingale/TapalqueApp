@@ -68,6 +68,7 @@ public class HabitacionService {
         habitacion.setServicios(dto.getServicios());
         habitacion.setDisponible(dto.getDisponible() != null ? dto.getDisponible() : true);
         habitacion.setMinimoPersonasAPagar(dto.getMinimoPersonasAPagar());
+        habitacion.setPrecioUnaPersona(dto.getPrecioUnaPersona());
         habitacion.setHospedaje(hospedaje);
 
         Habitacion guardada = habitacionRepository.save(habitacion);
@@ -114,6 +115,8 @@ public class HabitacionService {
         if (dto.getMinimoPersonasAPagar() != null) {
             habitacion.setMinimoPersonasAPagar(dto.getMinimoPersonasAPagar());
         }
+        // precioUnaPersona se actualiza siempre (puede ser null para quitarlo)
+        habitacion.setPrecioUnaPersona(dto.getPrecioUnaPersona());
 
         Habitacion actualizada = habitacionRepository.save(habitacion);
         return new HabitacionDTO(actualizada);

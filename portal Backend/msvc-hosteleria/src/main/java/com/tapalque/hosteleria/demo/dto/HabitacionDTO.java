@@ -13,6 +13,7 @@ public class HabitacionDTO {
     private String descripcion;
     private Integer maxPersonas;
     private BigDecimal precio;
+    private BigDecimal precioUnaPersona;
     private String tipoPrecio;
     private Integer minimoPersonasAPagar;
     private List<String> fotos;
@@ -30,6 +31,7 @@ public class HabitacionDTO {
         this.descripcion = habitacion.getDescripcion();
         this.maxPersonas = habitacion.getMaxPersonas();
         this.precio = habitacion.getPrecio();
+        this.precioUnaPersona = habitacion.getPrecioUnaPersona();
         this.tipoPrecio = habitacion.getTipoPrecio() != null
             ? habitacion.getTipoPrecio().name().toLowerCase()
             : "por_habitacion";
@@ -89,6 +91,14 @@ public class HabitacionDTO {
 
     public void setPrecio(BigDecimal precio) {
         this.precio = precio;
+    }
+
+    public BigDecimal getPrecioUnaPersona() {
+        return precioUnaPersona;
+    }
+
+    public void setPrecioUnaPersona(BigDecimal precioUnaPersona) {
+        this.precioUnaPersona = precioUnaPersona;
     }
 
     public String getTipoPrecio() {

@@ -63,9 +63,16 @@ public class HospedajeController {
             HospedajeDTO updated = null;
 
             if (body.containsKey("lastCloseDate")) {
-                java.time.LocalDateTime lastCloseDate = java.time.LocalDateTime.parse(
-                        body.get("lastCloseDate").toString(),
-                        java.time.format.DateTimeFormatter.ISO_DATE_TIME);
+                String rawDate = body.get("lastCloseDate").toString();
+                java.time.LocalDateTime lastCloseDate;
+                // toISOString() del browser incluye Z (UTC); LocalDateTime no acepta Z → convertir
+                if (rawDate.endsWith("Z")) {
+                    lastCloseDate = java.time.Instant.parse(rawDate)
+                            .atOffset(java.time.ZoneOffset.UTC).toLocalDateTime();
+                } else {
+                    lastCloseDate = java.time.LocalDateTime.parse(rawDate,
+                            java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+                }
                 updated = hospedajeService.updateLastCloseDate(id, lastCloseDate);
             }
 

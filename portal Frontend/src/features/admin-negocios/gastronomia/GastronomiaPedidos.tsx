@@ -767,6 +767,15 @@ function PedidoCard({
             <p className="mb-1 small">
               Teléfono:{' '}
               <a href={`tel:${pedido.userPhone}`}>{pedido.userPhone}</a>
+              <a
+                href={`https://wa.me/${pedido.userPhone.replace(/\D/g, '')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-sm btn-success ms-2 py-0 px-2"
+                title="Contactar por WhatsApp"
+              >
+                <i className="bi bi-whatsapp" /> WhatsApp
+              </a>
             </p>
           )}
           {fechaPedido && (

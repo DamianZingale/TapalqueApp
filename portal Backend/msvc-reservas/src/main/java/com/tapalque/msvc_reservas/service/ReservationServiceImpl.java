@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import com.tapalque.msvc_reservas.client.HospedajeClient;
 import com.tapalque.msvc_reservas.client.MercadoPagoClient;
+import com.tapalque.msvc_reservas.dto.HabitacionDTO;
 import com.tapalque.msvc_reservas.dto.PagoEventoDTO;
 import com.tapalque.msvc_reservas.dto.ReservationDTO;
 import com.tapalque.msvc_reservas.entity.Reservation;
@@ -80,7 +82,7 @@ public class ReservationServiceImpl implements ReservationService {
                 || !PaymentType.MERCADO_PAGO.equals(reservationDto.getPayment().getPaymentType());
 
         return politicaService.obtenerPolitica(hotelId)
-            .flatMap(politica -> {
+            .<List<HabitacionDTO>>flatMap(politica -> {
                 if (!esReservaManual) {
                     // Validar política de mínimo de noches para fin de semana (solo cuando está activa)
                     if (Boolean.TRUE.equals(politica.getPoliticaFdsActiva())) {
@@ -132,8 +134,14 @@ public class ReservationServiceImpl implements ReservationService {
 
                             precioPorNoche = habitacion.getPrecio().doubleValue() * personasACobrar;
                         } else {
-                            // POR_HABITACION
-                            precioPorNoche = habitacion.getPrecio().doubleValue();
+                            // POR_HABITACION: si hay precio especial para 1 persona y viene 1 huésped, usarlo
+                            Integer cantidadHuespedes = reservationDto.getCantidadHuespedes();
+                            java.math.BigDecimal precioUnaPersona = habitacion.getPrecioUnaPersona();
+                            if (precioUnaPersona != null && cantidadHuespedes != null && cantidadHuespedes == 1) {
+                                precioPorNoche = precioUnaPersona.doubleValue();
+                            } else {
+                                precioPorNoche = habitacion.getPrecio().doubleValue();
+                            }
                         }
 
                         double precioReal = precioPorNoche * noches;
@@ -146,7 +154,17 @@ public class ReservationServiceImpl implements ReservationService {
                             if (esReservaManual) {
                                 // Reserva manual: respetar el monto pagado indicado por el admin
                                 Double adminAmountPaid = reservationDto.getPayment().getAmountPaid();
-                                reservation.getPayment().setAmountPaid(adminAmountPaid != null ? adminAmountPaid : 0.0);
+                                double montoPagado = adminAmountPaid != null ? adminAmountPaid : 0.0;
+                                reservation.getPayment().setAmountPaid(montoPagado);
+                                // Registrar en historial para que aparezca en el cierre del día
+                                if (montoPagado > 0) {
+                                    PaymentType tipo = reservation.getPayment().getPaymentType() != null
+                                            ? reservation.getPayment().getPaymentType()
+                                            : PaymentType.EFECTIVO;
+                                    reservation.setPaymentHistory(new ArrayList<>(List.of(
+                                            new Reservation.PaymentRecord(LocalDateTime.now(), montoPagado, tipo,
+                                                    "Pago registrado al crear reserva"))));
+                                }
                             } else {
                                 // Reserva online: monto 0 hasta que Mercado Pago confirme el pago
                                 reservation.getPayment().setAmountPaid(0.0);

@@ -36,6 +36,7 @@ interface NuevaHabitacionForm {
   descripcion: string;
   maxPersonas: number;
   precio: number;
+  precioUnaPersona?: number;
   tipoPrecio: 'por_habitacion' | 'por_persona';
   minimoPersonasAPagar?: number;
   fotos: string[];
@@ -65,6 +66,7 @@ export function HosteleriaHabitaciones({
   const [nuevaHabitacion, setNuevaHabitacion] =
     useState<NuevaHabitacionForm>(initialFormState);
   const [precioInput, setPrecioInput] = useState('');
+  const [precioUnaPersonaInput, setPrecioUnaPersonaInput] = useState('');
   const [guardando, setGuardando] = useState(false);
   const [errorForm, setErrorForm] = useState<string | null>(null);
 
@@ -72,6 +74,7 @@ export function HosteleriaHabitaciones({
   const [habitacionSeleccionada, setHabitacionSeleccionada] =
     useState<Habitacion | null>(null);
   const [precioEditInput, setPrecioEditInput] = useState('');
+  const [precioUnaPersonaEditInput, setPrecioUnaPersonaEditInput] = useState('');
 
   const [mensaje, setMensaje] = useState<{
     tipo: 'success' | 'danger';
@@ -126,12 +129,17 @@ export function HosteleriaHabitaciones({
     try {
       setGuardando(true);
 
+      const precioUnaPersonaNumerico = precioUnaPersonaInput !== ''
+        ? parseFloat(precioUnaPersonaInput)
+        : undefined;
+
       const nueva = {
         numero: nuevaHabitacion.numero,
         titulo: nuevaHabitacion.titulo.trim(),
         descripcion: nuevaHabitacion.descripcion.trim(),
         maxPersonas: nuevaHabitacion.maxPersonas,
         precio: precioNumerico,
+        precioUnaPersona: precioUnaPersonaNumerico && !isNaN(precioUnaPersonaNumerico) ? precioUnaPersonaNumerico : undefined,
         tipoPrecio: nuevaHabitacion.tipoPrecio,
         minimoPersonasAPagar: nuevaHabitacion.minimoPersonasAPagar,
         fotos: nuevaHabitacion.fotos.slice(0, MAX_FOTOS),
@@ -149,6 +157,7 @@ export function HosteleriaHabitaciones({
         setModalAgregar(false);
         setNuevaHabitacion(initialFormState);
         setPrecioInput('');
+        setPrecioUnaPersonaInput('');
         setMensaje({
           tipo: 'success',
           texto: 'Habitación agregada correctamente',
@@ -176,9 +185,16 @@ export function HosteleriaHabitaciones({
     try {
       setGuardando(true);
 
+      const precioUnaPersonaEditNumerico = precioUnaPersonaEditInput !== ''
+        ? parseFloat(precioUnaPersonaEditInput)
+        : null;
+
       const habitacionActualizada = {
         ...habitacionSeleccionada,
         precio: precioNumerico,
+        precioUnaPersona: precioUnaPersonaEditNumerico !== null && !isNaN(precioUnaPersonaEditNumerico)
+          ? precioUnaPersonaEditNumerico
+          : null,
       };
 
       const actualizada = await actualizarHabitacion(
@@ -441,9 +457,14 @@ export function HosteleriaHabitaciones({
                           <strong>${habitacion.precio.toLocaleString()}</strong>
                           <span className="text-muted small ms-1">
                             {habitacion.tipoPrecio === 'por_habitacion'
-                              ? '/noche'
+                              ? '/noche (doble)'
                               : '/pers./noche'}
                           </span>
+                          {habitacion.tipoPrecio === 'por_habitacion' && habitacion.precioUnaPersona && (
+                            <span className="text-muted small d-block">
+                              1 pers.: ${habitacion.precioUnaPersona.toLocaleString()}/noche
+                            </span>
+                          )}
                         </div>
                         {habitacion.servicios && habitacion.servicios.length > 0 && (
                           <div className="mb-2 text-muted" style={{ fontSize: '0.7rem', lineHeight: 1.4 }}>
@@ -467,6 +488,7 @@ export function HosteleriaHabitaciones({
                             onClick={() => {
                               setHabitacionSeleccionada({ ...habitacion });
                               setPrecioEditInput(habitacion.precio.toString());
+                              setPrecioUnaPersonaEditInput(habitacion.precioUnaPersona?.toString() ?? '');
                               setModalEditar(true);
                             }}
                           >
@@ -540,6 +562,11 @@ export function HosteleriaHabitaciones({
                                   ? 'noche'
                                   : 'pers.'}
                               </small>
+                              {habitacion.tipoPrecio === 'por_habitacion' && habitacion.precioUnaPersona && (
+                                <small className="text-muted fw-normal d-block" style={{ fontSize: '0.75rem' }}>
+                                  1 pers.: ${habitacion.precioUnaPersona.toLocaleString()}/noche
+                                </small>
+                              )}
                             </span>
                           </div>
                           {habitacion.servicios &&
@@ -690,6 +717,31 @@ export function HosteleriaHabitaciones({
               </Form.Group>
             </Col>
           </Row>
+
+          {nuevaHabitacion.tipoPrecio === 'por_habitacion' && nuevaHabitacion.maxPersonas > 1 && (
+            <Form.Group className="mb-3">
+              <Form.Label>Precio para 1 persona (opcional)</Form.Label>
+              <Form.Control
+                type="text"
+                inputMode="decimal"
+                value={precioUnaPersonaInput}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                    setPrecioUnaPersonaInput(value);
+                  }
+                }}
+                placeholder="Ej: 45000"
+                isInvalid={
+                  precioUnaPersonaInput !== '' &&
+                  (isNaN(parseFloat(precioUnaPersonaInput)) || parseFloat(precioUnaPersonaInput) <= 0)
+                }
+              />
+              <Form.Text className="text-muted">
+                Si la habitación se alquila a 1 sola persona, se cobra este precio en lugar del precio doble.
+              </Form.Text>
+            </Form.Group>
+          )}
 
           {nuevaHabitacion.tipoPrecio === 'por_persona' && (
             <Form.Group className="mb-3">
@@ -923,6 +975,31 @@ export function HosteleriaHabitaciones({
                   </Form.Group>
                 </Col>
               </Row>
+
+              {habitacionSeleccionada.tipoPrecio === 'por_habitacion' && habitacionSeleccionada.maxPersonas > 1 && (
+                <Form.Group className="mb-3">
+                  <Form.Label>Precio para 1 persona (opcional)</Form.Label>
+                  <Form.Control
+                    type="text"
+                    inputMode="decimal"
+                    value={precioUnaPersonaEditInput}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                        setPrecioUnaPersonaEditInput(value);
+                      }
+                    }}
+                    placeholder="Ej: 45000"
+                    isInvalid={
+                      precioUnaPersonaEditInput !== '' &&
+                      (isNaN(parseFloat(precioUnaPersonaEditInput)) || parseFloat(precioUnaPersonaEditInput) <= 0)
+                    }
+                  />
+                  <Form.Text className="text-muted">
+                    Si la habitación se alquila a 1 sola persona, se cobra este precio en lugar del precio doble. Dejá vacío para cobrar siempre el precio completo.
+                  </Form.Text>
+                </Form.Group>
+              )}
 
               {habitacionSeleccionada.tipoPrecio === 'por_persona' && (
                 <Form.Group className="mb-3">

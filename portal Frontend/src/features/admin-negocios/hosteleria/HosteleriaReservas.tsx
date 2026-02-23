@@ -37,7 +37,7 @@ import {
 } from '../../../services/fetchReservas';
 import { useNotifications } from '../../../shared/context/NotificationContext';
 import { useWebSocket } from '../hooks/useWebSocket';
-import type { FormReservaExterna, Reserva } from '../types';
+import type { BillingInfo, FormReservaExterna, Reserva } from '../types';
 import { getColorEstadoReserva } from '../types';
 
 interface HosteleriaReservasProps {
@@ -79,6 +79,14 @@ const initialFormReserva: FormReservaExterna = {
   amountPaid: 0,
   paymentType: 'EFECTIVO',
   notas: '',
+};
+
+const initialBillingInfo: BillingInfo = {
+  cuitCuil: '',
+  razonSocial: '',
+  domicilioComercial: '',
+  tipoFactura: 'B',
+  condicionFiscal: 'Consumidor Final',
 };
 
 export function HosteleriaReservas({
@@ -137,6 +145,12 @@ export function HosteleriaReservas({
   const [notasPago, setNotasPago] = useState('');
   const [guardandoPago, setGuardandoPago] = useState(false);
   const [errorPago, setErrorPago] = useState<string | null>(null);
+
+  // Wizard de creación de reserva
+  const [pasoActual, setPasoActual] = useState(1);
+  const [cantidadHuespedes, setCantidadHuespedes] = useState(1);
+  const [requiereFacturacion, setRequiereFacturacion] = useState(false);
+  const [billingInfo, setBillingInfo] = useState<BillingInfo>(initialBillingInfo);
 
   // Política de reservas
   const [politica, setPolitica] = useState<PoliticaReservas | null>(null);
@@ -434,6 +448,44 @@ export function HosteleriaReservas({
     return diasOcupadosHabitacion.has(formatLocalDate(date)) ? 'dia-ocupado' : 'dia-libre';
   };
 
+  const siguientePasoCrear = () => {
+    setErrorForm(null);
+    if (pasoActual === 1) {
+      if (!formReserva.customerName.trim()) {
+        setErrorForm('El nombre del huésped es obligatorio');
+        return;
+      }
+    }
+    if (pasoActual === 2) {
+      if (!formReserva.checkInDate || !formReserva.checkOutDate) {
+        setErrorForm('Las fechas de entrada y salida son obligatorias');
+        return;
+      }
+      if (new Date(formReserva.checkOutDate) <= new Date(formReserva.checkInDate)) {
+        setErrorForm('La fecha de salida debe ser posterior a la de entrada');
+        return;
+      }
+    }
+    if (pasoActual === 3) {
+      const totalPrice = parseFloat(totalPriceInput) || 0;
+      if (totalPrice <= 0) {
+        setErrorForm('El precio total debe ser mayor a 0');
+        return;
+      }
+      if (requiereFacturacion) {
+        if (!billingInfo.cuitCuil.trim()) {
+          setErrorForm('El CUIT/CUIL es obligatorio para la facturación');
+          return;
+        }
+        if (!billingInfo.razonSocial.trim()) {
+          setErrorForm('La razón social es obligatoria para la facturación');
+          return;
+        }
+      }
+    }
+    setPasoActual((p) => p + 1);
+  };
+
   const handleCrearReserva = async () => {
     setErrorForm(null);
 
@@ -495,6 +547,9 @@ export function HosteleriaReservas({
         },
         totalPrice: totalPrice,
         roomNumber: roomNumberInput ? Number(roomNumberInput) : undefined,
+        cantidadHuespedes: cantidadHuespedes,
+        requiereFacturacion: requiereFacturacion,
+        billingInfo: requiereFacturacion ? billingInfo : undefined,
         isActive: true,
         isCancelled: false,
         notas: formReserva.notas,
@@ -513,6 +568,10 @@ export function HosteleriaReservas({
         setAmountPaidInput('');
         setRoomNumberInput('');
         setSelectedHabitacion(null);
+        setPasoActual(1);
+        setCantidadHuespedes(1);
+        setRequiereFacturacion(false);
+        setBillingInfo(initialBillingInfo);
         setMensaje({ tipo: 'success', texto: 'Reserva creada correctamente' });
       }
     } catch (error) {
@@ -640,10 +699,17 @@ export function HosteleriaReservas({
 
   // --- Cierre del día ---
 
+  // Fechas del backend (LocalDateTime) vienen sin 'Z'. El browser las trataría como hora
+  // local en vez de UTC → desfase de 3 hs si el servidor corre en UTC. Agregar 'Z' para forzar UTC.
+  const toUTC = (s: string) => (s.endsWith('Z') || s.includes('+') ? s : s + 'Z');
+
   const handleCerrarDia = async () => {
     setLoadingCierre(true);
     try {
-      const desde = hospedaje?.lastCloseDate || new Date(new Date().setHours(0, 0, 0, 0)).toISOString();
+      const rawDesde = hospedaje?.lastCloseDate;
+      const desde = rawDesde
+        ? toUTC(rawDesde)
+        : new Date(new Date().setHours(0, 0, 0, 0)).toISOString();
       const hasta = new Date().toISOString();
 
       const data = await fetchReservasParaCierre(businessId, desde, hasta);
@@ -658,14 +724,14 @@ export function HosteleriaReservas({
 
       for (const r of data) {
         const pagosEnPeriodo = (r.paymentHistory || []).filter((p) => {
-          const fechaPago = new Date(p.date);
+          const fechaPago = new Date(toUTC(p.date));
           return fechaPago >= desdeDate && fechaPago <= hastaDate;
         });
 
         // Si no hay historial de pagos pero tiene monto pagado, incluirlo con el monto total
         // (para reservas antiguas sin paymentHistory)
         if (pagosEnPeriodo.length === 0 && r.payment.amountPaid > 0) {
-          const fechaReserva = new Date(r.dateCreated);
+          const fechaReserva = new Date(toUTC(r.dateCreated));
           if (fechaReserva >= desdeDate && fechaReserva <= hastaDate) {
             const montoPeriodo = r.payment.amountPaid;
             const medioPagoPeriodo = r.payment.paymentType || 'EFECTIVO';
@@ -1141,35 +1207,101 @@ export function HosteleriaReservas({
         </Tab>
       </Tabs>
 
-      {/* Modal Crear Reserva */}
-      <Modal show={modalCrear} onHide={() => { setModalCrear(false); setSelectedHabitacion(null); }} size="lg" enforceFocus={false}>
-        <Modal.Header closeButton>
-          <Modal.Title>Crear Reserva Manual</Modal.Title>
+      {/* Modal Crear Reserva - Wizard por pasos */}
+      <Modal
+        show={modalCrear}
+        onHide={() => {
+          setModalCrear(false);
+          setSelectedHabitacion(null);
+          setPasoActual(1);
+          setRequiereFacturacion(false);
+          setCantidadHuespedes(1);
+          setBillingInfo(initialBillingInfo);
+        }}
+        size="lg"
+        enforceFocus={false}
+      >
+        <Modal.Header closeButton className="border-bottom-0 pb-1">
+          <Modal.Title className="fs-4">Nueva Reserva</Modal.Title>
         </Modal.Header>
-        <Modal.Body>
-          {errorForm && <Alert variant="danger">{errorForm}</Alert>}
+        <Modal.Body className="pt-2">
+          {errorForm && (
+            <Alert variant="danger" dismissible onClose={() => setErrorForm(null)}>
+              {errorForm}
+            </Alert>
+          )}
 
-          <h6 className="text-muted mb-3">Datos del Cliente</h6>
-          <Row>
-            <Col md={6}>
-              <Form.Group className="mb-3">
-                <Form.Label>Nombre completo *</Form.Label>
+          {/* Indicador de pasos */}
+          <div className="d-flex align-items-center justify-content-center mb-4">
+            {[
+              { n: 1, label: 'Huésped' },
+              { n: 2, label: 'Estadía' },
+              { n: 3, label: 'Pago' },
+              { n: 4, label: 'Confirmar' },
+            ].map(({ n, label }, idx) => (
+              <div key={n} className="d-flex align-items-center">
+                <div className="text-center">
+                  <div
+                    className={`rounded-circle d-flex align-items-center justify-content-center fw-bold mx-auto ${
+                      pasoActual > n
+                        ? 'bg-success text-white'
+                        : pasoActual === n
+                        ? 'bg-primary text-white'
+                        : 'bg-light text-muted border'
+                    }`}
+                    style={{ width: 44, height: 44, fontSize: '1rem' }}
+                  >
+                    {pasoActual > n ? '✓' : n}
+                  </div>
+                  <small
+                    className={`d-block mt-1 ${
+                      pasoActual === n
+                        ? 'fw-bold text-primary'
+                        : pasoActual > n
+                        ? 'text-success'
+                        : 'text-muted'
+                    }`}
+                  >
+                    {label}
+                  </small>
+                </div>
+                {idx < 3 && (
+                  <div
+                    style={{
+                      width: 50,
+                      height: 3,
+                      backgroundColor: pasoActual > n ? '#198754' : '#dee2e6',
+                      marginBottom: 18,
+                      marginLeft: 4,
+                      marginRight: 4,
+                    }}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* PASO 1: Datos del Huésped */}
+          {pasoActual === 1 && (
+            <div>
+              <h5 className="text-center text-muted mb-4">¿Quién se hospeda?</h5>
+              <Form.Group className="mb-4">
+                <Form.Label className="fs-5 fw-semibold">
+                  Nombre completo <span className="text-danger">*</span>
+                </Form.Label>
                 <Form.Control
+                  size="lg"
                   type="text"
                   value={formReserva.customerName}
                   onChange={(e) =>
-                    setFormReserva({
-                      ...formReserva,
-                      customerName: e.target.value,
-                    })
+                    setFormReserva({ ...formReserva, customerName: e.target.value })
                   }
                   placeholder="Nombre y apellido"
+                  autoFocus
                 />
               </Form.Group>
-            </Col>
-            <Col md={6}>
-              <Form.Group className="mb-3">
-                <Form.Label>Teléfono</Form.Label>
+              <Form.Group className="mb-4">
+                <Form.Label className="fs-5 fw-semibold">Teléfono</Form.Label>
                 <PhoneInput
                   value={formReserva.customerPhone}
                   onChange={(val) =>
@@ -1177,73 +1309,67 @@ export function HosteleriaReservas({
                   }
                 />
               </Form.Group>
-            </Col>
-          </Row>
+              <Row>
+                <Col md={6}>
+                  <Form.Group className="mb-3">
+                    <Form.Label className="fs-5 fw-semibold">DNI</Form.Label>
+                    <Form.Control
+                      size="lg"
+                      type="text"
+                      value={formReserva.customerDni}
+                      onChange={(e) =>
+                        setFormReserva({ ...formReserva, customerDni: e.target.value })
+                      }
+                      placeholder="Número de documento"
+                    />
+                  </Form.Group>
+                </Col>
+                <Col md={6}>
+                  <Form.Group className="mb-3">
+                    <Form.Label className="fs-5 fw-semibold">Email</Form.Label>
+                    <Form.Control
+                      size="lg"
+                      type="email"
+                      value={formReserva.customerEmail}
+                      onChange={(e) =>
+                        setFormReserva({ ...formReserva, customerEmail: e.target.value })
+                      }
+                      placeholder="correo@ejemplo.com"
+                    />
+                  </Form.Group>
+                </Col>
+              </Row>
+            </div>
+          )}
 
-          <Row>
-            <Col md={6}>
-              <Form.Group className="mb-3">
-                <Form.Label>Email</Form.Label>
-                <Form.Control
-                  type="email"
-                  value={formReserva.customerEmail}
-                  onChange={(e) =>
-                    setFormReserva({
-                      ...formReserva,
-                      customerEmail: e.target.value,
-                    })
-                  }
-                  placeholder="correo@ejemplo.com"
-                />
-              </Form.Group>
-            </Col>
-            <Col md={6}>
-              <Form.Group className="mb-3">
-                <Form.Label>DNI</Form.Label>
-                <Form.Control
-                  type="text"
-                  value={formReserva.customerDni}
-                  onChange={(e) =>
-                    setFormReserva({
-                      ...formReserva,
-                      customerDni: e.target.value,
-                    })
-                  }
-                  placeholder="Documento de identidad"
-                />
-              </Form.Group>
-            </Col>
-          </Row>
-
-          <style>{`
-            .react-datepicker__day.dia-ocupado {
-              background-color: #dc3545 !important;
-              color: white !important;
-              border-radius: 50%;
-              font-weight: bold;
-            }
-            .react-datepicker__day.dia-ocupado:hover {
-              background-color: #b02a37 !important;
-            }
-            .react-datepicker__day.dia-libre {
-              background-color: #198754 !important;
-              color: white !important;
-              border-radius: 50%;
-            }
-            .react-datepicker__day.dia-libre:hover {
-              background-color: #146c43 !important;
-            }
-            .react-datepicker-wrapper { width: 100%; }
-          `}</style>
-
-          <hr />
-          <h6 className="text-muted mb-3">Datos de la Reserva</h6>
-
-          <Row>
-            <Col md={4}>
-              <Form.Group className="mb-3">
-                <Form.Label>Habitación</Form.Label>
+          {/* PASO 2: Habitación y Fechas */}
+          {pasoActual === 2 && (
+            <div>
+              <h5 className="text-center text-muted mb-4">¿Cuándo y en qué habitación?</h5>
+              <style>{`
+                .react-datepicker__day.dia-ocupado {
+                  background-color: #dc3545 !important;
+                  color: white !important;
+                  border-radius: 50%;
+                  font-weight: bold;
+                }
+                .react-datepicker__day.dia-ocupado:hover {
+                  background-color: #b02a37 !important;
+                }
+                .react-datepicker__day.dia-libre {
+                  background-color: #198754 !important;
+                  color: white !important;
+                  border-radius: 50%;
+                }
+                .react-datepicker__day.dia-libre:hover {
+                  background-color: #146c43 !important;
+                }
+                .react-datepicker-wrapper { width: 100%; }
+              `}</style>
+              <Form.Group className="mb-4">
+                <Form.Label className="fs-5 fw-semibold">Habitación</Form.Label>
                 <Form.Select
+                  size="lg"
                   value={selectedHabitacion ? String(selectedHabitacion.id) : ''}
                   onChange={(e) => {
                     const hab = habitaciones.find((h) => String(h.id) === e.target.value) ?? null;
@@ -1252,194 +1378,506 @@ export function HosteleriaReservas({
                     setFormReserva((prev) => ({ ...prev, checkInDate: '', checkOutDate: '' }));
                   }}
                 >
-                  <option value="">Seleccionar habitación...</option>
+                  <option value="">Sin habitación asignada</option>
                   {habitaciones.map((h) => (
                     <option key={h.id} value={String(h.id)}>
-                      Hab. {h.numero} – {h.titulo}
+                      Hab. {h.numero} – {h.titulo} (máx. {h.maxPersonas} personas)
                     </option>
                   ))}
                 </Form.Select>
                 {selectedHabitacion && (
-                  <Form.Text className="text-muted">
-                    Rojo = ocupado · Verde = libre
+                  <Form.Text className="text-muted fs-6">
+                    🔴 Rojo = días ocupados &nbsp;·&nbsp; 🟢 Verde = días libres
                   </Form.Text>
                 )}
               </Form.Group>
-            </Col>
-            <Col md={4}>
-              <Form.Group className="mb-3">
-                <Form.Label>Check-in *</Form.Label>
-                <DatePicker
-                  selected={formReserva.checkInDate ? new Date(formReserva.checkInDate + 'T12:00:00') : null}
-                  onChange={(date) =>
-                    setFormReserva({
-                      ...formReserva,
-                      checkInDate: date ? formatLocalDate(date) : '',
-                      checkOutDate: '',
-                    })
-                  }
-                  dateFormat="dd/MM/yyyy"
-                  className="form-control"
-                  placeholderText="dd/mm/aaaa"
-                  dayClassName={getDayClassName}
-                  filterDate={(date) => !diasOcupadosHabitacion.has(formatLocalDate(date))}
-                />
-              </Form.Group>
-            </Col>
-            <Col md={4}>
-              <Form.Group className="mb-3">
-                <Form.Label>Check-out *</Form.Label>
-                <DatePicker
-                  selected={formReserva.checkOutDate ? new Date(formReserva.checkOutDate + 'T12:00:00') : null}
-                  onChange={(date) =>
-                    setFormReserva({
-                      ...formReserva,
-                      checkOutDate: date ? formatLocalDate(date) : '',
-                    })
-                  }
-                  dateFormat="dd/MM/yyyy"
-                  className="form-control"
-                  placeholderText="dd/mm/aaaa"
-                  dayClassName={getDayClassName}
-                  filterDate={(date) => !diasOcupadosParaCheckOut.has(formatLocalDate(date))}
-                  minDate={
-                    formReserva.checkInDate
-                      ? new Date(formReserva.checkInDate + 'T12:00:00')
-                      : new Date()
-                  }
-                />
-              </Form.Group>
-            </Col>
-          </Row>
 
-          {formReserva.checkInDate && formReserva.checkOutDate && (
-            <Alert variant="info" className="py-2">
-              <strong>
-                {calcularNoches(
-                  formReserva.checkInDate,
-                  formReserva.checkOutDate
-                )}{' '}
-                noches
-              </strong>
-            </Alert>
+              <Row className="g-3">
+                <Col md={6}>
+                  <Form.Group>
+                    <Form.Label className="fs-5 fw-semibold">
+                      Fecha de entrada <span className="text-danger">*</span>
+                    </Form.Label>
+                    <DatePicker
+                      selected={
+                        formReserva.checkInDate
+                          ? new Date(formReserva.checkInDate + 'T12:00:00')
+                          : null
+                      }
+                      onChange={(date) =>
+                        setFormReserva({
+                          ...formReserva,
+                          checkInDate: date ? formatLocalDate(date) : '',
+                          checkOutDate: '',
+                        })
+                      }
+                      dateFormat="dd/MM/yyyy"
+                      className="form-control form-control-lg"
+                      placeholderText="dd/mm/aaaa"
+                      dayClassName={getDayClassName}
+                      filterDate={(date) =>
+                        !diasOcupadosHabitacion.has(formatLocalDate(date))
+                      }
+                    />
+                  </Form.Group>
+                </Col>
+                <Col md={6}>
+                  <Form.Group>
+                    <Form.Label className="fs-5 fw-semibold">
+                      Fecha de salida <span className="text-danger">*</span>
+                    </Form.Label>
+                    <DatePicker
+                      selected={
+                        formReserva.checkOutDate
+                          ? new Date(formReserva.checkOutDate + 'T12:00:00')
+                          : null
+                      }
+                      onChange={(date) =>
+                        setFormReserva({
+                          ...formReserva,
+                          checkOutDate: date ? formatLocalDate(date) : '',
+                        })
+                      }
+                      dateFormat="dd/MM/yyyy"
+                      className="form-control form-control-lg"
+                      placeholderText="dd/mm/aaaa"
+                      dayClassName={getDayClassName}
+                      filterDate={(date) =>
+                        !diasOcupadosParaCheckOut.has(formatLocalDate(date))
+                      }
+                      minDate={
+                        formReserva.checkInDate
+                          ? new Date(formReserva.checkInDate + 'T12:00:00')
+                          : new Date()
+                      }
+                    />
+                  </Form.Group>
+                </Col>
+              </Row>
+
+              {formReserva.checkInDate && formReserva.checkOutDate && (
+                <Alert variant="success" className="mt-3 text-center fs-5 mb-0">
+                  <strong>
+                    {calcularNoches(formReserva.checkInDate, formReserva.checkOutDate)}{' '}
+                    noche
+                    {calcularNoches(formReserva.checkInDate, formReserva.checkOutDate) !== 1
+                      ? 's'
+                      : ''}
+                  </strong>{' '}
+                  de estadía
+                </Alert>
+              )}
+            </div>
           )}
 
-          <hr />
-          <h6 className="text-muted mb-3">Datos del Pago</h6>
+          {/* PASO 3: Pago y Detalles */}
+          {pasoActual === 3 && (
+            <div>
+              <h5 className="text-center text-muted mb-4">Pago y detalles</h5>
 
-          <Row>
-            <Col md={4}>
-              <Form.Group className="mb-3">
-                <Form.Label>Precio total *</Form.Label>
-                <Form.Control
-                  type="text"
-                  inputMode="decimal"
-                  value={totalPriceInput}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    if (value === '' || /^\d*\.?\d*$/.test(value)) {
-                      setTotalPriceInput(value);
-                    }
-                  }}
-                  placeholder="Ej: 50000.00"
-                  isInvalid={
-                    totalPriceInput !== '' &&
-                    (isNaN(parseFloat(totalPriceInput)) ||
-                      parseFloat(totalPriceInput) < 0)
-                  }
-                />
-                <Form.Text className="text-muted">
-                  Usa punto (.) como separador decimal
-                </Form.Text>
+              <Form.Group className="mb-4">
+                <Form.Label className="fs-5 fw-semibold">Cantidad de personas</Form.Label>
+                <div className="d-flex align-items-center gap-3 mt-1">
+                  <Button
+                    variant="outline-secondary"
+                    style={{ width: 50, height: 50, fontSize: '1.5rem', lineHeight: 1, padding: 0 }}
+                    onClick={() => setCantidadHuespedes((n) => Math.max(1, n - 1))}
+                  >
+                    −
+                  </Button>
+                  <span
+                    className="fs-2 fw-bold"
+                    style={{ minWidth: 50, textAlign: 'center' }}
+                  >
+                    {cantidadHuespedes}
+                  </span>
+                  <Button
+                    variant="outline-secondary"
+                    style={{ width: 50, height: 50, fontSize: '1.5rem', lineHeight: 1, padding: 0 }}
+                    onClick={() => setCantidadHuespedes((n) => Math.min(20, n + 1))}
+                  >
+                    +
+                  </Button>
+                  <span className="text-muted fs-5">
+                    {cantidadHuespedes === 1 ? 'persona' : 'personas'}
+                  </span>
+                </div>
               </Form.Group>
-            </Col>
-            <Col md={4}>
+
+              <Row className="g-3 mb-3">
+                <Col md={4}>
+                  <Form.Group>
+                    <Form.Label className="fs-5 fw-semibold">
+                      Precio total <span className="text-danger">*</span>
+                    </Form.Label>
+                    <Form.Control
+                      size="lg"
+                      type="text"
+                      inputMode="decimal"
+                      value={totalPriceInput}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                          setTotalPriceInput(value);
+                        }
+                      }}
+                      placeholder="Ej: 50000"
+                      isInvalid={
+                        totalPriceInput !== '' &&
+                        (isNaN(parseFloat(totalPriceInput)) ||
+                          parseFloat(totalPriceInput) < 0)
+                      }
+                    />
+                    <Form.Text className="text-muted">Punto (.) como decimal</Form.Text>
+                  </Form.Group>
+                </Col>
+                <Col md={4}>
+                  <Form.Group>
+                    <Form.Label className="fs-5 fw-semibold">Monto pagado</Form.Label>
+                    <Form.Control
+                      size="lg"
+                      type="text"
+                      inputMode="decimal"
+                      value={amountPaidInput}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                          setAmountPaidInput(value);
+                        }
+                      }}
+                      placeholder="Ej: 25000"
+                    />
+                    <Form.Text className="text-muted">Dejar en 0 si paga al ingreso</Form.Text>
+                  </Form.Group>
+                </Col>
+                <Col md={4}>
+                  <Form.Group>
+                    <Form.Label className="fs-5 fw-semibold">Forma de pago</Form.Label>
+                    <Form.Select
+                      size="lg"
+                      value={formReserva.paymentType}
+                      onChange={(e) =>
+                        setFormReserva({
+                          ...formReserva,
+                          paymentType: e.target.value as FormReservaExterna['paymentType'],
+                        })
+                      }
+                    >
+                      <option value="EFECTIVO">Efectivo</option>
+                      <option value="TRANSFERENCIA">Transferencia</option>
+                      <option value="TARJETA_CREDITO">Tarjeta de Crédito</option>
+                      <option value="TARJETA_DEBITO">Tarjeta de Débito</option>
+                      <option value="MERCADO_PAGO">MercadoPago</option>
+                    </Form.Select>
+                  </Form.Group>
+                </Col>
+              </Row>
+
+              {parseFloat(totalPriceInput) > 0 &&
+                parseFloat(amountPaidInput || '0') < parseFloat(totalPriceInput) && (
+                  <Alert variant="warning" className="py-2 mb-3">
+                    Saldo pendiente al ingreso:{' '}
+                    <strong>
+                      $
+                      {(
+                        parseFloat(totalPriceInput) - parseFloat(amountPaidInput || '0')
+                      ).toLocaleString()}
+                    </strong>
+                  </Alert>
+                )}
+
               <Form.Group className="mb-3">
-                <Form.Label>Monto pagado</Form.Label>
-                <Form.Control
-                  type="text"
-                  inputMode="decimal"
-                  value={amountPaidInput}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    if (value === '' || /^\d*\.?\d*$/.test(value)) {
-                      setAmountPaidInput(value);
-                    }
-                  }}
-                  placeholder="Ej: 25000.00"
-                  isInvalid={
-                    amountPaidInput !== '' &&
-                    (isNaN(parseFloat(amountPaidInput)) ||
-                      parseFloat(amountPaidInput) < 0)
-                  }
+                <Form.Check
+                  type="switch"
+                  id="requiere-factura"
+                  label={<span className="fs-5">¿Requiere factura?</span>}
+                  checked={requiereFacturacion}
+                  onChange={(e) => setRequiereFacturacion(e.target.checked)}
                 />
-                <Form.Text className="text-muted">
-                  Usa punto (.) como separador decimal
-                </Form.Text>
               </Form.Group>
-            </Col>
-            <Col md={4}>
-              <Form.Group className="mb-3">
-                <Form.Label>Forma de pago</Form.Label>
-                <Form.Select
-                  value={formReserva.paymentType}
+
+              {requiereFacturacion && (
+                <Card className="border-primary">
+                  <Card.Body>
+                    <h6 className="text-primary mb-3">Datos de Facturación</h6>
+                    <Row className="g-2">
+                      <Col md={6}>
+                        <Form.Group>
+                          <Form.Label>CUIT / CUIL *</Form.Label>
+                          <Form.Control
+                            type="text"
+                            value={billingInfo.cuitCuil}
+                            onChange={(e) =>
+                              setBillingInfo({ ...billingInfo, cuitCuil: e.target.value })
+                            }
+                            placeholder="20-12345678-9"
+                          />
+                        </Form.Group>
+                      </Col>
+                      <Col md={6}>
+                        <Form.Group>
+                          <Form.Label>Razón Social *</Form.Label>
+                          <Form.Control
+                            type="text"
+                            value={billingInfo.razonSocial}
+                            onChange={(e) =>
+                              setBillingInfo({ ...billingInfo, razonSocial: e.target.value })
+                            }
+                            placeholder="Nombre o empresa"
+                          />
+                        </Form.Group>
+                      </Col>
+                      <Col md={6}>
+                        <Form.Group>
+                          <Form.Label>Domicilio</Form.Label>
+                          <Form.Control
+                            type="text"
+                            value={billingInfo.domicilioComercial}
+                            onChange={(e) =>
+                              setBillingInfo({
+                                ...billingInfo,
+                                domicilioComercial: e.target.value,
+                              })
+                            }
+                            placeholder="Calle 123, Ciudad"
+                          />
+                        </Form.Group>
+                      </Col>
+                      <Col md={3}>
+                        <Form.Group>
+                          <Form.Label>Tipo</Form.Label>
+                          <Form.Select
+                            value={billingInfo.tipoFactura}
+                            onChange={(e) =>
+                              setBillingInfo({
+                                ...billingInfo,
+                                tipoFactura: e.target.value as 'A' | 'B',
+                              })
+                            }
+                          >
+                            <option value="A">Factura A</option>
+                            <option value="B">Factura B</option>
+                          </Form.Select>
+                        </Form.Group>
+                      </Col>
+                      <Col md={3}>
+                        <Form.Group>
+                          <Form.Label>Condición Fiscal</Form.Label>
+                          <Form.Select
+                            value={billingInfo.condicionFiscal}
+                            onChange={(e) =>
+                              setBillingInfo({
+                                ...billingInfo,
+                                condicionFiscal: e.target
+                                  .value as BillingInfo['condicionFiscal'],
+                              })
+                            }
+                          >
+                            <option value="Consumidor Final">Consumidor Final</option>
+                            <option value="Monotributista">Monotributista</option>
+                            <option value="Responsable Inscripto">Responsable Inscripto</option>
+                          </Form.Select>
+                        </Form.Group>
+                      </Col>
+                    </Row>
+                  </Card.Body>
+                </Card>
+              )}
+            </div>
+          )}
+
+          {/* PASO 4: Confirmar */}
+          {pasoActual === 4 && (
+            <div>
+              <h5 className="text-center text-muted mb-4">
+                Revise la reserva antes de confirmar
+              </h5>
+              <Card className="mb-3 border-2">
+                <Card.Body>
+                  <Row>
+                    <Col md={6} className="mb-3 mb-md-0">
+                      <div className="d-flex align-items-center gap-2 mb-2">
+                        <span style={{ fontSize: '1.4rem' }}>👤</span>
+                        <strong className="fs-5">Huésped</strong>
+                      </div>
+                      <p className="mb-1 fs-5">{formReserva.customerName}</p>
+                      {formReserva.customerPhone && (
+                        <p className="mb-1 text-muted">Tel: {formReserva.customerPhone}</p>
+                      )}
+                      {formReserva.customerDni && (
+                        <p className="mb-1 text-muted">DNI: {formReserva.customerDni}</p>
+                      )}
+                      {formReserva.customerEmail && (
+                        <p className="mb-0 text-muted">{formReserva.customerEmail}</p>
+                      )}
+                    </Col>
+                    <Col md={6}>
+                      <div className="d-flex align-items-center gap-2 mb-2">
+                        <span style={{ fontSize: '1.4rem' }}>🛏️</span>
+                        <strong className="fs-5">Estadía</strong>
+                      </div>
+                      {selectedHabitacion ? (
+                        <p className="mb-1">
+                          Hab. {selectedHabitacion.numero} – {selectedHabitacion.titulo}
+                        </p>
+                      ) : (
+                        <p className="mb-1 text-muted">Sin habitación asignada</p>
+                      )}
+                      <p className="mb-1">
+                        Entrada:{' '}
+                        <strong>
+                          {formReserva.checkInDate
+                            ? new Date(
+                                formReserva.checkInDate + 'T12:00:00'
+                              ).toLocaleDateString('es-AR')
+                            : '-'}
+                        </strong>
+                      </p>
+                      <p className="mb-2">
+                        Salida:{' '}
+                        <strong>
+                          {formReserva.checkOutDate
+                            ? new Date(
+                                formReserva.checkOutDate + 'T12:00:00'
+                              ).toLocaleDateString('es-AR')
+                            : '-'}
+                        </strong>
+                      </p>
+                      <div className="d-flex gap-2 flex-wrap">
+                        {formReserva.checkInDate && formReserva.checkOutDate && (
+                          <Badge bg="secondary">
+                            {calcularNoches(
+                              formReserva.checkInDate,
+                              formReserva.checkOutDate
+                            )}{' '}
+                            noches
+                          </Badge>
+                        )}
+                        <Badge bg="info">
+                          {cantidadHuespedes}{' '}
+                          {cantidadHuespedes === 1 ? 'persona' : 'personas'}
+                        </Badge>
+                        {requiereFacturacion && (
+                          <Badge bg="primary">
+                            Factura tipo {billingInfo.tipoFactura}
+                          </Badge>
+                        )}
+                      </div>
+                    </Col>
+                  </Row>
+                  <hr />
+                  <div className="d-flex align-items-center gap-2 mb-2">
+                    <span style={{ fontSize: '1.4rem' }}>💰</span>
+                    <strong className="fs-5">Pago</strong>
+                  </div>
+                  <Row className="g-2">
+                    <Col sm={4}>
+                      <p className="mb-0">
+                        Total:{' '}
+                        <strong className="text-primary fs-5">
+                          ${parseFloat(totalPriceInput || '0').toLocaleString()}
+                        </strong>
+                      </p>
+                    </Col>
+                    <Col sm={4}>
+                      <p className="mb-0">
+                        Pagado:{' '}
+                        <strong className="text-success">
+                          ${parseFloat(amountPaidInput || '0').toLocaleString()}
+                        </strong>
+                      </p>
+                    </Col>
+                    {parseFloat(totalPriceInput || '0') >
+                      parseFloat(amountPaidInput || '0') && (
+                      <Col sm={4}>
+                        <p className="mb-0">
+                          Pendiente:{' '}
+                          <strong className="text-danger">
+                            $
+                            {(
+                              parseFloat(totalPriceInput || '0') -
+                              parseFloat(amountPaidInput || '0')
+                            ).toLocaleString()}
+                          </strong>
+                        </p>
+                      </Col>
+                    )}
+                  </Row>
+                  <p className="mb-0 mt-1 text-muted small">
+                    Forma de pago:{' '}
+                    {formReserva.paymentType === 'EFECTIVO'
+                      ? 'Efectivo'
+                      : formReserva.paymentType === 'TRANSFERENCIA'
+                      ? 'Transferencia'
+                      : formReserva.paymentType === 'TARJETA_CREDITO'
+                      ? 'Tarjeta de Crédito'
+                      : formReserva.paymentType === 'TARJETA_DEBITO'
+                      ? 'Tarjeta de Débito'
+                      : 'MercadoPago'}
+                  </p>
+                </Card.Body>
+              </Card>
+
+              <Form.Group>
+                <Form.Label className="fw-semibold">
+                  Notas adicionales (opcional)
+                </Form.Label>
+                <Form.Control
+                  as="textarea"
+                  rows={2}
+                  value={formReserva.notas}
                   onChange={(e) =>
-                    setFormReserva({
-                      ...formReserva,
-                      paymentType: e.target
-                        .value as FormReservaExterna['paymentType'],
-                    })
+                    setFormReserva({ ...formReserva, notas: e.target.value })
                   }
-                >
-                  <option value="EFECTIVO">Efectivo</option>
-                  <option value="TRANSFERENCIA">Transferencia</option>
-                  <option value="TARJETA_CREDITO">Tarjeta de Crédito</option>
-                  <option value="TARJETA_DEBITO">Tarjeta de Débito</option>
-                  <option value="MERCADO_PAGO">MercadoPago</option>
-                </Form.Select>
+                  placeholder="Observaciones, pedidos especiales..."
+                />
               </Form.Group>
-            </Col>
-          </Row>
-
-          {parseFloat(totalPriceInput) > 0 &&
-            parseFloat(amountPaidInput || '0') <
-              parseFloat(totalPriceInput) && (
-              <Alert variant="warning" className="py-2">
-                Saldo pendiente:{' '}
-                <strong>
-                  $
-                  {(
-                    parseFloat(totalPriceInput) -
-                    parseFloat(amountPaidInput || '0')
-                  ).toLocaleString()}
-                </strong>
-              </Alert>
-            )}
-
-          <Form.Group className="mb-3">
-            <Form.Label>Notas</Form.Label>
-            <Form.Control
-              as="textarea"
-              rows={2}
-              value={formReserva.notas}
-              onChange={(e) =>
-                setFormReserva({ ...formReserva, notas: e.target.value })
-              }
-              placeholder="Observaciones adicionales..."
-            />
-          </Form.Group>
+            </div>
+          )}
         </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setModalCrear(false)}>
+
+        <Modal.Footer className="justify-content-between">
+          <Button
+            variant="outline-secondary"
+            onClick={() => {
+              setModalCrear(false);
+              setSelectedHabitacion(null);
+              setPasoActual(1);
+              setRequiereFacturacion(false);
+              setCantidadHuespedes(1);
+              setBillingInfo(initialBillingInfo);
+            }}
+          >
             Cancelar
           </Button>
-          <Button
-            variant="success"
-            onClick={handleCrearReserva}
-            disabled={guardando}
-          >
-            {guardando ? <Spinner size="sm" /> : 'Crear Reserva'}
-          </Button>
+          <div className="d-flex gap-2">
+            {pasoActual > 1 && (
+              <Button
+                variant="outline-primary"
+                size="lg"
+                onClick={() => {
+                  setErrorForm(null);
+                  setPasoActual((p) => p - 1);
+                }}
+              >
+                ← Anterior
+              </Button>
+            )}
+            {pasoActual < 4 ? (
+              <Button variant="primary" size="lg" onClick={siguientePasoCrear}>
+                Siguiente →
+              </Button>
+            ) : (
+              <Button
+                variant="success"
+                size="lg"
+                onClick={handleCrearReserva}
+                disabled={guardando}
+              >
+                {guardando ? <Spinner size="sm" /> : '✓ Confirmar Reserva'}
+              </Button>
+            )}
+          </div>
         </Modal.Footer>
       </Modal>
 
