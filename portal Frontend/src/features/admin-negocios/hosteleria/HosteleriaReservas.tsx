@@ -1120,7 +1120,7 @@ export function HosteleriaReservas({
       </Tabs>
 
       {/* Modal Crear Reserva */}
-      <Modal show={modalCrear} onHide={() => { setModalCrear(false); setSelectedHabitacion(null); }} size="lg">
+      <Modal show={modalCrear} onHide={() => { setModalCrear(false); setSelectedHabitacion(null); }} size="lg" enforceFocus={false}>
         <Modal.Header closeButton>
           <Modal.Title>Crear Reserva Manual</Modal.Title>
         </Modal.Header>
