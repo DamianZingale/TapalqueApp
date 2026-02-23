@@ -1260,6 +1260,7 @@ export function HosteleriaReservas({
                   className="form-control"
                   placeholderText="dd/mm/aaaa"
                   dayClassName={getDayClassName}
+                  filterDate={(date) => !diasOcupadosHabitacion.has(formatLocalDate(date))}
                   minDate={new Date()}
                 />
               </Form.Group>
@@ -1279,6 +1280,7 @@ export function HosteleriaReservas({
                   className="form-control"
                   placeholderText="dd/mm/aaaa"
                   dayClassName={getDayClassName}
+                  filterDate={(date) => !diasOcupadosHabitacion.has(formatLocalDate(date))}
                   minDate={
                     formReserva.checkInDate
                       ? new Date(formReserva.checkInDate + 'T12:00:00')

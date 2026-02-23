@@ -7,6 +7,7 @@ import type { Business } from '../types';
 import { HosteleriaHabitaciones } from './HosteleriaHabitaciones';
 import { HosteleriaReservas } from './HosteleriaReservas';
 import { HosteleriaConfiguracion } from './HosteleriaConfiguracion';
+import { HosteleriaPlanning } from './HosteleriaPlanning';
 
 export function HosteleriaDashboard() {
   const { id } = useParams<{ id: string }>();
@@ -17,13 +18,14 @@ export function HosteleriaDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const getActiveTab = (): 'habitaciones' | 'reservas' | 'configuracion' => {
+  const getActiveTab = (): 'habitaciones' | 'reservas' | 'configuracion' | 'planning' => {
     if (location.pathname.includes('/reservas')) return 'reservas';
     if (location.pathname.includes('/configuracion')) return 'configuracion';
+    if (location.pathname.includes('/planning')) return 'planning';
     return 'habitaciones';
   };
 
-  const [activeTab, setActiveTab] = useState<'habitaciones' | 'reservas' | 'configuracion'>(getActiveTab());
+  const [activeTab, setActiveTab] = useState<'habitaciones' | 'reservas' | 'configuracion' | 'planning'>(getActiveTab());
 
   useEffect(() => {
     setActiveTab(getActiveTab());
@@ -68,7 +70,7 @@ export function HosteleriaDashboard() {
   const handleTabChange = (tab: string | null) => {
     if (!tab || !id) return;
 
-    setActiveTab(tab as 'habitaciones' | 'reservas' | 'configuracion');
+    setActiveTab(tab as 'habitaciones' | 'reservas' | 'configuracion' | 'planning');
     navigate(`/admin/hosteleria/${id}/${tab}`);
   };
 
@@ -136,6 +138,12 @@ export function HosteleriaDashboard() {
         <Tab eventKey="configuracion" title="⚙️ Configuración">
           {activeTab === 'configuracion' && (
             <HosteleriaConfiguracion businessId={business.id} businessName={business.name} />
+          )}
+        </Tab>
+
+        <Tab eventKey="planning" title="📊 Planning">
+          {activeTab === 'planning' && (
+            <HosteleriaPlanning businessId={business.id} businessName={business.name} />
           )}
         </Tab>
       </Tabs>

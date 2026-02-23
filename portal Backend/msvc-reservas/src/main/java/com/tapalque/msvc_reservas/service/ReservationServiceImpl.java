@@ -73,31 +73,39 @@ public class ReservationServiceImpl implements ReservationService {
             return Mono.error(new IllegalArgumentException("Las fechas de estadía son inválidas"));
         }
 
+        // Las reservas manuales del administrador (no Mercado Pago) omiten las
+        // restricciones de política (estadía mínima, fin de semana).
+        final boolean esReservaManual = reservationDto.getPayment() == null
+                || reservationDto.getPayment().getPaymentType() == null
+                || !PaymentType.MERCADO_PAGO.equals(reservationDto.getPayment().getPaymentType());
+
         return politicaService.obtenerPolitica(hotelId)
             .flatMap(politica -> {
-                // Validar política de mínimo de noches para fin de semana (solo cuando está activa)
-                if (Boolean.TRUE.equals(politica.getPoliticaFdsActiva())) {
-                    DayOfWeek checkInDia = checkIn.toLocalDate().getDayOfWeek();
-                    boolean esFds = checkInDia == DayOfWeek.THURSDAY
-                            || checkInDia == DayOfWeek.FRIDAY
-                            || checkInDia == DayOfWeek.SATURDAY
-                            || checkInDia == DayOfWeek.SUNDAY;
-                    if (esFds && noches < 2) {
-                        LocalDate hoy = LocalDate.now();
-                        boolean esHoyMiercoles = hoy.getDayOfWeek() == DayOfWeek.WEDNESDAY;
-                        long diasHastaCheckIn = ChronoUnit.DAYS.between(hoy, checkIn.toLocalDate());
-                        boolean esFdsSiguiente = diasHastaCheckIn >= 0 && diasHastaCheckIn <= 4;
-                        if (!(esHoyMiercoles && esFdsSiguiente)) {
-                            return Mono.error(new IllegalArgumentException(
-                                    "De jueves a domingo la estadía mínima es de 2 noches. Solo el miércoles previo se permite reservar 1 noche para ese fin de semana."));
+                if (!esReservaManual) {
+                    // Validar política de mínimo de noches para fin de semana (solo cuando está activa)
+                    if (Boolean.TRUE.equals(politica.getPoliticaFdsActiva())) {
+                        DayOfWeek checkInDia = checkIn.toLocalDate().getDayOfWeek();
+                        boolean esFds = checkInDia == DayOfWeek.THURSDAY
+                                || checkInDia == DayOfWeek.FRIDAY
+                                || checkInDia == DayOfWeek.SATURDAY
+                                || checkInDia == DayOfWeek.SUNDAY;
+                        if (esFds && noches < 2) {
+                            LocalDate hoy = LocalDate.now();
+                            boolean esHoyMiercoles = hoy.getDayOfWeek() == DayOfWeek.WEDNESDAY;
+                            long diasHastaCheckIn = ChronoUnit.DAYS.between(hoy, checkIn.toLocalDate());
+                            boolean esFdsSiguiente = diasHastaCheckIn >= 0 && diasHastaCheckIn <= 4;
+                            if (!(esHoyMiercoles && esFdsSiguiente)) {
+                                return Mono.error(new IllegalArgumentException(
+                                        "De jueves a domingo la estadía mínima es de 2 noches. Solo el miércoles previo se permite reservar 1 noche para ese fin de semana."));
+                            }
                         }
                     }
-                }
 
-                // Validar estadía mínima general
-                if (politica.getEstadiaMinima() != null && noches < politica.getEstadiaMinima()) {
-                    return Mono.error(new IllegalArgumentException(
-                            "La estadía mínima para este hospedaje es de " + politica.getEstadiaMinima() + " noche(s)"));
+                    // Validar estadía mínima general
+                    if (politica.getEstadiaMinima() != null && noches < politica.getEstadiaMinima()) {
+                        return Mono.error(new IllegalArgumentException(
+                                "La estadía mínima para este hospedaje es de " + politica.getEstadiaMinima() + " noche(s)"));
+                    }
                 }
 
                 return hospedajeClient.fetchHabitaciones(hotelId);
@@ -133,10 +141,16 @@ public class ReservationServiceImpl implements ReservationService {
                         Reservation reservation = ReservationMapper.toEntity(reservationDto);
                         reservation.setTotalPrice(precioReal);
                         // Sobreescribir montos de pago con valores calculados en el servidor.
-                        // setTotalAmount + setAmountPaid(0) recalcula remainingAmount, isPaid y hasPendingAmount.
                         if (reservation.getPayment() != null) {
                             reservation.getPayment().setTotalAmount(precioReal);
-                            reservation.getPayment().setAmountPaid(0.0);
+                            if (esReservaManual) {
+                                // Reserva manual: respetar el monto pagado indicado por el admin
+                                Double adminAmountPaid = reservationDto.getPayment().getAmountPaid();
+                                reservation.getPayment().setAmountPaid(adminAmountPaid != null ? adminAmountPaid : 0.0);
+                            } else {
+                                // Reserva online: monto 0 hasta que Mercado Pago confirme el pago
+                                reservation.getPayment().setAmountPaid(0.0);
+                            }
                         }
                         reservation.setDateCreated(LocalDateTime.now());
                         reservation.setDateUpdated(LocalDateTime.now());
