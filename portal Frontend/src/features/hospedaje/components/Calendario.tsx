@@ -156,10 +156,6 @@ export const Calendario = ({
             <span className="dia-leyenda dia-leyenda--rango" />
             <small className="text-muted">Rango</small>
           </span>
-          <span className="d-flex align-items-center gap-1">
-            <span className="dia-leyenda dia-leyenda--ocupada" />
-            <small className="text-muted">Ocupada</small>
-          </span>
         </div>
 
         {/* Resumen de fechas seleccionadas */}
