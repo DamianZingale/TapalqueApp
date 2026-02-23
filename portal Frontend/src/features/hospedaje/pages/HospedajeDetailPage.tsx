@@ -218,8 +218,7 @@ export default function HospedajeDetailPage() {
       // Si los datos ya estaban completos en el backend, continuar con la reserva
     }
 
-    // Calcular noches y precio total
-    const noches = Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+    // Calcular precio total
     const precioTotal = calcularPrecioTotal(habitacionSeleccionada, noches);
     const montoSeña = Math.round(precioTotal * 0.5); // 50% de seña
 
