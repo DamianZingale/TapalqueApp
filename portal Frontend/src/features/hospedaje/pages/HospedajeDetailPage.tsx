@@ -173,13 +173,20 @@ export default function HospedajeDetailPage() {
       return;
     }
 
+    const noches = Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+
+    // Validar estadía mínima general
+    if (politica?.estadiaMinima && noches < politica.estadiaMinima) {
+      alert(`La estadía mínima para este hospedaje es de ${politica.estadiaMinima} noche${politica.estadiaMinima > 1 ? 's' : ''}.\n\nPor favor, seleccioná un período más largo.`);
+      return;
+    }
+
     // Validar mínimo de noches según política de fin de semana (solo cuando está activa)
     if (politica?.politicaFdsActiva) {
-      const noches = Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
       const checkInDia = start.getDay(); // 0=dom, 1=lun, 2=mar, 3=mie, 4=jue, 5=vie, 6=sab
       const esFds = checkInDia === 4 || checkInDia === 5 || checkInDia === 6 || checkInDia === 0;
       if (esFds && noches < 2 && !esExcepcionMiercoles(start)) {
-        alert('De jueves a domingo la estadía mínima es de 2 noches.\nSolo el miércoles previo al fin de semana se permite reservar 1 noche.');
+        alert('La estadía mínima de jueves a domingo es de 2 noches.\n\nPara reservar por una noche, intentelo nuevamente el miércoles previo al ingreso.');
         return;
       }
     }
@@ -328,11 +335,18 @@ export default function HospedajeDetailPage() {
 
       <Subtitle text="¡Reserva ahora!" />
 
-      {/* Banner de política de estadía mínima */}
+      {/* Banner de estadía mínima general */}
+      {politica?.estadiaMinima && politica.estadiaMinima > 1 && (
+        <div className="alert alert-info py-2 mb-3" role="alert">
+          <strong>Estadía mínima:</strong> Se requieren mínimo {politica.estadiaMinima} noches para reservar en este hospedaje.
+        </div>
+      )}
+
+      {/* Banner de política de estadía mínima de fin de semana */}
       {politica?.politicaFdsActiva && (
         <div className="alert alert-info py-2 mb-3" role="alert">
-          <strong>Política de estadía mínima:</strong> De jueves a domingo se requieren mínimo 2 noches.
-          El miércoles previo podés reservar 1 sola noche para ese fin de semana.
+          <strong>Política de fin de semana:</strong> La estadía mínima de jueves a domingo es de 2 noches.
+          Para reservar por una noche, intentelo el miércoles previo al ingreso.
         </div>
       )}
 

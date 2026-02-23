@@ -5,6 +5,7 @@ export interface PoliticaReservas {
   hotelId: string;
   reservasHabilitadas: boolean;   // ON/OFF de reservas para este hospedaje
   politicaFdsActiva: boolean;     // Activa regla mínimo 2 noches jue-dom
+  estadiaMinima?: number;         // Noches mínimas requeridas para cualquier reserva
   fechaActualizacion?: string;
   actualizadoPor?: string;
 }

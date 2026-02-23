@@ -123,6 +123,29 @@ export function getFullSchedule(
 }
 
 /**
+ * Formatea el schedule para mostrar en el card de gastronomía.
+ * Entrada: "1:12-22; 2:13-22; 5:10-20"
+ * Salida: "L: 12 a 22, M: 13 a 22, X: Cerrado, J: Cerrado, V: 10 a 20, S: Cerrado, D: Cerrado"
+ */
+export function formatScheduleDisplay(schedule: string): string {
+  if (!schedule) return '';
+
+  const schedules = parseSchedule(schedule);
+  const dayAbbr = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+
+  return dayAbbr
+    .map((abbr, index) => {
+      const dayNum = index + 1;
+      const daySchedule = schedules.find((s) => s.day === dayNum);
+      if (!daySchedule) return `${abbr}: Cerrado`;
+      const openHour = daySchedule.open.replace(/^0+/, '') || '0';
+      const closeHour = daySchedule.close.replace(/^0+/, '') || '0';
+      return `${abbr}: ${openHour} a ${closeHour}`;
+    })
+    .join(', ');
+}
+
+/**
  * Obtiene el estado en texto legible
  */
 export function getStatusText(schedule: string): {

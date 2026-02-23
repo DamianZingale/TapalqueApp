@@ -441,23 +441,9 @@ export function HosteleriaHabitaciones({
                           </span>
                         </div>
                         {habitacion.servicios && habitacion.servicios.length > 0 && (
-                          <div className="mb-2">
-                            {habitacion.servicios.slice(0, 3).map((s) => (
-                              <Badge
-                                key={s}
-                                bg="light"
-                                text="dark"
-                                className="me-1 mb-1"
-                                style={{ fontSize: '0.7rem' }}
-                              >
-                                {s}
-                              </Badge>
-                            ))}
-                            {habitacion.servicios.length > 3 && (
-                              <Badge bg="light" text="dark" style={{ fontSize: '0.7rem' }}>
-                                +{habitacion.servicios.length - 3}
-                              </Badge>
-                            )}
+                          <div className="mb-2 text-muted" style={{ fontSize: '0.7rem', lineHeight: 1.4 }}>
+                            {habitacion.servicios.slice(0, 3).join(' · ')}
+                            {habitacion.servicios.length > 3 && ` +${habitacion.servicios.length - 3}`}
                           </div>
                         )}
                       </Card.Body>
@@ -546,17 +532,8 @@ export function HosteleriaHabitaciones({
                           </div>
                           {habitacion.servicios &&
                             habitacion.servicios.length > 0 && (
-                              <div className="mt-2">
-                                {habitacion.servicios.map((s) => (
-                                  <Badge
-                                    key={s}
-                                    bg="light"
-                                    text="dark"
-                                    className="me-1 mb-1"
-                                  >
-                                    {s}
-                                  </Badge>
-                                ))}
+                              <div className="mt-2 text-muted" style={{ fontSize: '0.75rem', lineHeight: 1.4 }}>
+                                {habitacion.servicios.join(' · ')}
                               </div>
                             )}
                         </Card.Body>
@@ -574,6 +551,7 @@ export function HosteleriaHabitaciones({
         show={modalAgregar}
         onHide={() => setModalAgregar(false)}
         size="lg"
+        fullscreen="sm-down"
       >
         <Modal.Header closeButton>
           <Modal.Title>Agregar Nueva Habitación</Modal.Title>
@@ -808,7 +786,7 @@ export function HosteleriaHabitaciones({
       </Modal>
 
       {/* Modal Editar Habitación */}
-      <Modal show={modalEditar} onHide={() => setModalEditar(false)} size="lg">
+      <Modal show={modalEditar} onHide={() => setModalEditar(false)} size="lg" fullscreen="sm-down">
         <Modal.Header closeButton>
           <Modal.Title>Editar Habitación</Modal.Title>
         </Modal.Header>

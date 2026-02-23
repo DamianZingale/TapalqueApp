@@ -1,4 +1,5 @@
 import { ButtonComoLlegar } from '../../../shared/components/ButtonComoLlegar';
+import { formatScheduleDisplay } from '../../../shared/utils/scheduleUtils';
 import type { IRestaurantInfo } from '../types/IrestaurantInfo';
 
 interface InfoProps extends IRestaurantInfo {
@@ -51,7 +52,7 @@ export const Info: React.FC<InfoProps> = ({
 
             {schedule && (
               <p className="mb-1">
-                🕒 <strong>Horario:</strong> {schedule}
+                🕒 <strong>Horario:</strong> {formatScheduleDisplay(schedule)}
               </p>
             )}
           </div>
