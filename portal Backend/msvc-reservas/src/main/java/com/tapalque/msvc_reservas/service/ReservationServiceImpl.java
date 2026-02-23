@@ -330,6 +330,7 @@ public Mono<ReservationDTO> updateReservation(ReservationDTO reservationDto) {
                     LocalDateTime.now(), montoRecibido, PaymentType.MERCADO_PAGO, "Pago confirmado via Mercado Pago"
                 ));
                 reservation.setIsActive(true);
+                reservation.setIsCancelled(false);
                 reservation.setTransaccionId(evento.getTransaccionId());
                 reservation.setMercadoPagoId(evento.getMercadoPagoId());
                 reservation.setFechaPago(evento.getFechaPago());

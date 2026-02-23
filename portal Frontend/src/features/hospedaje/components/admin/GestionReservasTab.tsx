@@ -515,19 +515,30 @@ export const GestionReservasTab = () => {
                             <Form.Group className="mb-3">
                                 <Form.Label>Habitación *</Form.Label>
                                 <Form.Select
-                                    value={formData.roomNumber}
+                                    value={formData.roomNumber === '' ? '' : String(formData.roomNumber)}
                                     onChange={(e) => {
                                         const val = e.target.value;
-                                        const newRoom = val === '' ? '' : Number(val);
-                                        setFormData(prev => ({ ...prev, roomNumber: newRoom, checkInDate: '', checkOutDate: '' }));
+                                        if (val === '') {
+                                            setFormData(prev => ({ ...prev, roomNumber: '', checkInDate: '', checkOutDate: '' }));
+                                        } else {
+                                            const newRoom = Number(val);
+                                            const hab = habitaciones.find(h => h.numero === newRoom);
+                                            setFormData(prev => ({
+                                                ...prev,
+                                                roomNumber: newRoom,
+                                                checkInDate: '',
+                                                checkOutDate: '',
+                                                totalPrice: hab?.precio ?? prev.totalPrice
+                                            }));
+                                        }
                                         setShowCalendar(false);
                                         setDateRange({ startDate: undefined, endDate: undefined, key: 'selection' });
                                     }}
                                 >
                                     <option value="">-- Seleccionar habitación --</option>
                                     {habitaciones.map(hab => (
-                                        <option key={hab.id} value={hab.numero}>
-                                            {hab.numero} - {hab.titulo}
+                                        <option key={hab.id} value={String(hab.numero)}>
+                                            Hab. {hab.numero} — {hab.titulo} (${hab.precio.toLocaleString()})
                                         </option>
                                     ))}
                                 </Form.Select>
