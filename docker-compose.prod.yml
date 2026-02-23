@@ -253,13 +253,22 @@ services:
       SPRING_RABBITMQ_PORT: 5672
       SPRING_RABBITMQ_USERNAME: ${RABBITMQ_DEFAULT_USER}
       SPRING_RABBITMQ_PASSWORD: ${RABBITMQ_DEFAULT_PASS}
-      <<: *java-opts-critical
+      JAVA_OPTS: >-
+        -Xmx640m -Xms256m
+        -XX:+UseSerialGC
+        -XX:+UseContainerSupport
+        -XX:MaxRAMPercentage=75.0
+        -XX:MaxMetaspaceSize=192m
+        -Xss256k
+        -XX:ActiveProcessorCount=1
+        -XX:CICompilerCount=1
+        -XX:+TieredCompilation -XX:TieredStopAtLevel=1
     deploy:
       replicas: 1
       resources:
         limits:
-          memory: 384M
-          cpus: '0.30'
+          memory: 1G
+          cpus: '0.50'
 
   msvc-reservas:
     environment:
@@ -267,13 +276,22 @@ services:
       SPRING_RABBITMQ_PORT: 5672
       SPRING_RABBITMQ_USERNAME: ${RABBITMQ_DEFAULT_USER}
       SPRING_RABBITMQ_PASSWORD: ${RABBITMQ_DEFAULT_PASS}
-      <<: *java-opts-critical
+      JAVA_OPTS: >-
+        -Xmx640m -Xms256m
+        -XX:+UseSerialGC
+        -XX:+UseContainerSupport
+        -XX:MaxRAMPercentage=75.0
+        -XX:MaxMetaspaceSize=192m
+        -Xss256k
+        -XX:ActiveProcessorCount=1
+        -XX:CICompilerCount=1
+        -XX:+TieredCompilation -XX:TieredStopAtLevel=1
     deploy:
       replicas: 1
       resources:
         limits:
-          memory: 384M
-          cpus: '0.30'
+          memory: 1G
+          cpus: '0.50'
 
   msvc-mercado-pago:
     environment:

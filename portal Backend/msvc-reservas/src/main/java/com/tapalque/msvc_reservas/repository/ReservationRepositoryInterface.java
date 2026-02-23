@@ -44,6 +44,11 @@ public interface ReservationRepositoryInterface extends ReactiveMongoRepository<
     @Query("{ 'payment.paymentType': 'MERCADO_PAGO', 'payment.isPaid': false, 'isCancelled': false, 'transaccionId': null, 'dateCreated': { $lt: ?0 } }")
     Flux<Reservation> findAbandonedOnlineReservations(LocalDateTime creadoAntesDe);
 
+    // Reservas conflictivas para una habitación específica (usado por el lock distribuido al crear reservas).
+    // Igual que findByHotelAndStayPeriodOverlapIncludingPending pero filtra por roomNumber.
+    @Query("{ 'hotel.hotelId': ?0, 'roomNumber': ?1, 'stayPeriod.checkInDate': { $lt: ?3 }, 'stayPeriod.checkOutDate': { $gt: ?2 }, 'isCancelled': false, $or: [ { 'isActive': true }, { 'isActive': false, 'payment.isPaid': false, 'dateCreated': { $gte: ?4 } } ] }")
+    Flux<Reservation> findConflictingRoomReservations(String hotelId, Integer roomNumber, LocalDateTime desde, LocalDateTime hasta, LocalDateTime pendingLimit);
+
     // Reservas canceladas sin pago (para limpieza semanal)
     @Query("{ 'isCancelled': true, 'payment.isPaid': false }")
     Flux<Reservation> findCancelledUnpaidReservations();

@@ -566,12 +566,16 @@ services:
       SPRING_RABBITMQ_USERNAME: ${RABBITMQ_DEFAULT_USER}
       SPRING_RABBITMQ_PASSWORD: ${RABBITMQ_DEFAULT_PASS}
       JAVA_OPTS: '-Xmx256m -Xms128m -XX:+UseG1GC -XX:+UseContainerSupport -XX:MaxRAMPercentage=60.0'
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
     depends_on:
       reservas-db:
         condition: service_started
       rabbitmq:
         condition: service_healthy
       eureka-server:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     restart: always
     deploy:

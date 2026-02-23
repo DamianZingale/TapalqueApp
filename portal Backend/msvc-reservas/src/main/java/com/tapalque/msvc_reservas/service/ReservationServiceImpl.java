@@ -6,7 +6,10 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
+import org.redisson.api.RLockReactive;
+import org.redisson.api.RedissonClient;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -30,17 +33,20 @@ public class ReservationServiceImpl implements ReservationService {
     private final HospedajeClient hospedajeClient;
     private final MercadoPagoClient mercadoPagoClient;
     private final PoliticaService politicaService;
+    private final RedissonClient redissonClient;
 
     public ReservationServiceImpl(ReservationRepositoryInterface reservationRepository,
                                   AdminNotificationService adminNotificationService,
                                   HospedajeClient hospedajeClient,
                                   MercadoPagoClient mercadoPagoClient,
-                                  PoliticaService politicaService) {
+                                  PoliticaService politicaService,
+                                  RedissonClient redissonClient) {
         this.reservationRepository = reservationRepository;
         this.adminNotificationService = adminNotificationService;
         this.hospedajeClient = hospedajeClient;
         this.mercadoPagoClient = mercadoPagoClient;
         this.politicaService = politicaService;
+        this.redissonClient = redissonClient;
     }
 
     @Override
@@ -135,9 +141,31 @@ public class ReservationServiceImpl implements ReservationService {
                         reservation.setDateCreated(LocalDateTime.now());
                         reservation.setDateUpdated(LocalDateTime.now());
 
-                        return reservationRepository.save(reservation)
-                                .map(ReservationMapper::toDto);
-                                // Nota: No notificamos aquí. La notificación se envía cuando se confirma el pago en confirmarPagoReserva()
+                        String lockKey = "lock:reserva:" + hotelId + ":" + roomNumber;
+                        RLockReactive lock = redissonClient.reactive().getLock(lockKey);
+
+                        return lock.tryLock(5, 10, TimeUnit.SECONDS)
+                            .flatMap(acquired -> {
+                                if (!acquired) {
+                                    return Mono.error(new IllegalStateException(
+                                        "La habitación está siendo procesada por otro usuario. Intentá de nuevo en unos segundos."));
+                                }
+                                LocalDateTime pendingLimit = LocalDateTime.now().minusMinutes(5);
+                                return reservationRepository
+                                    .findConflictingRoomReservations(hotelId, roomNumber, checkIn, checkOut, pendingLimit)
+                                    .hasElements()
+                                    .flatMap(hasConflict -> {
+                                        if (hasConflict) {
+                                            return Mono.error(new IllegalStateException(
+                                                "La habitación " + roomNumber + " no está disponible para las fechas seleccionadas"));
+                                        }
+                                        // Nota: No notificamos aquí. La notificación se envía cuando se confirma el pago en confirmarPagoReserva()
+                                        return reservationRepository.save(reservation).map(ReservationMapper::toDto);
+                                    })
+                                    .doFinally(signal -> lock.unlock()
+                                        .onErrorResume(e -> Mono.empty())
+                                        .subscribe());
+                            });
                     })
                     .orElse(Mono.error(new IllegalArgumentException(
                         "Habitación número " + roomNumber + " no encontrada en el hospedaje")));
