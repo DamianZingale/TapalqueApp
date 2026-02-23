@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { Button, Spinner } from 'react-bootstrap';
+import { Button, Spinner, Modal, Form, InputGroup, Badge } from 'react-bootstrap';
 import { addDays, differenceInDays, isSameDay, format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { fetchHabitacionesByHospedaje, type Habitacion } from '../../../services/fetchHabitaciones';
@@ -21,7 +21,7 @@ const TOTAL_SLOTS = DAYS_TO_SHOW * 2; // 60 semi-columnas
 // ── Colores según estado de pago ─────────────────────────────────────────────
 function getPaymentColor(reserva: Reserva): { bg: string; text: string } {
   if (reserva.payment.isPaid && !reserva.payment.hasPendingAmount) {
-    return { bg: '#fd7e14', text: '#fff' }; // naranja - pagó total
+    return { bg: '#198754', text: '#fff' }; // verde - pagó total
   }
   if (reserva.payment.amountPaid > 0) {
     return { bg: '#ffc107', text: '#000' }; // amarillo - pagó anticipo
@@ -45,9 +45,6 @@ function parseLocalDate(dateStr: string): Date {
 const DAY_NAMES = ['DOM', 'LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB'];
 
 // ── Calcula el rango de slots (medio-día) que ocupa una reserva dentro de la vista
-//    Modelo: check-in ocupa desde el PM del día de llegada
-//            check-out libera desde el PM del día de salida (AM ya libre para limpieza/nuevo check-in)
-//    Retorna null si la reserva no intersecta con la vista.
 function getSlotRange(
   reserva: Reserva,
   viewStart: Date,
@@ -57,13 +54,9 @@ function getSlotRange(
   const co = parseLocalDate(reserva.stayPeriod.checkOutDate);
   const viewEnd = days[days.length - 1];
 
-  // Reserva completamente fuera de la vista
   if (co < viewStart || ci > viewEnd) return null;
-  // Check-in y check-out el mismo día → estadia inválida, ignorar
   if (isSameDay(ci, co)) return null;
 
-  // Slot de inicio: PM del día de check-in (índice *2 + 1)
-  // Si el check-in fue antes del inicio de la vista, arrancar desde slot 0 (AM del primer día)
   let startSlot: number;
   if (ci < viewStart) {
     startSlot = 0;
@@ -72,8 +65,6 @@ function getSlotRange(
     startSlot = ciDayIdx * 2 + 1;
   }
 
-  // Slot de fin: AM del día de check-out (índice *2)
-  // Si el check-out excede la vista, terminar en el último slot visible
   let endSlot: number;
   if (co > viewEnd) {
     endSlot = TOTAL_SLOTS - 1;
@@ -86,11 +77,157 @@ function getSlotRange(
   return [startSlot, endSlot];
 }
 
+// ── Modal de detalle de reserva ───────────────────────────────────────────────
+function ReservaDetalleModal({
+  reserva,
+  onClose,
+}: {
+  reserva: Reserva;
+  onClose: () => void;
+}) {
+  const { bg, text } = getPaymentColor(reserva);
+  const label = getPaymentLabel(reserva);
+  const noches = differenceInDays(
+    parseLocalDate(reserva.stayPeriod.checkOutDate),
+    parseLocalDate(reserva.stayPeriod.checkInDate)
+  );
+
+  return (
+    <Modal show onHide={onClose} centered size="lg">
+      <Modal.Header closeButton style={{ background: '#1e2235', color: '#e8eaf6' }}>
+        <Modal.Title style={{ fontSize: '1rem' }}>
+          Detalle de Reserva
+          <span className="ms-2 text-muted" style={{ fontSize: '0.75rem', fontFamily: 'monospace' }}>
+            #{reserva.id}
+          </span>
+        </Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <div className="row g-3">
+          {/* Cliente */}
+          <div className="col-md-6">
+            <h6 className="text-muted mb-2" style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+              Cliente
+            </h6>
+            <p className="mb-1 fw-semibold">{reserva.customer.customerName}</p>
+            {reserva.customer.customerPhone && (
+              <p className="mb-1 small text-muted">📞 {reserva.customer.customerPhone}</p>
+            )}
+            {reserva.customer.customerEmail && (
+              <p className="mb-1 small text-muted">✉️ {reserva.customer.customerEmail}</p>
+            )}
+            {reserva.customer.customerDni && (
+              <p className="mb-0 small text-muted">DNI: {reserva.customer.customerDni}</p>
+            )}
+          </div>
+
+          {/* Estadía */}
+          <div className="col-md-6">
+            <h6 className="text-muted mb-2" style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+              Estadía
+            </h6>
+            <p className="mb-1">
+              <span className="text-muted small">Check-in:</span>{' '}
+              <strong>{reserva.stayPeriod.checkInDate.split('T')[0]}</strong>
+            </p>
+            <p className="mb-1">
+              <span className="text-muted small">Check-out:</span>{' '}
+              <strong>{reserva.stayPeriod.checkOutDate.split('T')[0]}</strong>
+            </p>
+            <p className="mb-1 small text-muted">
+              {noches} noche{noches !== 1 ? 's' : ''} · {reserva.cantidadHuespedes ?? 1} huésped{(reserva.cantidadHuespedes ?? 1) !== 1 ? 'es' : ''}
+            </p>
+            {reserva.roomNumber && (
+              <p className="mb-0 small">Habitación: <strong>#{reserva.roomNumber}</strong></p>
+            )}
+          </div>
+
+          {/* Pago */}
+          <div className="col-md-6">
+            <h6 className="text-muted mb-2" style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+              Pago
+            </h6>
+            <p className="mb-1">
+              <span
+                style={{
+                  background: bg,
+                  color: text,
+                  borderRadius: 4,
+                  padding: '2px 8px',
+                  fontSize: '0.78rem',
+                  fontWeight: 600,
+                }}
+              >
+                {label}
+              </span>
+            </p>
+            <p className="mb-1 small">Total: <strong>${reserva.payment.totalAmount.toLocaleString('es-AR')}</strong></p>
+            <p className="mb-1 small">Pagado: <strong>${reserva.payment.amountPaid.toLocaleString('es-AR')}</strong></p>
+            {reserva.payment.remainingAmount > 0 && (
+              <p className="mb-1 small text-danger">Restante: <strong>${reserva.payment.remainingAmount.toLocaleString('es-AR')}</strong></p>
+            )}
+            {reserva.payment.paymentType && (
+              <p className="mb-0 small text-muted">Método: {reserva.payment.paymentType}</p>
+            )}
+          </div>
+
+          {/* Estado / Facturación */}
+          <div className="col-md-6">
+            <h6 className="text-muted mb-2" style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+              Estado
+            </h6>
+            <p className="mb-1 small">
+              <Badge bg={reserva.isActive ? 'success' : 'secondary'} className="me-1">
+                {reserva.isActive ? 'Activa' : 'Inactiva'}
+              </Badge>
+              {reserva.isCancelled && <Badge bg="danger">Cancelada</Badge>}
+            </p>
+            {reserva.requiereFacturacion && (
+              <p className="mb-1 small">
+                <Badge bg="primary">Requiere Facturación</Badge>
+              </p>
+            )}
+            {reserva.billingInfo && (
+              <div className="small text-muted mt-1">
+                <p className="mb-0">{reserva.billingInfo.razonSocial}</p>
+                <p className="mb-0">CUIT/CUIL: {reserva.billingInfo.cuitCuil}</p>
+                <p className="mb-0">Factura tipo {reserva.billingInfo.tipoFactura}</p>
+              </div>
+            )}
+            <p className="mb-0 mt-2 small text-muted">
+              Creada: {new Date(reserva.dateCreated).toLocaleDateString('es-AR')}
+            </p>
+          </div>
+
+          {/* Notas */}
+          {reserva.notas && (
+            <div className="col-12">
+              <h6 className="text-muted mb-1" style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                Notas
+              </h6>
+              <p className="mb-0 small" style={{ whiteSpace: 'pre-wrap' }}>{reserva.notas}</p>
+            </div>
+          )}
+        </div>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="secondary" size="sm" onClick={onClose}>Cerrar</Button>
+      </Modal.Footer>
+    </Modal>
+  );
+}
+
 export function HosteleriaPlanning({ businessId }: Props) {
   const [habitaciones, setHabitaciones] = useState<Habitacion[]>([]);
   const [reservas, setReservas] = useState<Reserva[]>([]);
+  const [allReservas, setAllReservas] = useState<Reserva[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+
+  // Buscador de ID
+  const [searchId, setSearchId] = useState('');
+  const [modalReserva, setModalReserva] = useState<Reserva | null>(null);
+  const [searchError, setSearchError] = useState('');
 
   const [viewStart, setViewStart] = useState<Date>(() => {
     const t = new Date();
@@ -106,6 +243,7 @@ export function HosteleriaPlanning({ businessId }: Props) {
         fetchReservasByHotel(businessId),
       ]);
       setHabitaciones([...habs].sort((a, b) => a.numero - b.numero));
+      setAllReservas(revs);
       setReservas(revs.filter((r) => !r.isCancelled));
       setLastUpdate(new Date());
     } catch (err) {
@@ -122,6 +260,22 @@ export function HosteleriaPlanning({ businessId }: Props) {
     const id = setInterval(loadData, 120_000);
     return () => clearInterval(id);
   }, [loadData]);
+
+  // ── Buscador de ID ──────────────────────────────────────────────────────────
+  const handleSearch = () => {
+    const term = searchId.trim().toLowerCase();
+    if (!term) {
+      setSearchError('Ingresá un ID para buscar.');
+      return;
+    }
+    const found = allReservas.find((r) => r.id.toLowerCase() === term || r.id.toLowerCase().startsWith(term));
+    if (found) {
+      setSearchError('');
+      setModalReserva(found);
+    } else {
+      setSearchError('No se encontró ninguna reserva con ese ID.');
+    }
+  };
 
   // ── Rango de fechas visible ─────────────────────────────────────────────────
   const days = useMemo<Date[]>(
@@ -152,7 +306,6 @@ export function HosteleriaPlanning({ businessId }: Props) {
     (hab: Habitacion): PlanningCell[] => {
       const habReservas = reservas.filter((r) => r.roomNumber === hab.numero);
 
-      // Pre-calcular rangos de slots para las reservas de esta habitación
       const ranges = habReservas
         .map((r) => ({ reserva: r, range: getSlotRange(r, viewStart, days) }))
         .filter((x): x is { reserva: Reserva; range: [number, number] } => x.range !== null);
@@ -200,7 +353,6 @@ export function HosteleriaPlanning({ businessId }: Props) {
     boxShadow: '2px 0 5px rgba(0,0,0,0.12)',
   };
 
-  // Dado un slotIdx, retorna el día correspondiente y si es AM
   const slotToDay = (slotIdx: number) => ({
     day: days[Math.floor(slotIdx / 2)],
     isAM: slotIdx % 2 === 0,
@@ -238,12 +390,35 @@ export function HosteleriaPlanning({ businessId }: Props) {
         </div>
       </div>
 
+      {/* Buscador de reserva por ID */}
+      <div className="mb-3">
+        <InputGroup size="sm" style={{ maxWidth: 480 }}>
+          <InputGroup.Text style={{ background: '#1e2235', color: '#e8eaf6', border: 'none' }}>
+            🔍 Buscar por ID
+          </InputGroup.Text>
+          <Form.Control
+            placeholder="Pegá el ID de la reserva..."
+            value={searchId}
+            onChange={(e) => {
+              setSearchId(e.target.value);
+              setSearchError('');
+            }}
+            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+            style={{ fontFamily: 'monospace', fontSize: '0.82rem' }}
+          />
+          <Button variant="primary" onClick={handleSearch}>Buscar</Button>
+        </InputGroup>
+        {searchError && (
+          <p className="text-danger small mt-1 mb-0">{searchError}</p>
+        )}
+      </div>
+
       {/* Leyenda */}
       <div className="d-flex gap-4 mb-3 align-items-center flex-wrap">
         {[
           { color: '#ffc107', border: true,  label: 'Pagó anticipo' },
           { color: '#dc3545', border: false, label: 'Abona al ingreso' },
-          { color: '#fd7e14', border: false, label: 'Pagó total' },
+          { color: '#198754', border: false, label: 'Pagó total' },
         ].map(({ color, border, label }) => (
           <div key={label} className="d-flex align-items-center gap-2">
             <span style={{
@@ -338,7 +513,6 @@ export function HosteleriaPlanning({ businessId }: Props) {
                     key={i}
                     colSpan={2}
                     style={{
-                      // Línea divisoria al mediodía usando gradiente
                       background: `linear-gradient(to right,
                         ${bg} calc(50% - 0.75px),
                         ${isToday ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.18)'} calc(50% - 0.75px),
@@ -411,7 +585,6 @@ export function HosteleriaPlanning({ businessId }: Props) {
                       const isToday   = day ? isSameDay(day, today) : false;
                       const isWeekend = day ? (day.getDay() === 0 || day.getDay() === 6) : false;
 
-                      // Borde izquierdo: más grueso al inicio de cada día (AM), fino al mediodía (PM)
                       const dayBorderL = isAM
                         ? `2px solid ${isToday ? '#0d6efd' : '#d0d4df'}`
                         : `1px dashed ${isToday ? '#5b9bff' : '#dde0ea'}`;
@@ -440,26 +613,33 @@ export function HosteleriaPlanning({ businessId }: Props) {
                       const nombre   = reserva.customer.customerName;
                       const personas = reserva.cantidadHuespedes ?? 1;
                       const tooltip  =
-                        `${nombre} · ${personas} persona${personas !== 1 ? 's' : ''} · ${getPaymentLabel(reserva)}` +
+                        `ID: ${reserva.id}` +
+                        `\n${nombre} · ${personas} persona${personas !== 1 ? 's' : ''} · ${getPaymentLabel(reserva)}` +
                         `\nCheck-in: ${reserva.stayPeriod.checkInDate.split('T')[0]}` +
                         `  Check-out: ${reserva.stayPeriod.checkOutDate.split('T')[0]}`;
 
                       return (
-                        <td key={ci} colSpan={span} title={tooltip} style={{
-                          background:   bg,
-                          color:        text,
-                          padding:      '3px 8px',
-                          borderLeft:   dayBorderL,
-                          borderBottom: '1px solid rgba(0,0,0,0.1)',
-                          overflow:     'hidden',
-                          whiteSpace:   'nowrap',
-                          textOverflow: 'ellipsis',
-                          maxWidth:     span * COL_W_HALF,
-                          fontSize:     '0.78rem',
-                          verticalAlign: 'middle',
-                          cursor:       'default',
-                          userSelect:   'none',
-                        }}>
+                        <td
+                          key={ci}
+                          colSpan={span}
+                          title={tooltip}
+                          onClick={() => setModalReserva(reserva)}
+                          style={{
+                            background:   bg,
+                            color:        text,
+                            padding:      '3px 8px',
+                            borderLeft:   dayBorderL,
+                            borderBottom: '1px solid rgba(0,0,0,0.1)',
+                            overflow:     'hidden',
+                            whiteSpace:   'nowrap',
+                            textOverflow: 'ellipsis',
+                            maxWidth:     span * COL_W_HALF,
+                            fontSize:     '0.78rem',
+                            verticalAlign: 'middle',
+                            cursor:       'pointer',
+                            userSelect:   'none',
+                          }}
+                        >
                           <span style={{ fontWeight: 600 }}>{nombre}</span>
                           <span style={{ marginLeft: 5, opacity: 0.85, fontSize: '0.72rem' }}>
                             {personas}p
@@ -494,6 +674,14 @@ export function HosteleriaPlanning({ businessId }: Props) {
       <div className="text-muted small mt-2 text-end">
         Se actualiza automáticamente cada 2 minutos
       </div>
+
+      {/* Modal de detalle */}
+      {modalReserva && (
+        <ReservaDetalleModal
+          reserva={modalReserva}
+          onClose={() => setModalReserva(null)}
+        />
+      )}
     </div>
   );
 }
