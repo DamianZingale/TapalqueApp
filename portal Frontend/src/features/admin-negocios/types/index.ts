@@ -26,6 +26,7 @@ export enum EstadoPedido {
   LISTO = 'LISTO',
   EN_DELIVERY = 'EN_DELIVERY',
   ENTREGADO = 'ENTREGADO',
+  FAILED = 'FAILED',
 }
 
 // Estados de reserva con colores

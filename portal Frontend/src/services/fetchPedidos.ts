@@ -1,4 +1,5 @@
 // Servicios para gestión de pedidos
+import { api } from '../config/api';
 
 export enum EstadoPedido {
   RECIBIDO = 'RECIBIDO',
@@ -7,15 +8,6 @@ export enum EstadoPedido {
   EN_DELIVERY = 'EN_DELIVERY',
   ENTREGADO = 'ENTREGADO',
   FAILED = 'FAILED',
-}
-
-// Helper para obtener headers con autenticación
-function getAuthHeaders(): HeadersInit {
-  const token = localStorage.getItem('token');
-  return {
-    'Content-Type': 'application/json',
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-  };
 }
 
 export interface ItemPedido {
@@ -80,49 +72,23 @@ export interface CrearPedidoDTO {
 export async function fetchPedidosByRestaurant(
   restaurantId: string
 ): Promise<Pedido[]> {
-  try {
-    const response = await fetch(
-      `/api/pedidos/orders/restaurant/${restaurantId}`,
-      { headers: getAuthHeaders() }
-    );
-    if (!response.ok) {
-      throw new Error(`Error al obtener pedidos: ${response.status}`);
-    }
-    const data = await response.json();
-    return data as Pedido[];
-  } catch (error) {
-    console.error('Error en fetchPedidosByRestaurant:', error);
-    return [];
-  }
+  const data = await api.get<Pedido[]>(
+    `/pedidos/orders/restaurant/${restaurantId}`
+  );
+  return data ?? [];
 }
 
 export async function fetchPedidosByUser(userId: string): Promise<Pedido[]> {
-  try {
-    const response = await fetch(`/api/pedidos/orders/user/${userId}`, {
-      headers: getAuthHeaders(),
-    });
-    if (!response.ok) {
-      throw new Error(`Error al obtener pedidos: ${response.status}`);
-    }
-    const data = await response.json();
-    return data as Pedido[];
-  } catch (error) {
-    console.error('Error en fetchPedidosByUser:', error);
-    return [];
-  }
+  const data = await api.get<Pedido[]>(`/pedidos/orders/user/${userId}`);
+  return data ?? [];
 }
 
 export async function fetchPedidoById(
   pedidoId: string
 ): Promise<Pedido | null> {
   try {
-    const response = await fetch(`/api/pedidos/orders/${pedidoId}`, {
-      headers: getAuthHeaders(),
-    });
-    if (!response.ok) return null;
-    return await response.json();
-  } catch (error) {
-    console.error('Error en fetchPedidoById:', error);
+    return await api.get<Pedido>(`/pedidos/orders/${pedidoId}`);
+  } catch {
     return null;
   }
 }
@@ -132,14 +98,11 @@ export async function updateEstadoPedido(
   nuevoEstado: EstadoPedido
 ): Promise<boolean> {
   try {
-    const response = await fetch(`/api/pedidos/orders/${pedidoId}/estado`, {
-      method: 'PATCH',
-      headers: getAuthHeaders(),
-      body: JSON.stringify({ status: nuevoEstado }),
+    await api.patch(`/pedidos/orders/${pedidoId}/estado`, {
+      status: nuevoEstado,
     });
-    return response.ok;
-  } catch (error) {
-    console.error('Error al actualizar estado del pedido:', error);
+    return true;
+  } catch {
     return false;
   }
 }
@@ -149,39 +112,19 @@ export async function fetchPedidosByRestaurantAndDateRange(
   desde: string,
   hasta: string
 ): Promise<Pedido[]> {
-  try {
-    const params = new URLSearchParams({ desde, hasta });
-    const response = await fetch(
-      `/api/pedidos/orders/restaurant/${restaurantId}?${params}`,
-      { headers: getAuthHeaders() }
-    );
-    if (!response.ok) {
-      throw new Error(`Error al obtener pedidos: ${response.status}`);
-    }
-    const data = await response.json();
-    return data as Pedido[];
-  } catch (error) {
-    console.error('Error en fetchPedidosByRestaurantAndDateRange:', error);
-    return [];
-  }
+  const params = new URLSearchParams({ desde, hasta });
+  const data = await api.get<Pedido[]>(
+    `/pedidos/orders/restaurant/${restaurantId}?${params}`
+  );
+  return data ?? [];
 }
 
 export async function crearPedido(
   pedido: CrearPedidoDTO
 ): Promise<Pedido | null> {
   try {
-    const response = await fetch('/api/pedidos/orders/new', {
-      method: 'POST',
-      headers: getAuthHeaders(),
-      body: JSON.stringify(pedido),
-    });
-    if (!response.ok) {
-      throw new Error(`Error al crear pedido: ${response.status}`);
-    }
-    const data = await response.json();
-    return data as Pedido;
-  } catch (error) {
-    console.error('Error en crearPedido:', error);
+    return await api.post<Pedido>('/pedidos/orders/new', pedido);
+  } catch {
     return null;
   }
 }

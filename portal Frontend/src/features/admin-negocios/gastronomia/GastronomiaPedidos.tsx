@@ -124,8 +124,9 @@ export function GastronomiaPedidos({
       setLoading(true);
       const data = await fetchPedidosByRestaurant(externalBusinessId);
       setPedidos(data);
-    } catch {
-      setMensaje({ tipo: 'danger', texto: 'Error al cargar pedidos' });
+    } catch (error) {
+      console.error('Error al cargar pedidos:', error);
+      setMensaje({ tipo: 'danger', texto: 'Error al cargar pedidos. Verifica tu conexión e intenta nuevamente.' });
     } finally {
       setLoading(false);
     }
@@ -407,7 +408,7 @@ export function GastronomiaPedidos({
                   type="text"
                   inputMode="decimal"
                   value={precioDeliveryInput}
-                  onChange={(e) => setPrecioDeliveryInput(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPrecioDeliveryInput(e.target.value)}
                 />
               </Col>
               <Col md="auto">
@@ -429,7 +430,7 @@ export function GastronomiaPedidos({
                   type="text"
                   inputMode="numeric"
                   value={tiempoEsperaInput}
-                  onChange={(e) => setTiempoEsperaInput(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTiempoEsperaInput(e.target.value)}
                 />
               </Col>
               <Col md="auto">
@@ -736,7 +737,7 @@ function PedidoCard({
           <Card.Footer>
             <Button
               className="w-100"
-              onClick={(e) => {
+              onClick={(e: React.MouseEvent) => {
                 e.stopPropagation();
                 onCambiarEstado(pedido);
               }}

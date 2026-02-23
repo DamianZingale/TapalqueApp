@@ -1,22 +1,28 @@
 import { useEffect, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { Alert, Button, Form, Modal } from 'react-bootstrap';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { authService } from '../../../services/authService';
+import type { Habitacion } from '../../../services/fetchHabitaciones';
 import {
   fetchHospedajeById,
   Hospedaje,
 } from '../../../services/fetchHospedajes';
+import { crearPreferenciaPago } from '../../../services/fetchMercadoPago';
+import {
+  fetchPolitica,
+  type PoliticaReservas,
+} from '../../../services/fetchPolitica';
+import {
+  crearReservaExterna,
+  fetchDisponibilidad,
+  type BillingInfo,
+} from '../../../services/fetchReservas';
 import { Carrusel } from '../../../shared/components/Carrusel';
 import { Description } from '../../../shared/components/Description';
 import { Subtitle } from '../../../shared/components/Subtitle';
 import { Title } from '../../../shared/components/Title';
 import { WhatsAppButton } from '../../../shared/components/WhatsAppButton';
 import { Calendario } from '../components/Calendario';
-import { fetchDisponibilidad, crearReservaExterna, type BillingInfo } from '../../../services/fetchReservas';
-import type { Habitacion } from '../../../services/fetchHabitaciones';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { authService } from '../../../services/authService';
-import { crearPreferenciaPago } from '../../../services/fetchMercadoPago';
-import { fetchPolitica, type PoliticaReservas } from '../../../services/fetchPolitica';
-import { Modal, Button, Form, Alert } from 'react-bootstrap';
 
 export default function HospedajeDetailPage() {
   const { id } = useParams();
@@ -26,7 +32,8 @@ export default function HospedajeDetailPage() {
   const [loading, setLoading] = useState(true);
   const [disponibles, setDisponibles] = useState<Habitacion[] | null>(null);
   const [cargandoDisp, setCargandoDisp] = useState(false);
-  const [habitacionSeleccionada, setHabitacionSeleccionada] = useState<Habitacion | null>(null);
+  const [habitacionSeleccionada, setHabitacionSeleccionada] =
+    useState<Habitacion | null>(null);
   const [creandoReserva, setCreandoReserva] = useState(false);
   const [politica, setPolitica] = useState<PoliticaReservas | null>(null);
   const fetchIdRef = useRef(0);
@@ -43,7 +50,10 @@ export default function HospedajeDetailPage() {
     condicionFiscal: 'Consumidor Final',
   });
   const [errorFacturacion, setErrorFacturacion] = useState<string | null>(null);
-  const [fechasSeleccionadas, setFechasSeleccionadas] = useState<{start: Date, end: Date} | null>(null);
+  const [fechasSeleccionadas, setFechasSeleccionadas] = useState<{
+    start: Date;
+    end: Date;
+  } | null>(null);
 
   useEffect(() => {
     const cargarHospedaje = async () => {
@@ -87,12 +97,16 @@ export default function HospedajeDetailPage() {
       setFechasSeleccionadas(null);
       return;
     }
-    setFechasSeleccionadas({start, end});
+    setFechasSeleccionadas({ start, end });
     const currentFetch = ++fetchIdRef.current;
     setCargandoDisp(true);
     setHabitacionSeleccionada(null);
     setCantidadHuespedes(1);
-    const result = await fetchDisponibilidad(id!, formatDate(start), formatDate(end));
+    const result = await fetchDisponibilidad(
+      id!,
+      formatDate(start),
+      formatDate(end)
+    );
     if (currentFetch === fetchIdRef.current) {
       setDisponibles(result);
       setCargandoDisp(false);
@@ -120,14 +134,18 @@ export default function HospedajeDetailPage() {
     return hoy >= miercolesPrevi && hoy <= checkInCopy;
   };
 
-  const calcularPrecioTotal = (habitacion: Habitacion, noches: number): number => {
+  const calcularPrecioTotal = (
+    habitacion: Habitacion,
+    noches: number
+  ): number => {
     let precioPorNoche = habitacion.precio;
 
     if (habitacion.tipoPrecio === 'por_persona') {
-      const personasACobrar = habitacion.minimoPersonasAPagar &&
-                              cantidadHuespedes < habitacion.minimoPersonasAPagar
-        ? habitacion.minimoPersonasAPagar
-        : cantidadHuespedes;
+      const personasACobrar =
+        habitacion.minimoPersonasAPagar &&
+        cantidadHuespedes < habitacion.minimoPersonasAPagar
+          ? habitacion.minimoPersonasAPagar
+          : cantidadHuespedes;
       precioPorNoche = habitacion.precio * personasACobrar;
     }
 
@@ -166,9 +184,13 @@ export default function HospedajeDetailPage() {
     }
   };
 
-  const handleAgregarReserva = async (_idHabitacion: string, start: Date, end: Date) => {
+  const handleAgregarReserva = async (
+    _idHabitacion: string,
+    start: Date,
+    end: Date
+  ) => {
     // Guardar las fechas para usar después en el modal de facturación
-    setFechasSeleccionadas({start, end});
+    setFechasSeleccionadas({ start, end });
 
     // Si requiere facturación, abrir modal primero
     if (requiereFacturacion && data?.permiteFacturacion) {
@@ -183,24 +205,36 @@ export default function HospedajeDetailPage() {
   const procesarReserva = async (start: Date, end: Date) => {
     // Verificar que haya habitación seleccionada
     if (!habitacionSeleccionada) {
-      alert('Por favor, seleccioná una habitación de la lista antes de reservar.');
+      alert(
+        'Por favor, seleccioná una habitación de la lista antes de reservar.'
+      );
       return;
     }
 
-    const noches = Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+    const noches = Math.round(
+      (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)
+    );
 
     // Validar estadía mínima general
     if (politica?.estadiaMinima && noches < politica.estadiaMinima) {
-      alert(`La estadía mínima para este hospedaje es de ${politica.estadiaMinima} noche${politica.estadiaMinima > 1 ? 's' : ''}.\n\nPor favor, seleccioná un período más largo.`);
+      alert(
+        `La estadía mínima para este hospedaje es de ${politica.estadiaMinima} noche${politica.estadiaMinima > 1 ? 's' : ''}.\n\nPor favor, seleccioná un período más largo.`
+      );
       return;
     }
 
     // Validar mínimo de noches según política de fin de semana (solo cuando está activa)
     if (politica?.politicaFdsActiva) {
       const checkInDia = start.getDay(); // 0=dom, 1=lun, 2=mar, 3=mie, 4=jue, 5=vie, 6=sab
-      const esFds = checkInDia === 4 || checkInDia === 5 || checkInDia === 6 || checkInDia === 0;
+      const esFds =
+        checkInDia === 4 ||
+        checkInDia === 5 ||
+        checkInDia === 6 ||
+        checkInDia === 0;
       if (esFds && noches < 2 && !esExcepcionMiercoles(start)) {
-        alert('La estadía mínima de jueves a domingo es de 2 noches.\n\nPara reservar por una noche, intentelo nuevamente el miércoles previo al ingreso.');
+        alert(
+          'La estadía mínima de jueves a domingo es de 2 noches.\n\nPara reservar por una noche, intentelo nuevamente a partir del miércoles previo al ingreso.'
+        );
         return;
       }
     }
@@ -214,7 +248,9 @@ export default function HospedajeDetailPage() {
 
     const user = authService.getUser();
     if (!user) {
-      alert('Error al obtener datos del usuario. Por favor, iniciá sesión nuevamente.');
+      alert(
+        'Error al obtener datos del usuario. Por favor, iniciá sesión nuevamente.'
+      );
       navigate('/login');
       return;
     }
@@ -225,8 +261,12 @@ export default function HospedajeDetailPage() {
       const isComplete = await authService.syncUserFromBackend();
       if (!isComplete) {
         const missing = authService.getMissingFieldsForReservations();
-        alert(`Para realizar una reserva necesitás completar tu perfil.\n\nFaltan los siguientes datos: ${missing.join(', ')}`);
-        navigate('/perfil/datosPersonales', { state: { returnTo: location.pathname } });
+        alert(
+          `Para realizar una reserva necesitás completar tu perfil.\n\nFaltan los siguientes datos: ${missing.join(', ')}`
+        );
+        navigate('/perfil/datosPersonales', {
+          state: { returnTo: location.pathname },
+        });
         return;
       }
       // Si los datos ya estaban completos en el backend, continuar con la reserva
@@ -250,7 +290,9 @@ export default function HospedajeDetailPage() {
       const reserva = await crearReservaExterna({
         customer: {
           customerId: String(user.id || user.email || ''),
-          customerName: `${user.nombre || ''} ${user.apellido || ''}`.trim() || String(user.email || ''),
+          customerName:
+            `${user.nombre || ''} ${user.apellido || ''}`.trim() ||
+            String(user.email || ''),
           customerPhone: String(user.telefono || ''),
           customerEmail: String(user.email || ''),
           customerDni: String(user.dni || ''),
@@ -260,8 +302,8 @@ export default function HospedajeDetailPage() {
           hotelName: data!.titulo,
         },
         stayPeriod: {
-          checkInDate: formatDateTime(start, 13),  // Check-in 13:00
-          checkOutDate: formatDateTime(end, 10),   // Check-out 10:00
+          checkInDate: formatDateTime(start, 13), // Check-in 13:00
+          checkOutDate: formatDateTime(end, 10), // Check-out 10:00
         },
         payment: {
           isPaid: false,
@@ -298,16 +340,21 @@ export default function HospedajeDetailPage() {
         idTransaccion: reserva.id, // ID de la reserva
         tipoServicio: 'HOSPEDAJE',
         payerEmail: user.email || undefined,
-        payerName: `${user.nombre || ''} ${user.apellido || ''}`.trim() || undefined,
+        payerName:
+          `${user.nombre || ''} ${user.apellido || ''}`.trim() || undefined,
         payerIdentificationNumber: user.dni || undefined,
       });
 
       if (urlPago) {
         // 3. Redirigir a Mercado Pago
-        alert(`Reserva creada. Serás redirigido a Mercado Pago para abonar la seña del 50%.\n\nTotal: $${precioTotal.toLocaleString()}\nSeña a pagar: $${montoSeña.toLocaleString()}\nResto al llegar: $${(precioTotal - montoSeña).toLocaleString()}\n\nTenés 5 minutos para completar el pago. Pasado ese tiempo, la habitación volverá a estar disponible.`);
+        alert(
+          `Reserva creada. Serás redirigido a Mercado Pago para abonar la seña del 50%.\n\nTotal: $${precioTotal.toLocaleString()}\nSeña a pagar: $${montoSeña.toLocaleString()}\nResto al llegar: $${(precioTotal - montoSeña).toLocaleString()}\n\nTenés 5 minutos para completar el pago. Pasado ese tiempo, la habitación volverá a estar disponible.`
+        );
         window.location.href = urlPago;
       } else {
-        alert(`Reserva creada pero hubo un error al generar el link de pago.\n\nPodés intentar pagar desde "Mis Reservas" en tu perfil.`);
+        alert(
+          `Reserva creada pero hubo un error al generar el link de pago.\n\nPodés intentar pagar desde "Mis Reservas" en tu perfil.`
+        );
         setHabitacionSeleccionada(null);
         setDisponibles(null);
       }
@@ -335,7 +382,10 @@ export default function HospedajeDetailPage() {
   return (
     <div className="container">
       <title>{data.titulo} | Hospedaje - Tapalqué App</title>
-      <meta name="description" content={`${data.titulo} en Tapalqué.${data.ubicacion ? ` ${data.ubicacion}.` : ''} Reservá habitaciones online con confirmación inmediata.`} />
+      <meta
+        name="description"
+        content={`${data.titulo} en Tapalqué.${data.ubicacion ? ` ${data.ubicacion}.` : ''} Reservá habitaciones online con confirmación inmediata.`}
+      />
       <Title text={data.titulo} />
       <p className="text-center text-muted mb-3">
         <span className="badge bg-info">{tipoLabel}</span>
@@ -351,30 +401,42 @@ export default function HospedajeDetailPage() {
       {/* Banner de estadía mínima general */}
       {politica?.estadiaMinima && politica.estadiaMinima > 1 && (
         <div className="alert alert-info py-2 mb-3" role="alert">
-          <strong>Estadía mínima:</strong> Se requieren mínimo {politica.estadiaMinima} noches para reservar en este hospedaje.
+          <strong>Estadía mínima:</strong> Se requieren mínimo{' '}
+          {politica.estadiaMinima} noches para reservar en este hospedaje.
         </div>
       )}
 
       {/* Banner de política de estadía mínima de fin de semana */}
       {politica?.politicaFdsActiva && (
         <div className="alert alert-info py-2 mb-3" role="alert">
-          <strong>Política de fin de semana:</strong> La estadía mínima de jueves a domingo es de 2 noches.
-          Para reservar por una noche, intentelo el miércoles previo al ingreso.
+          <strong>Política de fin de semana:</strong> La estadía mínima de
+          jueves a domingo es de 2 noches. Para reservar por una noche,
+          intentelo el miércoles previo al ingreso.
         </div>
       )}
 
       <Calendario
-        idHabitacion={habitacionSeleccionada ? String(habitacionSeleccionada.id) : String(data.id)}
+        idHabitacion={
+          habitacionSeleccionada
+            ? String(habitacionSeleccionada.id)
+            : String(data.id)
+        }
         onDateChange={handleDateChange}
         onAgregarReserva={handleAgregarReserva}
-        maxDate={data.fechaLimiteReservas ? new Date(data.fechaLimiteReservas) : undefined}
+        maxDate={
+          data.fechaLimiteReservas
+            ? new Date(data.fechaLimiteReservas)
+            : undefined
+        }
       />
 
       {data.fechaLimiteReservas && (
         <p className="text-center text-muted small mt-2">
           Reservas disponibles hasta el{' '}
           <strong>
-            {new Date(data.fechaLimiteReservas + 'T00:00:00').toLocaleDateString('es-AR', {
+            {new Date(
+              data.fechaLimiteReservas + 'T00:00:00'
+            ).toLocaleDateString('es-AR', {
               day: 'numeric',
               month: 'long',
               year: 'numeric',
@@ -386,14 +448,22 @@ export default function HospedajeDetailPage() {
 
       {cargandoDisp && (
         <p className="text-center text-muted my-3">
-          <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true" />
+          <span
+            className="spinner-border spinner-border-sm me-2"
+            role="status"
+            aria-hidden="true"
+          />
           Buscando disponibilidad…
         </p>
       )}
 
       {creandoReserva && (
         <div className="text-center my-3">
-          <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true" />
+          <span
+            className="spinner-border spinner-border-sm me-2"
+            role="status"
+            aria-hidden="true"
+          />
           <span className="text-primary fw-semibold">Creando reserva…</span>
         </div>
       )}
@@ -413,7 +483,8 @@ export default function HospedajeDetailPage() {
                     className={`card h-100 ${habitacionSeleccionada?.id === hab.id ? 'border-primary border-2' : ''}`}
                     style={{ width: '16rem', cursor: 'pointer' }}
                     onClick={() => {
-                      const nuevaSeleccion = habitacionSeleccionada?.id === hab.id ? null : hab;
+                      const nuevaSeleccion =
+                        habitacionSeleccionada?.id === hab.id ? null : hab;
                       setHabitacionSeleccionada(nuevaSeleccion);
                       if (nuevaSeleccion) {
                         setCantidadHuespedes(1);
@@ -431,11 +502,18 @@ export default function HospedajeDetailPage() {
                     )}
                     <div className="card-body d-flex flex-column">
                       <h6 className="card-title mb-1">{hab.titulo}</h6>
-                      <p className="text-muted mb-1" style={{ fontSize: '0.8rem' }}>
-                        Hasta {hab.maxPersonas} {hab.maxPersonas === 1 ? 'persona' : 'personas'}
+                      <p
+                        className="text-muted mb-1"
+                        style={{ fontSize: '0.8rem' }}
+                      >
+                        Hasta {hab.maxPersonas}{' '}
+                        {hab.maxPersonas === 1 ? 'persona' : 'personas'}
                       </p>
                       {hab.servicios && hab.servicios.length > 0 && (
-                        <p className="text-muted mb-1" style={{ fontSize: '0.75rem' }}>
+                        <p
+                          className="text-muted mb-1"
+                          style={{ fontSize: '0.75rem' }}
+                        >
                           {hab.servicios.join(', ')}
                         </p>
                       )}
@@ -443,8 +521,14 @@ export default function HospedajeDetailPage() {
                         <span className="text-success fw-bold">
                           ${hab.precio.toLocaleString()}
                         </span>
-                        <span className="text-muted" style={{ fontSize: '0.75rem' }}>
-                          /{hab.tipoPrecio === 'por_habitacion' ? 'noche' : 'pers./noche'}
+                        <span
+                          className="text-muted"
+                          style={{ fontSize: '0.75rem' }}
+                        >
+                          /
+                          {hab.tipoPrecio === 'por_habitacion'
+                            ? 'noche'
+                            : 'pers./noche'}
                         </span>
                       </div>
                     </div>
@@ -463,17 +547,26 @@ export default function HospedajeDetailPage() {
             <div className="col-md-8 col-lg-6">
               <div className="card border-primary">
                 <div className="card-body">
-                  <h6 className="card-title text-primary mb-3">Detalles de la reserva</h6>
+                  <h6 className="card-title text-primary mb-3">
+                    Detalles de la reserva
+                  </h6>
 
                   {/* Selector de cantidad de huéspedes */}
                   <div className="mb-3">
-                    <label className="form-label fw-semibold">Cantidad de huéspedes</label>
+                    <label className="form-label fw-semibold">
+                      Cantidad de huéspedes
+                    </label>
                     <select
                       className="form-select"
                       value={cantidadHuespedes}
-                      onChange={(e) => setCantidadHuespedes(Number(e.target.value))}
+                      onChange={(e) =>
+                        setCantidadHuespedes(Number(e.target.value))
+                      }
                     >
-                      {Array.from({ length: habitacionSeleccionada.maxPersonas }, (_, i) => i + 1).map(n => (
+                      {Array.from(
+                        { length: habitacionSeleccionada.maxPersonas },
+                        (_, i) => i + 1
+                      ).map((n) => (
                         <option key={n} value={n}>
                           {n} {n === 1 ? 'persona' : 'personas'}
                         </option>
@@ -482,12 +575,14 @@ export default function HospedajeDetailPage() {
 
                     {/* Alerta de mínimo de personas a pagar */}
                     {habitacionSeleccionada.tipoPrecio === 'por_persona' &&
-                     habitacionSeleccionada.minimoPersonasAPagar &&
-                     cantidadHuespedes < habitacionSeleccionada.minimoPersonasAPagar && (
-                      <div className="alert alert-warning mt-2 mb-0 py-2 small">
-                        <strong>Nota:</strong> Mínimo a pagar: {habitacionSeleccionada.minimoPersonasAPagar} personas
-                      </div>
-                    )}
+                      habitacionSeleccionada.minimoPersonasAPagar &&
+                      cantidadHuespedes <
+                        habitacionSeleccionada.minimoPersonasAPagar && (
+                        <div className="alert alert-warning mt-2 mb-0 py-2 small">
+                          <strong>Nota:</strong> Mínimo a pagar:{' '}
+                          {habitacionSeleccionada.minimoPersonasAPagar} personas
+                        </div>
+                      )}
                   </div>
 
                   {/* Checkbox de facturación (solo si el hospedaje lo permite) */}
@@ -499,9 +594,14 @@ export default function HospedajeDetailPage() {
                           type="checkbox"
                           id="requiereFacturacion"
                           checked={requiereFacturacion}
-                          onChange={(e) => setRequiereFacturacion(e.target.checked)}
+                          onChange={(e) =>
+                            setRequiereFacturacion(e.target.checked)
+                          }
                         />
-                        <label className="form-check-label" htmlFor="requiereFacturacion">
+                        <label
+                          className="form-check-label"
+                          htmlFor="requiereFacturacion"
+                        >
                           Requiero factura
                         </label>
                       </div>
@@ -509,7 +609,8 @@ export default function HospedajeDetailPage() {
                       {/* Alerta de IVA adicional */}
                       {requiereFacturacion && data?.tipoIva === 'ADICIONAL' && (
                         <div className="alert alert-warning mt-2 mb-0 py-2 small">
-                          <strong>⚠️ Atención:</strong> Se agregará un 21% de IVA adicional al precio total
+                          <strong>⚠️ Atención:</strong> Se agregará un 21% de
+                          IVA adicional al precio total
                         </div>
                       )}
                     </div>
@@ -521,9 +622,14 @@ export default function HospedajeDetailPage() {
                       <div className="d-flex justify-content-between align-items-center">
                         <span className="fw-semibold">Precio total:</span>
                         <span className="text-success fw-bold fs-5">
-                          ${calcularPrecioTotal(
+                          $
+                          {calcularPrecioTotal(
                             habitacionSeleccionada,
-                            Math.round((fechasSeleccionadas.end.getTime() - fechasSeleccionadas.start.getTime()) / (1000 * 60 * 60 * 24))
+                            Math.round(
+                              (fechasSeleccionadas.end.getTime() -
+                                fechasSeleccionadas.start.getTime()) /
+                                (1000 * 60 * 60 * 24)
+                            )
                           ).toLocaleString()}
                         </span>
                       </div>
@@ -540,12 +646,18 @@ export default function HospedajeDetailPage() {
       )}
 
       {/* Modal de datos de facturación */}
-      <Modal show={mostrarModalFacturacion} onHide={() => setMostrarModalFacturacion(false)} size="lg">
+      <Modal
+        show={mostrarModalFacturacion}
+        onHide={() => setMostrarModalFacturacion(false)}
+        size="lg"
+      >
         <Modal.Header closeButton>
           <Modal.Title>Datos de Facturación</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          {errorFacturacion && <Alert variant="danger">{errorFacturacion}</Alert>}
+          {errorFacturacion && (
+            <Alert variant="danger">{errorFacturacion}</Alert>
+          )}
 
           <Form>
             <Form.Group className="mb-3">
@@ -554,7 +666,12 @@ export default function HospedajeDetailPage() {
                 type="text"
                 placeholder="Ej: 20-12345678-9"
                 value={datosFacturacion.cuitCuil}
-                onChange={(e) => setDatosFacturacion({ ...datosFacturacion, cuitCuil: e.target.value })}
+                onChange={(e) =>
+                  setDatosFacturacion({
+                    ...datosFacturacion,
+                    cuitCuil: e.target.value,
+                  })
+                }
               />
             </Form.Group>
 
@@ -564,7 +681,12 @@ export default function HospedajeDetailPage() {
                 type="text"
                 placeholder="Nombre completo o razón social"
                 value={datosFacturacion.razonSocial}
-                onChange={(e) => setDatosFacturacion({ ...datosFacturacion, razonSocial: e.target.value })}
+                onChange={(e) =>
+                  setDatosFacturacion({
+                    ...datosFacturacion,
+                    razonSocial: e.target.value,
+                  })
+                }
               />
             </Form.Group>
 
@@ -574,7 +696,12 @@ export default function HospedajeDetailPage() {
                 type="text"
                 placeholder="Dirección fiscal"
                 value={datosFacturacion.domicilioComercial}
-                onChange={(e) => setDatosFacturacion({ ...datosFacturacion, domicilioComercial: e.target.value })}
+                onChange={(e) =>
+                  setDatosFacturacion({
+                    ...datosFacturacion,
+                    domicilioComercial: e.target.value,
+                  })
+                }
               />
             </Form.Group>
 
@@ -582,10 +709,12 @@ export default function HospedajeDetailPage() {
               <Form.Label>Tipo de Factura *</Form.Label>
               <Form.Select
                 value={datosFacturacion.tipoFactura}
-                onChange={(e) => setDatosFacturacion({
-                  ...datosFacturacion,
-                  tipoFactura: e.target.value as 'A' | 'B'
-                })}
+                onChange={(e) =>
+                  setDatosFacturacion({
+                    ...datosFacturacion,
+                    tipoFactura: e.target.value as 'A' | 'B',
+                  })
+                }
               >
                 <option value="B">B - Consumidor Final / Monotributista</option>
                 <option value="A">A - Responsable Inscripto</option>
@@ -596,20 +725,30 @@ export default function HospedajeDetailPage() {
               <Form.Label>Condición Fiscal *</Form.Label>
               <Form.Select
                 value={datosFacturacion.condicionFiscal}
-                onChange={(e) => setDatosFacturacion({
-                  ...datosFacturacion,
-                  condicionFiscal: e.target.value as 'Monotributista' | 'Responsable Inscripto' | 'Consumidor Final'
-                })}
+                onChange={(e) =>
+                  setDatosFacturacion({
+                    ...datosFacturacion,
+                    condicionFiscal: e.target.value as
+                      | 'Monotributista'
+                      | 'Responsable Inscripto'
+                      | 'Consumidor Final',
+                  })
+                }
               >
                 <option value="Consumidor Final">Consumidor Final</option>
                 <option value="Monotributista">Monotributista</option>
-                <option value="Responsable Inscripto">Responsable Inscripto</option>
+                <option value="Responsable Inscripto">
+                  Responsable Inscripto
+                </option>
               </Form.Select>
             </Form.Group>
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setMostrarModalFacturacion(false)}>
+          <Button
+            variant="secondary"
+            onClick={() => setMostrarModalFacturacion(false)}
+          >
             Cancelar
           </Button>
           <Button variant="primary" onClick={handleConfirmarFacturacion}>

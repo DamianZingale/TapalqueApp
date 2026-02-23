@@ -600,6 +600,20 @@ export function HosteleriaReservas({
           return fechaPago >= desdeDate && fechaPago <= hastaDate;
         });
 
+        // Si no hay historial de pagos pero tiene monto pagado, incluirlo con el monto total
+        // (para reservas antiguas sin paymentHistory)
+        if (pagosEnPeriodo.length === 0 && r.payment.amountPaid > 0) {
+          const fechaReserva = new Date(r.dateCreated);
+          if (fechaReserva >= desdeDate && fechaReserva <= hastaDate) {
+            const montoPeriodo = r.payment.amountPaid;
+            const medioPagoPeriodo = r.payment.paymentType || 'EFECTIVO';
+            totalIngresado += montoPeriodo;
+            porMedioDePago[medioPagoPeriodo] = (porMedioDePago[medioPagoPeriodo] || 0) + montoPeriodo;
+            items.push({ reserva: r, montoPeriodo, medioPagoPeriodo });
+          }
+          continue;
+        }
+
         if (pagosEnPeriodo.length === 0) continue;
 
         let montoPeriodo = 0;
@@ -1327,10 +1341,13 @@ export function HosteleriaReservas({
         {reservaDetalle && (
           <>
             <Modal.Header closeButton>
-              <Modal.Title className="d-flex align-items-center gap-2">
+              <Modal.Title className="d-flex align-items-center gap-2 flex-wrap">
                 <span>Reserva #{reservaDetalle.id.slice(-6).toUpperCase()}</span>
                 {reservaDetalle.roomNumber && (
                   <Badge bg="secondary">Hab. #{reservaDetalle.roomNumber}</Badge>
+                )}
+                {reservaDetalle.requiereFacturacion && (
+                  <Badge bg="primary">Con Facturación</Badge>
                 )}
                 {(() => {
                   const hoy = new Date();
@@ -1377,6 +1394,11 @@ export function HosteleriaReservas({
                   {reservaDetalle.customer.customerEmail && (
                     <p className="mb-1 small">Email: {reservaDetalle.customer.customerEmail}</p>
                   )}
+                  {reservaDetalle.cantidadHuespedes && (
+                    <p className="mb-1 small">
+                      Huéspedes: <strong>{reservaDetalle.cantidadHuespedes}</strong> {reservaDetalle.cantidadHuespedes === 1 ? 'persona' : 'personas'}
+                    </p>
+                  )}
                 </Col>
                 <Col md={6}>
                   <h6 className="text-muted">Estadía</h6>
@@ -1399,6 +1421,39 @@ export function HosteleriaReservas({
                   </div>
                 </Col>
               </Row>
+
+              {/* Datos de Facturación */}
+              {reservaDetalle.requiereFacturacion && reservaDetalle.billingInfo && (
+                <>
+                  <hr />
+                  <h6 className="text-muted d-flex align-items-center gap-2">
+                    Datos de Facturación
+                    <Badge bg="primary" className="ms-1">Tipo {reservaDetalle.billingInfo.tipoFactura}</Badge>
+                  </h6>
+                  <Card className="bg-light">
+                    <Card.Body className="py-2">
+                      <Row>
+                        <Col md={6}>
+                          <p className="mb-1 small">
+                            <strong>CUIT/CUIL:</strong> {reservaDetalle.billingInfo.cuitCuil}
+                          </p>
+                          <p className="mb-1 small">
+                            <strong>Razón Social:</strong> {reservaDetalle.billingInfo.razonSocial}
+                          </p>
+                        </Col>
+                        <Col md={6}>
+                          <p className="mb-1 small">
+                            <strong>Domicilio:</strong> {reservaDetalle.billingInfo.domicilioComercial}
+                          </p>
+                          <p className="mb-0 small">
+                            <strong>Condición Fiscal:</strong> {reservaDetalle.billingInfo.condicionFiscal}
+                          </p>
+                        </Col>
+                      </Row>
+                    </Card.Body>
+                  </Card>
+                </>
+              )}
 
               <hr />
 
@@ -1685,7 +1740,7 @@ export function HosteleriaReservas({
                 </Col>
               </Row>
 
-              {resumenCierre.items.length > 0 && (
+              {resumenCierre.items.length > 0 ? (
                 <Table size="sm" striped responsive>
                   <thead>
                     <tr>
@@ -1712,6 +1767,13 @@ export function HosteleriaReservas({
                     ))}
                   </tbody>
                 </Table>
+              ) : (
+                <Alert variant="info" className="text-center">
+                  <p className="mb-0">No hay ingresos registrados en este período.</p>
+                  <small className="text-muted">
+                    Los pagos se registran automáticamente al confirmar reservas o al registrar pagos manualmente.
+                  </small>
+                </Alert>
               )}
             </>
           )}
