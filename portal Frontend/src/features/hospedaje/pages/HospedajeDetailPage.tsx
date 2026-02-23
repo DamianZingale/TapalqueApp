@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Alert, Button, Form, Modal } from 'react-bootstrap';
+import { Alert, Badge, Button, Card, Col, Form, Modal, Row, Spinner } from 'react-bootstrap';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { authService } from '../../../services/authService';
 import type { Habitacion } from '../../../services/fetchHabitaciones';
@@ -41,7 +41,6 @@ export default function HospedajeDetailPage() {
   // Estados para facturación y huéspedes
   const [cantidadHuespedes, setCantidadHuespedes] = useState(1);
   const [requiereFacturacion, setRequiereFacturacion] = useState(false);
-  const [mostrarModalFacturacion, setMostrarModalFacturacion] = useState(false);
   const [datosFacturacion, setDatosFacturacion] = useState<BillingInfo>({
     cuitCuil: '',
     razonSocial: '',
@@ -54,6 +53,10 @@ export default function HospedajeDetailPage() {
     start: Date;
     end: Date;
   } | null>(null);
+
+  // Wizard de reserva para usuarios
+  const [modalWizard, setModalWizard] = useState(false);
+  const [pasoWizard, setPasoWizard] = useState(1);
 
   useEffect(() => {
     const cargarHospedaje = async () => {
@@ -159,29 +162,40 @@ export default function HospedajeDetailPage() {
     return Math.round(precioTotal);
   };
 
-  const validarDatosFacturacion = (): boolean => {
-    if (!datosFacturacion.cuitCuil || datosFacturacion.cuitCuil.length < 10) {
-      setErrorFacturacion('El CUIT/CUIL debe tener al menos 10 dígitos');
-      return false;
-    }
-    if (!datosFacturacion.razonSocial.trim()) {
-      setErrorFacturacion('La razón social es obligatoria');
-      return false;
-    }
-    if (!datosFacturacion.domicilioComercial.trim()) {
-      setErrorFacturacion('El domicilio comercial es obligatorio');
-      return false;
-    }
+  const abrirWizard = (hab: Habitacion) => {
+    setHabitacionSeleccionada(hab);
+    setCantidadHuespedes(1);
+    setRequiereFacturacion(false);
+    setDatosFacturacion({
+      cuitCuil: '',
+      razonSocial: '',
+      domicilioComercial: '',
+      tipoFactura: 'B',
+      condicionFiscal: 'Consumidor Final',
+    });
     setErrorFacturacion(null);
-    return true;
+    setPasoWizard(1);
+    setModalWizard(true);
   };
 
-  const handleConfirmarFacturacion = () => {
-    if (!validarDatosFacturacion()) return;
-    setMostrarModalFacturacion(false);
-    if (fechasSeleccionadas) {
-      procesarReserva(fechasSeleccionadas.start, fechasSeleccionadas.end);
+  const siguientePasoWizard = () => {
+    setErrorFacturacion(null);
+    // Paso de facturación: validar si requiere factura
+    if (data?.permiteFacturacion && pasoWizard === 2 && requiereFacturacion) {
+      if (!datosFacturacion.cuitCuil || datosFacturacion.cuitCuil.trim().length < 10) {
+        setErrorFacturacion('El CUIT/CUIL debe tener al menos 10 dígitos');
+        return;
+      }
+      if (!datosFacturacion.razonSocial.trim()) {
+        setErrorFacturacion('La razón social es obligatoria');
+        return;
+      }
+      if (!datosFacturacion.domicilioComercial.trim()) {
+        setErrorFacturacion('El domicilio comercial es obligatorio');
+        return;
+      }
     }
+    setPasoWizard((p) => p + 1);
   };
 
   const handleAgregarReserva = async (
@@ -189,17 +203,23 @@ export default function HospedajeDetailPage() {
     start: Date,
     end: Date
   ) => {
-    // Guardar las fechas para usar después en el modal de facturación
     setFechasSeleccionadas({ start, end });
-
-    // Si requiere facturación, abrir modal primero
-    if (requiereFacturacion && data?.permiteFacturacion) {
-      setMostrarModalFacturacion(true);
+    if (!habitacionSeleccionada) {
+      alert('Por favor, seleccioná una habitación de la lista primero.');
       return;
     }
-
-    // Si no requiere facturación, procesar directamente
-    await procesarReserva(start, end);
+    setCantidadHuespedes(1);
+    setRequiereFacturacion(false);
+    setDatosFacturacion({
+      cuitCuil: '',
+      razonSocial: '',
+      domicilioComercial: '',
+      tipoFactura: 'B',
+      condicionFiscal: 'Consumidor Final',
+    });
+    setErrorFacturacion(null);
+    setPasoWizard(1);
+    setModalWizard(true);
   };
 
   const procesarReserva = async (start: Date, end: Date) => {
@@ -479,19 +499,7 @@ export default function HospedajeDetailPage() {
             <div className="row justify-content-center">
               {disponibles.map((hab) => (
                 <div className="col-auto my-2" key={hab.id}>
-                  <div
-                    className={`card h-100 ${habitacionSeleccionada?.id === hab.id ? 'border-primary border-2' : ''}`}
-                    style={{ width: '16rem', cursor: 'pointer' }}
-                    onClick={() => {
-                      const nuevaSeleccion =
-                        habitacionSeleccionada?.id === hab.id ? null : hab;
-                      setHabitacionSeleccionada(nuevaSeleccion);
-                      if (nuevaSeleccion) {
-                        setCantidadHuespedes(1);
-                        setRequiereFacturacion(false);
-                      }
-                    }}
-                  >
+                  <div className="card h-100" style={{ width: '16rem' }}>
                     {hab.fotos?.[0] && (
                       <img
                         src={hab.fotos[0]}
@@ -502,34 +510,30 @@ export default function HospedajeDetailPage() {
                     )}
                     <div className="card-body d-flex flex-column">
                       <h6 className="card-title mb-1">{hab.titulo}</h6>
-                      <p
-                        className="text-muted mb-1"
-                        style={{ fontSize: '0.8rem' }}
-                      >
+                      <p className="text-muted mb-1" style={{ fontSize: '0.8rem' }}>
                         Hasta {hab.maxPersonas}{' '}
                         {hab.maxPersonas === 1 ? 'persona' : 'personas'}
                       </p>
                       {hab.servicios && hab.servicios.length > 0 && (
-                        <p
-                          className="text-muted mb-1"
-                          style={{ fontSize: '0.75rem' }}
-                        >
+                        <p className="text-muted mb-2" style={{ fontSize: '0.75rem' }}>
                           {hab.servicios.join(', ')}
                         </p>
                       )}
-                      <div className="d-flex justify-content-between align-items-end mt-auto">
-                        <span className="text-success fw-bold">
-                          ${hab.precio.toLocaleString()}
-                        </span>
-                        <span
-                          className="text-muted"
-                          style={{ fontSize: '0.75rem' }}
+                      <div className="mt-auto">
+                        <div className="d-flex justify-content-between align-items-center mb-2">
+                          <span className="text-success fw-bold">
+                            ${hab.precio.toLocaleString()}
+                          </span>
+                          <span className="text-muted" style={{ fontSize: '0.75rem' }}>
+                            /{hab.tipoPrecio === 'por_habitacion' ? 'noche' : 'pers./noche'}
+                          </span>
+                        </div>
+                        <button
+                          className="btn btn-success w-100 fw-semibold"
+                          onClick={() => abrirWizard(hab)}
                         >
-                          /
-                          {hab.tipoPrecio === 'por_habitacion'
-                            ? 'noche'
-                            : 'pers./noche'}
-                        </span>
+                          Reservar →
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -540,222 +544,408 @@ export default function HospedajeDetailPage() {
         </div>
       )}
 
-      {/* Opciones de huéspedes y facturación */}
-      {habitacionSeleccionada && fechasSeleccionadas && (
-        <div className="container mt-4 mb-3">
-          <div className="row justify-content-center">
-            <div className="col-md-8 col-lg-6">
-              <div className="card border-primary">
-                <div className="card-body">
-                  <h6 className="card-title text-primary mb-3">
-                    Detalles de la reserva
-                  </h6>
+      {/* Wizard de reserva */}
+      {(() => {
+        const totalPasos = data?.permiteFacturacion ? 3 : 2;
+        const pasosConfig = data?.permiteFacturacion
+          ? [{ n: 1, label: 'Personas' }, { n: 2, label: 'Factura' }, { n: 3, label: 'Confirmar' }]
+          : [{ n: 1, label: 'Personas' }, { n: 2, label: 'Confirmar' }];
+        const noches = fechasSeleccionadas
+          ? Math.round(
+              (fechasSeleccionadas.end.getTime() - fechasSeleccionadas.start.getTime()) /
+                (1000 * 60 * 60 * 24)
+            )
+          : 0;
+        const precioTotal =
+          habitacionSeleccionada && noches > 0
+            ? calcularPrecioTotal(habitacionSeleccionada, noches)
+            : 0;
 
-                  {/* Selector de cantidad de huéspedes */}
-                  <div className="mb-3">
-                    <label className="form-label fw-semibold">
-                      Cantidad de huéspedes
-                    </label>
-                    <select
-                      className="form-select"
-                      value={cantidadHuespedes}
-                      onChange={(e) =>
-                        setCantidadHuespedes(Number(e.target.value))
+        return (
+          <Modal
+            show={modalWizard}
+            onHide={() => setModalWizard(false)}
+            size="lg"
+            centered
+          >
+            <Modal.Header closeButton className="border-bottom-0 pb-1">
+              <Modal.Title className="fs-4">Reservar en {data?.titulo}</Modal.Title>
+            </Modal.Header>
+            <Modal.Body className="pt-2">
+              {errorFacturacion && (
+                <Alert variant="danger" dismissible onClose={() => setErrorFacturacion(null)}>
+                  {errorFacturacion}
+                </Alert>
+              )}
+
+              {/* Indicador de pasos */}
+              <div className="d-flex align-items-center justify-content-center mb-4">
+                {pasosConfig.map(({ n, label }, idx) => (
+                  <div key={n} className="d-flex align-items-center">
+                    <div className="text-center">
+                      <div
+                        className={`rounded-circle d-flex align-items-center justify-content-center fw-bold mx-auto ${
+                          pasoWizard > n
+                            ? 'bg-success text-white'
+                            : pasoWizard === n
+                            ? 'bg-primary text-white'
+                            : 'bg-light text-muted border'
+                        }`}
+                        style={{ width: 44, height: 44, fontSize: '1rem' }}
+                      >
+                        {pasoWizard > n ? '✓' : n}
+                      </div>
+                      <small
+                        className={`d-block mt-1 ${
+                          pasoWizard === n
+                            ? 'fw-bold text-primary'
+                            : pasoWizard > n
+                            ? 'text-success'
+                            : 'text-muted'
+                        }`}
+                      >
+                        {label}
+                      </small>
+                    </div>
+                    {idx < pasosConfig.length - 1 && (
+                      <div
+                        style={{
+                          width: 50,
+                          height: 3,
+                          backgroundColor: pasoWizard > n ? '#198754' : '#dee2e6',
+                          marginBottom: 18,
+                          marginLeft: 4,
+                          marginRight: 4,
+                        }}
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* Resumen de habitación y fechas (visible siempre) */}
+              {habitacionSeleccionada && fechasSeleccionadas && (
+                <div className="d-flex align-items-center gap-3 p-3 bg-light rounded mb-4">
+                  {habitacionSeleccionada.fotos?.[0] && (
+                    <img
+                      src={habitacionSeleccionada.fotos[0]}
+                      alt={habitacionSeleccionada.titulo}
+                      style={{ width: 80, height: 60, objectFit: 'cover', borderRadius: 8, flexShrink: 0 }}
+                    />
+                  )}
+                  <div>
+                    <div className="fw-bold fs-5">{habitacionSeleccionada.titulo}</div>
+                    <div className="text-muted">
+                      {fechasSeleccionadas.start.toLocaleDateString('es-AR')} →{' '}
+                      {fechasSeleccionadas.end.toLocaleDateString('es-AR')}
+                    </div>
+                    <Badge bg="secondary">
+                      {noches} noche{noches !== 1 ? 's' : ''}
+                    </Badge>
+                  </div>
+                </div>
+              )}
+
+              {/* PASO 1: Personas */}
+              {pasoWizard === 1 && (
+                <div>
+                  <h5 className="text-center text-muted mb-4">
+                    ¿Cuántas personas van a hospedarse?
+                  </h5>
+                  <div className="d-flex align-items-center justify-content-center gap-4 my-4">
+                    <Button
+                      variant="outline-secondary"
+                      style={{ width: 60, height: 60, fontSize: '2rem', lineHeight: 1, padding: 0 }}
+                      onClick={() => setCantidadHuespedes((n) => Math.max(1, n - 1))}
+                    >
+                      −
+                    </Button>
+                    <div className="text-center">
+                      <div className="display-4 fw-bold">{cantidadHuespedes}</div>
+                      <div className="text-muted fs-5">
+                        {cantidadHuespedes === 1 ? 'persona' : 'personas'}
+                      </div>
+                    </div>
+                    <Button
+                      variant="outline-secondary"
+                      style={{ width: 60, height: 60, fontSize: '2rem', lineHeight: 1, padding: 0 }}
+                      onClick={() =>
+                        setCantidadHuespedes((n) =>
+                          Math.min(habitacionSeleccionada?.maxPersonas ?? 10, n + 1)
+                        )
                       }
                     >
-                      {Array.from(
-                        { length: habitacionSeleccionada.maxPersonas },
-                        (_, i) => i + 1
-                      ).map((n) => (
-                        <option key={n} value={n}>
-                          {n} {n === 1 ? 'persona' : 'personas'}
-                        </option>
-                      ))}
-                    </select>
-
-                    {/* Alerta de mínimo de personas a pagar */}
-                    {habitacionSeleccionada.tipoPrecio === 'por_persona' &&
-                      habitacionSeleccionada.minimoPersonasAPagar &&
-                      cantidadHuespedes <
-                        habitacionSeleccionada.minimoPersonasAPagar && (
-                        <div className="alert alert-warning mt-2 mb-0 py-2 small">
-                          <strong>Nota:</strong> Mínimo a pagar:{' '}
-                          {habitacionSeleccionada.minimoPersonasAPagar} personas
-                        </div>
-                      )}
+                      +
+                    </Button>
                   </div>
 
-                  {/* Checkbox de facturación (solo si el hospedaje lo permite) */}
-                  {data?.permiteFacturacion && (
-                    <div className="mb-3">
-                      <div className="form-check">
-                        <input
-                          className="form-check-input"
-                          type="checkbox"
-                          id="requiereFacturacion"
-                          checked={requiereFacturacion}
-                          onChange={(e) =>
-                            setRequiereFacturacion(e.target.checked)
-                          }
-                        />
-                        <label
-                          className="form-check-label"
-                          htmlFor="requiereFacturacion"
-                        >
-                          Requiero factura
-                        </label>
-                      </div>
+                  {habitacionSeleccionada?.tipoPrecio === 'por_persona' &&
+                    habitacionSeleccionada.minimoPersonasAPagar &&
+                    cantidadHuespedes < habitacionSeleccionada.minimoPersonasAPagar && (
+                      <Alert variant="warning" className="text-center">
+                        Mínimo a pagar:{' '}
+                        <strong>{habitacionSeleccionada.minimoPersonasAPagar} personas</strong>
+                      </Alert>
+                    )}
 
-                      {/* Alerta de IVA adicional */}
-                      {requiereFacturacion && data?.tipoIva === 'ADICIONAL' && (
-                        <div className="alert alert-warning mt-2 mb-0 py-2 small">
-                          <strong>⚠️ Atención:</strong> Se agregará un 21% de
-                          IVA adicional al precio total
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Resumen de precio */}
-                  {fechasSeleccionadas && (
-                    <div className="border-top pt-3">
-                      <div className="d-flex justify-content-between align-items-center">
-                        <span className="fw-semibold">Precio total:</span>
-                        <span className="text-success fw-bold fs-5">
-                          $
-                          {calcularPrecioTotal(
-                            habitacionSeleccionada,
-                            Math.round(
-                              (fechasSeleccionadas.end.getTime() -
-                                fechasSeleccionadas.start.getTime()) /
-                                (1000 * 60 * 60 * 24)
-                            )
-                          ).toLocaleString()}
-                        </span>
+                  {precioTotal > 0 && (
+                    <div className="text-center p-3 bg-light rounded mt-3">
+                      <div className="text-muted small mb-1">Precio estimado</div>
+                      <div className="fs-2 fw-bold text-success">
+                        ${precioTotal.toLocaleString()}
                       </div>
-                      <p className="text-muted small mb-0 mt-1">
-                        Seña del 50% a pagar ahora, resto al llegar
-                      </p>
+                      <div className="text-muted small">
+                        Seña del 50%:{' '}
+                        <strong>${Math.round(precioTotal * 0.5).toLocaleString()}</strong>
+                      </div>
                     </div>
                   )}
                 </div>
+              )}
+
+              {/* PASO 2: Facturación (solo si permiteFacturacion) */}
+              {data?.permiteFacturacion && pasoWizard === 2 && (
+                <div>
+                  <h5 className="text-center text-muted mb-4">¿Necesitás factura?</h5>
+                  <div className="text-center mb-4">
+                    <Form.Check
+                      type="switch"
+                      id="requiere-factura-usuario"
+                      label={<span className="fs-5">Sí, necesito factura</span>}
+                      checked={requiereFacturacion}
+                      onChange={(e) => setRequiereFacturacion(e.target.checked)}
+                      className="d-inline-flex align-items-center gap-3"
+                    />
+                  </div>
+
+                  {requiereFacturacion ? (
+                    <>
+                      {data?.tipoIva === 'ADICIONAL' && (
+                        <Alert variant="warning" className="text-center">
+                          ⚠️ Se agregará un <strong>21% de IVA</strong> al precio total
+                        </Alert>
+                      )}
+                      <Card className="border-primary">
+                        <Card.Body>
+                          <h6 className="text-primary mb-3">Datos de Facturación</h6>
+                          <Row className="g-3">
+                            <Col md={6}>
+                              <Form.Group>
+                                <Form.Label className="fw-semibold">CUIT/CUIL *</Form.Label>
+                                <Form.Control
+                                  size="lg"
+                                  type="text"
+                                  placeholder="20-12345678-9"
+                                  value={datosFacturacion.cuitCuil}
+                                  onChange={(e) =>
+                                    setDatosFacturacion({
+                                      ...datosFacturacion,
+                                      cuitCuil: e.target.value,
+                                    })
+                                  }
+                                />
+                              </Form.Group>
+                            </Col>
+                            <Col md={6}>
+                              <Form.Group>
+                                <Form.Label className="fw-semibold">Razón Social *</Form.Label>
+                                <Form.Control
+                                  size="lg"
+                                  type="text"
+                                  placeholder="Nombre o empresa"
+                                  value={datosFacturacion.razonSocial}
+                                  onChange={(e) =>
+                                    setDatosFacturacion({
+                                      ...datosFacturacion,
+                                      razonSocial: e.target.value,
+                                    })
+                                  }
+                                />
+                              </Form.Group>
+                            </Col>
+                            <Col md={6}>
+                              <Form.Group>
+                                <Form.Label className="fw-semibold">Domicilio *</Form.Label>
+                                <Form.Control
+                                  size="lg"
+                                  type="text"
+                                  placeholder="Calle 123, Ciudad"
+                                  value={datosFacturacion.domicilioComercial}
+                                  onChange={(e) =>
+                                    setDatosFacturacion({
+                                      ...datosFacturacion,
+                                      domicilioComercial: e.target.value,
+                                    })
+                                  }
+                                />
+                              </Form.Group>
+                            </Col>
+                            <Col md={3}>
+                              <Form.Group>
+                                <Form.Label>Tipo</Form.Label>
+                                <Form.Select
+                                  size="lg"
+                                  value={datosFacturacion.tipoFactura}
+                                  onChange={(e) =>
+                                    setDatosFacturacion({
+                                      ...datosFacturacion,
+                                      tipoFactura: e.target.value as 'A' | 'B',
+                                    })
+                                  }
+                                >
+                                  <option value="B">Factura B</option>
+                                  <option value="A">Factura A</option>
+                                </Form.Select>
+                              </Form.Group>
+                            </Col>
+                            <Col md={3}>
+                              <Form.Group>
+                                <Form.Label>Condición Fiscal</Form.Label>
+                                <Form.Select
+                                  size="lg"
+                                  value={datosFacturacion.condicionFiscal}
+                                  onChange={(e) =>
+                                    setDatosFacturacion({
+                                      ...datosFacturacion,
+                                      condicionFiscal: e.target.value as BillingInfo['condicionFiscal'],
+                                    })
+                                  }
+                                >
+                                  <option value="Consumidor Final">Consumidor Final</option>
+                                  <option value="Monotributista">Monotributista</option>
+                                  <option value="Responsable Inscripto">
+                                    Responsable Inscripto
+                                  </option>
+                                </Form.Select>
+                              </Form.Group>
+                            </Col>
+                          </Row>
+                        </Card.Body>
+                      </Card>
+                    </>
+                  ) : (
+                    <div className="text-center py-3 text-muted">
+                      <div style={{ fontSize: '3rem' }}>📄</div>
+                      <p className="fs-5">Sin factura, avanzá al siguiente paso</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* ÚLTIMO PASO: Confirmar y pagar */}
+              {pasoWizard === totalPasos && (
+                <div>
+                  <h5 className="text-center text-muted mb-4">
+                    Revise su reserva
+                  </h5>
+                  <Card className="border-2 mb-3">
+                    <Card.Body>
+                      <Row>
+                        <Col sm={6} className="mb-3 mb-sm-0">
+                          <div className="text-muted small mb-1">Estadía</div>
+                          <div className="fw-bold">
+                            {fechasSeleccionadas?.start.toLocaleDateString('es-AR')} →{' '}
+                            {fechasSeleccionadas?.end.toLocaleDateString('es-AR')}
+                          </div>
+                          <div className="d-flex gap-2 mt-2 flex-wrap">
+                            <Badge bg="secondary">
+                              {noches} noche{noches !== 1 ? 's' : ''}
+                            </Badge>
+                            <Badge bg="info">
+                              {cantidadHuespedes}{' '}
+                              {cantidadHuespedes === 1 ? 'persona' : 'personas'}
+                            </Badge>
+                            {requiereFacturacion && (
+                              <Badge bg="primary">
+                                Factura tipo {datosFacturacion.tipoFactura}
+                              </Badge>
+                            )}
+                          </div>
+                        </Col>
+                        <Col sm={6}>
+                          <div className="text-muted small mb-1">Pago</div>
+                          <div className="d-flex justify-content-between">
+                            <span>Total estadía:</span>
+                            <strong className="text-primary fs-5">
+                              ${precioTotal.toLocaleString()}
+                            </strong>
+                          </div>
+                          <div className="d-flex justify-content-between text-success">
+                            <span>Seña ahora (50%):</span>
+                            <strong>${Math.round(precioTotal * 0.5).toLocaleString()}</strong>
+                          </div>
+                          <div className="d-flex justify-content-between text-muted">
+                            <span>Resto al llegar:</span>
+                            <span>${Math.round(precioTotal * 0.5).toLocaleString()}</span>
+                          </div>
+                          {requiereFacturacion && data?.tipoIva === 'ADICIONAL' && (
+                            <small className="text-warning d-block mt-1">
+                              * Precio incluye IVA del 21%
+                            </small>
+                          )}
+                        </Col>
+                      </Row>
+                    </Card.Body>
+                  </Card>
+
+                  <Alert variant="info" className="text-center mb-0">
+                    Vas a ser redirigido a <strong>Mercado Pago</strong> para abonar la seña.
+                    <br />
+                    <small>Tenés 5 minutos para completar el pago.</small>
+                  </Alert>
+                </div>
+              )}
+            </Modal.Body>
+
+            <Modal.Footer className="justify-content-between">
+              <Button variant="outline-secondary" onClick={() => setModalWizard(false)}>
+                Cancelar
+              </Button>
+              <div className="d-flex gap-2">
+                {pasoWizard > 1 && (
+                  <Button
+                    variant="outline-primary"
+                    size="lg"
+                    onClick={() => {
+                      setErrorFacturacion(null);
+                      setPasoWizard((p) => p - 1);
+                    }}
+                  >
+                    ← Anterior
+                  </Button>
+                )}
+                {pasoWizard < totalPasos ? (
+                  <Button variant="primary" size="lg" onClick={siguientePasoWizard}>
+                    Siguiente →
+                  </Button>
+                ) : (
+                  <Button
+                    variant="success"
+                    size="lg"
+                    disabled={creandoReserva}
+                    onClick={() => {
+                      setModalWizard(false);
+                      procesarReserva(
+                        fechasSeleccionadas!.start,
+                        fechasSeleccionadas!.end
+                      );
+                    }}
+                  >
+                    {creandoReserva ? (
+                      <>
+                        <Spinner animation="border" size="sm" className="me-2" />
+                        Procesando…
+                      </>
+                    ) : (
+                      'Pagar con Mercado Pago →'
+                    )}
+                  </Button>
+                )}
               </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal de datos de facturación */}
-      <Modal
-        show={mostrarModalFacturacion}
-        onHide={() => setMostrarModalFacturacion(false)}
-        size="lg"
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>Datos de Facturación</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {errorFacturacion && (
-            <Alert variant="danger">{errorFacturacion}</Alert>
-          )}
-
-          <Form>
-            <Form.Group className="mb-3">
-              <Form.Label>CUIT/CUIL *</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Ej: 20-12345678-9"
-                value={datosFacturacion.cuitCuil}
-                onChange={(e) =>
-                  setDatosFacturacion({
-                    ...datosFacturacion,
-                    cuitCuil: e.target.value,
-                  })
-                }
-              />
-            </Form.Group>
-
-            <Form.Group className="mb-3">
-              <Form.Label>Razón Social *</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Nombre completo o razón social"
-                value={datosFacturacion.razonSocial}
-                onChange={(e) =>
-                  setDatosFacturacion({
-                    ...datosFacturacion,
-                    razonSocial: e.target.value,
-                  })
-                }
-              />
-            </Form.Group>
-
-            <Form.Group className="mb-3">
-              <Form.Label>Domicilio Comercial *</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Dirección fiscal"
-                value={datosFacturacion.domicilioComercial}
-                onChange={(e) =>
-                  setDatosFacturacion({
-                    ...datosFacturacion,
-                    domicilioComercial: e.target.value,
-                  })
-                }
-              />
-            </Form.Group>
-
-            <Form.Group className="mb-3">
-              <Form.Label>Tipo de Factura *</Form.Label>
-              <Form.Select
-                value={datosFacturacion.tipoFactura}
-                onChange={(e) =>
-                  setDatosFacturacion({
-                    ...datosFacturacion,
-                    tipoFactura: e.target.value as 'A' | 'B',
-                  })
-                }
-              >
-                <option value="B">B - Consumidor Final / Monotributista</option>
-                <option value="A">A - Responsable Inscripto</option>
-              </Form.Select>
-            </Form.Group>
-
-            <Form.Group className="mb-3">
-              <Form.Label>Condición Fiscal *</Form.Label>
-              <Form.Select
-                value={datosFacturacion.condicionFiscal}
-                onChange={(e) =>
-                  setDatosFacturacion({
-                    ...datosFacturacion,
-                    condicionFiscal: e.target.value as
-                      | 'Monotributista'
-                      | 'Responsable Inscripto'
-                      | 'Consumidor Final',
-                  })
-                }
-              >
-                <option value="Consumidor Final">Consumidor Final</option>
-                <option value="Monotributista">Monotributista</option>
-                <option value="Responsable Inscripto">
-                  Responsable Inscripto
-                </option>
-              </Form.Select>
-            </Form.Group>
-          </Form>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button
-            variant="secondary"
-            onClick={() => setMostrarModalFacturacion(false)}
-          >
-            Cancelar
-          </Button>
-          <Button variant="primary" onClick={handleConfirmarFacturacion}>
-            Confirmar y Reservar
-          </Button>
-        </Modal.Footer>
-      </Modal>
+            </Modal.Footer>
+          </Modal>
+        );
+      })()}
 
       {data.latitud != null && data.longitud != null && (
         <div className="text-center my-4">
