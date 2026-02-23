@@ -1950,10 +1950,17 @@ function ReservaCardCompacta({ reserva, onClick }: ReservaCardCompactaProps) {
           {new Date(reserva.stayPeriod.checkOutDate).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' })}
         </div>
         <div className="small text-muted">{reserva.customer.customerName}</div>
-        {(esCheckInHoy || esCheckOutHoy) && reserva.isActive && !reserva.isCancelled && (
+        {(reserva.requiereFacturacion || ((esCheckInHoy || esCheckOutHoy) && reserva.isActive && !reserva.isCancelled)) && (
           <div className="mt-1">
-            {esCheckInHoy && <Badge bg="info" className="me-1 pulse-animation" style={{ fontSize: '0.65rem' }}>ENTRA HOY</Badge>}
-            {esCheckOutHoy && <Badge bg="warning" text="dark" className="pulse-animation" style={{ fontSize: '0.65rem' }}>SALE HOY</Badge>}
+            {reserva.requiereFacturacion && (
+              <Badge bg="primary" className="me-1" style={{ fontSize: '0.65rem' }}>FACT</Badge>
+            )}
+            {esCheckInHoy && reserva.isActive && !reserva.isCancelled && (
+              <Badge bg="info" className="me-1 pulse-animation" style={{ fontSize: '0.65rem' }}>ENTRA HOY</Badge>
+            )}
+            {esCheckOutHoy && reserva.isActive && !reserva.isCancelled && (
+              <Badge bg="warning" text="dark" className="pulse-animation" style={{ fontSize: '0.65rem' }}>SALE HOY</Badge>
+            )}
           </div>
         )}
       </Card.Body>
