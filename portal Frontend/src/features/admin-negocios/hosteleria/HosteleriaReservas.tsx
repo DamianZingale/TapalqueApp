@@ -390,16 +390,38 @@ export function HosteleriaReservas({
     return `${y}-${m}-${d}`;
   };
 
+  // Días bloqueados para CHECK-IN: desde el día de check-in existente hasta el día
+  // ANTES del check-out (exclusive). El día de checkout está libre porque el
+  // check-out es a las 11:00 y el check-in es a las 14:00.
   const diasOcupadosHabitacion = useMemo((): Set<string> => {
     if (!selectedHabitacion) return new Set();
     const occupied = new Set<string>();
     for (const r of reservas) {
       if (r.roomNumber !== selectedHabitacion.numero) continue;
       if (r.isCancelled) continue;
-      // Usar noon local para evitar problemas de DST
       const cur = new Date(r.stayPeriod.checkInDate.slice(0, 10) + 'T12:00:00');
       const end = new Date(r.stayPeriod.checkOutDate.slice(0, 10) + 'T12:00:00');
-      while (cur <= end) {
+      while (cur < end) {  // exclusive: checkout day is free for new check-in
+        occupied.add(formatLocalDate(cur));
+        cur.setDate(cur.getDate() + 1);
+      }
+    }
+    return occupied;
+  }, [selectedHabitacion, reservas]);
+
+  // Días bloqueados para CHECK-OUT: igual que el anterior pero también excluye el
+  // día de check-in de la reserva existente. Si el huésped nuevo hace check-out
+  // a las 11:00 del mismo día que otro hace check-in a las 14:00, no hay conflicto.
+  const diasOcupadosParaCheckOut = useMemo((): Set<string> => {
+    if (!selectedHabitacion) return new Set();
+    const occupied = new Set<string>();
+    for (const r of reservas) {
+      if (r.roomNumber !== selectedHabitacion.numero) continue;
+      if (r.isCancelled) continue;
+      const cur = new Date(r.stayPeriod.checkInDate.slice(0, 10) + 'T12:00:00');
+      const end = new Date(r.stayPeriod.checkOutDate.slice(0, 10) + 'T12:00:00');
+      cur.setDate(cur.getDate() + 1); // saltar día de check-in existente
+      while (cur < end) {
         occupied.add(formatLocalDate(cur));
         cur.setDate(cur.getDate() + 1);
       }
@@ -1261,7 +1283,6 @@ export function HosteleriaReservas({
                   placeholderText="dd/mm/aaaa"
                   dayClassName={getDayClassName}
                   filterDate={(date) => !diasOcupadosHabitacion.has(formatLocalDate(date))}
-                  minDate={new Date()}
                 />
               </Form.Group>
             </Col>
@@ -1280,7 +1301,7 @@ export function HosteleriaReservas({
                   className="form-control"
                   placeholderText="dd/mm/aaaa"
                   dayClassName={getDayClassName}
-                  filterDate={(date) => !diasOcupadosHabitacion.has(formatLocalDate(date))}
+                  filterDate={(date) => !diasOcupadosParaCheckOut.has(formatLocalDate(date))}
                   minDate={
                     formReserva.checkInDate
                       ? new Date(formReserva.checkInDate + 'T12:00:00')

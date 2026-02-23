@@ -22,6 +22,7 @@ export function AdministradoresRoutes() {
         <Route path="hosteleria/:id/habitaciones" element={<HosteleriaDashboard />} />
         <Route path="hosteleria/:id/reservas" element={<HosteleriaDashboard />} />
         <Route path="hosteleria/:id/configuracion" element={<HosteleriaDashboard />} />
+        <Route path="hosteleria/:id/planning" element={<HosteleriaDashboard />} />
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/admin" replace />} />
