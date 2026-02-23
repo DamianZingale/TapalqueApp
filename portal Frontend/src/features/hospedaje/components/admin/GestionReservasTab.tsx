@@ -22,6 +22,7 @@ interface FormReservaExterna {
     amountPaid: number;
     paymentType: 'EFECTIVO' | 'TRANSFERENCIA' | 'TARJETA';
     notas: string;
+    roomNumber: number | '';
 }
 
 const initialFormData: FormReservaExterna = {
@@ -33,7 +34,8 @@ const initialFormData: FormReservaExterna = {
     totalPrice: 0,
     amountPaid: 0,
     paymentType: 'EFECTIVO',
-    notas: ''
+    notas: '',
+    roomNumber: ''
 };
 
 export const GestionReservasTab = () => {
@@ -119,6 +121,10 @@ export const GestionReservasTab = () => {
             setErrorForm('El nombre del cliente es obligatorio');
             return;
         }
+        if (formData.roomNumber === '' || Number(formData.roomNumber) <= 0) {
+            setErrorForm('El número de habitación es obligatorio');
+            return;
+        }
         if (!formData.checkInDate || !formData.checkOutDate) {
             setErrorForm('Las fechas de check-in y check-out son obligatorias');
             return;
@@ -157,6 +163,7 @@ export const GestionReservasTab = () => {
                     remainingAmount: formData.totalPrice - formData.amountPaid
                 },
                 totalPrice: formData.totalPrice,
+                roomNumber: Number(formData.roomNumber),
                 isActive: true,
                 isCancelled: false
             };
@@ -238,6 +245,64 @@ export const GestionReservasTab = () => {
                 key: 'selection'
             });
         }
+    };
+
+    const resetModal = () => {
+        setModalReservaExterna(false);
+        setFormData(initialFormData);
+        setErrorForm(null);
+        setDateRange({ startDate: undefined, endDate: undefined, key: 'selection' });
+        setShowCalendar(false);
+    };
+
+    const toLocalDateStr = (date: Date): string => {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    };
+
+    const getOccupiedDatesForRoom = (roomNum: number): Set<string> => {
+        const occupied = new Set<string>();
+        reservas
+            .filter(r => r.roomNumber === roomNum && r.isActive && !r.isCancelled)
+            .forEach(r => {
+                const start = new Date(r.stayPeriod.checkInDate);
+                const end = new Date(r.stayPeriod.checkOutDate);
+                start.setHours(0, 0, 0, 0);
+                end.setHours(0, 0, 0, 0);
+                const current = new Date(start);
+                while (current < end) {
+                    occupied.add(toLocalDateStr(current));
+                    current.setDate(current.getDate() + 1);
+                }
+            });
+        return occupied;
+    };
+
+    const occupiedDatesSet = formData.roomNumber !== ''
+        ? getOccupiedDatesForRoom(Number(formData.roomNumber))
+        : new Set<string>();
+
+    const dayContentRenderer = (date: Date) => {
+        const dateStr = toLocalDateStr(date);
+        const isOccupied = occupiedDatesSet.has(dateStr);
+        return (
+            <div style={{
+                background: isOccupied ? 'rgba(220, 53, 69, 0.38)' : 'rgba(25, 135, 84, 0.28)',
+                borderRadius: '50%',
+                width: 28,
+                height: 28,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: 'auto',
+                color: isOccupied ? '#842029' : '#0a3622',
+                fontWeight: 500,
+            }}>
+                {date.getDate()}
+            </div>
+        );
     };
 
     if (loading) {
@@ -394,7 +459,7 @@ export const GestionReservasTab = () => {
             )}
 
             {/* Modal para crear reserva externa */}
-            <Modal show={modalReservaExterna} onHide={() => { setModalReservaExterna(false); setFormData(initialFormData); setErrorForm(null); }} size="lg">
+            <Modal show={modalReservaExterna} onHide={resetModal} size="lg">
                 <Modal.Header closeButton>
                     <Modal.Title>Crear Reserva Externa</Modal.Title>
                 </Modal.Header>
@@ -439,87 +504,119 @@ export const GestionReservasTab = () => {
                     </Row>
 
                     <hr />
-                    <h6 className="mb-3">Fechas de Estadía</h6>
-                    
-                    <Form.Group className="mb-3">
-                        <Form.Label>Seleccionar fechas *</Form.Label>
-                        <InputGroup>
-                            <Form.Control
-                                type="text"
-                                value={dateRange.startDate && dateRange.endDate ? 
-                                    `${formatFecha(dateRange.startDate)} - ${formatFecha(dateRange.endDate)}` : 
-                                    'Click para seleccionar fechas'
-                                }
-                                readOnly
-                                onClick={openCalendar}
-                                placeholder="Click para seleccionar fechas"
-                                style={{ cursor: 'pointer' }}
-                            />
-                            <Button 
-                                variant="outline-primary" 
-                                onClick={openCalendar}
-                            >
-                                📅 Calendario
-                            </Button>
-                        </InputGroup>
-                        <Form.Text className="text-muted">
-                            Click en el campo o botón para seleccionar check-in y check-out
-                        </Form.Text>
-                    </Form.Group>
+                    <h6 className="mb-3">Habitación y Fechas</h6>
 
-                    {showCalendar && (
-                        <Card className="mb-3">
-                            <Card.Body className="p-3">
-                                <div className="d-flex justify-content-between align-items-center mb-3">
-                                    <h6 className="mb-0">Seleccionar Fechas</h6>
-                                    <Button 
-                                        variant="outline-secondary" 
-                                        size="sm"
-                                        onClick={() => setShowCalendar(false)}
-                                    >
-                                        ✕ Cerrar
-                                    </Button>
-                                </div>
-                                <Calendar
-                                    onChange={handleDateSelect}
-                                    ranges={[dateRange]}
-                                    months={2}
-                                    direction="horizontal"
-                                    locale={es}
-                                    minDate={new Date()}
-                                    showDateDisplay={false}
-                                    rangeColors={['#0d6efd', '#3ecf8e', '#fed14c']}
+                    <Row>
+                        <Col md={4}>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Número de Habitación *</Form.Label>
+                                <Form.Control
+                                    type="number"
+                                    min="1"
+                                    value={formData.roomNumber}
+                                    onChange={(e) => {
+                                        const val = e.target.value;
+                                        const newRoom = val === '' ? '' : Number(val);
+                                        setFormData(prev => ({ ...prev, roomNumber: newRoom, checkInDate: '', checkOutDate: '' }));
+                                        setShowCalendar(false);
+                                        setDateRange({ startDate: undefined, endDate: undefined, key: 'selection' });
+                                    }}
+                                    placeholder="Ej: 101"
                                 />
-                                {dateRange.startDate && dateRange.endDate && (
-                                    <Alert variant="info" className="mt-3 mb-0">
-                                        <div className="d-flex justify-content-between align-items-center">
-                                            <div>
-                                                <strong>Check-in:</strong> {formatFecha(dateRange.startDate)}<br/>
-                                                <strong>Check-out:</strong> {formatFecha(dateRange.endDate)}<br/>
-                                                <strong>Noches:</strong> {calcularNoches(
-                                                    dateRange.startDate.toISOString().split('T')[0],
-                                                    dateRange.endDate.toISOString().split('T')[0]
-                                                )}
-                                            </div>
-                                            <Button 
-                                                variant="success" 
-                                                size="sm"
-                                                onClick={() => setShowCalendar(false)}
-                                            >
-                                                Confirmar fechas
-                                            </Button>
-                                        </div>
-                                    </Alert>
+                                {formData.roomNumber !== '' && (
+                                    <Form.Text className="text-muted">
+                                        {reservas.filter(r => r.roomNumber === Number(formData.roomNumber) && r.isActive && !r.isCancelled).length} reserva(s) activa(s)
+                                    </Form.Text>
                                 )}
-                            </Card.Body>
-                        </Card>
-                    )}
-                    {formData.checkInDate && formData.checkOutDate && (
-                        <Alert variant="info" className="py-2">
-                            <small>
-                                <strong>Noches:</strong> {calcularNoches(formData.checkInDate, formData.checkOutDate)}
-                            </small>
+                            </Form.Group>
+                        </Col>
+                    </Row>
+
+                    {formData.roomNumber === '' ? (
+                        <Alert variant="secondary" className="py-2 mb-3">
+                            <small>Ingrese el número de habitación para ver disponibilidad en el calendario.</small>
                         </Alert>
+                    ) : (
+                        <>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Seleccionar fechas *</Form.Label>
+                                <InputGroup>
+                                    <Form.Control
+                                        type="text"
+                                        value={dateRange.startDate && dateRange.endDate ?
+                                            `${formatFecha(dateRange.startDate)} - ${formatFecha(dateRange.endDate)}` :
+                                            'Click para seleccionar fechas'
+                                        }
+                                        readOnly
+                                        onClick={openCalendar}
+                                        style={{ cursor: 'pointer' }}
+                                    />
+                                    <Button variant="outline-primary" onClick={openCalendar}>
+                                        📅 Calendario
+                                    </Button>
+                                </InputGroup>
+                                <Form.Text className="text-muted">
+                                    Click en el campo o botón para seleccionar check-in y check-out
+                                </Form.Text>
+                            </Form.Group>
+
+                            {showCalendar && (
+                                <Card className="mb-3">
+                                    <Card.Body className="p-3">
+                                        <div className="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                                            <h6 className="mb-0">Habitación {formData.roomNumber}</h6>
+                                            <div className="d-flex align-items-center gap-3">
+                                                <small className="d-flex align-items-center gap-1">
+                                                    <span style={{ display: 'inline-block', width: 12, height: 12, borderRadius: '50%', background: 'rgba(220, 53, 69, 0.7)' }} />
+                                                    Ocupado
+                                                </small>
+                                                <small className="d-flex align-items-center gap-1">
+                                                    <span style={{ display: 'inline-block', width: 12, height: 12, borderRadius: '50%', background: 'rgba(25, 135, 84, 0.7)' }} />
+                                                    Disponible
+                                                </small>
+                                                <Button variant="outline-secondary" size="sm" onClick={() => setShowCalendar(false)}>
+                                                    ✕ Cerrar
+                                                </Button>
+                                            </div>
+                                        </div>
+                                        <Calendar
+                                            onChange={handleDateSelect}
+                                            ranges={[dateRange]}
+                                            months={2}
+                                            direction="horizontal"
+                                            locale={es}
+                                            showDateDisplay={false}
+                                            rangeColors={['#0d6efd', '#3ecf8e', '#fed14c']}
+                                            dayContentRenderer={dayContentRenderer}
+                                        />
+                                        {dateRange.startDate && dateRange.endDate && (
+                                            <Alert variant="info" className="mt-3 mb-0">
+                                                <div className="d-flex justify-content-between align-items-center">
+                                                    <div>
+                                                        <strong>Check-in:</strong> {formatFecha(dateRange.startDate)}<br />
+                                                        <strong>Check-out:</strong> {formatFecha(dateRange.endDate)}<br />
+                                                        <strong>Noches:</strong> {calcularNoches(
+                                                            dateRange.startDate.toISOString().split('T')[0],
+                                                            dateRange.endDate.toISOString().split('T')[0]
+                                                        )}
+                                                    </div>
+                                                    <Button variant="success" size="sm" onClick={() => setShowCalendar(false)}>
+                                                        Confirmar fechas
+                                                    </Button>
+                                                </div>
+                                            </Alert>
+                                        )}
+                                    </Card.Body>
+                                </Card>
+                            )}
+                            {formData.checkInDate && formData.checkOutDate && (
+                                <Alert variant="info" className="py-2">
+                                    <small>
+                                        <strong>Noches:</strong> {calcularNoches(formData.checkInDate, formData.checkOutDate)}
+                                    </small>
+                                </Alert>
+                            )}
+                        </>
                     )}
 
                     <hr />
@@ -582,7 +679,7 @@ export const GestionReservasTab = () => {
                     </Form.Group>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={() => { setModalReservaExterna(false); setFormData(initialFormData); }}>
+                    <Button variant="secondary" onClick={resetModal}>
                         Cancelar
                     </Button>
                     <Button variant="success" onClick={handleCrearReservaExterna} disabled={guardando}>

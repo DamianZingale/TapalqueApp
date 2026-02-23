@@ -733,6 +733,15 @@ spring:
           filters:
             - RewritePath=/api/reservas/reservations/by-customer/(?<id>[0-9]+), /reservations/by-customer/${id}
 
+        # RESERVAS - Cierre del día
+        - id: msvc-reservas-cierre
+          uri: lb://msvc-reservas
+          predicates:
+            - Path=/api/reservas/reservations/cierre/{hotelId}
+            - Method=GET
+          filters:
+            - RewritePath=/api/reservas/reservations/cierre/(?<hotelId>.*), /reservations/cierre/${hotelId}
+
         # RESERVAS - Políticas de hospedaje
         - id: msvc-reservas-politica
           uri: lb://msvc-reservas
