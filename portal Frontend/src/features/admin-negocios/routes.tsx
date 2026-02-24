@@ -16,6 +16,7 @@ export function AdministradoresRoutes() {
         <Route path="gastronomia/:id/menu" element={<GastronomiaDashboard />} />
         <Route path="gastronomia/:id/pedidos" element={<GastronomiaDashboard />} />
         <Route path="gastronomia/:id/configuracion" element={<GastronomiaDashboard />} />
+        <Route path="gastronomia/:id/estadisticas" element={<GastronomiaDashboard />} />
 
         {/* Rutas de Hostelería */}
         <Route path="hosteleria/:id" element={<HosteleriaDashboard />} />
@@ -23,6 +24,7 @@ export function AdministradoresRoutes() {
         <Route path="hosteleria/:id/reservas" element={<HosteleriaDashboard />} />
         <Route path="hosteleria/:id/configuracion" element={<HosteleriaDashboard />} />
         <Route path="hosteleria/:id/planning" element={<HosteleriaDashboard />} />
+        <Route path="hosteleria/:id/estadisticas" element={<HosteleriaDashboard />} />
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/admin" replace />} />

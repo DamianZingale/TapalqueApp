@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { Button, Spinner, Modal, Form, InputGroup, Badge } from 'react-bootstrap';
+import { Button, Spinner, Modal, Form, InputGroup, Badge, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { addDays, differenceInDays, isSameDay, format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { fetchHabitacionesByHospedaje, type Habitacion } from '../../../services/fetchHabitaciones';
@@ -85,6 +85,7 @@ function ReservaDetalleModal({
   reserva: Reserva;
   onClose: () => void;
 }) {
+  const [copied, setCopied] = useState(false);
   const { bg, text } = getPaymentColor(reserva);
   const label = getPaymentLabel(reserva);
   const noches = differenceInDays(
@@ -92,17 +93,42 @@ function ReservaDetalleModal({
     parseLocalDate(reserva.stayPeriod.checkInDate)
   );
 
+  const handleCopyId = () => {
+    navigator.clipboard.writeText(reserva.id).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  const getWhatsAppUrl = (phone: string) => {
+    const digits = phone.replace(/\D/g, '');
+    return `https://wa.me/${digits}`;
+  };
+
   return (
     <Modal show onHide={onClose} centered size="lg">
       <Modal.Header closeButton style={{ background: '#1e2235', color: '#e8eaf6' }}>
         <Modal.Title style={{ fontSize: '1rem' }}>
           Detalle de Reserva
-          <span className="ms-2 text-muted" style={{ fontSize: '0.75rem', fontFamily: 'monospace' }}>
-            #{reserva.id}
-          </span>
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
+        {/* ID de reserva copiable */}
+        <div className="d-flex align-items-center gap-2 mb-3 p-2 rounded" style={{ background: '#f5f7fa', border: '1px solid #e0e3ea' }}>
+          <span className="text-muted" style={{ fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.08em' }}>ID Reserva:</span>
+          <code style={{ fontSize: '0.82rem', color: '#1e2235', flex: 1, userSelect: 'all' }}>{reserva.id}</code>
+          <OverlayTrigger placement="top" overlay={<Tooltip>{copied ? '¡Copiado!' : 'Copiar ID'}</Tooltip>}>
+            <Button
+              size="sm"
+              variant={copied ? 'success' : 'outline-secondary'}
+              style={{ padding: '2px 10px', fontSize: '0.78rem' }}
+              onClick={handleCopyId}
+            >
+              {copied ? '✓' : '📋'}
+            </Button>
+          </OverlayTrigger>
+        </div>
+
         <div className="row g-3">
           {/* Cliente */}
           <div className="col-md-6">
@@ -111,7 +137,20 @@ function ReservaDetalleModal({
             </h6>
             <p className="mb-1 fw-semibold">{reserva.customer.customerName}</p>
             {reserva.customer.customerPhone && (
-              <p className="mb-1 small text-muted">📞 {reserva.customer.customerPhone}</p>
+              <p className="mb-1 small text-muted d-flex align-items-center gap-2">
+                <span>📞 {reserva.customer.customerPhone}</span>
+                <a
+                  href={getWhatsAppUrl(reserva.customer.customerPhone)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="Enviar mensaje por WhatsApp"
+                  style={{ lineHeight: 1 }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="#25D366">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                  </svg>
+                </a>
+              </p>
             )}
             {reserva.customer.customerEmail && (
               <p className="mb-1 small text-muted">✉️ {reserva.customer.customerEmail}</p>
