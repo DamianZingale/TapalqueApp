@@ -5,14 +5,15 @@ import {
     EstadisticasGastronomia
 } from '../../../../services/fetchEstadisticas';
 
-export const EstadisticasTab = () => {
+interface EstadisticasTabProps {
+    businessId: string;
+}
+
+export const EstadisticasTab = ({ businessId }: EstadisticasTabProps) => {
     const [estadisticas, setEstadisticas] = useState<EstadisticasGastronomia | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [periodoVentas, setPeriodoVentas] = useState<'hoy' | 'semana' | 'mes'>('hoy');
-
-    // TODO: Obtener restaurantId del usuario logueado
-    const restaurantId = '1';
 
     useEffect(() => {
         cargarEstadisticas();
@@ -21,7 +22,7 @@ export const EstadisticasTab = () => {
     const cargarEstadisticas = async () => {
         setLoading(true);
         setError(null);
-        const data = await fetchEstadisticasGastronomia(restaurantId);
+        const data = await fetchEstadisticasGastronomia(businessId);
         if (data) {
             setEstadisticas(data);
         } else {

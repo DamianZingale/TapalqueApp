@@ -7,8 +7,9 @@ import type { Business } from '../types';
 import { GastronomiaConfiguracion } from './GastronomiaConfiguracion';
 import { GastronomiaMenu } from './GastronomiaMenu';
 import { GastronomiaPedidos } from './GastronomiaPedidos';
+import { EstadisticasTab } from '../../gastronomia/components/admin/EstadisticasTab';
 
-type TabKey = 'menu' | 'pedidos' | 'configuracion';
+type TabKey = 'menu' | 'pedidos' | 'configuracion' | 'estadisticas';
 
 export function GastronomiaDashboard() {
   const { id } = useParams<{ id: string }>();
@@ -22,6 +23,7 @@ export function GastronomiaDashboard() {
   const getActiveTab = (): TabKey => {
     if (location.pathname.includes('/pedidos')) return 'pedidos';
     if (location.pathname.includes('/configuracion')) return 'configuracion';
+    if (location.pathname.includes('/estadisticas')) return 'estadisticas';
     return 'menu';
   };
 
@@ -130,6 +132,14 @@ export function GastronomiaDashboard() {
               businessId={business.id}
               businessName={business.name}
             />
+          )}
+        </Tab>
+
+        <Tab eventKey="estadisticas" title="📊 Estadísticas">
+          {activeTab === 'estadisticas' && (
+            <div className="pt-3">
+              <EstadisticasTab businessId={business.id} />
+            </div>
           )}
         </Tab>
       </Tabs>

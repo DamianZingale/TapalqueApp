@@ -8,6 +8,7 @@ import { HosteleriaHabitaciones } from './HosteleriaHabitaciones';
 import { HosteleriaReservas } from './HosteleriaReservas';
 import { HosteleriaConfiguracion } from './HosteleriaConfiguracion';
 import { HosteleriaPlanning } from './HosteleriaPlanning';
+import { HosteleriaEstadisticas } from './HosteleriaEstadisticas';
 
 export function HosteleriaDashboard() {
   const { id } = useParams<{ id: string }>();
@@ -18,14 +19,15 @@ export function HosteleriaDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const getActiveTab = (): 'habitaciones' | 'reservas' | 'configuracion' | 'planning' => {
+  const getActiveTab = (): 'habitaciones' | 'reservas' | 'configuracion' | 'planning' | 'estadisticas' => {
     if (location.pathname.includes('/reservas')) return 'reservas';
     if (location.pathname.includes('/configuracion')) return 'configuracion';
     if (location.pathname.includes('/planning')) return 'planning';
+    if (location.pathname.includes('/estadisticas')) return 'estadisticas';
     return 'habitaciones';
   };
 
-  const [activeTab, setActiveTab] = useState<'habitaciones' | 'reservas' | 'configuracion' | 'planning'>(getActiveTab());
+  const [activeTab, setActiveTab] = useState<'habitaciones' | 'reservas' | 'configuracion' | 'planning' | 'estadisticas'>(getActiveTab());
 
   useEffect(() => {
     setActiveTab(getActiveTab());
@@ -70,7 +72,7 @@ export function HosteleriaDashboard() {
   const handleTabChange = (tab: string | null) => {
     if (!tab || !id) return;
 
-    setActiveTab(tab as 'habitaciones' | 'reservas' | 'configuracion' | 'planning');
+    setActiveTab(tab as 'habitaciones' | 'reservas' | 'configuracion' | 'planning' | 'estadisticas');
     navigate(`/admin/hosteleria/${id}/${tab}`);
   };
 
@@ -144,6 +146,14 @@ export function HosteleriaDashboard() {
         <Tab eventKey="planning" title="📊 Planning">
           {activeTab === 'planning' && (
             <HosteleriaPlanning businessId={business.id} businessName={business.name} />
+          )}
+        </Tab>
+
+        <Tab eventKey="estadisticas" title="📈 Estadísticas">
+          {activeTab === 'estadisticas' && (
+            <div className="pt-3">
+              <HosteleriaEstadisticas businessId={business.id} />
+            </div>
           )}
         </Tab>
       </Tabs>
