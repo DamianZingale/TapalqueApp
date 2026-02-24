@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Card, Row, Col, Badge, Button, ButtonGroup, Form, Alert } from 'react-bootstrap';
 import { fetchPedidosByRestaurant, updateEstadoPedido, Pedido, EstadoPedido } from '../../../../services/fetchPedidos';
+import { printPedido, printCocina } from '../../utils/printPedido';
 
 export const GestionPedidosTab = () => {
     const [pedidos, setPedidos] = useState<Pedido[]>([]);
@@ -211,7 +212,7 @@ export const GestionPedidosTab = () => {
                                         )}
                                     </div>
                                 </Card.Body>
-                                <Card.Footer>
+                                <Card.Footer className="d-flex flex-column gap-2">
                                     {getSiguienteEstado(pedido) && (
                                         <Button
                                             variant="primary"
@@ -227,6 +228,26 @@ export const GestionPedidosTab = () => {
                                             Completado
                                         </div>
                                     )}
+                                    <div className="d-flex gap-1">
+                                        <Button
+                                            variant="outline-secondary"
+                                            size="sm"
+                                            className="flex-fill"
+                                            onClick={() => printCocina(pedido)}
+                                        >
+                                            <i className="bi bi-printer me-1"></i>
+                                            Cocina
+                                        </Button>
+                                        <Button
+                                            variant="outline-dark"
+                                            size="sm"
+                                            className="flex-fill"
+                                            onClick={() => printPedido(pedido)}
+                                        >
+                                            <i className="bi bi-receipt me-1"></i>
+                                            Caja
+                                        </Button>
+                                    </div>
                                 </Card.Footer>
                             </Card>
                         </Col>
