@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { Button, Spinner, Modal, Form, InputGroup, Badge, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Button, Spinner, Modal, Badge, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { addDays, differenceInDays, isSameDay, format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { fetchHabitacionesByHospedaje, type Habitacion } from '../../../services/fetchHabitaciones';
@@ -259,14 +259,10 @@ function ReservaDetalleModal({
 export function HosteleriaPlanning({ businessId }: Props) {
   const [habitaciones, setHabitaciones] = useState<Habitacion[]>([]);
   const [reservas, setReservas] = useState<Reserva[]>([]);
-  const [allReservas, setAllReservas] = useState<Reserva[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 
-  // Buscador de ID
-  const [searchId, setSearchId] = useState('');
   const [modalReserva, setModalReserva] = useState<Reserva | null>(null);
-  const [searchError, setSearchError] = useState('');
 
   const [viewStart, setViewStart] = useState<Date>(() => {
     const t = new Date();
@@ -282,7 +278,6 @@ export function HosteleriaPlanning({ businessId }: Props) {
         fetchReservasByHotel(businessId),
       ]);
       setHabitaciones([...habs].sort((a, b) => a.numero - b.numero));
-      setAllReservas(revs);
       setReservas(revs.filter((r) => !r.isCancelled));
       setLastUpdate(new Date());
     } catch (err) {
@@ -299,22 +294,6 @@ export function HosteleriaPlanning({ businessId }: Props) {
     const id = setInterval(loadData, 120_000);
     return () => clearInterval(id);
   }, [loadData]);
-
-  // ── Buscador de ID ──────────────────────────────────────────────────────────
-  const handleSearch = () => {
-    const term = searchId.trim().toLowerCase();
-    if (!term) {
-      setSearchError('Ingresá un ID para buscar.');
-      return;
-    }
-    const found = allReservas.find((r) => r.id.toLowerCase() === term || r.id.toLowerCase().startsWith(term));
-    if (found) {
-      setSearchError('');
-      setModalReserva(found);
-    } else {
-      setSearchError('No se encontró ninguna reserva con ese ID.');
-    }
-  };
 
   // ── Rango de fechas visible ─────────────────────────────────────────────────
   const days = useMemo<Date[]>(
@@ -427,29 +406,6 @@ export function HosteleriaPlanning({ businessId }: Props) {
           )}
           <Button variant="outline-success" size="sm" onClick={loadData}>↻ Actualizar</Button>
         </div>
-      </div>
-
-      {/* Buscador de reserva por ID */}
-      <div className="mb-3">
-        <InputGroup size="sm" style={{ maxWidth: 480 }}>
-          <InputGroup.Text style={{ background: '#1e2235', color: '#e8eaf6', border: 'none' }}>
-            🔍 Buscar por ID
-          </InputGroup.Text>
-          <Form.Control
-            placeholder="Pegá el ID de la reserva..."
-            value={searchId}
-            onChange={(e) => {
-              setSearchId(e.target.value);
-              setSearchError('');
-            }}
-            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-            style={{ fontFamily: 'monospace', fontSize: '0.82rem' }}
-          />
-          <Button variant="primary" onClick={handleSearch}>Buscar</Button>
-        </InputGroup>
-        {searchError && (
-          <p className="text-danger small mt-1 mb-0">{searchError}</p>
-        )}
       </div>
 
       {/* Leyenda */}

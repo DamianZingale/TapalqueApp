@@ -10,6 +10,7 @@ import {
   Card,
   Col,
   Form,
+  InputGroup,
   Modal,
   Row,
   Spinner,
@@ -135,6 +136,11 @@ export function HosteleriaReservas({
   const [modalDetalle, setModalDetalle] = useState(false);
   const [reservaDetalle, setReservaDetalle] = useState<Reserva | null>(null);
 
+  // Buscador por ID
+  const [searchId, setSearchId] = useState('');
+  const [searchError, setSearchError] = useState('');
+  const [resaltadaId, setResaltadaId] = useState<string | null>(null);
+
   // Estado para modal de completar pago
   const [modalCompletarPago, setModalCompletarPago] = useState(false);
   const [reservaSeleccionada, setReservaSeleccionada] =
@@ -235,6 +241,39 @@ export function HosteleriaReservas({
       return () => clearTimeout(timer);
     }
   }, [mensaje]);
+
+  // Scroll hacia la card resaltada
+  useEffect(() => {
+    if (!resaltadaId) return;
+    const el = document.getElementById(`reserva-card-${resaltadaId}`);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [resaltadaId]);
+
+  const handleSearchById = () => {
+    const term = searchId.trim().toLowerCase();
+    if (!term) {
+      setSearchError('Ingresá un ID para buscar.');
+      return;
+    }
+    const found = reservas.find(
+      (r) => r.id.toLowerCase() === term || r.id.toLowerCase().startsWith(term)
+    );
+    if (found) {
+      setSearchError('');
+      setResaltadaId(found.id);
+      // Si está cancelada va al historial, si no al tab activas
+      if (found.isCancelled || !found.isActive) {
+        setActiveTab('historial');
+      } else {
+        setActiveTab('activas');
+      }
+    } else {
+      setSearchError('No se encontró ninguna reserva con ese ID.');
+      setResaltadaId(null);
+    }
+  };
 
   const playNotificationSound = () => {
     try {
@@ -1036,9 +1075,25 @@ export function HosteleriaReservas({
         </Card.Body>
       </Card>
 
+      {/* Buscador por ID de reserva */}
+      <div className="mb-3">
+        <InputGroup size="sm" style={{ maxWidth: 520 }}>
+          <InputGroup.Text>🔍 Buscar por ID</InputGroup.Text>
+          <Form.Control
+            placeholder="Pegá el ID de la reserva..."
+            value={searchId}
+            onChange={(e) => { setSearchId(e.target.value); setSearchError(''); setResaltadaId(null); }}
+            onKeyDown={(e) => e.key === 'Enter' && handleSearchById()}
+            style={{ fontFamily: 'monospace', fontSize: '0.82rem' }}
+          />
+          <Button variant="outline-primary" onClick={handleSearchById}>Buscar</Button>
+        </InputGroup>
+        {searchError && <p className="text-danger small mt-1 mb-0">{searchError}</p>}
+      </div>
+
       <Tabs
         activeKey={activeTab}
-        onSelect={(k) => setActiveTab(k as 'activas' | 'historial')}
+        onSelect={(k) => { setActiveTab(k as 'activas' | 'historial'); setResaltadaId(null); }}
         className="mb-3"
       >
         <Tab eventKey="activas" title={`Activas (${reservasActivas.length})`}>
@@ -1071,7 +1126,14 @@ export function HosteleriaReservas({
 
           <Row xs={2} md={3} lg={4} className="g-2">
             {reservasActivas.map((reserva) => (
-              <Col key={reserva.id}>
+              <Col key={reserva.id} id={`reserva-card-${reserva.id}`}
+                style={resaltadaId === reserva.id ? {
+                  outline: '2px solid #0d6efd',
+                  borderRadius: 8,
+                  boxShadow: '0 0 0 4px rgba(13,110,253,0.2)',
+                  transition: 'all 0.3s',
+                } : undefined}
+              >
                 <ReservaCardCompacta
                   reserva={reserva}
                   onClick={() => {
@@ -1185,7 +1247,14 @@ export function HosteleriaReservas({
 
           <Row xs={2} md={3} lg={4} className="g-2">
             {reservasFiltradas.map((reserva) => (
-              <Col key={reserva.id}>
+              <Col key={reserva.id} id={`reserva-card-${reserva.id}`}
+                style={resaltadaId === reserva.id ? {
+                  outline: '2px solid #0d6efd',
+                  borderRadius: 8,
+                  boxShadow: '0 0 0 4px rgba(13,110,253,0.2)',
+                  transition: 'all 0.3s',
+                } : undefined}
+              >
                 <ReservaCardCompacta
                   reserva={reserva}
                   onClick={() => {
