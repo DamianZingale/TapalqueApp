@@ -1,4 +1,4 @@
-import { fetchPedidosByRestaurantAndDateRange, type Pedido, EstadoPedido } from './fetchPedidos';
+import { fetchPedidosByRestaurant, type Pedido, EstadoPedido } from './fetchPedidos';
 import { fetchReservasByHotel } from './fetchReservas';
 import { fetchHabitacionesByHospedaje } from './fetchHabitaciones';
 
@@ -52,10 +52,6 @@ export interface ReservaMes {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function toLocalDT(date: Date): string {
-    return date.toISOString().replace('Z', '').replace(/\.\d{3}$/, '');
-}
-
 function startOfDay(d: Date): Date {
     const r = new Date(d);
     r.setHours(0, 0, 0, 0);
@@ -89,15 +85,7 @@ export async function fetchEstadisticasGastronomia(
     restaurantId: string
 ): Promise<EstadisticasGastronomia | null> {
     try {
-        const ahora = new Date();
-        const hace30 = startOfDay(new Date(ahora));
-        hace30.setDate(hace30.getDate() - 30);
-
-        const pedidos = await fetchPedidosByRestaurantAndDateRange(
-            restaurantId,
-            toLocalDT(hace30),
-            toLocalDT(ahora)
-        );
+        const pedidos = await fetchPedidosByRestaurant(restaurantId);
 
         const vacío: EstadisticasGastronomia = {
             pedidosHoy: 0, ingresosHoy: 0,
