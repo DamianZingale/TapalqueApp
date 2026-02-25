@@ -55,8 +55,8 @@ public class AvailabilityController {
         // Obtiene los números de habitación ocupados para filtrar por habitación específica
         Mono<List<Integer>> numerosOcupadosMono = reservationService
                 .getReservationsByHotelAndStayOverlapIncludingPending(hotelId, desdeDateTime, hastaDateTime)
+                .filter(r -> r.getRoomNumber() != null)
                 .map(r -> r.getRoomNumber())
-                .filter(n -> n != null)
                 .collectList();
 
         return Mono.zip(habitacionesMono, numerosOcupadosMono)
