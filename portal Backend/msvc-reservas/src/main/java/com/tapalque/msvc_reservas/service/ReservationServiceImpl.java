@@ -37,6 +37,12 @@ public class ReservationServiceImpl implements ReservationService {
     private final PoliticaService politicaService;
     private final RedissonClient redissonClient;
 
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private ReservaEmailService emailService;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    private WhatsAppNotificationService whatsAppService;
+
     public ReservationServiceImpl(ReservationRepositoryInterface reservationRepository,
                                   AdminNotificationService adminNotificationService,
                                   HospedajeClient hospedajeClient,
@@ -372,8 +378,21 @@ public Mono<ReservationDTO> updateReservation(ReservationDTO reservationDto) {
             .doOnSuccess(reservation -> {
                 System.out.println("Reserva " + reservaId + " confirmada como PAGADA");
                 if (reservation != null) {
+                    ReservationDTO dto = ReservationMapper.toDto(reservation);
                     // Notificamos como NUEVA reserva cuando se confirma el pago (es cuando realmente se crea para el admin)
-                    adminNotificationService.notificarNuevaReserva(ReservationMapper.toDto(reservation));
+                    adminNotificationService.notificarNuevaReserva(dto);
+                    // Enviar email y/o WhatsApp al admin
+                    if (reservation.getHotel() != null) {
+                        hospedajeClient.fetchEmailNotificacion(reservation.getHotel().getHotelId())
+                            .subscribe(hotel -> {
+                                if (hotel != null) {
+                                    if (emailService != null) emailService.notificarNuevaReserva(dto, hotel.emailNotificacion());
+                                    if (Boolean.TRUE.equals(hotel.whatsappActivo())) {
+                                        whatsAppService.notificarNuevaReserva(dto, hotel.numWhatsapp());
+                                    }
+                                }
+                            });
+                    }
                 }
             })
             .doOnError(error -> System.err.println("Error al confirmar pago de reserva " + reservaId + ": " + error.getMessage()))

@@ -38,6 +38,9 @@ public class Hospedaje {
     @Column(name = "num_whatsapp")
     private String numWhatsapp;
 
+    @Column(name = "email_notificacion")
+    private String emailNotificacion;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "tipo_hospedaje")
     private TipoHospedaje tipoHospedaje;
@@ -60,6 +63,9 @@ public class Hospedaje {
     @Enumerated(EnumType.STRING)
     @Column(name = "tipo_iva")
     private TipoIVA tipoIva = TipoIVA.NO_APLICA;
+
+    @Column(name = "whatsapp_activo")
+    private Boolean whatsappActivo = false;
 
     // --- Constructores ---
     public Hospedaje() {
@@ -133,6 +139,14 @@ public class Hospedaje {
         this.numWhatsapp = numWhatsapp;
     }
 
+    public String getEmailNotificacion() {
+        return emailNotificacion;
+    }
+
+    public void setEmailNotificacion(String emailNotificacion) {
+        this.emailNotificacion = emailNotificacion;
+    }
+
     public TipoHospedaje getTipoHospedaje() {
         return tipoHospedaje;
     }
@@ -188,4 +202,13 @@ public class Hospedaje {
     public void setTipoIva(TipoIVA tipoIva) {
         this.tipoIva = tipoIva;
     }
+
+    public Boolean getWhatsappActivo() {
+        return whatsappActivo;
+    }
+
+    public void setWhatsappActivo(Boolean whatsappActivo) {
+        this.whatsappActivo = whatsappActivo;
+    }
+
 }

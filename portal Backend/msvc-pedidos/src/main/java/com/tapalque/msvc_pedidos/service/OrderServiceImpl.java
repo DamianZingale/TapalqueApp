@@ -33,6 +33,9 @@ public class OrderServiceImpl implements OrderService {
     private final GastronomiaClient gastronomiaClient;
     private final MercadoPagoClient mercadoPagoClient;
 
+    @org.springframework.beans.factory.annotation.Autowired
+    private WhatsAppNotificationService whatsAppService;
+
     @Value("${rabbitmq.exchange}")
     private String orderExchange;
 
@@ -109,6 +112,14 @@ public class OrderServiceImpl implements OrderService {
                             // (ver confirmarPagoPedido).
                             if (Boolean.TRUE.equals(savedOrder.getPaidWithCash())) {
                                 adminNotificationService.notificarNuevoPedido(savedOrder);
+                                if (savedOrder.getRestaurant() != null) {
+                                    gastronomiaClient.fetchWhatsappConfig(savedOrder.getRestaurant().getRestaurantId())
+                                        .subscribe(config -> {
+                                            if (config != null && Boolean.TRUE.equals(config.getWhatsappActivo())) {
+                                                whatsAppService.notificarNuevoPedido(savedOrder, config.getWhatsappNotificacion());
+                                            }
+                                        });
+                                }
                             }
 
                             return mapToDTO(savedOrder);
@@ -237,7 +248,17 @@ public class OrderServiceImpl implements OrderService {
             })
             .doOnSuccess(order -> {
                 System.out.println("Pedido " + pedidoId + " confirmado como PAGADO");
-                if (order != null) adminNotificationService.notificarNuevoPedido(order);
+                if (order != null) {
+                    adminNotificationService.notificarNuevoPedido(order);
+                    if (order.getRestaurant() != null) {
+                        gastronomiaClient.fetchWhatsappConfig(order.getRestaurant().getRestaurantId())
+                            .subscribe(config -> {
+                                if (config != null && Boolean.TRUE.equals(config.getWhatsappActivo())) {
+                                    whatsAppService.notificarNuevoPedido(order, config.getWhatsappNotificacion());
+                                }
+                            });
+                    }
+                }
             })
             .doOnError(error -> System.err.println("Error al confirmar pago del pedido " + pedidoId + ": " + error.getMessage()))
             .subscribe();

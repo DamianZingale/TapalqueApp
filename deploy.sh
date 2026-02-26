@@ -151,9 +151,9 @@ wait_for_services() {
 startup_staggered() {
     echo_info "=== Arranque escalonado de servicios ==="
 
-    # Paso 1: Bases de datos + RabbitMQ + Redis
-    echo_info "[1/6] Levantando bases de datos, RabbitMQ y Redis..."
-    $COMPOSE_CMD up -d rabbitmq redis \
+    # Paso 1: Bases de datos + RabbitMQ + Redis + WPPConnect
+    echo_info "[1/6] Levantando bases de datos, RabbitMQ, Redis y WPPConnect..."
+    $COMPOSE_CMD up -d rabbitmq redis wppconnect \
         pedidos-db reservas-db jwt-db user-db \
         gastronomia-db hosteleria-db mercado-pago-db \
         comercio-db eventos-db servicios-db termas-db espacios-publicos-db

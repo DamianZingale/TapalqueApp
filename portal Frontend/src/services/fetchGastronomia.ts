@@ -1,4 +1,5 @@
 // src/services/fetchGastronomia.ts
+import { apiRequest } from '../config/api';
 
 export interface DishCategory {
   idDishCategory: number;
@@ -45,6 +46,8 @@ export interface Restaurant {
   phones?: string;
   schedule?: string;
   imageUrl?: string;
+  whatsappNotificacion?: string;
+  whatsappActivo?: boolean;
 }
 
 export async function fetchRestaurants(): Promise<Restaurant[]> {
@@ -98,5 +101,31 @@ export async function fetchMenuByRestaurant(
   } catch (error) {
     console.error('Error en fetchMenuByRestaurant:', error);
     return null;
+  }
+}
+
+export async function fetchRestaurantByIdAuth(id: string | number): Promise<Restaurant | null> {
+  try {
+    return await apiRequest<Restaurant>(`/gastronomia/restaurants/${id}`, { method: 'GET' });
+  } catch (error) {
+    console.error('Error en fetchRestaurantByIdAuth:', error);
+    return null;
+  }
+}
+
+export async function actualizarWhatsappRestaurante(
+  id: string | number,
+  whatsappNotificacion: string,
+  whatsappActivo: boolean
+): Promise<boolean> {
+  try {
+    await apiRequest(`/gastronomia/restaurants/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ whatsappNotificacion, whatsappActivo }),
+    });
+    return true;
+  } catch (error) {
+    console.error('Error en actualizarWhatsappRestaurante:', error);
+    return false;
   }
 }

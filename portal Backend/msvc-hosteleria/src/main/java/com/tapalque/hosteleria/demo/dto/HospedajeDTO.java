@@ -15,12 +15,14 @@ public class HospedajeDTO {
     private Double latitud;
     private Double longitud;
     private String numWhatsapp;
+    private String emailNotificacion;
     private String tipoHospedaje;
     private List<String> imagenes;
     private java.time.LocalDateTime lastCloseDate;
     private java.time.LocalDate fechaLimiteReservas;
     private Boolean permiteFacturacion;
     private String tipoIva;
+    private Boolean whatsappActivo;
 
     // Constructor vacío (necesario para algunas herramientas de serialización como Jackson)
     public HospedajeDTO() {
@@ -35,6 +37,7 @@ public class HospedajeDTO {
         this.latitud = hospedaje.getLatitud();
         this.longitud = hospedaje.getLongitud();
         this.numWhatsapp = hospedaje.getNumWhatsapp();
+        this.emailNotificacion = hospedaje.getEmailNotificacion();
         this.tipoHospedaje = hospedaje.getTipoHospedaje() != null
                 ? hospedaje.getTipoHospedaje().name()
                 : null;
@@ -49,6 +52,7 @@ public class HospedajeDTO {
         this.tipoIva = hospedaje.getTipoIva() != null
                 ? hospedaje.getTipoIva().name()
                 : "NO_APLICA";
+        this.whatsappActivo = hospedaje.getWhatsappActivo();
     }
 
     // Getters y setters
@@ -109,6 +113,14 @@ public class HospedajeDTO {
         this.numWhatsapp = numWhatsapp;
     }
 
+    public String getEmailNotificacion() {
+        return emailNotificacion;
+    }
+
+    public void setEmailNotificacion(String emailNotificacion) {
+        this.emailNotificacion = emailNotificacion;
+    }
+
     public String getTipoHospedaje() {
         return tipoHospedaje;
     }
@@ -156,4 +168,13 @@ public class HospedajeDTO {
     public void setTipoIva(String tipoIva) {
         this.tipoIva = tipoIva;
     }
+
+    public Boolean getWhatsappActivo() {
+        return whatsappActivo;
+    }
+
+    public void setWhatsappActivo(Boolean whatsappActivo) {
+        this.whatsappActivo = whatsappActivo;
+    }
+
 }

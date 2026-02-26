@@ -19,6 +19,20 @@ public class HospedajeClient {
         this.webClient = builder.baseUrl("lb://msvc-hosteleria").build();
     }
 
+    public record HospedajeInfoDTO(String emailNotificacion, String titulo, String numWhatsapp, Boolean whatsappActivo) {}
+
+    /**
+     * Trae el email de notificación del hospedaje.
+     * GET /hospedajes/{id}
+     */
+    public Mono<HospedajeInfoDTO> fetchEmailNotificacion(String hospedajeId) {
+        return webClient.get()
+                .uri("/hospedajes/{id}", hospedajeId)
+                .retrieve()
+                .bodyToMono(HospedajeInfoDTO.class)
+                .onErrorResume(e -> Mono.empty());
+    }
+
     /**
      * Trae todas las habitaciones de un hospedaje desde msvc-hosteleria.
      * GET /habitaciones/hospedajes/{hospedajeId}

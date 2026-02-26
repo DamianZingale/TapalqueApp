@@ -1,7 +1,8 @@
-import { useState } from 'react';
-import { Card, Button, Alert, Spinner } from 'react-bootstrap';
+import { useState, useEffect } from 'react';
+import { Card, Button, Alert, Spinner, Form } from 'react-bootstrap';
 import { authService } from '../../../services/authService';
 import { obtenerUrlOAuthMercadoPago } from '../../../services/fetchMercadoPago';
+import { fetchRestaurantByIdAuth, actualizarWhatsappRestaurante } from '../../../services/fetchGastronomia';
 
 interface Props {
   businessId: string;
@@ -11,6 +12,41 @@ interface Props {
 export function GastronomiaConfiguracion({ businessId, businessName }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // WhatsApp
+  const [whatsappNotificacion, setWhatsappNotificacion] = useState('');
+  const [whatsappActivo, setWhatsappActivo] = useState(false);
+  const [loadingWhatsapp, setLoadingWhatsapp] = useState(false);
+  const [successWhatsapp, setSuccessWhatsapp] = useState(false);
+
+  useEffect(() => {
+    fetchRestaurantByIdAuth(businessId).then((r) => {
+      if (r?.whatsappNotificacion) {
+        setWhatsappNotificacion(r.whatsappNotificacion);
+      }
+      if (r?.whatsappActivo !== undefined) {
+        setWhatsappActivo(r.whatsappActivo ?? false);
+      }
+    });
+  }, [businessId]);
+
+  const handleGuardarWhatsapp = async () => {
+    setLoadingWhatsapp(true);
+    setSuccessWhatsapp(false);
+    try {
+      const ok = await actualizarWhatsappRestaurante(businessId, whatsappNotificacion, whatsappActivo);
+      if (ok) {
+        setSuccessWhatsapp(true);
+        setTimeout(() => setSuccessWhatsapp(false), 3000);
+      } else {
+        setError('No se pudo guardar la configuración de WhatsApp');
+      }
+    } catch {
+      setError('Error al guardar la configuración de WhatsApp');
+    } finally {
+      setLoadingWhatsapp(false);
+    }
+  };
 
   const handleConectarMercadoPago = async () => {
     const user = authService.getUser();
@@ -90,6 +126,49 @@ export function GastronomiaConfiguracion({ businessId, businessName }: Props) {
               </>
             )}
           </Button>
+        </Card.Body>
+      </Card>
+
+      {/* WhatsApp */}
+      <Card className="mb-4">
+        <Card.Header>Notificaciones por WhatsApp</Card.Header>
+        <Card.Body>
+          <Card.Text>
+            Cuando un cliente realice un pedido, se enviará un mensaje de WhatsApp resumido a este número.
+            Solo se envía cuando está activado.
+          </Card.Text>
+          <Form.Group className="mb-3">
+            <Form.Check
+              type="switch"
+              id="whatsapp-activo-gastronomia"
+              label="Activar notificaciones por WhatsApp"
+              checked={whatsappActivo}
+              onChange={(e) => setWhatsappActivo(e.target.checked)}
+            />
+          </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>Número de WhatsApp</Form.Label>
+            <Form.Control
+              type="tel"
+              placeholder="+54 9 2983 000000"
+              value={whatsappNotificacion}
+              onChange={(e) => setWhatsappNotificacion(e.target.value)}
+              style={{ maxWidth: 280 }}
+            />
+            <Form.Text className="text-muted">
+              Ingresá el número con código de país, ej: +54 9 2983 123456
+            </Form.Text>
+          </Form.Group>
+          <Button
+            variant="primary"
+            onClick={handleGuardarWhatsapp}
+            disabled={loadingWhatsapp}
+          >
+            {loadingWhatsapp ? <Spinner animation="border" size="sm" /> : 'Guardar'}
+          </Button>
+          {successWhatsapp && (
+            <p className="text-success small mt-2 mb-0">Configuración guardada correctamente.</p>
+          )}
         </Card.Body>
       </Card>
 

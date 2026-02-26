@@ -27,6 +27,8 @@ public class RestaurantDTO {
     private Integer estimatedWaitTime;
     private String imageUrl;
     private java.time.LocalDateTime lastCloseDate;
+    private String whatsappNotificacion;
+    private Boolean whatsappActivo;
 
     // 🔹 Constructor vacío
     public RestaurantDTO() {}
@@ -74,6 +76,8 @@ public class RestaurantDTO {
     this.deliveryPrice = entity.getDeliveryPrice();
     this.estimatedWaitTime = entity.getEstimatedWaitTime();
     this.lastCloseDate = entity.getLastCloseDate();
+    this.whatsappNotificacion = entity.getWhatsappNotificacion();
+    this.whatsappActivo = entity.getWhatsappActivo();
     // Imagen: tomar la primera imagen del restaurante
     if (entity.getImages() != null && !entity.getImages().isEmpty()) {
         this.imageUrl = entity.getImages().get(0).getImageUrl();
@@ -301,4 +305,21 @@ entity.setSchedules(scheduleList);
     public void setLastCloseDate(java.time.LocalDateTime lastCloseDate) {
         this.lastCloseDate = lastCloseDate;
     }
+
+    public String getWhatsappNotificacion() {
+        return whatsappNotificacion;
+    }
+
+    public void setWhatsappNotificacion(String whatsappNotificacion) {
+        this.whatsappNotificacion = whatsappNotificacion;
+    }
+
+    public Boolean getWhatsappActivo() {
+        return whatsappActivo;
+    }
+
+    public void setWhatsappActivo(Boolean whatsappActivo) {
+        this.whatsappActivo = whatsappActivo;
+    }
+
 }

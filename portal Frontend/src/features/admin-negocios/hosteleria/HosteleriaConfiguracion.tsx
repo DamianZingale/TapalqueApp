@@ -30,6 +30,17 @@ export function HosteleriaConfiguracion({ businessId, businessName }: Props) {
   const [loadingEstadia, setLoadingEstadia] = useState(false);
   const [successEstadia, setSuccessEstadia] = useState(false);
 
+  // Email de notificación
+  const [emailNotificacion, setEmailNotificacion] = useState('');
+  const [loadingEmail, setLoadingEmail] = useState(false);
+  const [successEmail, setSuccessEmail] = useState(false);
+
+  // WhatsApp
+  const [numWhatsapp, setNumWhatsapp] = useState('');
+  const [whatsappActivo, setWhatsappActivo] = useState(false);
+  const [loadingWhatsapp, setLoadingWhatsapp] = useState(false);
+  const [successWhatsapp, setSuccessWhatsapp] = useState(false);
+
   useEffect(() => {
     fetchHospedajeById(businessId).then((h) => {
       if (h?.fechaLimiteReservas) {
@@ -41,6 +52,15 @@ export function HosteleriaConfiguracion({ businessId, businessName }: Props) {
       }
       if (h?.tipoIva) {
         setTipoIva(h.tipoIva);
+      }
+      if (h?.emailNotificacion) {
+        setEmailNotificacion(h.emailNotificacion);
+      }
+      if (h?.numWhatsapp) {
+        setNumWhatsapp(h.numWhatsapp);
+      }
+      if (h?.whatsappActivo !== undefined) {
+        setWhatsappActivo(h.whatsappActivo ?? false);
       }
     });
 
@@ -104,6 +124,34 @@ export function HosteleriaConfiguracion({ businessId, businessName }: Props) {
       setError('Error al guardar la estadía mínima');
     } finally {
       setLoadingEstadia(false);
+    }
+  };
+
+  const handleGuardarEmail = async () => {
+    setLoadingEmail(true);
+    setSuccessEmail(false);
+    try {
+      await api.patch(`/hospedajes/${businessId}`, { emailNotificacion: emailNotificacion || null });
+      setSuccessEmail(true);
+      setTimeout(() => setSuccessEmail(false), 3000);
+    } catch {
+      setError('No se pudo guardar el email de notificación');
+    } finally {
+      setLoadingEmail(false);
+    }
+  };
+
+  const handleGuardarWhatsapp = async () => {
+    setLoadingWhatsapp(true);
+    setSuccessWhatsapp(false);
+    try {
+      await api.patch(`/hospedajes/${businessId}`, { numWhatsapp: numWhatsapp || '', whatsappActivo });
+      setSuccessWhatsapp(true);
+      setTimeout(() => setSuccessWhatsapp(false), 3000);
+    } catch {
+      setError('No se pudo guardar la configuración de WhatsApp');
+    } finally {
+      setLoadingWhatsapp(false);
     }
   };
 
@@ -285,6 +333,79 @@ export function HosteleriaConfiguracion({ businessId, businessName }: Props) {
           </Button>
 
           {successFacturacion && (
+            <p className="text-success small mt-2 mb-0">Configuración guardada correctamente.</p>
+          )}
+        </Card.Body>
+      </Card>
+
+      {/* Email de notificación */}
+      <Card className="mb-4">
+        <Card.Header>Email de notificaciones</Card.Header>
+        <Card.Body>
+          <Card.Text>
+            Cuando un huésped complete una reserva online, se enviará un email con los datos a esta dirección.
+          </Card.Text>
+          <Form.Group className="mb-3">
+            <Form.Label>Email del administrador</Form.Label>
+            <Form.Control
+              type="email"
+              placeholder="admin@ejemplo.com"
+              value={emailNotificacion}
+              onChange={(e) => setEmailNotificacion(e.target.value)}
+              style={{ maxWidth: 320 }}
+            />
+          </Form.Group>
+          <Button
+            variant="primary"
+            onClick={handleGuardarEmail}
+            disabled={loadingEmail}
+          >
+            {loadingEmail ? <Spinner animation="border" size="sm" /> : 'Guardar'}
+          </Button>
+          {successEmail && (
+            <p className="text-success small mt-2 mb-0">Email guardado correctamente.</p>
+          )}
+        </Card.Body>
+      </Card>
+
+      {/* WhatsApp */}
+      <Card className="mb-4">
+        <Card.Header>Notificaciones por WhatsApp</Card.Header>
+        <Card.Body>
+          <Card.Text>
+            Cuando un huésped complete una reserva, se enviará un mensaje de WhatsApp resumido a este número.
+            Solo se envía cuando está activado.
+          </Card.Text>
+          <Form.Group className="mb-3">
+            <Form.Check
+              type="switch"
+              id="whatsapp-activo-hosteleria"
+              label="Activar notificaciones por WhatsApp"
+              checked={whatsappActivo}
+              onChange={(e) => setWhatsappActivo(e.target.checked)}
+            />
+          </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>Número de WhatsApp</Form.Label>
+            <Form.Control
+              type="tel"
+              placeholder="+54 9 2983 000000"
+              value={numWhatsapp}
+              onChange={(e) => setNumWhatsapp(e.target.value)}
+              style={{ maxWidth: 280 }}
+            />
+            <Form.Text className="text-muted">
+              Ingresá el número con código de país, ej: +54 9 2983 123456
+            </Form.Text>
+          </Form.Group>
+          <Button
+            variant="primary"
+            onClick={handleGuardarWhatsapp}
+            disabled={loadingWhatsapp}
+          >
+            {loadingWhatsapp ? <Spinner animation="border" size="sm" /> : 'Guardar'}
+          </Button>
+          {successWhatsapp && (
             <p className="text-success small mt-2 mb-0">Configuración guardada correctamente.</p>
           )}
         </Card.Body>

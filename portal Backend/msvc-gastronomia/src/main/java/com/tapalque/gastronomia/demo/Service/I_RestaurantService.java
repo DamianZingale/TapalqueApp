@@ -16,6 +16,7 @@ public interface I_RestaurantService {
     RestaurantDTO updateLastCloseDate(Long id, java.time.LocalDateTime lastCloseDate);
     RestaurantDTO updateEstimatedWaitTime(Long id, Integer estimatedWaitTime);
     void deleteRestaurant (Long id);
+    RestaurantDTO updateWhatsappConfig(Long id, String whatsappNotificacion, Boolean whatsappActivo);
     
     
 

@@ -106,6 +106,7 @@ public class HospedajeService {
         hospedaje.setLatitud(dto.getLatitud());
         hospedaje.setLongitud(dto.getLongitud());
         hospedaje.setNumWhatsapp(dto.getNumWhatsapp());
+        hospedaje.setEmailNotificacion(dto.getEmailNotificacion());
         hospedaje.setTipoHospedaje(dto.getTipoHospedaje());
         // Solo actualizar imágenes si se envían explícitamente en el request.
         // Las imágenes se gestionan por separado vía /hospedajes/{id}/imagenes
@@ -167,7 +168,32 @@ public class HospedajeService {
         return new HospedajeDTO(hospedaje);
     }
 
+    @CacheEvict(value = "hospedajes", allEntries = true)
+    @Transactional
+    public HospedajeDTO updateWhatsappConfig(Long id, String numWhatsapp, Boolean whatsappActivo) {
+        Hospedaje hospedaje = hospedajeRepository.findById(id)
+                .orElseThrow(() -> new jakarta.persistence.EntityNotFoundException("No existe el hospedaje con id " + id));
+        if (numWhatsapp != null) {
+            hospedaje.setNumWhatsapp(numWhatsapp.isBlank() ? null : numWhatsapp);
+        }
+        if (whatsappActivo != null) {
+            hospedaje.setWhatsappActivo(whatsappActivo);
+        }
+        hospedajeRepository.save(hospedaje);
+        return new HospedajeDTO(hospedaje);
+    }
+
     // Método para mapear de DTORequest a Entidad
+    @CacheEvict(value = "hospedajes", allEntries = true)
+    @Transactional
+    public HospedajeDTO updateEmailNotificacion(Long id, String email) {
+        Hospedaje hospedaje = hospedajeRepository.findById(id)
+                .orElseThrow(() -> new jakarta.persistence.EntityNotFoundException("No existe el hospedaje con id " + id));
+        hospedaje.setEmailNotificacion(email);
+        hospedajeRepository.save(hospedaje);
+        return new HospedajeDTO(hospedaje);
+    }
+
     private Hospedaje mapToEntity(HospedajeRequestDTO dto) {
         Hospedaje hospedaje = new Hospedaje();
         hospedaje.setTitulo(dto.getTitulo());
@@ -176,6 +202,7 @@ public class HospedajeService {
         hospedaje.setLatitud(dto.getLatitud());
         hospedaje.setLongitud(dto.getLongitud());
         hospedaje.setNumWhatsapp(dto.getNumWhatsapp());
+        hospedaje.setEmailNotificacion(dto.getEmailNotificacion());
         hospedaje.setTipoHospedaje(dto.getTipoHospedaje());
         // Carga imágenes si hay URLs
         if (dto.getImagenes() != null) {

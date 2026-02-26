@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.tapalque.hosteleria.demo.entidades.TipoHospedaje;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -28,6 +29,9 @@ public class HospedajeRequestDTO {
 
     @Pattern(regexp = "^\\+?[0-9]{7,15}$", message = "Número de WhatsApp inválido")
     private String numWhatsapp;
+
+    @Email(message = "Email de notificación inválido")
+    private String emailNotificacion;
 
     @NotNull(message = "Debe especificar el tipo de hospedaje")
     private TipoHospedaje tipoHospedaje;
@@ -86,6 +90,14 @@ public class HospedajeRequestDTO {
 
     public void setNumWhatsapp(String numWhatsapp) {
         this.numWhatsapp = numWhatsapp;
+    }
+
+    public String getEmailNotificacion() {
+        return emailNotificacion;
+    }
+
+    public void setEmailNotificacion(String emailNotificacion) {
+        this.emailNotificacion = emailNotificacion;
     }
 
     public TipoHospedaje getTipoHospedaje() {

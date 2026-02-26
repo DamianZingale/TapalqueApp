@@ -57,6 +57,13 @@ public class Restaurant {
     @Nullable
     private java.time.LocalDateTime lastCloseDate;
 
+    @Column(name = "whatsapp_notificacion")
+    @Nullable
+    private String whatsappNotificacion;
+
+    @Column(name = "whatsapp_activo")
+    private Boolean whatsappActivo = false;
+
     @Min(value = -90, message = "La latitud debe estar entre -90 y 90")
     @Max(value = 90, message = "La latitud debe estar entre -90 y 90")
     @Column (name="latitude" ,nullable= false)
@@ -243,4 +250,21 @@ public class Restaurant {
     public void setLastCloseDate(java.time.LocalDateTime lastCloseDate) {
         this.lastCloseDate = lastCloseDate;
     }
+
+    public String getWhatsappNotificacion() {
+        return whatsappNotificacion;
+    }
+
+    public void setWhatsappNotificacion(String whatsappNotificacion) {
+        this.whatsappNotificacion = whatsappNotificacion;
+    }
+
+    public Boolean getWhatsappActivo() {
+        return whatsappActivo;
+    }
+
+    public void setWhatsappActivo(Boolean whatsappActivo) {
+        this.whatsappActivo = whatsappActivo;
+    }
+
 }
