@@ -56,7 +56,10 @@ export const OrderSummaryCard: FC<Props> = ({
           className="d-flex justify-content-between align-items-center mb-2"
         >
           <div>
-            {i.dish_name} (${i.price.toFixed(2)})
+            <div>{i.dish_name} (${i.price.toFixed(2)})</div>
+            {i.notas && (
+              <small className="text-muted">Sabores: {i.notas}</small>
+            )}
           </div>
           <ItemCounter
             quantity={i.cantidad}

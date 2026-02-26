@@ -302,7 +302,8 @@ public class OrderServiceImpl implements OrderService {
                 i.getProductId(),
                 i.getItemName(),
                 i.getItemPrice(),
-                i.getItemQuantity()))
+                i.getItemQuantity(),
+                i.getNotas()))
             .toList());
 
         // Restaurant
@@ -344,6 +345,7 @@ public class OrderServiceImpl implements OrderService {
                 itemDto.setItemName(i.getItemName());
                 itemDto.setItemPrice(i.getItemPrice());
                 itemDto.setItemQuantity(i.getItemQuantity());
+                itemDto.setNotas(i.getNotas());
                 return itemDto;
             }).toList());
 

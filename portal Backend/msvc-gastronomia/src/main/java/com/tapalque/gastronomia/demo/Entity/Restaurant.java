@@ -57,6 +57,9 @@ public class Restaurant {
     @Nullable
     private java.time.LocalDateTime lastCloseDate;
 
+    @Column(name = "es_heladeria", nullable = false, columnDefinition = "boolean default false")
+    private Boolean esHeladeria = false;
+
 
     @Min(value = -90, message = "La latitud debe estar entre -90 y 90")
     @Max(value = 90, message = "La latitud debe estar entre -90 y 90")
@@ -243,6 +246,14 @@ public class Restaurant {
 
     public void setLastCloseDate(java.time.LocalDateTime lastCloseDate) {
         this.lastCloseDate = lastCloseDate;
+    }
+
+    public Boolean getEsHeladeria() {
+        return esHeladeria != null ? esHeladeria : false;
+    }
+
+    public void setEsHeladeria(Boolean esHeladeria) {
+        this.esHeladeria = esHeladeria != null ? esHeladeria : false;
     }
 
 }

@@ -21,6 +21,7 @@ export default function HospedajeListPage() {
     const [desde, setDesde] = useState("");
     const [hasta, setHasta] = useState("");
     const [buscando, setBuscando] = useState(false);
+    const [soloMascotas, setSoloMascotas] = useState(false);
     // null = no se buscó aún (muestra vista normal), array = resultado de búsqueda
     const [disponibles, setDisponibles] = useState<HospedajeDisponible[] | null>(null);
 
@@ -61,6 +62,7 @@ export default function HospedajeListPage() {
     const handleLimpiar = () => {
         setDesde("");
         setHasta("");
+        setSoloMascotas(false);
         setDisponibles(null);
     };
 
@@ -111,7 +113,7 @@ export default function HospedajeListPage() {
                             }}
                         />
                     </div>
-                    <div className="col-md-3 d-flex gap-2">
+                    <div className="col-md-6 d-flex gap-2 flex-wrap align-items-end">
                         <button
                             className="btn btn-primary"
                             onClick={handleBuscar}
@@ -119,7 +121,14 @@ export default function HospedajeListPage() {
                         >
                             {buscando ? "Buscando..." : "Buscar disponibles"}
                         </button>
-                        {(desde || hasta || disponibles) && (
+                        <button
+                            className={`btn ${soloMascotas ? "btn-warning" : "btn-outline-warning"}`}
+                            onClick={() => { setSoloMascotas(!soloMascotas); setDisponibles(null); }}
+                            title="Filtrar por hospedajes que aceptan mascotas"
+                        >
+                            🐾 Mascotas
+                        </button>
+                        {(desde || hasta || disponibles || soloMascotas) && (
                             <button className="btn btn-outline-secondary" onClick={handleLimpiar}>
                                 Limpiar
                             </button>
@@ -136,86 +145,97 @@ export default function HospedajeListPage() {
 
         {/* Resultados filtrados por fechas */}
         {disponibles !== null ? (
-            <>
-                <p className="text-muted text-center">
-                    {disponibles.length > 0
-                        ? `${disponibles.length} hospedaje${disponibles.length !== 1 ? "s" : ""} con disponibilidad`
-                        : "No hay hospedajes disponibles para esas fechas."}
-                </p>
-                <div className="row justify-content-center">
-                    {disponibles.map(({ hospedaje, habitaciones }) => (
-                        <div className="col-auto my-2" key={hospedaje.id}>
-                            <div className="card h-100 d-flex flex-column" style={{ width: "18rem" }}>
-                                <img
-                                    src={hospedaje.imagenes?.[0] || "https://via.placeholder.com/400x200.png?text=Sin+Imagen"}
-                                    className="card-img-top p-1"
-                                    alt={hospedaje.titulo}
-                                    style={{ height: "160px", objectFit: "cover" }}
-                                />
-                                <div className="card-body d-flex flex-column flex-grow-1">
-                                    <h5 className="card-title text-center">{hospedaje.titulo}</h5>
-                                    {hospedaje.ubicacion && (
-                                        <p className="text-center text-muted mb-2 small">{hospedaje.ubicacion}</p>
-                                    )}
-                                    <div className="text-center mb-2">
-                                        <span className="badge bg-success">
-                                            {habitaciones.length} habitación{habitaciones.length !== 1 ? "es" : ""} libre
-                                        </span>
-                                    </div>
-
-                                    {/* Lista de habitaciones libres */}
-                                    <div className="border-top pt-2">
-                                        {habitaciones.map((hab) => (
-                                            <div
-                                                key={hab.id}
-                                                className="d-flex justify-content-between align-items-center py-1 border-bottom border-light"
-                                            >
-                                                <div>
-                                                    <div className="fw-semibold small">{hab.titulo}</div>
-                                                    <div className="text-muted" style={{ fontSize: "0.7rem" }}>
-                                                        Hasta {hab.maxPersonas} {hab.maxPersonas === 1 ? "persona" : "personas"}
-                                                    </div>
-                                                </div>
-                                                <div className="text-end">
-                                                    <span className="text-success fw-bold small">
-                                                        ${hab.precio.toLocaleString()}
-                                                    </span>
-                                                    <div className="text-muted" style={{ fontSize: "0.7rem" }}>
-                                                        /{hab.tipoPrecio === "por_habitacion" ? "noche" : "pers./noche"}
-                                                    </div>
-                                                </div>
+            (() => {
+                const filtrados = soloMascotas ? disponibles.filter(d => d.hospedaje.permiteMascotas) : disponibles;
+                return (
+                    <>
+                        <p className="text-muted text-center">
+                            {filtrados.length > 0
+                                ? `${filtrados.length} hospedaje${filtrados.length !== 1 ? "s" : ""} con disponibilidad${soloMascotas ? " que aceptan mascotas" : ""}`
+                                : "No hay hospedajes disponibles para esas fechas."}
+                        </p>
+                        <div className="row justify-content-center">
+                            {filtrados.map(({ hospedaje, habitaciones }) => (
+                                <div className="col-auto my-2" key={hospedaje.id}>
+                                    <div className="card h-100 d-flex flex-column" style={{ width: "18rem" }}>
+                                        <img
+                                            src={hospedaje.imagenes?.[0] || "https://via.placeholder.com/400x200.png?text=Sin+Imagen"}
+                                            className="card-img-top p-1"
+                                            alt={hospedaje.titulo}
+                                            style={{ height: "160px", objectFit: "cover" }}
+                                        />
+                                        <div className="card-body d-flex flex-column flex-grow-1">
+                                            <h5 className="card-title text-center">{hospedaje.titulo}</h5>
+                                            {hospedaje.ubicacion && (
+                                                <p className="text-center text-muted mb-2 small">{hospedaje.ubicacion}</p>
+                                            )}
+                                            <div className="text-center mb-2 d-flex gap-2 justify-content-center flex-wrap">
+                                                <span className="badge bg-success">
+                                                    {habitaciones.length} habitación{habitaciones.length !== 1 ? "es" : ""} libre
+                                                </span>
+                                                {hospedaje.permiteMascotas && (
+                                                    <span className="badge bg-warning text-dark">🐾 Mascotas</span>
+                                                )}
                                             </div>
-                                        ))}
-                                    </div>
 
-                                    <div className="d-grid gap-2 col-6 mx-auto mt-auto pt-2">
-                                        <button
-                                            onClick={() => handleCardClick(hospedaje)}
-                                            className="btn btn-secondary p-1"
-                                        >
-                                            Ver más
-                                        </button>
+                                            {/* Lista de habitaciones libres */}
+                                            <div className="border-top pt-2">
+                                                {habitaciones.map((hab) => (
+                                                    <div
+                                                        key={hab.id}
+                                                        className="d-flex justify-content-between align-items-center py-1 border-bottom border-light"
+                                                    >
+                                                        <div>
+                                                            <div className="fw-semibold small">{hab.titulo}</div>
+                                                            <div className="text-muted" style={{ fontSize: "0.7rem" }}>
+                                                                Hasta {hab.maxPersonas} {hab.maxPersonas === 1 ? "persona" : "personas"}
+                                                            </div>
+                                                        </div>
+                                                        <div className="text-end">
+                                                            <span className="text-success fw-bold small">
+                                                                ${hab.precio.toLocaleString()}
+                                                            </span>
+                                                            <div className="text-muted" style={{ fontSize: "0.7rem" }}>
+                                                                /{hab.tipoPrecio === "por_habitacion" ? "noche" : "pers./noche"}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+
+                                            <div className="d-grid gap-2 col-6 mx-auto mt-auto pt-2">
+                                                <button
+                                                    onClick={() => handleCardClick(hospedaje)}
+                                                    className="btn btn-secondary p-1"
+                                                >
+                                                    Ver más
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                            ))}
                         </div>
-                    ))}
-                </div>
-            </>
+                    </>
+                );
+            })()
         ) : (
             /* Sin búsqueda activa: vista original con cards */
             <div className="row justify-content-center">
-                {hospedajes.map((hospedaje) => (
-                <Card
-                    key={hospedaje.id}
-                    id={String(hospedaje.id)}
-                    titulo={hospedaje.titulo}
-                    imagenUrl={hospedaje.imagenes?.[0] || "https://via.placeholder.com/400x200.png?text=Sin+Imagen"}
-                    tipo={SECCION_TYPE.HOSPEDAJES}
-                    direccion_local={hospedaje.ubicacion}
-                    onClick={() => handleCardClick(hospedaje)}
-                />
-                ))}
+                {hospedajes
+                    .filter(h => !soloMascotas || h.permiteMascotas)
+                    .map((hospedaje) => (
+                        <Card
+                            key={hospedaje.id}
+                            id={String(hospedaje.id)}
+                            titulo={hospedaje.titulo}
+                            imagenUrl={hospedaje.imagenes?.[0] || "https://via.placeholder.com/400x200.png?text=Sin+Imagen"}
+                            tipo={SECCION_TYPE.HOSPEDAJES}
+                            direccion_local={hospedaje.ubicacion}
+                            onClick={() => handleCardClick(hospedaje)}
+                            badge={hospedaje.permiteMascotas ? "🐾 Mascotas" : undefined}
+                        />
+                    ))}
                 {hospedajes.length === 0 && (
                     <p className="text-center my-5">No hay hospedajes disponibles por el momento.</p>
                 )}

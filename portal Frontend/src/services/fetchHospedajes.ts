@@ -17,6 +17,7 @@ export interface Hospedaje {
     permiteFacturacion?: boolean;
     tipoIva?: 'INCLUIDO' | 'ADICIONAL' | 'NO_APLICA';
     emailNotificacion?: string;
+    permiteMascotas?: boolean;
 }
 
 export async function fetchHospedajes(): Promise<Hospedaje[]> {

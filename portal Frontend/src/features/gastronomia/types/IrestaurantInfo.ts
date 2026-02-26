@@ -14,4 +14,5 @@ export interface IRestaurantInfo {
   estimatedWaitTime?: number;
   // Note: Backend doesn't return imageUrl in RestaurantDTO
   imageUrl?: string;   // For UI compatibility - may be undefined
+  esHeladeria?: boolean;
 }

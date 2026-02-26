@@ -5,6 +5,7 @@ public class ItemDTO {
     private String itemName;
     private Double itemPrice;
     private Integer itemQuantity;
+    private String notas;
 
     public ItemDTO() {}
 
@@ -20,4 +21,7 @@ public class ItemDTO {
 
     public Integer getItemQuantity() { return itemQuantity; }
     public void setItemQuantity(Integer itemQuantity) { this.itemQuantity = itemQuantity; }
+
+    public String getNotas() { return notas; }
+    public void setNotas(String notas) { this.notas = notas; }
 }

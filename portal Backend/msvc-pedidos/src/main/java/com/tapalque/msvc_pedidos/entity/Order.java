@@ -127,13 +127,15 @@ public class Order {
         private String itemName;
         private Double itemPrice;
         private Integer itemQuantity;
+        private String notas;
 
         public Item() {}
-        public Item(String productId, String itemName, Double itemPrice, Integer itemQuantity) {
+        public Item(String productId, String itemName, Double itemPrice, Integer itemQuantity, String notas) {
             this.productId = productId;
             this.itemName = itemName;
             this.itemPrice = itemPrice;
             this.itemQuantity = itemQuantity;
+            this.notas = notas;
         }
 
         public String getProductId() { return productId; }
@@ -148,6 +150,8 @@ public class Order {
         public Integer getItemQuantity() { return itemQuantity; }
         public void setItemQuantity(Integer itemQuantity) { this.itemQuantity = itemQuantity; }
 
+        public String getNotas() { return notas; }
+        public void setNotas(String notas) { this.notas = notas; }
 
     }
 

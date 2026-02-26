@@ -8,5 +8,6 @@ export interface CardProps {
   direccion_local: string;
   schedule?: string;
   descripcion?: string;
+  badge?: string;
   onClick?: () => void;
 }

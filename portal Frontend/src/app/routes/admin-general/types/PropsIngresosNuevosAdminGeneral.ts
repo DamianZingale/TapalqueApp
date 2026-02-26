@@ -32,6 +32,15 @@ export const CampoHospedaje: ConfiguracionDeCampos[] = [
     { name: 'descripcion', label: 'Descripcion', type: 'textarea' },
     { name: 'latitud', label: 'Latitud', type: 'text' },
     { name: 'longitud', label: 'Longitud', type: 'text' },
+    {
+        name: 'permiteMascotas',
+        label: 'Permite mascotas',
+        type: 'dropdownlist',
+        options: [
+            { value: 'true', label: 'Sí' },
+            { value: 'false', label: 'No' },
+        ],
+    },
     { name: 'images', label: 'Fotos del lugar', type: 'file', multiple: true },
 ];
 

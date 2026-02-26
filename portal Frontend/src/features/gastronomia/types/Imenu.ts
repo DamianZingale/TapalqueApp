@@ -49,6 +49,7 @@ export interface Imenu {
 
 export interface PedidoItem extends Imenu {
   cantidad: number;
+  notas?: string;
 }
 
 // Alias para compatibilidad

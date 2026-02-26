@@ -27,6 +27,7 @@ public class RestaurantDTO {
     private Integer estimatedWaitTime;
     private String imageUrl;
     private java.time.LocalDateTime lastCloseDate;
+    private Boolean esHeladeria;
 
     // 🔹 Constructor vacío
     public RestaurantDTO() {}
@@ -74,6 +75,7 @@ public class RestaurantDTO {
     this.deliveryPrice = entity.getDeliveryPrice();
     this.estimatedWaitTime = entity.getEstimatedWaitTime();
     this.lastCloseDate = entity.getLastCloseDate();
+    this.esHeladeria = entity.getEsHeladeria();
     // Imagen: tomar la primera imagen del restaurante
     if (entity.getImages() != null && !entity.getImages().isEmpty()) {
         this.imageUrl = entity.getImages().get(0).getImageUrl();
@@ -184,6 +186,7 @@ public class RestaurantDTO {
 entity.setSchedules(scheduleList);
 }
     entity.setDelivery(delivery);
+    entity.setEsHeladeria(this.esHeladeria != null ? this.esHeladeria : false);
 
     return entity;
 }
@@ -300,6 +303,14 @@ entity.setSchedules(scheduleList);
 
     public void setLastCloseDate(java.time.LocalDateTime lastCloseDate) {
         this.lastCloseDate = lastCloseDate;
+    }
+
+    public Boolean getEsHeladeria() {
+        return esHeladeria;
+    }
+
+    public void setEsHeladeria(Boolean esHeladeria) {
+        this.esHeladeria = esHeladeria;
     }
 
 }

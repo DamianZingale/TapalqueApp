@@ -23,6 +23,7 @@ interface Restaurant {
   phones?: string;
   schedule?: string;
   delivery?: boolean;
+  esHeladeria?: boolean;
   imagenes?: { imagenUrl: string }[];
   userId?: number;
 }
@@ -45,6 +46,7 @@ const emptyItem: Partial<Restaurant> = {
   phones: '',
   schedule: '',
   delivery: false,
+  esHeladeria: false,
   imagenes: [],
   userId: undefined,
 };
@@ -158,6 +160,7 @@ export function GastronomiaSection() {
         schedule: formData.schedule?.trim() || undefined,
         latitude: formData.latitude != null && String(formData.latitude).trim() !== '' ? parseFloat(String(formData.latitude)) : undefined,
         longitude: formData.longitude != null && String(formData.longitude).trim() !== '' ? parseFloat(String(formData.longitude)) : undefined,
+        esHeladeria: formData.esHeladeria || false,
       };
 
       const res = isNew
@@ -457,6 +460,13 @@ export function GastronomiaSection() {
                     label="Delivery"
                     checked={formData.delivery || false}
                     onChange={(e) => handleChange('delivery', e.target.checked)}
+                  />
+                  <Form.Check
+                    type="switch"
+                    label="Es Heladería"
+                    checked={formData.esHeladeria || false}
+                    onChange={(e) => handleChange('esHeladeria', e.target.checked)}
+                    className="mt-1"
                   />
                 </Form.Group>
               </Col>

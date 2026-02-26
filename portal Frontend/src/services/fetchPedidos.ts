@@ -18,6 +18,7 @@ export interface ItemPedido {
   itemQuantity?: number;
   unitPrice?: number;
   quantity: number;
+  notas?: string;
 }
 
 export interface Restaurant {

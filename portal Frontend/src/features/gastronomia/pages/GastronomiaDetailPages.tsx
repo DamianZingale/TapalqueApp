@@ -3,6 +3,7 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { api } from '../../../config/api';
 import { WhatsAppButton } from '../../../shared/components/WhatsAppButton';
 import { MenuCard } from '../components/MenuCard';
+import { MenuCardHeladeria } from '../components/MenuCardHeladeria';
 import { Info } from '../components/RestaurantCard';
 import { Imenu, MenuResponseDTO, transformMenuResponse } from '../types/Imenu';
 import { IRestaurantInfo } from '../types/IrestaurantInfo';
@@ -135,14 +136,25 @@ export default function GastronomiaDetailPage() {
           ) : (
             <>
               {menu.length > 0 ? (
-                <MenuCard
-                  items={menu}
-                  restaurantId={restaurante.id.toString()}
-                  restaurantName={restaurante.name ?? ''}
-                  allowDelivery={restaurante.delivery ?? false}
-                  deliveryPrice={restaurante.deliveryPrice ?? 0}
-                  estimatedWaitTime={restaurante.estimatedWaitTime ?? 0}
-                />
+                restaurante.esHeladeria ? (
+                  <MenuCardHeladeria
+                    items={menu}
+                    restaurantId={restaurante.id.toString()}
+                    restaurantName={restaurante.name ?? ''}
+                    allowDelivery={restaurante.delivery ?? false}
+                    deliveryPrice={restaurante.deliveryPrice ?? 0}
+                    estimatedWaitTime={restaurante.estimatedWaitTime ?? 0}
+                  />
+                ) : (
+                  <MenuCard
+                    items={menu}
+                    restaurantId={restaurante.id.toString()}
+                    restaurantName={restaurante.name ?? ''}
+                    allowDelivery={restaurante.delivery ?? false}
+                    deliveryPrice={restaurante.deliveryPrice ?? 0}
+                    estimatedWaitTime={restaurante.estimatedWaitTime ?? 0}
+                  />
+                )
               ) : (
                 <div className="alert alert-info text-center">
                   No hay elementos disponibles en el menú de este restaurante.

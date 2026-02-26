@@ -5,6 +5,7 @@ interface ItemPedido {
     itemQuantity?: number;
     unitPrice?: number;
     quantity: number;
+    notas?: string;
 }
 
 interface Pedido {
@@ -33,6 +34,9 @@ export function printPedido(pedido: Pedido) {
         const name = item.itemName ?? item.productName;
         const price = (item.itemPrice ?? item.unitPrice ?? 0).toFixed(2);
         const subtotal = (qty * (item.itemPrice ?? item.unitPrice ?? 0)).toFixed(2);
+        const notasHtml = item.notas
+            ? `<tr><td colspan="2" style="font-size:10px; color:#333; padding-bottom:2px">&nbsp;&nbsp;&nbsp;Sabores: ${item.notas}</td></tr>`
+            : '';
         return `
             <tr>
                 <td>${qty}x ${name}</td>
@@ -43,6 +47,7 @@ export function printPedido(pedido: Pedido) {
                     &nbsp;&nbsp;&nbsp;$${price} c/u
                 </td>
             </tr>
+            ${notasHtml}
         `;
     }).join('');
 
@@ -146,7 +151,10 @@ export function printCocina(pedido: Pedido) {
     const itemsHtml = pedido.items.map(item => {
         const qty = item.itemQuantity ?? item.quantity;
         const name = item.itemName ?? item.productName;
-        return `<tr><td class="qty">${qty}x</td><td class="name">${name}</td></tr>`;
+        const notasHtml = item.notas
+            ? `<tr><td></td><td class="notas">→ ${item.notas}</td></tr>`
+            : '';
+        return `<tr><td class="qty">${qty}x</td><td class="name">${name}</td></tr>${notasHtml}`;
     }).join('');
 
     const clienteHtml = pedido.userName
@@ -183,6 +191,7 @@ export function printCocina(pedido: Pedido) {
                 td { padding: 3px 0; vertical-align: top; }
                 td.qty { font-size: 18px; font-weight: bold; width: 30px; }
                 td.name { font-size: 14px; font-weight: bold; }
+                td.notas { font-size: 12px; font-style: italic; color: #333; padding-bottom: 4px; }
                 @media print {
                     @page { margin: 0; size: 80mm auto; }
                 }
