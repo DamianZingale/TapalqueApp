@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from 'react';
 import SockJS from 'sockjs-client';
+import { api } from '../../config/api';
 import { authService } from '../../services/authService';
 
 export interface AppNotification {
@@ -49,6 +50,17 @@ const ESTADO_LABELS: Record<string, string> = {
   ENTREGADO: 'Entregado',
   FAILED: 'Cancelado',
 };
+
+interface AdminBusinessDTO {
+  externalBusinessId: number | string;
+  businessType: 'GASTRONOMIA' | 'HOSPEDAJE';
+}
+
+function sendBrowserNotification(title: string, body: string) {
+  if (!('Notification' in window)) return;
+  if (Notification.permission !== 'granted') return;
+  new Notification(title, { body, icon: '/logo-tapalque.png' });
+}
 
 function loadNotifications(): AppNotification[] {
   try {
@@ -101,6 +113,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       setNotifications((prev) =>
         [newNotification, ...prev].slice(0, MAX_NOTIFICATIONS)
       );
+      sendBrowserNotification(notification.title, notification.message);
     },
     []
   );
@@ -111,9 +124,9 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     if (!user?.id) return;
 
     // Only connect for regular users (ROL 3)
-    // Admins/moderators get notifications via the admin panel WebSocket
+    // Admins/moderators get notifications via registerAdminTopic
     const rol = Number(user.rol);
-    if (rol === 1) return;
+    if (rol !== 3) return;
 
     const userId = String(user.id);
     const wsUrl = getWsUrl();
@@ -186,6 +199,14 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     };
   }, [addNotification]);
 
+  // Pedir permiso para notificaciones de navegador al montar
+  useEffect(() => {
+    if (!('Notification' in window)) return;
+    if (Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+  }, []);
+
   const registerAdminTopic = useCallback(
     (businessId: string, businessType: 'HOSPEDAJE' | 'GASTRONOMIA') => {
       if (!businessId || adminClientsRef.current.has(businessId)) return;
@@ -257,6 +278,26 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     },
     [addNotification]
   );
+
+  // Auto-registrar topics para admin/moderador al iniciar sesión
+  useEffect(() => {
+    const user = authService.getUser();
+    if (!user?.id) return;
+    const rol = Number(user.rol);
+    if (rol !== 1 && rol !== 2) return;
+
+    api
+      .get<AdminBusinessDTO[]>(`/business/user/${user.id}`)
+      .then((businesses) => {
+        if (!Array.isArray(businesses)) return;
+        businesses.forEach((b) => {
+          registerAdminTopic(String(b.externalBusinessId), b.businessType);
+        });
+      })
+      .catch(() => {
+        // silencioso: si falla, el admin puede navegar al panel para reconectar
+      });
+  }, [registerAdminTopic]);
 
   const markAllAsRead = useCallback(() => {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
