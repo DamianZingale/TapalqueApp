@@ -99,15 +99,6 @@ public class LocalGastronomicoController {
                 updated = localGastronomicoService.updateLastCloseDate(id, lastCloseDate);
             }
 
-            if (body.containsKey("whatsappNotificacion") || body.containsKey("whatsappActivo")) {
-                String whatsappNum = body.containsKey("whatsappNotificacion")
-                        ? (body.get("whatsappNotificacion") != null ? body.get("whatsappNotificacion").toString() : "")
-                        : null;
-                Boolean whatsappActivo = body.containsKey("whatsappActivo")
-                        ? Boolean.valueOf(body.get("whatsappActivo").toString())
-                        : null;
-                updated = localGastronomicoService.updateWhatsappConfig(id, whatsappNum, whatsappActivo);
-            }
 
             if (updated == null) {
                 return ResponseEntity.badRequest().build();

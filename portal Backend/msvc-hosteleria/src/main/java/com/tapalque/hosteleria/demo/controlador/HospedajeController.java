@@ -91,15 +91,6 @@ public class HospedajeController {
                 updated = hospedajeService.updateEmailNotificacion(id, email);
             }
 
-            if (body.containsKey("numWhatsapp") || body.containsKey("whatsappActivo")) {
-                String numWa = body.containsKey("numWhatsapp")
-                        ? (body.get("numWhatsapp") != null ? body.get("numWhatsapp").toString() : "")
-                        : null;
-                Boolean activo = body.containsKey("whatsappActivo")
-                        ? Boolean.valueOf(body.get("whatsappActivo").toString())
-                        : null;
-                updated = hospedajeService.updateWhatsappConfig(id, numWa, activo);
-            }
 
             if (body.containsKey("permiteFacturacion") || body.containsKey("tipoIva")) {
                 Boolean permiteFacturacion = body.containsKey("permiteFacturacion")

@@ -168,21 +168,6 @@ public class HospedajeService {
         return new HospedajeDTO(hospedaje);
     }
 
-    @CacheEvict(value = "hospedajes", allEntries = true)
-    @Transactional
-    public HospedajeDTO updateWhatsappConfig(Long id, String numWhatsapp, Boolean whatsappActivo) {
-        Hospedaje hospedaje = hospedajeRepository.findById(id)
-                .orElseThrow(() -> new jakarta.persistence.EntityNotFoundException("No existe el hospedaje con id " + id));
-        if (numWhatsapp != null) {
-            hospedaje.setNumWhatsapp(numWhatsapp.isBlank() ? null : numWhatsapp);
-        }
-        if (whatsappActivo != null) {
-            hospedaje.setWhatsappActivo(whatsappActivo);
-        }
-        hospedajeRepository.save(hospedaje);
-        return new HospedajeDTO(hospedaje);
-    }
-
     // Método para mapear de DTORequest a Entidad
     @CacheEvict(value = "hospedajes", allEntries = true)
     @Transactional

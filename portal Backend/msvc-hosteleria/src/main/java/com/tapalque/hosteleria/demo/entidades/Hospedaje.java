@@ -64,9 +64,6 @@ public class Hospedaje {
     @Column(name = "tipo_iva")
     private TipoIVA tipoIva = TipoIVA.NO_APLICA;
 
-    @Column(name = "whatsapp_activo")
-    private Boolean whatsappActivo = false;
-
     // --- Constructores ---
     public Hospedaje() {
     }
@@ -201,14 +198,6 @@ public class Hospedaje {
 
     public void setTipoIva(TipoIVA tipoIva) {
         this.tipoIva = tipoIva;
-    }
-
-    public Boolean getWhatsappActivo() {
-        return whatsappActivo;
-    }
-
-    public void setWhatsappActivo(Boolean whatsappActivo) {
-        this.whatsappActivo = whatsappActivo;
     }
 
 }

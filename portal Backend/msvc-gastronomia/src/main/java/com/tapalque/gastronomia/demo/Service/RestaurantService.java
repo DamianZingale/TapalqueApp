@@ -213,21 +213,6 @@ public RestaurantDTO addRestaurant(RestaurantDTO dto) {
         return new RestaurantDTO(existing);
     }
 
-    @Caching(evict = {@CacheEvict(value = "restaurantes", allEntries = true), @CacheEvict(value = "restaurante", allEntries = true)})
-    @Transactional
-    @Override
-    public RestaurantDTO updateWhatsappConfig(Long id, String whatsappNotificacion, Boolean whatsappActivo) {
-        Restaurant existing = localGastronomicoRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("No existe el local con id " + id));
-        if (whatsappNotificacion != null) {
-            existing.setWhatsappNotificacion(whatsappNotificacion.isBlank() ? null : whatsappNotificacion);
-        }
-        if (whatsappActivo != null) {
-            existing.setWhatsappActivo(whatsappActivo);
-        }
-        localGastronomicoRepository.save(existing);
-        return new RestaurantDTO(existing);
-    }
 
     @Caching(evict = {@CacheEvict(value = "restaurantes", allEntries = true), @CacheEvict(value = "restaurante", allEntries = true)})
     @Transactional

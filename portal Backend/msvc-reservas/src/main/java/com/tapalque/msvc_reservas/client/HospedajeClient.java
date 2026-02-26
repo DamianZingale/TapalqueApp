@@ -19,7 +19,7 @@ public class HospedajeClient {
         this.webClient = builder.baseUrl("lb://msvc-hosteleria").build();
     }
 
-    public record HospedajeInfoDTO(String emailNotificacion, String titulo, String numWhatsapp, Boolean whatsappActivo) {}
+    public record HospedajeInfoDTO(String emailNotificacion, String titulo) {}
 
     /**
      * Trae el email de notificación del hospedaje.

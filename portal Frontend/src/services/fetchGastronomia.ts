@@ -46,8 +46,7 @@ export interface Restaurant {
   phones?: string;
   schedule?: string;
   imageUrl?: string;
-  whatsappNotificacion?: string;
-  whatsappActivo?: boolean;
+
 }
 
 export async function fetchRestaurants(): Promise<Restaurant[]> {
@@ -113,19 +112,4 @@ export async function fetchRestaurantByIdAuth(id: string | number): Promise<Rest
   }
 }
 
-export async function actualizarWhatsappRestaurante(
-  id: string | number,
-  whatsappNotificacion: string,
-  whatsappActivo: boolean
-): Promise<boolean> {
-  try {
-    await apiRequest(`/gastronomia/restaurants/${id}`, {
-      method: 'PATCH',
-      body: JSON.stringify({ whatsappNotificacion, whatsappActivo }),
-    });
-    return true;
-  } catch (error) {
-    console.error('Error en actualizarWhatsappRestaurante:', error);
-    return false;
-  }
-}
+

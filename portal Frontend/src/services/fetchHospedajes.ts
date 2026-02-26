@@ -17,7 +17,6 @@ export interface Hospedaje {
     permiteFacturacion?: boolean;
     tipoIva?: 'INCLUIDO' | 'ADICIONAL' | 'NO_APLICA';
     emailNotificacion?: string;
-    whatsappActivo?: boolean;
 }
 
 export async function fetchHospedajes(): Promise<Hospedaje[]> {

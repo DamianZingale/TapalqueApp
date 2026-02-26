@@ -22,7 +22,6 @@ public class HospedajeDTO {
     private java.time.LocalDate fechaLimiteReservas;
     private Boolean permiteFacturacion;
     private String tipoIva;
-    private Boolean whatsappActivo;
 
     // Constructor vacío (necesario para algunas herramientas de serialización como Jackson)
     public HospedajeDTO() {
@@ -52,7 +51,6 @@ public class HospedajeDTO {
         this.tipoIva = hospedaje.getTipoIva() != null
                 ? hospedaje.getTipoIva().name()
                 : "NO_APLICA";
-        this.whatsappActivo = hospedaje.getWhatsappActivo();
     }
 
     // Getters y setters
@@ -167,14 +165,6 @@ public class HospedajeDTO {
 
     public void setTipoIva(String tipoIva) {
         this.tipoIva = tipoIva;
-    }
-
-    public Boolean getWhatsappActivo() {
-        return whatsappActivo;
-    }
-
-    public void setWhatsappActivo(Boolean whatsappActivo) {
-        this.whatsappActivo = whatsappActivo;
     }
 
 }

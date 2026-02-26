@@ -40,8 +40,6 @@ public class ReservationServiceImpl implements ReservationService {
     @org.springframework.beans.factory.annotation.Autowired(required = false)
     private ReservaEmailService emailService;
 
-    @org.springframework.beans.factory.annotation.Autowired
-    private WhatsAppNotificationService whatsAppService;
 
     public ReservationServiceImpl(ReservationRepositoryInterface reservationRepository,
                                   AdminNotificationService adminNotificationService,
@@ -381,15 +379,11 @@ public Mono<ReservationDTO> updateReservation(ReservationDTO reservationDto) {
                     ReservationDTO dto = ReservationMapper.toDto(reservation);
                     // Notificamos como NUEVA reserva cuando se confirma el pago (es cuando realmente se crea para el admin)
                     adminNotificationService.notificarNuevaReserva(dto);
-                    // Enviar email y/o WhatsApp al admin
                     if (reservation.getHotel() != null) {
                         hospedajeClient.fetchEmailNotificacion(reservation.getHotel().getHotelId())
                             .subscribe(hotel -> {
-                                if (hotel != null) {
-                                    if (emailService != null) emailService.notificarNuevaReserva(dto, hotel.emailNotificacion());
-                                    if (Boolean.TRUE.equals(hotel.whatsappActivo())) {
-                                        whatsAppService.notificarNuevaReserva(dto, hotel.numWhatsapp());
-                                    }
+                                if (hotel != null && emailService != null) {
+                                    emailService.notificarNuevaReserva(dto, hotel.emailNotificacion());
                                 }
                             });
                     }
