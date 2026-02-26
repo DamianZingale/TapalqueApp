@@ -59,7 +59,7 @@ services:
     ports:
       - '21465:21465'
     environment:
-      SECRET_KEY: ${WPPCONNECT_SECRET:tapalque_secret}
+      SECRET_KEY: ${WPPCONNECT_SECRET:-tapalque_secret}
     volumes:
       - wppconnect_tokens:/home/user/wppconnect-server/tokens
     deploy:
@@ -561,8 +561,8 @@ services:
       SPRING_RABBITMQ_PASSWORD: ${RABBITMQ_DEFAULT_PASS}
       JAVA_OPTS: '-Xmx256m -Xms128m -XX:+UseG1GC -XX:+UseContainerSupport -XX:MaxRAMPercentage=60.0'
       WPPCONNECT_URL: http://wppconnect:21465
-      WPPCONNECT_TOKEN: ${WPPCONNECT_TOKEN:}
-      WPPCONNECT_SESSION: ${WPPCONNECT_SESSION:tapalque}
+      WPPCONNECT_TOKEN: ${WPPCONNECT_TOKEN:-}
+      WPPCONNECT_SESSION: ${WPPCONNECT_SESSION:-tapalque}
     depends_on:
       pedidos-db:
         condition: service_started
@@ -589,8 +589,8 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       WPPCONNECT_URL: http://wppconnect:21465
-      WPPCONNECT_TOKEN: ${WPPCONNECT_TOKEN:}
-      WPPCONNECT_SESSION: ${WPPCONNECT_SESSION:tapalque}
+      WPPCONNECT_TOKEN: ${WPPCONNECT_TOKEN:-}
+      WPPCONNECT_SESSION: ${WPPCONNECT_SESSION:-tapalque}
     depends_on:
       reservas-db:
         condition: service_started
