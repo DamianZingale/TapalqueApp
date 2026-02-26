@@ -1,4 +1,28 @@
-import type { Pedido } from '../../../services/fetchPedidos';
+interface ItemPedido {
+    productName?: string;
+    itemName?: string;
+    itemPrice?: number;
+    itemQuantity?: number;
+    unitPrice?: number;
+    quantity: number;
+}
+
+interface Pedido {
+    id: string;
+    userName?: string;
+    userPhone?: string;
+    totalPrice?: number;
+    totalAmount?: number;
+    paidWithMercadoPago: boolean;
+    paidWithCash: boolean;
+    isDelivery: boolean;
+    deliveryAddress?: string;
+    dateCreated: string;
+    items: ItemPedido[];
+    transaccionId?: number;
+    mercadoPagoId?: string;
+    fechaPago?: string;
+}
 
 export function printPedido(pedido: Pedido) {
     const fecha = new Date(pedido.dateCreated).toLocaleString('es-AR');

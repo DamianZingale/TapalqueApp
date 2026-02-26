@@ -1,6 +1,7 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { useCallback, useEffect, useState } from 'react';
+import { printPedido, printCocina } from '../../gastronomia/utils/printPedido';
 import {
   Alert,
   Badge,
@@ -732,8 +733,8 @@ function PedidoCard({
           </div>
         </Card.Body>
 
-        {siguienteEstado && (
-          <Card.Footer>
+        <Card.Footer className="d-flex flex-column gap-2" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
+          {siguienteEstado && (
             <Button
               className="w-100"
               onClick={(e: React.MouseEvent) => {
@@ -743,8 +744,28 @@ function PedidoCard({
             >
               {textoBoton}
             </Button>
-          </Card.Footer>
-        )}
+          )}
+          <div className="d-flex gap-1">
+            <Button
+              variant="outline-secondary"
+              size="sm"
+              className="flex-fill"
+              onClick={(e: React.MouseEvent) => { e.stopPropagation(); printCocina(pedido); }}
+            >
+              <i className="bi bi-printer me-1"></i>
+              Cocina
+            </Button>
+            <Button
+              variant="outline-dark"
+              size="sm"
+              className="flex-fill"
+              onClick={(e: React.MouseEvent) => { e.stopPropagation(); printPedido(pedido); }}
+            >
+              <i className="bi bi-receipt me-1"></i>
+              Caja
+            </Button>
+          </div>
+        </Card.Footer>
       </Card>
 
       {/* Modal de detalle */}
