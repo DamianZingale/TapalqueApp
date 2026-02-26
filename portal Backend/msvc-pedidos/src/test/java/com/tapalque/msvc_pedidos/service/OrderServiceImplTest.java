@@ -46,7 +46,7 @@ class OrderServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        Order.Item item = new Order.Item("prod1", "Pizza", 1500.0, 2);
+        Order.Item item = new Order.Item("prod1", "Pizza", 1500.0, 2, null);
         Order.Restaurant restaurant = new Order.Restaurant("rest1", "Pizzería Test");
 
         testOrder = new Order();

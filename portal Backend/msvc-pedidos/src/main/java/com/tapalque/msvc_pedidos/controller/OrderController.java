@@ -154,8 +154,8 @@ public class OrderController {
         order.setIsDelivery(dto.getIsDelivery());
         order.setDeliveryAddress(dto.getDeliveryAddress());
         order.setItems(dto.getItems().stream()
-                .map(i -> new Order.Item(i.getProductId(), i.getItemName(), i.getItemPrice(), i.getItemQuantity()))
-                .toList());
+                .map(i -> new Order.Item(i.getProductId(), i.getItemName(), i.getItemPrice(), i.getItemQuantity(), i.getNotas()))
+                .collect(java.util.stream.Collectors.toList()));
         if (dto.getRestaurant() != null) {
             var restaurant = new Order.Restaurant(dto.getRestaurant().getRestaurantId(), dto.getRestaurant().getRestaurantName());
             order.setRestaurant(restaurant);
