@@ -32,7 +32,7 @@ public class RestaurantDTO {
     // 🔹 Constructor vacío
     public RestaurantDTO() {}
 
-    // 🔹 Constructor con todos los campos
+    // 🔹 Constructor con todos los campos (usado por Spring Data JPA para mapear native queries)
     public RestaurantDTO(
     Long idRestaurant,
     String name,
@@ -46,6 +46,7 @@ public class RestaurantDTO {
     Boolean delivery,
     Double deliveryPrice,
     Integer estimatedWaitTime,
+    Boolean esHeladeria,
     String imageUrl
 ) {
     this.id = idRestaurant;
@@ -60,6 +61,7 @@ public class RestaurantDTO {
     this.delivery = (delivery != null) ? delivery : false;
     this.deliveryPrice = deliveryPrice;
     this.estimatedWaitTime = estimatedWaitTime;
+    this.esHeladeria = (esHeladeria != null) ? esHeladeria : false;
     this.imageUrl = imageUrl;
 }
 
