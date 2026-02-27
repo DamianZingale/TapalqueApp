@@ -25,6 +25,7 @@ interface Hospedaje {
   tipoHospedaje: TipoHospedaje;
   imagenes?: { imagenUrl: string }[];
   userId?: number;
+  permiteMascotas?: boolean;
 }
 
 interface Usuario {
@@ -45,6 +46,7 @@ const emptyItem: Partial<Hospedaje> = {
   tipoHospedaje: 'HOTEL',
   imagenes: [],
   userId: undefined,
+  permiteMascotas: undefined,
 };
 
 export function HospedajesSection() {
@@ -147,6 +149,7 @@ export function HospedajesSection() {
         latitud: formData.latitud ? parseFloat(formData.latitud) : undefined,
         longitud: formData.longitud ? parseFloat(formData.longitud) : undefined,
         numWhatsapp: formData.numWhatsapp?.trim() || undefined,
+        permiteMascotas: formData.permiteMascotas,
       };
 
       console.log('Enviando hospedaje:', cleanedData);
@@ -414,6 +417,27 @@ export function HospedajesSection() {
                       handleChange('numWhatsapp', e.target.value)
                     }
                   />
+                </Form.Group>
+              </Col>
+            </Row>
+            <Row className="mb-2">
+              <Col md={6}>
+                <Form.Group>
+                  <Form.Label className="small mb-0">Acepta mascotas</Form.Label>
+                  <Form.Select
+                    size="sm"
+                    value={formData.permiteMascotas === undefined ? '' : String(formData.permiteMascotas)}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        permiteMascotas: e.target.value === '' ? undefined : e.target.value === 'true',
+                      }))
+                    }
+                  >
+                    <option value="">Sin especificar</option>
+                    <option value="true">Sí</option>
+                    <option value="false">No</option>
+                  </Form.Select>
                 </Form.Group>
               </Col>
             </Row>

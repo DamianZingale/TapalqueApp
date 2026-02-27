@@ -11,6 +11,7 @@ import {
   Spinner,
   Table,
 } from 'react-bootstrap';
+import { api } from '../../../config/api';
 import {
   actualizarMenuItem,
   cambiarDisponibilidadItem,
@@ -22,6 +23,7 @@ import {
   searchIngredients,
 } from '../../../services/fetchMenu';
 import { subirImagenMenu } from '../../../services/menuImagenService';
+import { SABORES_HELADERIA } from '../../gastronomia/constants/saboresHeladeria';
 import type { MenuItem, NuevoMenuItem } from '../types';
 
 interface GastronomiaMenuProps {
@@ -52,6 +54,7 @@ const initialFormState: NuevoPlatoForm = {
 export function GastronomiaMenu({ businessId }: GastronomiaMenuProps) {
   const [menu, setMenu] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [esHeladeria, setEsHeladeria] = useState(false);
   const [filtroCategoria, setFiltroCategoria] = useState<string>('TODAS');
   const [filtroDisponibilidad, setFiltroDisponibilidad] = useState<
     'TODOS' | 'DISPONIBLE' | 'NO_DISPONIBLE'
@@ -102,7 +105,17 @@ export function GastronomiaMenu({ businessId }: GastronomiaMenuProps) {
     cargarMenu();
     cargarCategorias();
     cargarRestricciones();
+    cargarTipoRestaurante();
   }, [businessId]);
+
+  const cargarTipoRestaurante = async () => {
+    try {
+      const data = await api.get<{ esHeladeria?: boolean }>(`/gastronomia/restaurants/${businessId}`);
+      setEsHeladeria(data.esHeladeria === true);
+    } catch {
+      // Si falla, queda como restaurante normal
+    }
+  };
 
   useEffect(() => {
     if (mensaje) {
@@ -235,7 +248,7 @@ export function GastronomiaMenu({ businessId }: GastronomiaMenuProps) {
         setBusquedaCategoria('');
         setMostrarSugerenciasCat(false);
         setIndiceSeleccionadoCat(-1);
-        setMensaje({ tipo: 'success', texto: 'Plato agregado correctamente' });
+        setMensaje({ tipo: 'success', texto: esHeladeria ? 'Ítem agregado correctamente' : 'Plato agregado correctamente' });
       } else {
         setErrorForm('No se pudo crear el plato');
       }
@@ -263,6 +276,20 @@ export function GastronomiaMenu({ businessId }: GastronomiaMenuProps) {
       ...nuevoPlato,
       ingredients: nuevoPlato.ingredients.filter((i) => i !== ingrediente),
     });
+  };
+
+  const toggleSabor = (sabor: string) => {
+    if (nuevoPlato.ingredients.includes(sabor)) {
+      setNuevoPlato({
+        ...nuevoPlato,
+        ingredients: nuevoPlato.ingredients.filter((s) => s !== sabor),
+      });
+    } else {
+      setNuevoPlato({
+        ...nuevoPlato,
+        ingredients: [...nuevoPlato.ingredients, sabor],
+      });
+    }
   };
 
   const seleccionarCategoria = (categoria: string) => {
@@ -441,7 +468,7 @@ export function GastronomiaMenu({ businessId }: GastronomiaMenuProps) {
                 size="sm"
                 onClick={() => setModalAgregar(true)}
               >
-                + Agregar Plato
+                + {esHeladeria ? 'Agregar Ítem' : 'Agregar Plato'}
               </Button>
             </Card.Header>
             <Card.Body>
@@ -603,7 +630,7 @@ export function GastronomiaMenu({ businessId }: GastronomiaMenuProps) {
               )}
               {platoDetalle.ingredients.length > 0 && (
                 <div className="mb-2">
-                  <small className="fw-bold text-muted d-block mb-1">Ingredientes:</small>
+                  <small className="fw-bold text-muted d-block mb-1">{esHeladeria ? 'Sabores disponibles:' : 'Ingredientes:'}</small>
                   <div>
                     {platoDetalle.ingredients.map((ing, idx) => (
                       <Badge key={idx} bg="light" text="dark" className="me-1 mb-1 border">
@@ -667,7 +694,7 @@ export function GastronomiaMenu({ businessId }: GastronomiaMenuProps) {
         size="lg"
       >
         <Modal.Header closeButton>
-          <Modal.Title>Agregar Nuevo Plato</Modal.Title>
+          <Modal.Title>{esHeladeria ? 'Agregar Ítem de Heladería' : 'Agregar Nuevo Plato'}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {errorForm && <Alert variant="danger">{errorForm}</Alert>}
@@ -675,14 +702,14 @@ export function GastronomiaMenu({ businessId }: GastronomiaMenuProps) {
           <Row>
             <Col md={6}>
               <Form.Group className="mb-3">
-                <Form.Label>Nombre del plato *</Form.Label>
+                <Form.Label>{esHeladeria ? 'Nombre del ítem *' : 'Nombre del plato *'}</Form.Label>
                 <Form.Control
                   type="text"
                   value={nuevoPlato.dish_name}
                   onChange={(e) =>
                     setNuevoPlato({ ...nuevoPlato, dish_name: e.target.value })
                   }
-                  placeholder="Ej: Milanesa napolitana"
+                  placeholder={esHeladeria ? 'Ej: Cuarto kilo, Medio kilo, Kilo' : 'Ej: Milanesa napolitana'}
                 />
               </Form.Group>
             </Col>
@@ -790,85 +817,125 @@ export function GastronomiaMenu({ businessId }: GastronomiaMenuProps) {
             </Form.Text>
           </Form.Group>
 
-          <Form.Group className="mb-3">
-            <Form.Label>Ingredientes</Form.Label>
-            <div className="position-relative">
-              <Form.Control
-                type="text"
-                value={busquedaIngrediente}
-                onChange={(e) => {
-                  setBusquedaIngrediente(e.target.value);
-                  setMostrarSugerencias(true);
-                }}
-                onFocus={() => setMostrarSugerencias(true)}
-                placeholder="Buscar ingrediente..."
-              />
-              {buscandoIngredientes && (
-                <div className="position-absolute end-0 top-0 mt-2 me-2">
-                  <Spinner size="sm" animation="border" />
-                </div>
-              )}
-              {mostrarSugerencias && ingredientesDisponibles.length > 0 && (
-                <div
-                  className="position-absolute w-100 bg-white border rounded shadow-sm mt-1"
-                  style={{
-                    maxHeight: '200px',
-                    overflowY: 'auto',
-                    zIndex: 1000,
-                  }}
-                >
-                  {ingredientesDisponibles.map((ing, idx) => (
-                    <div
+          {esHeladeria ? (
+            <Form.Group className="mb-3">
+              <Form.Label>Sabores disponibles <small className="text-muted fw-normal">(opcional — para ítems de tamaño como Kilo, Medio kilo, puede quedar vacío)</small></Form.Label>
+              <div
+                className="border rounded p-2"
+                style={{ maxHeight: '220px', overflowY: 'auto', background: '#fafafa' }}
+              >
+                <Row className="g-1">
+                  {SABORES_HELADERIA.map((sabor) => (
+                    <Col xs={6} sm={4} key={sabor}>
+                      <Form.Check
+                        type="checkbox"
+                        label={sabor}
+                        checked={nuevoPlato.ingredients.includes(sabor)}
+                        onChange={() => toggleSabor(sabor)}
+                        style={{ fontSize: '0.85rem' }}
+                      />
+                    </Col>
+                  ))}
+                </Row>
+              </div>
+              {nuevoPlato.ingredients.length > 0 && (
+                <div className="mt-2">
+                  <small className="text-muted">Seleccionados: </small>
+                  {nuevoPlato.ingredients.map((s, idx) => (
+                    <Badge
                       key={idx}
-                      className="px-3 py-2 hover-bg-light cursor-pointer"
-                      style={{ cursor: 'pointer' }}
-                      onClick={() => agregarIngrediente(ing)}
-                      onMouseEnter={(e) =>
-                        (e.currentTarget.style.backgroundColor = '#f8f9fa')
-                      }
-                      onMouseLeave={(e) =>
-                        (e.currentTarget.style.backgroundColor = 'white')
-                      }
+                      bg="primary"
+                      className="me-1 mb-1"
+                      style={{ cursor: 'pointer', fontSize: '0.8rem' }}
+                      onClick={() => toggleSabor(s)}
                     >
-                      {ing}
-                    </div>
+                      {s} ×
+                    </Badge>
                   ))}
                 </div>
               )}
-            </div>
-            {busquedaIngrediente && (
-              <Button
-                variant="link"
-                size="sm"
-                className="mt-1"
-                onClick={() => {
-                  if (busquedaIngrediente.trim()) {
-                    agregarIngrediente(busquedaIngrediente.trim());
-                  }
-                }}
-              >
-                + Agregar "{busquedaIngrediente}" como nuevo ingrediente
-              </Button>
-            )}
-            <div className="mt-2">
-              {nuevoPlato.ingredients.map((ing, idx) => (
-                <Badge
-                  key={idx}
-                  bg="secondary"
-                  className="me-1 mb-1"
-                  style={{ cursor: 'pointer', fontSize: '0.85rem' }}
-                >
-                  {ing}
-                  <span
-                    className="ms-2"
-                    onClick={() => eliminarIngrediente(ing)}
+            </Form.Group>
+          ) : (
+            <Form.Group className="mb-3">
+              <Form.Label>Ingredientes</Form.Label>
+              <div className="position-relative">
+                <Form.Control
+                  type="text"
+                  value={busquedaIngrediente}
+                  onChange={(e) => {
+                    setBusquedaIngrediente(e.target.value);
+                    setMostrarSugerencias(true);
+                  }}
+                  onFocus={() => setMostrarSugerencias(true)}
+                  placeholder="Buscar ingrediente..."
+                />
+                {buscandoIngredientes && (
+                  <div className="position-absolute end-0 top-0 mt-2 me-2">
+                    <Spinner size="sm" animation="border" />
+                  </div>
+                )}
+                {mostrarSugerencias && ingredientesDisponibles.length > 0 && (
+                  <div
+                    className="position-absolute w-100 bg-white border rounded shadow-sm mt-1"
+                    style={{
+                      maxHeight: '200px',
+                      overflowY: 'auto',
+                      zIndex: 1000,
+                    }}
                   >
-                    ×
-                  </span>
-                </Badge>
-              ))}
-            </div>
-          </Form.Group>
+                    {ingredientesDisponibles.map((ing, idx) => (
+                      <div
+                        key={idx}
+                        className="px-3 py-2 hover-bg-light cursor-pointer"
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => agregarIngrediente(ing)}
+                        onMouseEnter={(e) =>
+                          (e.currentTarget.style.backgroundColor = '#f8f9fa')
+                        }
+                        onMouseLeave={(e) =>
+                          (e.currentTarget.style.backgroundColor = 'white')
+                        }
+                      >
+                        {ing}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              {busquedaIngrediente && (
+                <Button
+                  variant="link"
+                  size="sm"
+                  className="mt-1"
+                  onClick={() => {
+                    if (busquedaIngrediente.trim()) {
+                      agregarIngrediente(busquedaIngrediente.trim());
+                    }
+                  }}
+                >
+                  + Agregar "{busquedaIngrediente}" como nuevo ingrediente
+                </Button>
+              )}
+              <div className="mt-2">
+                {nuevoPlato.ingredients.map((ing, idx) => (
+                  <Badge
+                    key={idx}
+                    bg="secondary"
+                    className="me-1 mb-1"
+                    style={{ cursor: 'pointer', fontSize: '0.85rem' }}
+                  >
+                    {ing}
+                    <span
+                      className="ms-2"
+                      onClick={() => eliminarIngrediente(ing)}
+                    >
+                      ×
+                    </span>
+                  </Badge>
+                ))}
+              </div>
+            </Form.Group>
+          )}
 
           <Form.Group className="mb-3">
             <Form.Label>Restricciones alimentarias</Form.Label>
@@ -962,7 +1029,7 @@ export function GastronomiaMenu({ businessId }: GastronomiaMenuProps) {
             onClick={handleAgregarPlato}
             disabled={guardando}
           >
-            {guardando ? <Spinner size="sm" /> : 'Agregar Plato'}
+            {guardando ? <Spinner size="sm" /> : (esHeladeria ? 'Agregar Ítem' : 'Agregar Plato')}
           </Button>
         </Modal.Footer>
       </Modal>
