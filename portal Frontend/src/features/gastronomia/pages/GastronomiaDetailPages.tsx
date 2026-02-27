@@ -125,6 +125,7 @@ export default function GastronomiaDetailPage() {
         categories={restaurante.categories}
         latitude={restaurante.latitude}
         longitude={restaurante.longitude}
+        esHeladeria={restaurante.esHeladeria}
       />
 
       {showMenu && (
