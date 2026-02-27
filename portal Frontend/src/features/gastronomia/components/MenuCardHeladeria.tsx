@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type FC } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Alert, Badge, Spinner } from 'react-bootstrap';
+import { Alert, Spinner } from 'react-bootstrap';
 import authService from '../../../services/authService';
 import { crearPedido } from '../../../services/fetchPedidos';
 import { crearPreferenciaPago } from '../../../services/fetchMercadoPago';
@@ -305,22 +305,26 @@ export const MenuCardHeladeria: FC<Props> = ({
                           {sabores.map((sabor) => {
                             const seleccionado = esSaborSeleccionado(sabor.nombre, notas);
                             return (
-                              <Badge
+                              <span
                                 key={sabor.id}
-                                className="me-1 mb-1"
-                                style={{
-                                  cursor: 'pointer',
-                                  background: seleccionado ? '#d1e7dd' : '#f8f9fa',
-                                  color: seleccionado ? '#0a3622' : '#343a40',
-                                  border: seleccionado ? '1px solid #a3cfbb' : '1px solid #ced4da',
-                                  fontWeight: seleccionado ? '600' : 'normal',
-                                  fontSize: '0.85rem',
-                                  padding: '5px 10px',
-                                }}
                                 onClick={() => toggleSaborEnNotas(plato.id, sabor.nombre, notas)}
+                                style={{
+                                  display: 'inline-block',
+                                  cursor: 'pointer',
+                                  marginRight: '6px',
+                                  marginBottom: '6px',
+                                  padding: '4px 10px',
+                                  borderRadius: '12px',
+                                  fontSize: '0.82rem',
+                                  fontWeight: seleccionado ? '600' : '400',
+                                  background: seleccionado ? '#d1e7dd' : '#ffffff',
+                                  color: '#212529',
+                                  border: seleccionado ? '1.5px solid #2e7d5e' : '1px solid #212529',
+                                  userSelect: 'none',
+                                }}
                               >
                                 {seleccionado ? '✓ ' : ''}{sabor.nombre}
-                              </Badge>
+                              </span>
                             );
                           })}
                         </div>
