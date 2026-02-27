@@ -55,6 +55,7 @@ export function GastronomiaMenu({ businessId }: GastronomiaMenuProps) {
   const [menu, setMenu] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [esHeladeria, setEsHeladeria] = useState(false);
+  const [saborPersonalizado, setSaborPersonalizado] = useState('');
   const [filtroCategoria, setFiltroCategoria] = useState<string>('TODAS');
   const [filtroDisponibilidad, setFiltroDisponibilidad] = useState<
     'TODOS' | 'DISPONIBLE' | 'NO_DISPONIBLE'
@@ -245,6 +246,7 @@ export function GastronomiaMenu({ businessId }: GastronomiaMenuProps) {
         setPrecioInput('0');
         setBusquedaIngrediente('');
         setIngredientesDisponibles([]);
+        setSaborPersonalizado('');
         setBusquedaCategoria('');
         setMostrarSugerenciasCat(false);
         setIndiceSeleccionadoCat(-1);
@@ -686,6 +688,7 @@ export function GastronomiaMenu({ businessId }: GastronomiaMenuProps) {
           setBusquedaIngrediente('');
           setIngredientesDisponibles([]);
           setMostrarSugerencias(false);
+          setSaborPersonalizado('');
           setBusquedaCategoria('');
           setMostrarSugerenciasCat(false);
           setIndiceSeleccionadoCat(-1);
@@ -837,6 +840,39 @@ export function GastronomiaMenu({ businessId }: GastronomiaMenuProps) {
                     </Col>
                   ))}
                 </Row>
+              </div>
+              <div className="mt-2 d-flex gap-2">
+                <Form.Control
+                  type="text"
+                  size="sm"
+                  placeholder="Sabor personalizado (ej: Menta limón)"
+                  value={saborPersonalizado}
+                  onChange={(e) => setSaborPersonalizado(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      const s = saborPersonalizado.trim();
+                      if (s && !nuevoPlato.ingredients.includes(s)) {
+                        setNuevoPlato({ ...nuevoPlato, ingredients: [...nuevoPlato.ingredients, s] });
+                      }
+                      setSaborPersonalizado('');
+                    }
+                  }}
+                />
+                <Button
+                  variant="outline-secondary"
+                  size="sm"
+                  style={{ whiteSpace: 'nowrap' }}
+                  onClick={() => {
+                    const s = saborPersonalizado.trim();
+                    if (s && !nuevoPlato.ingredients.includes(s)) {
+                      setNuevoPlato({ ...nuevoPlato, ingredients: [...nuevoPlato.ingredients, s] });
+                    }
+                    setSaborPersonalizado('');
+                  }}
+                >
+                  + Agregar
+                </Button>
               </div>
               {nuevoPlato.ingredients.length > 0 && (
                 <div className="mt-2">
