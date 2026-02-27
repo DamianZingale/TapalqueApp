@@ -292,9 +292,14 @@ export const MenuCardHeladeria: FC<Props> = ({
                       className="mt-3 p-3"
                       style={{ background: '#f0f8ff', borderRadius: '8px', border: '1px solid #bee3f8' }}
                     >
-                      <small className="fw-bold text-primary d-block mb-2">
+                      <small className="fw-bold text-primary d-block mb-1">
                         Elegí tus sabores (tocá para seleccionar):
                       </small>
+                      {cantidad > 1 && (
+                        <small className="d-block mb-2" style={{ color: '#856404' }}>
+                          Pedís {cantidad} unidades — si querés sabores distintos en cada una, aclarálo en el campo de texto de abajo.
+                        </small>
+                      )}
 
                       {loadingSabores ? (
                         <div className="text-center py-2">

@@ -708,16 +708,18 @@ function PedidoCard({
                 const cantidad = item.itemQuantity || item.quantity;
                 const precio = item.itemPrice || item.unitPrice || 0;
                 return (
-                  <div
-                    key={idx}
-                    className="d-flex justify-content-between small"
-                  >
-                    <span>
-                      {nombre} x{cantidad}
-                    </span>
-                    <span className="text-muted">
-                      ${(precio * cantidad).toLocaleString('es-AR')}
-                    </span>
+                  <div key={idx} className="mb-1">
+                    <div className="d-flex justify-content-between small">
+                      <span>{nombre} x{cantidad}</span>
+                      <span className="text-muted">
+                        ${(precio * cantidad).toLocaleString('es-AR')}
+                      </span>
+                    </div>
+                    {item.notas && (
+                      <div style={{ fontSize: '0.75rem', color: '#555', paddingLeft: '8px' }}>
+                        ↳ {item.notas}
+                      </div>
+                    )}
                   </div>
                 );
               })}
@@ -852,16 +854,28 @@ function PedidoCard({
                     const cantidad = item.itemQuantity || item.quantity || 1;
                     const precio = item.itemPrice || item.unitPrice || 0;
                     return (
-                      <tr key={idx}>
-                        <td>{nombre}</td>
-                        <td className="text-center">{cantidad}</td>
-                        <td className="text-end">
-                          ${precio.toLocaleString('es-AR')}
-                        </td>
-                        <td className="text-end">
-                          ${(precio * cantidad).toLocaleString('es-AR')}
-                        </td>
-                      </tr>
+                      <>
+                        <tr key={idx}>
+                          <td>{nombre}</td>
+                          <td className="text-center">{cantidad}</td>
+                          <td className="text-end">
+                            ${precio.toLocaleString('es-AR')}
+                          </td>
+                          <td className="text-end">
+                            ${(precio * cantidad).toLocaleString('es-AR')}
+                          </td>
+                        </tr>
+                        {item.notas && (
+                          <tr key={`${idx}-notas`}>
+                            <td
+                              colSpan={4}
+                              style={{ fontSize: '0.8rem', color: '#555', paddingTop: 0, paddingLeft: '16px', borderTop: 'none' }}
+                            >
+                              ↳ <em>{item.notas}</em>
+                            </td>
+                          </tr>
+                        )}
+                      </>
                     );
                   })}
                 </tbody>
