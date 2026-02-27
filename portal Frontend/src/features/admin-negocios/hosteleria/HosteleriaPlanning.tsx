@@ -278,7 +278,7 @@ export function HosteleriaPlanning({ businessId }: Props) {
         fetchReservasByHotel(businessId),
       ]);
       setHabitaciones([...habs].sort((a, b) => a.numero - b.numero));
-      setReservas(revs.filter((r) => !r.isCancelled));
+      setReservas(revs.filter((r) => r.isActive && !r.isCancelled));
       setLastUpdate(new Date());
     } catch (err) {
       console.error('Error cargando planning:', err);

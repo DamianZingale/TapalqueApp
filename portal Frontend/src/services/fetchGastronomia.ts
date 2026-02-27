@@ -46,7 +46,7 @@ export interface Restaurant {
   phones?: string;
   schedule?: string;
   imageUrl?: string;
-
+  esHeladeria?: boolean;
 }
 
 export async function fetchRestaurants(): Promise<Restaurant[]> {

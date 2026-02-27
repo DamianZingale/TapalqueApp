@@ -466,6 +466,7 @@ export function GastronomiaPedidos({
                 pedido={pedido}
                 onCambiarEstado={handleCambiarEstado}
                 deliveryPrice={precioDelivery}
+                esHeladeria={restaurant?.esHeladeria}
               />
             </Col>
           ))}
@@ -618,12 +619,14 @@ interface PedidoCardProps {
   pedido: Pedido;
   onCambiarEstado: (pedido: Pedido) => void;
   deliveryPrice: number;
+  esHeladeria?: boolean;
 }
 
 function PedidoCard({
   pedido,
   onCambiarEstado,
   deliveryPrice,
+  esHeladeria = false,
 }: PedidoCardProps) {
   const [showModal, setShowModal] = useState(false);
 
@@ -752,7 +755,7 @@ function PedidoCard({
               variant="outline-secondary"
               size="sm"
               className="flex-fill"
-              onClick={(e: React.MouseEvent) => { e.stopPropagation(); printCocina(pedido); }}
+              onClick={(e: React.MouseEvent) => { e.stopPropagation(); printPedido(pedido); }}
             >
               <i className="bi bi-printer me-1"></i>
               Cocina
@@ -761,7 +764,7 @@ function PedidoCard({
               variant="outline-dark"
               size="sm"
               className="flex-fill"
-              onClick={(e: React.MouseEvent) => { e.stopPropagation(); printPedido(pedido); }}
+              onClick={(e: React.MouseEvent) => { e.stopPropagation(); printCocina(pedido); }}
             >
               <i className="bi bi-receipt me-1"></i>
               Caja

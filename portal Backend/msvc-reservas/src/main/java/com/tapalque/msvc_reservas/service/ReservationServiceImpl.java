@@ -176,6 +176,11 @@ public class ReservationServiceImpl implements ReservationService {
                         }
                         reservation.setDateCreated(LocalDateTime.now());
                         reservation.setDateUpdated(LocalDateTime.now());
+                        // Reservas online inician inactivas; se activan cuando MercadoPago confirma el pago.
+                        // Las reservas manuales del admin quedan activas desde el momento de la creación.
+                        if (!esReservaManual) {
+                            reservation.setIsActive(false);
+                        }
 
                         String lockKey = "lock:reserva:" + hotelId + ":" + roomNumber;
                         RLockReactive lock = redissonClient.reactive().getLock(lockKey);
