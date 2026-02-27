@@ -823,6 +823,24 @@ export function GastronomiaMenu({ businessId }: GastronomiaMenuProps) {
           {esHeladeria ? (
             <Form.Group className="mb-3">
               <Form.Label>Sabores disponibles <small className="text-muted fw-normal">(opcional — para ítems de tamaño como Kilo, Medio kilo, puede quedar vacío)</small></Form.Label>
+              <div className="d-flex gap-2 mb-1">
+                <Button
+                  variant="outline-primary"
+                  size="sm"
+                  onClick={() => setNuevoPlato({ ...nuevoPlato, ingredients: [...SABORES_HELADERIA] })}
+                >
+                  Agregar todos
+                </Button>
+                {nuevoPlato.ingredients.some(s => SABORES_HELADERIA.includes(s as typeof SABORES_HELADERIA[number])) && (
+                  <Button
+                    variant="outline-secondary"
+                    size="sm"
+                    onClick={() => setNuevoPlato({ ...nuevoPlato, ingredients: nuevoPlato.ingredients.filter(s => !SABORES_HELADERIA.includes(s as typeof SABORES_HELADERIA[number])) })}
+                  >
+                    Limpiar
+                  </Button>
+                )}
+              </div>
               <div
                 className="border rounded p-2"
                 style={{ maxHeight: '220px', overflowY: 'auto', background: '#fafafa' }}

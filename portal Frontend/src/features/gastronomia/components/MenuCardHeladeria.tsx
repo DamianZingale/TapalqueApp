@@ -253,13 +253,15 @@ export const MenuCardHeladeria: FC<Props> = ({
                             style={{
                               cursor: 'pointer',
                               background: notas.toLowerCase().includes(sab.toLowerCase())
-                                ? '#0d6efd'
-                                : '#e9ecef',
+                                ? '#d1e7dd'
+                                : '#f8f9fa',
                               color: notas.toLowerCase().includes(sab.toLowerCase())
-                                ? '#fff'
-                                : '#495057',
-                              border: '1px solid #ced4da',
-                              fontWeight: 'normal',
+                                ? '#0a3622'
+                                : '#343a40',
+                              border: notas.toLowerCase().includes(sab.toLowerCase())
+                                ? '1px solid #a3cfbb'
+                                : '1px solid #ced4da',
+                              fontWeight: notas.toLowerCase().includes(sab.toLowerCase()) ? '600' : 'normal',
                               fontSize: '0.85rem',
                               padding: '5px 10px',
                             }}
@@ -268,7 +270,7 @@ export const MenuCardHeladeria: FC<Props> = ({
                               handleNotasChange(plato.id, nuevo);
                             }}
                           >
-                            {sab}
+                            {notas.toLowerCase().includes(sab.toLowerCase()) ? '✓ ' : ''}{sab}
                           </Badge>
                         ))}
                       </div>
