@@ -129,6 +129,7 @@ public class OrderController {
                     itemDto.setItemName(i.getItemName());
                     itemDto.setItemPrice(i.getItemPrice());
                     itemDto.setItemQuantity(i.getItemQuantity());
+                    itemDto.setNotas(i.getNotas());
                     return itemDto;
                 }).toList());
         if (order.getRestaurant() != null) {
