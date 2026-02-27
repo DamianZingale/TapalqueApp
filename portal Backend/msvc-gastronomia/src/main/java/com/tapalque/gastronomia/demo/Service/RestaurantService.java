@@ -122,6 +122,7 @@ public RestaurantDTO addRestaurant(RestaurantDTO dto) {
             existing.setDelivery(restaurant.getDelivery());
             existing.setCoordinate_lat(restaurant.getcoordinate_lat());
             existing.setCoordinate_lon(restaurant.getCoordinate_lon());
+            existing.setEsHeladeria(restaurant.getEsHeladeria());
 
             // Manejar categorías
             if (restaurant.getCategories() != null && !restaurant.getCategories().isEmpty()) {
