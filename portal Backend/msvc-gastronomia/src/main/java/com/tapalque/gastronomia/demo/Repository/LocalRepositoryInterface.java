@@ -28,9 +28,10 @@ public interface LocalRepositoryInterface extends JpaRepository<Restaurant, Long
             r.delivery,
             r.delivery_price AS deliveryPrice,
             r.estimated_wait_time AS estimatedWaitTime,
-            (SELECT ri.photo 
-             FROM restaurant_images ri 
-             WHERE ri.restaurant_id = r.id_restaurant 
+            r.es_heladeria AS esHeladeria,
+            (SELECT ri.photo
+             FROM restaurant_images ri
+             WHERE ri.restaurant_id = r.id_restaurant
              LIMIT 1) AS imageUrl
         FROM restaurant r
         LEFT JOIN restaurant_category rc ON rc.id_restaurant = r.id_restaurant
@@ -38,7 +39,7 @@ public interface LocalRepositoryInterface extends JpaRepository<Restaurant, Long
         LEFT JOIN phone_number p ON p.id_restaurant = r.id_restaurant
         LEFT JOIN schedule s ON s.id_restaurant = r.id_restaurant
         GROUP BY r.id_restaurant, r.name, r.address, r.email,
-                 r.latitude, r.longitude, r.delivery, r.delivery_price, r.estimated_wait_time
+                 r.latitude, r.longitude, r.delivery, r.delivery_price, r.estimated_wait_time, r.es_heladeria
         ORDER BY r.id_restaurant
         """, nativeQuery = true)
     List<RestaurantDTO> selectAllRestaurant();
@@ -58,9 +59,10 @@ public interface LocalRepositoryInterface extends JpaRepository<Restaurant, Long
             r.delivery,
             r.delivery_price AS deliveryPrice,
             r.estimated_wait_time AS estimatedWaitTime,
-            (SELECT ri.photo 
-             FROM restaurant_images ri 
-             WHERE ri.restaurant_id = r.id_restaurant 
+            r.es_heladeria AS esHeladeria,
+            (SELECT ri.photo
+             FROM restaurant_images ri
+             WHERE ri.restaurant_id = r.id_restaurant
              LIMIT 1) AS imageUrl
         FROM restaurant r
         LEFT JOIN restaurant_category rc ON rc.id_restaurant = r.id_restaurant
@@ -69,7 +71,7 @@ public interface LocalRepositoryInterface extends JpaRepository<Restaurant, Long
         LEFT JOIN schedule s ON s.id_restaurant = r.id_restaurant
         WHERE r.id_restaurant = ?1
         GROUP BY r.id_restaurant, r.name, r.address, r.email,
-                 r.latitude, r.longitude, r.delivery, r.delivery_price, r.estimated_wait_time
+                 r.latitude, r.longitude, r.delivery, r.delivery_price, r.estimated_wait_time, r.es_heladeria
         """, nativeQuery = true)
     Optional<RestaurantDTO> selectRestaurantById(Long id);
 
