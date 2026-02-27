@@ -48,9 +48,9 @@ export const MisPedidosTab = () => {
         }
     };
 
-    const pedidosFiltrados = pedidos.filter(p =>
-        filtroEstado === "TODOS" || p.status === filtroEstado
-    );
+    const pedidosFiltrados = pedidos
+        .filter(p => filtroEstado === "TODOS" || p.status === filtroEstado)
+        .sort((a, b) => new Date(b.dateCreated).getTime() - new Date(a.dateCreated).getTime());
 
     const getEstadoBadge = (estado: EstadoPedido) => {
         const config = estadoLabel[estado] ?? { bg: "secondary", text: estado };

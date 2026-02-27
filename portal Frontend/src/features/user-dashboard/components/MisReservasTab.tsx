@@ -37,12 +37,14 @@ export const MisReservasTab = () => {
         }
     };
 
-    const reservasFiltradas = reservas.filter(r => {
-        if (filtroEstado === "ACTIVAS") return r.isActive && !r.isCancelled;
-        if (filtroEstado === "PAGADAS") return r.payment.isPaid;
-        if (filtroEstado === "CANCELADAS") return r.isCancelled;
-        return true;
-    });
+    const reservasFiltradas = reservas
+        .filter(r => {
+            if (filtroEstado === "ACTIVAS") return r.isActive && !r.isCancelled;
+            if (filtroEstado === "PAGADAS") return r.payment.isPaid;
+            if (filtroEstado === "CANCELADAS") return r.isCancelled;
+            return true;
+        })
+        .sort((a, b) => new Date(b.dateCreated).getTime() - new Date(a.dateCreated).getTime());
 
     const calcularNoches = (checkIn: string, checkOut: string): number => {
         const diff = new Date(checkOut).getTime() - new Date(checkIn).getTime();
