@@ -53,7 +53,7 @@ export function printPedido(pedido: Pedido) {
 
     const clienteHtml = (pedido.userName || pedido.userPhone) ? `
         <tr><td colspan="2" style="padding-top:8px; border-top:1px dashed #000">
-            ${pedido.userName ? `<div><b>Cliente:</b> ${pedido.userName}</div>` : ''}
+            ${pedido.userName ? `<div><b>Nombre y Apellido:</b> ${pedido.userName}</div>` : ''}
             ${pedido.userPhone ? `<div><b>Tel:</b> ${pedido.userPhone}</div>` : ''}
         </td></tr>
     ` : '';
@@ -157,9 +157,10 @@ export function printCocina(pedido: Pedido) {
         return `<tr><td class="qty">${qty}x</td><td class="name">${name}</td></tr>${notasHtml}`;
     }).join('');
 
-    const clienteHtml = pedido.userName
-        ? `<p class="cliente">Cliente: ${pedido.userName}</p>`
-        : '';
+    const clienteHtml = (pedido.userName || pedido.userPhone) ? `
+        ${pedido.userName ? `<p class="cliente">${pedido.userName}</p>` : ''}
+        ${pedido.userPhone ? `<p class="cliente" style="font-size:11px">Tel: ${pedido.userPhone}</p>` : ''}
+    ` : '';
 
     const deliveryHtml = pedido.isDelivery && pedido.deliveryAddress
         ? `<p class="direccion">Dir: ${pedido.deliveryAddress}</p>`
