@@ -559,6 +559,55 @@ spring:
           filters:
             - RewritePath=/api/gastronomia/menu/dish/(?<dishId>[0-9]+)/availability, /gastronomia/menu/dish/${dishId}/availability
 
+        # ===== SABORES HELADERÍA =====
+        - id: msvc-gastronomia-heladeria-sabores-habilitados
+          uri: lb://msvc-gastronomia
+          predicates:
+            - Path=/api/gastronomia/heladeria/{restaurantId}/sabores/habilitados
+            - Method=GET
+          filters:
+            - RewritePath=/api/gastronomia/heladeria/(?<restaurantId>[0-9]+)/sabores/habilitados, /gastronomia/heladeria/${restaurantId}/sabores/habilitados
+
+        - id: msvc-gastronomia-heladeria-sabores-get
+          uri: lb://msvc-gastronomia
+          predicates:
+            - Path=/api/gastronomia/heladeria/{restaurantId}/sabores
+            - Method=GET
+          filters:
+            - RewritePath=/api/gastronomia/heladeria/(?<restaurantId>[0-9]+)/sabores, /gastronomia/heladeria/${restaurantId}/sabores
+
+        - id: msvc-gastronomia-heladeria-sabores-create
+          uri: lb://msvc-gastronomia
+          predicates:
+            - Path=/api/gastronomia/heladeria/{restaurantId}/sabores
+            - Method=POST
+          filters:
+            - RewritePath=/api/gastronomia/heladeria/(?<restaurantId>[0-9]+)/sabores, /gastronomia/heladeria/${restaurantId}/sabores
+
+        - id: msvc-gastronomia-heladeria-sabor-toggle
+          uri: lb://msvc-gastronomia
+          predicates:
+            - Path=/api/gastronomia/heladeria/sabores/{saborId}/habilitado
+            - Method=PATCH
+          filters:
+            - RewritePath=/api/gastronomia/heladeria/sabores/(?<saborId>[0-9]+)/habilitado, /gastronomia/heladeria/sabores/${saborId}/habilitado
+
+        - id: msvc-gastronomia-heladeria-sabor-update
+          uri: lb://msvc-gastronomia
+          predicates:
+            - Path=/api/gastronomia/heladeria/sabores/{saborId}
+            - Method=PUT
+          filters:
+            - RewritePath=/api/gastronomia/heladeria/sabores/(?<saborId>[0-9]+), /gastronomia/heladeria/sabores/${saborId}
+
+        - id: msvc-gastronomia-heladeria-sabor-delete
+          uri: lb://msvc-gastronomia
+          predicates:
+            - Path=/api/gastronomia/heladeria/sabores/{saborId}
+            - Method=DELETE
+          filters:
+            - RewritePath=/api/gastronomia/heladeria/sabores/(?<saborId>[0-9]+), /gastronomia/heladeria/sabores/${saborId}
+
         # MERCADO PAGO
         # Test payment (público - para activar la app)
         - id: msvc-mercado-pago-test

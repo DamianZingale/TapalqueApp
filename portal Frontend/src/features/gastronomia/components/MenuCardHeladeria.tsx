@@ -1,9 +1,10 @@
-import { useMemo, useState, type FC } from 'react';
+import { useEffect, useMemo, useState, type FC } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Alert, Badge, Spinner } from 'react-bootstrap';
 import authService from '../../../services/authService';
 import { crearPedido } from '../../../services/fetchPedidos';
 import { crearPreferenciaPago } from '../../../services/fetchMercadoPago';
+import { fetchSaboresHabilitados, type SaborHeladeria } from '../../../services/fetchMenu';
 import { useFilterByCategory } from '../hooks/useFilterByCategory';
 import { useFilterByRestriction } from '../hooks/useFilterByRestriction';
 import { useOrderHeladeria } from '../hooks/useOrderHeladeria';
@@ -33,6 +34,25 @@ export const MenuCardHeladeria: FC<Props> = ({
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitResult, setSubmitResult] = useState<{ success: boolean; message: string } | null>(null);
+
+  // Sabores habilitados para esta heladería (obtenidos del API)
+  const [sabores, setSabores] = useState<SaborHeladeria[]>([]);
+  const [loadingSabores, setLoadingSabores] = useState(true);
+
+  useEffect(() => {
+    const cargar = async () => {
+      setLoadingSabores(true);
+      try {
+        const data = await fetchSaboresHabilitados(restaurantId);
+        setSabores(data);
+      } catch (error) {
+        console.error('Error cargando sabores:', error);
+      } finally {
+        setLoadingSabores(false);
+      }
+    };
+    cargar();
+  }, [restaurantId]);
 
   const categories = useMemo(
     () => Array.from(new Set(items.map((i) => i.category))),
@@ -160,6 +180,36 @@ export const MenuCardHeladeria: FC<Props> = ({
     setIsSubmitting(false);
   };
 
+  // Toggle sabor en las notas del ítem
+  const toggleSaborEnNotas = (itemId: number, saborNombre: string, notasActuales: string) => {
+    const saboresActuales = notasActuales
+      ? notasActuales.split(',').map((s) => s.trim()).filter(Boolean)
+      : [];
+
+    const yaSeleccionado = saboresActuales.some(
+      (s) => s.toLowerCase() === saborNombre.toLowerCase()
+    );
+
+    let nuevosSabores: string[];
+    if (yaSeleccionado) {
+      nuevosSabores = saboresActuales.filter(
+        (s) => s.toLowerCase() !== saborNombre.toLowerCase()
+      );
+    } else {
+      nuevosSabores = [...saboresActuales, saborNombre];
+    }
+
+    handleNotasChange(itemId, nuevosSabores.join(', '));
+  };
+
+  const esSaborSeleccionado = (saborNombre: string, notas: string): boolean => {
+    if (!notas) return false;
+    return notas
+      .split(',')
+      .map((s) => s.trim().toLowerCase())
+      .includes(saborNombre.toLowerCase());
+  };
+
   return (
     <>
       <div
@@ -236,44 +286,50 @@ export const MenuCardHeladeria: FC<Props> = ({
                     </div>
                   </div>
 
-                  {/* Sabores disponibles + selector — visible solo cuando se agrega al carrito */}
-                  {cantidad > 0 && plato.ingredients.length > 0 && (
+                  {/* Selector de sabores — visible cuando se agrega al carrito */}
+                  {cantidad > 0 && (
                     <div
                       className="mt-3 p-3"
                       style={{ background: '#f0f8ff', borderRadius: '8px', border: '1px solid #bee3f8' }}
                     >
                       <small className="fw-bold text-primary d-block mb-2">
-                        Elegí tus sabores (clic para agregar):
+                        Elegí tus sabores (tocá para seleccionar):
                       </small>
-                      <div className="mb-2">
-                        {plato.ingredients.map((sab, idx) => (
-                          <Badge
-                            key={idx}
-                            className="me-1 mb-1"
-                            style={{
-                              cursor: 'pointer',
-                              background: notas.toLowerCase().includes(sab.toLowerCase())
-                                ? '#d1e7dd'
-                                : '#f8f9fa',
-                              color: notas.toLowerCase().includes(sab.toLowerCase())
-                                ? '#0a3622'
-                                : '#343a40',
-                              border: notas.toLowerCase().includes(sab.toLowerCase())
-                                ? '1px solid #a3cfbb'
-                                : '1px solid #ced4da',
-                              fontWeight: notas.toLowerCase().includes(sab.toLowerCase()) ? '600' : 'normal',
-                              fontSize: '0.85rem',
-                              padding: '5px 10px',
-                            }}
-                            onClick={() => {
-                              const nuevo = notas ? `${notas}, ${sab}` : sab;
-                              handleNotasChange(plato.id, nuevo);
-                            }}
-                          >
-                            {notas.toLowerCase().includes(sab.toLowerCase()) ? '✓ ' : ''}{sab}
-                          </Badge>
-                        ))}
-                      </div>
+
+                      {loadingSabores ? (
+                        <div className="text-center py-2">
+                          <Spinner animation="border" size="sm" variant="primary" />
+                        </div>
+                      ) : sabores.length > 0 ? (
+                        <div className="mb-2">
+                          {sabores.map((sabor) => {
+                            const seleccionado = esSaborSeleccionado(sabor.nombre, notas);
+                            return (
+                              <Badge
+                                key={sabor.id}
+                                className="me-1 mb-1"
+                                style={{
+                                  cursor: 'pointer',
+                                  background: seleccionado ? '#d1e7dd' : '#f8f9fa',
+                                  color: seleccionado ? '#0a3622' : '#343a40',
+                                  border: seleccionado ? '1px solid #a3cfbb' : '1px solid #ced4da',
+                                  fontWeight: seleccionado ? '600' : 'normal',
+                                  fontSize: '0.85rem',
+                                  padding: '5px 10px',
+                                }}
+                                onClick={() => toggleSaborEnNotas(plato.id, sabor.nombre, notas)}
+                              >
+                                {seleccionado ? '✓ ' : ''}{sabor.nombre}
+                              </Badge>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <small className="text-muted d-block mb-2">
+                          Escribí los sabores que querés en el campo de abajo.
+                        </small>
+                      )}
+
                       <input
                         type="text"
                         className="form-control form-control-sm"
@@ -281,6 +337,11 @@ export const MenuCardHeladeria: FC<Props> = ({
                         value={notas}
                         onChange={(e) => handleNotasChange(plato.id, e.target.value)}
                       />
+                      {notas && (
+                        <small className="text-success mt-1 d-block">
+                          Seleccionados: {notas}
+                        </small>
+                      )}
                     </div>
                   )}
                 </div>
