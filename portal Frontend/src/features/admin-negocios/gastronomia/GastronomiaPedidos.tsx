@@ -101,6 +101,7 @@ export function GastronomiaPedidos({
   const [precioDelivery, setPrecioDelivery] = useState<number>(0);
   const [updatingPrice, setUpdatingPrice] = useState(false);
   const [tiempoEsperaInput, setTiempoEsperaInput] = useState<string>('0');
+  const [tiempoEntrega, setTiempoEntrega] = useState<number>(0);
   const [updatingWaitTime, setUpdatingWaitTime] = useState(false);
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
 
@@ -169,7 +170,9 @@ export function GastronomiaPedidos({
         const precio = data.deliveryPrice ?? 0;
         setPrecioDelivery(precio);
         setPrecioDeliveryInput(String(precio));
-        setTiempoEsperaInput(String(data.estimatedWaitTime ?? 0));
+        const espera = data.estimatedWaitTime ?? 0;
+        setTiempoEntrega(espera);
+        setTiempoEsperaInput(String(espera));
       }
     } catch {
       setMensaje({ tipo: 'danger', texto: 'Error al cargar restaurant' });
@@ -233,7 +236,9 @@ export function GastronomiaPedidos({
         { estimatedWaitTime: parsed }
       );
       setRestaurant(updated);
-      setTiempoEsperaInput(String(updated.estimatedWaitTime ?? parsed));
+      const nuevoTiempo = updated.estimatedWaitTime ?? parsed;
+      setTiempoEntrega(nuevoTiempo);
+      setTiempoEsperaInput(String(nuevoTiempo));
       setMensaje({ tipo: 'success', texto: 'Tiempo de espera actualizado' });
     } catch {
       setMensaje({
@@ -627,7 +632,7 @@ export function GastronomiaPedidos({
                 pedido={pedido}
                 onCambiarEstado={handleCambiarEstado}
                 deliveryPrice={precioDelivery}
-                estimatedWaitTime={restaurant?.estimatedWaitTime ?? 0}
+                estimatedWaitTime={tiempoEntrega}
                 esHeladeria={restaurant?.esHeladeria}
               />
             </Col>
@@ -971,6 +976,13 @@ interface PedidoCardProps {
   esHeladeria?: boolean;
 }
 
+// Parsea fechas del backend como UTC (el backend no incluye 'Z' en LocalDateTime)
+function parseUTC(dateStr: string): Date {
+  if (!dateStr) return new Date(NaN);
+  const hasTimezone = dateStr.endsWith('Z') || /[+-]\d{2}:\d{2}$/.test(dateStr);
+  return new Date(hasTimezone ? dateStr : dateStr + 'Z');
+}
+
 // Inyectar CSS de animación una sola vez por módulo
 let _alarmStyleInjected = false;
 function injectAlarmStyle() {
@@ -1012,14 +1024,14 @@ function PedidoCard({
   );
 
   const horaPedido = pedido.dateCreated
-    ? new Date(pedido.dateCreated).toLocaleTimeString('es-AR', {
+    ? parseUTC(pedido.dateCreated).toLocaleTimeString('es-AR', {
         hour: '2-digit',
         minute: '2-digit',
       })
     : null;
 
   const fechaPedido = pedido.dateCreated
-    ? new Date(pedido.dateCreated).toLocaleString('es-AR', {
+    ? parseUTC(pedido.dateCreated).toLocaleString('es-AR', {
         dateStyle: 'short',
         timeStyle: 'short',
       })
@@ -1030,11 +1042,11 @@ function PedidoCard({
     if (!pedido.isDelivery || estimatedWaitTime <= 0) return;
     injectAlarmStyle();
     const check = () => {
-      const transcurridos = (Date.now() - new Date(pedido.dateCreated).getTime()) / 60000;
+      const transcurridos = (Date.now() - parseUTC(pedido.dateCreated).getTime()) / 60000;
       setExcedido(transcurridos >= estimatedWaitTime);
     };
     check();
-    const interval = setInterval(check, 30000);
+    const interval = setInterval(check, 10000);
     return () => clearInterval(interval);
   }, [pedido.dateCreated, pedido.isDelivery, estimatedWaitTime]);
 

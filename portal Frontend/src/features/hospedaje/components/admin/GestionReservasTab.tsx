@@ -399,7 +399,7 @@ export const GestionReservasTab = () => {
                                         <span className="fw-bold d-block">Reserva #{reserva.id.slice(0, 8)}</span>
                                         {reserva.dateCreated && (
                                             <small className="text-muted" style={{ fontSize: '0.72rem' }}>
-                                                Registrada: {new Date(reserva.dateCreated).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' })}
+                                                Registrada: {(reserva.dateCreated.endsWith('Z') ? new Date(reserva.dateCreated) : new Date(reserva.dateCreated + 'Z')).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' })}
                                             </small>
                                         )}
                                     </div>
