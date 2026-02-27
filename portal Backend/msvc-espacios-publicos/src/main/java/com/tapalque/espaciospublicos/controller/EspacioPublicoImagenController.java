@@ -7,11 +7,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.tapalque.espaciospublicos.dto.EspacioPublicoImagenRequestDTO;
 import com.tapalque.espaciospublicos.dto.ImagenResponseDTO;
 import com.tapalque.espaciospublicos.entity.EspacioPublicoImagen;
 import com.tapalque.espaciospublicos.service.EspacioPublicoImagenService;
@@ -34,9 +36,11 @@ public class EspacioPublicoImagenController {
         return ResponseEntity.status(HttpStatus.CREATED).body(new ImagenResponseDTO(imagen.getImagenUrl()));
     }
 
-    @DeleteMapping("/{imagenId}/imagenes")
-    public ResponseEntity<Void> eliminarImagen(@PathVariable Long imagenId) throws IOException {
-        imagenService.eliminarImagen(imagenId);
+    @DeleteMapping("/{espacioPublicoId}/imagenes")
+    public ResponseEntity<Void> eliminarImagen(
+            @PathVariable Long espacioPublicoId,
+            @RequestBody EspacioPublicoImagenRequestDTO dto) throws IOException {
+        imagenService.eliminarImagen(espacioPublicoId, dto.getImagenUrl());
         return ResponseEntity.noContent().build();
     }
 }

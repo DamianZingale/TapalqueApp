@@ -74,8 +74,9 @@ public class EspacioPublicoImagenService {
     }
 
     @CacheEvict(value = "espacios-publicos", allEntries = true)
-    public void eliminarImagen(Long imagenId) throws IOException {
-        EspacioPublicoImagen imagen = imagenRepository.findById(imagenId)
+    public void eliminarImagen(Long espacioPublicoId, String imagenUrl) throws IOException {
+        EspacioPublicoImagen imagen = imagenRepository
+                .findByImagenUrlAndEspacioPublicoId(imagenUrl, espacioPublicoId)
                 .orElseThrow(() -> new IllegalArgumentException("Imagen no encontrada"));
 
         String filename = imagen.getImagenUrl().substring(imagen.getImagenUrl().lastIndexOf("/") + 1);
