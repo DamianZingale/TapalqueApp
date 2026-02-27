@@ -16,6 +16,12 @@ export interface EstadisticasGastronomia {
     platosMasVendidos: PlatoVendido[];
     pedidosPorEstado: PedidoPorEstado[];
     ventasPorDia: VentaDia[];
+    saboresMasVendidos: SaborVendido[];
+}
+
+export interface SaborVendido {
+    nombre: string;
+    cantidad: number;
 }
 
 export interface PlatoVendido {
@@ -93,6 +99,7 @@ export async function fetchEstadisticasGastronomia(
             pedidosSemana: 0, ingresosSemana: 0,
             pedidosMes: 0, ingresosMes: 0,
             platosMasVendidos: [], pedidosPorEstado: [], ventasPorDia: [],
+            saboresMasVendidos: [],
         };
 
         if (!pedidos || pedidos.length === 0) return vacío;
@@ -137,6 +144,22 @@ export async function fetchEstadisticasGastronomia(
             .sort((a, b) => b.cantidad - a.cantidad)
             .slice(0, 10);
 
+        // Sabores más vendidos (heladería)
+        const saborMap = new Map<string, number>();
+        pagadosMes.forEach(p => {
+            p.items.forEach(item => {
+                if (!item.notas) return;
+                item.notas.split(',').forEach(s => {
+                    const sabor = s.trim();
+                    if (sabor) saborMap.set(sabor, (saborMap.get(sabor) ?? 0) + (item.itemQuantity ?? item.quantity ?? 1));
+                });
+            });
+        });
+        const saboresMasVendidos = Array.from(saborMap.entries())
+            .map(([nombre, cantidad]) => ({ nombre, cantidad }))
+            .sort((a, b) => b.cantidad - a.cantidad)
+            .slice(0, 5);
+
         // Pedidos por estado
         const statusMap = new Map<string, number>();
         pedidos.forEach(p => statusMap.set(p.status, (statusMap.get(p.status) ?? 0) + 1));
@@ -162,6 +185,7 @@ export async function fetchEstadisticasGastronomia(
             pedidosSemana, ingresosSemana,
             pedidosMes, ingresosMes,
             platosMasVendidos, pedidosPorEstado, ventasPorDia,
+            saboresMasVendidos,
         };
     } catch (error) {
         console.error('Error en fetchEstadisticasGastronomia:', error);

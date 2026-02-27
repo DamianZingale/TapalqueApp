@@ -208,7 +208,9 @@ export const GestionPedidosTab = () => {
                                             </>
                                         )}
                                         {pedido.paidWithCash && (
-                                            <Badge bg="outline-secondary" text="dark" className="border">Pago en efectivo</Badge>
+                                            <Badge bg="warning" text="dark" className="border">
+                                                {pedido.isDelivery ? 'Paga en destino' : 'Paga al retirar'}
+                                            </Badge>
                                         )}
                                     </div>
                                 </Card.Body>

@@ -24,7 +24,11 @@ import {
   fetchPedidosByRestaurant,
   fetchPedidosByRestaurantAndDateRange,
   updateEstadoPedido,
+  crearPedido,
+  type CrearPedidoDTO,
 } from '../../../services/fetchPedidos';
+import { fetchMenuByRestaurant } from '../../../services/fetchMenu';
+import type { Imenu } from '../../gastronomia/types/Imenu';
 import { useNotifications } from '../../../shared/context/NotificationContext';
 import { useWebSocket } from '../hooks/useWebSocket';
 import {
@@ -58,6 +62,30 @@ interface ResumenCierre {
   hasta: string;
 }
 
+interface NuevoPedidoItem {
+  menuItem: Imenu;
+  quantity: number;
+  notas: string;
+}
+
+interface NuevoPedidoForm {
+  userName: string;
+  userPhone: string;
+  isDelivery: boolean;
+  deliveryAddress: string;
+  paidWithCash: boolean;
+  items: NuevoPedidoItem[];
+}
+
+const EMPTY_FORM: NuevoPedidoForm = {
+  userName: '',
+  userPhone: '',
+  isDelivery: false,
+  deliveryAddress: '',
+  paidWithCash: true,
+  items: [],
+};
+
 // ============================================================
 // Componente principal
 // ============================================================
@@ -75,6 +103,14 @@ export function GastronomiaPedidos({
   const [tiempoEsperaInput, setTiempoEsperaInput] = useState<string>('0');
   const [updatingWaitTime, setUpdatingWaitTime] = useState(false);
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
+
+  // Crear pedido manual
+  const [showCrearModal, setShowCrearModal] = useState(false);
+  const [menuItems, setMenuItems] = useState<Imenu[]>([]);
+  const [loadingMenu, setLoadingMenu] = useState(false);
+  const [creandoPedido, setCreandoPedido] = useState(false);
+  const [nuevoPedido, setNuevoPedido] = useState<NuevoPedidoForm>(EMPTY_FORM);
+  const [selectedMenuItemId, setSelectedMenuItemId] = useState<number | ''>('');
 
   // Cierre del día
   const [showCierreModal, setShowCierreModal] = useState(false);
@@ -206,6 +242,124 @@ export function GastronomiaPedidos({
       });
     } finally {
       setUpdatingWaitTime(false);
+    }
+  };
+
+  const handleAbrirCrearModal = async () => {
+    setNuevoPedido(EMPTY_FORM);
+    setSelectedMenuItemId('');
+    setShowCrearModal(true);
+    setLoadingMenu(true);
+    try {
+      const items = await fetchMenuByRestaurant(externalBusinessId);
+      setMenuItems(items.filter((i) => i.available !== false));
+    } catch {
+      setMenuItems([]);
+    } finally {
+      setLoadingMenu(false);
+    }
+  };
+
+  const handleAgregarItem = () => {
+    if (selectedMenuItemId === '') return;
+    const menuItem = menuItems.find((i) => i.id === selectedMenuItemId);
+    if (!menuItem) return;
+    const exists = nuevoPedido.items.find((i) => i.menuItem.id === selectedMenuItemId);
+    if (exists) {
+      setNuevoPedido((prev) => ({
+        ...prev,
+        items: prev.items.map((i) =>
+          i.menuItem.id === selectedMenuItemId ? { ...i, quantity: i.quantity + 1 } : i
+        ),
+      }));
+    } else {
+      setNuevoPedido((prev) => ({
+        ...prev,
+        items: [...prev.items, { menuItem, quantity: 1, notas: '' }],
+      }));
+    }
+    setSelectedMenuItemId('');
+  };
+
+  const handleQuitarItem = (menuItemId: number) => {
+    setNuevoPedido((prev) => ({
+      ...prev,
+      items: prev.items.filter((i) => i.menuItem.id !== menuItemId),
+    }));
+  };
+
+  const handleCambiarCantidad = (menuItemId: number, quantity: number) => {
+    if (quantity < 1) return;
+    setNuevoPedido((prev) => ({
+      ...prev,
+      items: prev.items.map((i) =>
+        i.menuItem.id === menuItemId ? { ...i, quantity } : i
+      ),
+    }));
+  };
+
+  const handleCambiarNotas = (menuItemId: number, notas: string) => {
+    setNuevoPedido((prev) => ({
+      ...prev,
+      items: prev.items.map((i) =>
+        i.menuItem.id === menuItemId ? { ...i, notas } : i
+      ),
+    }));
+  };
+
+  const handleCrearPedidoManual = async () => {
+    if (nuevoPedido.items.length === 0) {
+      setMensaje({ tipo: 'danger', texto: 'Agregá al menos un producto al pedido.' });
+      return;
+    }
+    if (nuevoPedido.isDelivery && !nuevoPedido.deliveryAddress.trim()) {
+      setMensaje({ tipo: 'danger', texto: 'Ingresá la dirección de entrega.' });
+      return;
+    }
+
+    setCreandoPedido(true);
+    try {
+      const totalItems = nuevoPedido.items.reduce(
+        (sum, i) => sum + i.menuItem.price * i.quantity,
+        0
+      );
+      const totalConDelivery = totalItems + (nuevoPedido.isDelivery ? precioDelivery : 0);
+
+      const dto: CrearPedidoDTO = {
+        userId: 'ADMIN_MANUAL',
+        userName: nuevoPedido.userName.trim() || 'Cliente presencial',
+        userPhone: nuevoPedido.userPhone.trim(),
+        totalPrice: totalConDelivery,
+        items: nuevoPedido.items.map((i) => ({
+          productId: String(i.menuItem.id),
+          itemName: i.menuItem.dish_name,
+          itemPrice: i.menuItem.price,
+          itemQuantity: i.quantity,
+          quantity: i.quantity,
+          notas: i.notas || undefined,
+        })),
+        restaurant: {
+          restaurantId: externalBusinessId,
+          restaurantName: businessName,
+        },
+        isDelivery: nuevoPedido.isDelivery,
+        deliveryAddress: nuevoPedido.isDelivery ? nuevoPedido.deliveryAddress.trim() : undefined,
+        paidWithMercadoPago: false,
+        paidWithCash: nuevoPedido.paidWithCash,
+      };
+
+      const created = await crearPedido(dto);
+      if (created) {
+        setPedidos((prev) => [created, ...prev]);
+        setShowCrearModal(false);
+        setMensaje({ tipo: 'success', texto: 'Pedido creado correctamente.' });
+      } else {
+        setMensaje({ tipo: 'danger', texto: 'Error al crear el pedido. Intentá de nuevo.' });
+      }
+    } catch {
+      setMensaje({ tipo: 'danger', texto: 'Error al crear el pedido.' });
+    } finally {
+      setCreandoPedido(false);
     }
   };
 
@@ -456,6 +610,13 @@ export function GastronomiaPedidos({
         </Card>
       )}
 
+      <div className="d-flex justify-content-end mb-3">
+        <Button variant="success" onClick={handleAbrirCrearModal}>
+          <i className="bi bi-plus-circle me-1"></i>
+          Nuevo Pedido
+        </Button>
+      </div>
+
       {pedidosActivos.length === 0 ? (
         <p className="text-muted text-center py-4">No hay pedidos activos</p>
       ) : (
@@ -488,6 +649,192 @@ export function GastronomiaPedidos({
           )}
         </Button>
       </div>
+
+      {/* Modal crear pedido manual */}
+      <Modal
+        show={showCrearModal}
+        onHide={() => setShowCrearModal(false)}
+        size="lg"
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Nuevo Pedido</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {/* Datos del cliente */}
+          <h6 className="text-muted mb-2">Cliente</h6>
+          <Row className="mb-3 g-2">
+            <Col sm={6}>
+              <Form.Label>Nombre</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Nombre del cliente"
+                value={nuevoPedido.userName}
+                onChange={(e) => setNuevoPedido((p) => ({ ...p, userName: e.target.value }))}
+              />
+            </Col>
+            <Col sm={6}>
+              <Form.Label>Teléfono</Form.Label>
+              <Form.Control
+                type="tel"
+                placeholder="Teléfono"
+                value={nuevoPedido.userPhone}
+                onChange={(e) => setNuevoPedido((p) => ({ ...p, userPhone: e.target.value }))}
+              />
+            </Col>
+          </Row>
+
+          {/* Tipo de entrega */}
+          <h6 className="text-muted mb-2">Entrega</h6>
+          <div className="mb-3">
+            {delivery && (
+              <Form.Check
+                type="checkbox"
+                label="Delivery"
+                checked={nuevoPedido.isDelivery}
+                onChange={(e) => setNuevoPedido((p) => ({ ...p, isDelivery: e.target.checked, deliveryAddress: '' }))}
+                className="mb-2"
+              />
+            )}
+            {nuevoPedido.isDelivery && (
+              <Form.Control
+                type="text"
+                placeholder="Dirección de entrega"
+                value={nuevoPedido.deliveryAddress}
+                onChange={(e) => setNuevoPedido((p) => ({ ...p, deliveryAddress: e.target.value }))}
+              />
+            )}
+            {!delivery && (
+              <Badge bg="info">Retiro en local</Badge>
+            )}
+          </div>
+
+          {/* Productos */}
+          <h6 className="text-muted mb-2">Productos</h6>
+          {loadingMenu ? (
+            <div className="text-center py-2"><Spinner animation="border" size="sm" /></div>
+          ) : (
+            <>
+              <Row className="mb-2 g-2">
+                <Col>
+                  <Form.Select
+                    value={selectedMenuItemId}
+                    onChange={(e) => setSelectedMenuItemId(e.target.value === '' ? '' : Number(e.target.value))}
+                  >
+                    <option value="">— Seleccionar producto —</option>
+                    {menuItems.map((item) => (
+                      <option key={item.id} value={item.id}>
+                        {item.dish_name} — ${item.price.toLocaleString('es-AR')}
+                      </option>
+                    ))}
+                  </Form.Select>
+                </Col>
+                <Col xs="auto">
+                  <Button variant="outline-success" onClick={handleAgregarItem} disabled={selectedMenuItemId === ''}>
+                    Agregar
+                  </Button>
+                </Col>
+              </Row>
+
+              {nuevoPedido.items.length > 0 && (
+                <Table size="sm" className="mb-0">
+                  <thead>
+                    <tr>
+                      <th>Producto</th>
+                      <th style={{ width: 90 }}>Cant.</th>
+                      <th>Notas</th>
+                      <th style={{ width: 40 }}></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {nuevoPedido.items.map((item) => (
+                      <tr key={item.menuItem.id}>
+                        <td>
+                          <div>{item.menuItem.dish_name}</div>
+                          <small className="text-muted">${(item.menuItem.price * item.quantity).toLocaleString('es-AR')}</small>
+                        </td>
+                        <td>
+                          <Form.Control
+                            type="number"
+                            min={1}
+                            value={item.quantity}
+                            size="sm"
+                            onChange={(e) => handleCambiarCantidad(item.menuItem.id, Number(e.target.value))}
+                          />
+                        </td>
+                        <td>
+                          <Form.Control
+                            type="text"
+                            size="sm"
+                            placeholder="Sabores, aclaraciones..."
+                            value={item.notas}
+                            onChange={(e) => handleCambiarNotas(item.menuItem.id, e.target.value)}
+                          />
+                        </td>
+                        <td>
+                          <Button
+                            variant="outline-danger"
+                            size="sm"
+                            onClick={() => handleQuitarItem(item.menuItem.id)}
+                          >
+                            ✕
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              )}
+            </>
+          )}
+
+          {/* Total */}
+          {nuevoPedido.items.length > 0 && (
+            <div className="text-end mt-3 fw-bold">
+              Total: ${(
+                nuevoPedido.items.reduce((s, i) => s + i.menuItem.price * i.quantity, 0) +
+                (nuevoPedido.isDelivery ? precioDelivery : 0)
+              ).toLocaleString('es-AR')}
+              {nuevoPedido.isDelivery && precioDelivery > 0 && (
+                <small className="text-muted fw-normal ms-2">(incl. delivery ${precioDelivery.toLocaleString('es-AR')})</small>
+              )}
+            </div>
+          )}
+
+          {/* Método de pago */}
+          <h6 className="text-muted mt-3 mb-2">Pago</h6>
+          <div>
+            <Form.Check
+              type="radio"
+              id="pago-destino"
+              name="metodoPago"
+              label={nuevoPedido.isDelivery ? 'Paga en destino (efectivo)' : 'Paga al retirar (efectivo)'}
+              checked={nuevoPedido.paidWithCash}
+              onChange={() => setNuevoPedido((p) => ({ ...p, paidWithCash: true }))}
+            />
+            <Form.Check
+              type="radio"
+              id="pago-mp"
+              name="metodoPago"
+              label="Ya pagó (efectivo en mostrador)"
+              checked={!nuevoPedido.paidWithCash}
+              onChange={() => setNuevoPedido((p) => ({ ...p, paidWithCash: false }))}
+            />
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowCrearModal(false)}>
+            Cancelar
+          </Button>
+          <Button
+            variant="success"
+            onClick={handleCrearPedidoManual}
+            disabled={creandoPedido || nuevoPedido.items.length === 0}
+          >
+            {creandoPedido ? <Spinner animation="border" size="sm" /> : 'Crear Pedido'}
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
       {/* Modal de cierre */}
       <Modal
@@ -708,8 +1055,8 @@ function PedidoCard({
           {/* Método de pago */}
           <div className="mb-2">
             {pedido.paidWithCash && (
-              <Badge bg="success" className="me-1">
-                Efectivo
+              <Badge bg="warning" text="dark" className="me-1">
+                {pedido.isDelivery ? 'Paga en destino' : 'Paga al retirar'}
               </Badge>
             )}
             {pedido.paidWithMercadoPago && (
@@ -844,8 +1191,8 @@ function PedidoCard({
           <h6 className="text-muted mb-2">Pago</h6>
           <div className="mb-3">
             {pedido.paidWithCash && (
-              <Badge bg="success" className="me-1">
-                Efectivo
+              <Badge bg="warning" text="dark" className="me-1">
+                {pedido.isDelivery ? 'Paga en destino' : 'Paga al retirar'}
               </Badge>
             )}
             {pedido.paidWithMercadoPago && (

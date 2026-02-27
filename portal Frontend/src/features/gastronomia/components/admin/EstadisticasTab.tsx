@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { Card, Row, Col, Table, Badge, Spinner, Alert, Form } from 'react-bootstrap';
 import {
     fetchEstadisticasGastronomia,
-    EstadisticasGastronomia
+    EstadisticasGastronomia,
+    SaborVendido
 } from '../../../../services/fetchEstadisticas';
 
 interface EstadisticasTabProps {
@@ -211,6 +212,44 @@ export const EstadisticasTab = ({ businessId }: EstadisticasTabProps) => {
                     </Card>
                 </Col>
             </Row>
+
+            {/* Top 5 sabores más vendidos (heladería) */}
+            {estadisticas.saboresMasVendidos.length > 0 && (
+                <Row className="mt-4">
+                    <Col md={6}>
+                        <Card className="shadow-sm">
+                            <Card.Header>
+                                <h5 className="mb-0">Top 5 Sabores Más Vendidos</h5>
+                            </Card.Header>
+                            <Card.Body>
+                                <Table hover size="sm">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Sabor</th>
+                                            <th className="text-center">Cantidad</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {estadisticas.saboresMasVendidos.map((sabor: SaborVendido, idx: number) => (
+                                            <tr key={idx}>
+                                                <td>
+                                                    {idx === 0 && <Badge bg="warning" text="dark">1</Badge>}
+                                                    {idx === 1 && <Badge bg="secondary">2</Badge>}
+                                                    {idx === 2 && <Badge bg="info">3</Badge>}
+                                                    {idx > 2 && <span className="text-muted">{idx + 1}</span>}
+                                                </td>
+                                                <td><strong>{sabor.nombre}</strong></td>
+                                                <td className="text-center">{sabor.cantidad}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </Table>
+                            </Card.Body>
+                        </Card>
+                    </Col>
+                </Row>
+            )}
 
             {/* Ventas por día */}
             {estadisticas.ventasPorDia.length > 0 && (

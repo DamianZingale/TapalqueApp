@@ -69,7 +69,7 @@ export function printPedido(pedido: Pedido) {
     const estadoPago = pedido.paidWithMercadoPago
         ? '✓ PAGADO - MercadoPago'
         : pedido.paidWithCash
-        ? '✓ PAGADO - Efectivo'
+        ? (pedido.isDelivery ? '→ PAGA EN DESTINO' : '→ PAGA AL RETIRAR')
         : '✗ PENDIENTE DE PAGO';
 
     const html = `
