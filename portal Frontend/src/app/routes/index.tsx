@@ -31,6 +31,7 @@ import { AdministradoresRoutes } from '../../features/admin-negocios';
 
 // Moderador
 import { lazy } from 'react';
+import { ErrorBoundary } from '../../shared/components/ErrorBoundary';
 const ModeradorDashboard = lazy(() => import('../../features/moderador/pages/ModeradorDashboard'));
 
 // Páginas legales
@@ -126,9 +127,11 @@ export const router = createBrowserRouter([
     element: (
       <ModeradorOnlyRoute>
         <MainLayout>
-          <Suspense fallback={<div>Cargando dashboard...</div>}>
-            <ModeradorDashboard />
-          </Suspense>
+          <ErrorBoundary>
+            <Suspense fallback={<div>Cargando dashboard...</div>}>
+              <ModeradorDashboard />
+            </Suspense>
+          </ErrorBoundary>
         </MainLayout>
       </ModeradorOnlyRoute>
     ),

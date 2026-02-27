@@ -10,6 +10,16 @@ interface State {
   error?: Error;
 }
 
+const CHUNK_ERROR_RELOAD_KEY = 'chunk_error_reloaded';
+
+function isChunkLoadError(error: Error): boolean {
+  return (
+    error.message.includes('Failed to fetch dynamically imported module') ||
+    error.message.includes('Loading chunk') ||
+    error.message.includes('Importing a module script failed')
+  );
+}
+
 export class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
@@ -21,6 +31,15 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    // Si es un error de chunk (deploy nuevo), recarga automáticamente una sola vez
+    if (isChunkLoadError(error)) {
+      const alreadyReloaded = sessionStorage.getItem(CHUNK_ERROR_RELOAD_KEY);
+      if (!alreadyReloaded) {
+        sessionStorage.setItem(CHUNK_ERROR_RELOAD_KEY, '1');
+        window.location.reload();
+        return;
+      }
+    }
     console.error('Error capturado por ErrorBoundary:', error, errorInfo);
   }
 
@@ -40,7 +59,7 @@ export class ErrorBoundary extends Component<Props, State> {
               </pre>
             </details>
           )}
-          <button 
+          <button
             className="btn btn-sm btn-outline-primary mt-2"
             onClick={() => window.location.reload()}
           >
