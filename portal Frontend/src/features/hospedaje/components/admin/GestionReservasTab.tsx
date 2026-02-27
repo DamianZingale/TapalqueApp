@@ -394,8 +394,15 @@ export const GestionReservasTab = () => {
                     {reservasFiltradas.map(reserva => (
                         <Col md={6} lg={4} key={reserva.id} className="mb-3">
                             <Card className="h-100 shadow-sm">
-                                <Card.Header className="d-flex justify-content-between align-items-center">
-                                    <span className="fw-bold">Reserva #{reserva.id.slice(0, 8)}</span>
+                                <Card.Header className="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <span className="fw-bold d-block">Reserva #{reserva.id.slice(0, 8)}</span>
+                                        {reserva.dateCreated && (
+                                            <small className="text-muted" style={{ fontSize: '0.72rem' }}>
+                                                Registrada: {new Date(reserva.dateCreated).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' })}
+                                            </small>
+                                        )}
+                                    </div>
                                     {getEstadoBadge(reserva)}
                                 </Card.Header>
                                 <Card.Body>

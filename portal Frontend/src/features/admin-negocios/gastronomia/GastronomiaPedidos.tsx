@@ -627,6 +627,7 @@ export function GastronomiaPedidos({
                 pedido={pedido}
                 onCambiarEstado={handleCambiarEstado}
                 deliveryPrice={precioDelivery}
+                estimatedWaitTime={restaurant?.estimatedWaitTime ?? 0}
                 esHeladeria={restaurant?.esHeladeria}
               />
             </Col>
@@ -966,16 +967,36 @@ interface PedidoCardProps {
   pedido: Pedido;
   onCambiarEstado: (pedido: Pedido) => void;
   deliveryPrice: number;
+  estimatedWaitTime?: number;
   esHeladeria?: boolean;
+}
+
+// Inyectar CSS de animación una sola vez por módulo
+let _alarmStyleInjected = false;
+function injectAlarmStyle() {
+  if (_alarmStyleInjected) return;
+  _alarmStyleInjected = true;
+  const el = document.createElement('style');
+  el.textContent = `
+    @keyframes pedidoFlash {
+      0%, 49% { box-shadow: 0 0 0 3px #dc3545, 0 0 12px rgba(220,53,69,0.5); border-color: #dc3545 !important; }
+      50%, 100% { box-shadow: none; border-color: rgba(0,0,0,.125) !important; }
+    }
+    .pedido-alarma { animation: pedidoFlash 1.2s ease-in-out infinite; border: 2px solid #dc3545 !important; }
+  `;
+  document.head.appendChild(el);
 }
 
 function PedidoCard({
   pedido,
   onCambiarEstado,
   deliveryPrice,
+  estimatedWaitTime = 0,
   esHeladeria = false,
 }: PedidoCardProps) {
   const [showModal, setShowModal] = useState(false);
+  const [alarmaDismissed, setAlarmaDismissed] = useState(false);
+  const [excedido, setExcedido] = useState(false);
 
   const estadoBadge = getEstadoPedidoBadge(pedido.status);
   const baseTotal = pedido.totalPrice || pedido.totalAmount || 0;
@@ -990,6 +1011,13 @@ function PedidoCard({
     pedido.isDelivery
   );
 
+  const horaPedido = pedido.dateCreated
+    ? new Date(pedido.dateCreated).toLocaleTimeString('es-AR', {
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    : null;
+
   const fechaPedido = pedido.dateCreated
     ? new Date(pedido.dateCreated).toLocaleString('es-AR', {
         dateStyle: 'short',
@@ -997,16 +1025,50 @@ function PedidoCard({
       })
     : null;
 
+  // Timer de alarma para delivery
+  useEffect(() => {
+    if (!pedido.isDelivery || estimatedWaitTime <= 0) return;
+    injectAlarmStyle();
+    const check = () => {
+      const transcurridos = (Date.now() - new Date(pedido.dateCreated).getTime()) / 60000;
+      setExcedido(transcurridos >= estimatedWaitTime);
+    };
+    check();
+    const interval = setInterval(check, 30000);
+    return () => clearInterval(interval);
+  }, [pedido.dateCreated, pedido.isDelivery, estimatedWaitTime]);
+
+  const mostrarAlarma = excedido && !alarmaDismissed;
+
   return (
     <>
       <Card
-        className="h-100"
+        className={`h-100${mostrarAlarma ? ' pedido-alarma' : ''}`}
         style={{ cursor: 'pointer' }}
         onClick={() => setShowModal(true)}
       >
-        <Card.Header className="d-flex justify-content-between">
-          <small>#{pedido.id.slice(-6)}</small>
-          <Badge bg={estadoBadge.color}>{estadoBadge.texto}</Badge>
+        <Card.Header className="d-flex justify-content-between align-items-center">
+          <div>
+            <small className="fw-bold">#{pedido.id.slice(-6)}</small>
+            {horaPedido && (
+              <small className="text-muted ms-2" style={{ fontSize: '0.75rem' }}>
+                <i className="bi bi-clock me-1"></i>{horaPedido}
+              </small>
+            )}
+          </div>
+          <div className="d-flex align-items-center gap-1">
+            {mostrarAlarma && (
+              <Badge
+                bg="danger"
+                style={{ fontSize: '0.65rem', cursor: 'pointer' }}
+                onClick={(e: React.MouseEvent) => { e.stopPropagation(); setAlarmaDismissed(true); }}
+                title="Apagar alarma"
+              >
+                ⏰ Tiempo excedido — apagar
+              </Badge>
+            )}
+            <Badge bg={estadoBadge.color}>{estadoBadge.texto}</Badge>
+          </div>
         </Card.Header>
 
         <Card.Body>
