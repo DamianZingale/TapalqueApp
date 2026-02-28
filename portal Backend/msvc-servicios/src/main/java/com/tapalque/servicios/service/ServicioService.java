@@ -53,10 +53,20 @@ public class ServicioService {
     public ServicioResponseDTO actualizarCompleto(Long id, ServicioRequestDTO dto) {
         Servicio servicio = servicioRepository.findById(id)
                 .orElseThrow(() -> new ServicioNotFoundException(id));
-        Servicio actualizado = new Servicio(dto);
-        actualizado.setId(servicio.getId());
-        servicioRepository.save(actualizado);
-        return new ServicioResponseDTO(actualizado);
+        // Se actualiza sobre la entidad existente para preservar las imagenes asociadas.
+        // No crear entidad nueva: con orphanRemoval=true borraría todas las imágenes.
+        servicio.setTitulo(dto.getTitulo());
+        servicio.setDescripcion(dto.getDescripcion());
+        servicio.setDireccion(dto.getDireccion());
+        servicio.setHorario(dto.getHorario());
+        servicio.setTelefono(dto.getTelefono());
+        servicio.setLatitud(dto.getLatitud());
+        servicio.setLongitud(dto.getLongitud());
+        servicio.setFacebook(dto.getFacebook());
+        servicio.setInstagram(dto.getInstagram());
+        servicio.setTag(dto.getTag() != null ? dto.getTag().toUpperCase() : null);
+        servicioRepository.save(servicio);
+        return new ServicioResponseDTO(servicio);
     }
 
     @CacheEvict(value = "servicios", allEntries = true)
