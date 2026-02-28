@@ -103,6 +103,7 @@ export default function ServiciosListPage() {
                             titulo={servicio.titulo}
                             imagenUrl={servicio.imagenes?.[0]?.imagenUrl || "https://via.placeholder.com/400x200.png?text=Sin+Imagen"}
                             direccion_local={servicio.horario || ""}
+                            schedule={servicio.telefono}
                             tipo={SECCION_TYPE.SERVICIOS}
                             onClick={() => handleCardClick(servicio)}
                         />
