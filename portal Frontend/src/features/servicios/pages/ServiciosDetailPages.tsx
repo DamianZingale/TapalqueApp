@@ -67,6 +67,23 @@ export default function ServiciosDetailPage() {
                 instagram={data.instagram}
             />
             <Description description={data.descripcion || ""} />
+            {data.direccion && (
+                <div className="text-center my-3">
+                    <strong>Dirección:</strong> {data.direccion}
+                </div>
+            )}
+            {data.latitud && data.longitud && (
+                <div className="text-center my-3">
+                    <a
+                        href={`https://www.google.com/maps?q=${data.latitud},${data.longitud}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn btn-secondary"
+                    >
+                        📍 Cómo Llegar
+                    </a>
+                </div>
+            )}
             {data.horario && <div className="text-center my-3"><strong>Horario:</strong> {data.horario}</div>}
             {data.telefono && <WhatsAppButton num={data.telefono} />}
         </div>
