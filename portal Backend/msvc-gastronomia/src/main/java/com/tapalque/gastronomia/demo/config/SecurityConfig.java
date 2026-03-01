@@ -30,6 +30,7 @@ public class SecurityConfig {
                         // Recursos estáticos (imágenes)
                         .requestMatchers("/uploads/**").permitAll()
                         // GET públicos - ver restaurantes, menús, imágenes
+                        .requestMatchers(HttpMethod.GET, "/restaurante/findAllAdmin").permitAll()
                         .requestMatchers(HttpMethod.GET, "/restaurante/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/gastronomia/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/menu/**").permitAll()

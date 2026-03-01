@@ -30,6 +30,7 @@ public class SecurityConfig {
                         // Recursos estáticos (imágenes)
                         .requestMatchers("/uploads/**").permitAll()
                         // GET públicos - ver hospedajes, habitaciones, disponibilidad
+                        .requestMatchers(HttpMethod.GET, "/hospedajes/admin").permitAll()
                         .requestMatchers(HttpMethod.GET, "/hospedajes/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/habitaciones/**").permitAll()
                         // Crear/modificar requiere autenticación (para Mercado Pago)
