@@ -97,6 +97,9 @@ public class Restaurant {
     @JsonManagedReference
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviews;
+
+    @OneToMany(mappedBy = "restaurante", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<SaborHeladeria> saboresHeladeria;
     
     public Restaurant(){}
   
