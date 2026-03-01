@@ -136,6 +136,13 @@ export function HosteleriaReservas({
   const [modalDetalle, setModalDetalle] = useState(false);
   const [reservaDetalle, setReservaDetalle] = useState<Reserva | null>(null);
 
+  // Estado para reprogramación de fechas
+  const [reprogramando, setReprogramando] = useState(false);
+  const [reprogramCheckIn, setReprogramCheckIn] = useState('');
+  const [reprogramCheckOut, setReprogramCheckOut] = useState('');
+  const [guardandoReprogramacion, setGuardandoReprogramacion] = useState(false);
+  const [errorReprogramacion, setErrorReprogramacion] = useState<string | null>(null);
+
   // Buscador por ID
   const [searchId, setSearchId] = useState('');
   const [searchError, setSearchError] = useState('');
@@ -435,6 +442,38 @@ export function HosteleriaReservas({
     }
   };
 
+  const handleReprogramar = async () => {
+    if (!reservaDetalle || !reprogramCheckIn || !reprogramCheckOut) {
+      setErrorReprogramacion('Seleccioná las fechas de check-in y check-out');
+      return;
+    }
+    setGuardandoReprogramacion(true);
+    setErrorReprogramacion(null);
+    try {
+      const reservaActualizada: Reserva = {
+        ...reservaDetalle,
+        stayPeriod: {
+          checkInDate: reprogramCheckIn,
+          checkOutDate: reprogramCheckOut,
+        },
+      };
+      const resultado = await actualizarReserva(reservaActualizada);
+      if (resultado) {
+        // Actualiza el listado (libera fechas viejas, ocupa fechas nuevas)
+        setReservas((prev) => prev.map((r) => (r.id === resultado.id ? resultado : r)));
+        setReservaDetalle(resultado);
+        setReprogramando(false);
+        setReprogramCheckIn('');
+        setReprogramCheckOut('');
+        setMensaje({ tipo: 'success', texto: 'Reserva reprogramada correctamente' });
+      } else {
+        setErrorReprogramacion('Error al reprogramar la reserva. Intentá de nuevo.');
+      }
+    } finally {
+      setGuardandoReprogramacion(false);
+    }
+  };
+
   // --- Calendario con disponibilidad por habitación ---
   const formatLocalDate = (date: Date): string => {
     const y = date.getFullYear();
@@ -485,6 +524,47 @@ export function HosteleriaReservas({
   const getDayClassName = (date: Date): string => {
     if (!selectedHabitacion) return '';
     return diasOcupadosHabitacion.has(formatLocalDate(date)) ? 'dia-ocupado' : 'dia-libre';
+  };
+
+  // Días ocupados para reprogramación: usa la habitación de la reserva en detalle,
+  // excluyendo la propia reserva para que sus fechas aparezcan como disponibles.
+  const diasOcupadosReprogramCheckIn = useMemo((): Set<string> => {
+    if (!reservaDetalle?.roomNumber) return new Set();
+    const occupied = new Set<string>();
+    for (const r of reservas) {
+      if (r.roomNumber !== reservaDetalle.roomNumber) continue;
+      if (r.isCancelled) continue;
+      if (r.id === reservaDetalle.id) continue; // excluir la reserva actual
+      const cur = new Date(r.stayPeriod.checkInDate.slice(0, 10) + 'T12:00:00');
+      const end = new Date(r.stayPeriod.checkOutDate.slice(0, 10) + 'T12:00:00');
+      while (cur < end) {
+        occupied.add(formatLocalDate(cur));
+        cur.setDate(cur.getDate() + 1);
+      }
+    }
+    return occupied;
+  }, [reservaDetalle, reservas]);
+
+  const diasOcupadosReprogramCheckOut = useMemo((): Set<string> => {
+    if (!reservaDetalle?.roomNumber) return new Set();
+    const occupied = new Set<string>();
+    for (const r of reservas) {
+      if (r.roomNumber !== reservaDetalle.roomNumber) continue;
+      if (r.isCancelled) continue;
+      if (r.id === reservaDetalle.id) continue; // excluir la reserva actual
+      const cur = new Date(r.stayPeriod.checkInDate.slice(0, 10) + 'T12:00:00');
+      const end = new Date(r.stayPeriod.checkOutDate.slice(0, 10) + 'T12:00:00');
+      cur.setDate(cur.getDate() + 1);
+      while (cur < end) {
+        occupied.add(formatLocalDate(cur));
+        cur.setDate(cur.getDate() + 1);
+      }
+    }
+    return occupied;
+  }, [reservaDetalle, reservas]);
+
+  const getDayClassNameReprogramar = (date: Date): string => {
+    return diasOcupadosReprogramCheckIn.has(formatLocalDate(date)) ? 'dia-ocupado' : 'dia-libre';
   };
 
   const siguientePasoCrear = () => {
@@ -1953,7 +2033,13 @@ export function HosteleriaReservas({
       {/* Modal Detalle de Reserva */}
       <Modal
         show={modalDetalle}
-        onHide={() => setModalDetalle(false)}
+        onHide={() => {
+          setModalDetalle(false);
+          setReprogramando(false);
+          setReprogramCheckIn('');
+          setReprogramCheckOut('');
+          setErrorReprogramacion(null);
+        }}
         size="lg"
       >
         {reservaDetalle && (
@@ -2040,6 +2126,109 @@ export function HosteleriaReservas({
                 </Col>
               </Row>
 
+              {/* Sección de Reprogramación */}
+              {reprogramando && (
+                <>
+                  <hr />
+                  <h6 className="text-muted d-flex align-items-center gap-2">
+                    Reprogramar estadía
+                    <small className="text-muted fw-normal">
+                      🔴 Ocupado &nbsp;·&nbsp; 🟢 Libre
+                    </small>
+                  </h6>
+                  <style>{`
+                    .react-datepicker__day.dia-ocupado {
+                      background-color: #dc3545 !important;
+                      color: white !important;
+                      border-radius: 50%;
+                      font-weight: bold;
+                    }
+                    .react-datepicker__day.dia-ocupado:hover {
+                      background-color: #b02a37 !important;
+                    }
+                    .react-datepicker__day.dia-libre {
+                      background-color: #198754 !important;
+                      color: white !important;
+                      border-radius: 50%;
+                    }
+                    .react-datepicker__day.dia-libre:hover {
+                      background-color: #146c43 !important;
+                    }
+                    .react-datepicker-wrapper { width: 100%; }
+                  `}</style>
+                  {errorReprogramacion && (
+                    <Alert variant="danger" className="mb-2 py-2">
+                      {errorReprogramacion}
+                    </Alert>
+                  )}
+                  <Row className="g-3">
+                    <Col md={6}>
+                      <Form.Group>
+                        <Form.Label className="fw-semibold">Nueva fecha de entrada</Form.Label>
+                        <DatePicker
+                          selected={reprogramCheckIn ? new Date(reprogramCheckIn + 'T12:00:00') : null}
+                          onChange={(date: Date | null) => {
+                            setReprogramCheckIn(date ? formatLocalDate(date) : '');
+                            setReprogramCheckOut('');
+                          }}
+                          dateFormat="dd/MM/yyyy"
+                          className="form-control"
+                          placeholderText="dd/mm/aaaa"
+                          dayClassName={getDayClassNameReprogramar}
+                          filterDate={(date: Date) => !diasOcupadosReprogramCheckIn.has(formatLocalDate(date))}
+                          minDate={new Date()}
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Col md={6}>
+                      <Form.Group>
+                        <Form.Label className="fw-semibold">Nueva fecha de salida</Form.Label>
+                        <DatePicker
+                          selected={reprogramCheckOut ? new Date(reprogramCheckOut + 'T12:00:00') : null}
+                          onChange={(date: Date | null) => setReprogramCheckOut(date ? formatLocalDate(date) : '')}
+                          dateFormat="dd/MM/yyyy"
+                          className="form-control"
+                          placeholderText="dd/mm/aaaa"
+                          dayClassName={getDayClassNameReprogramar}
+                          filterDate={(date: Date) => !diasOcupadosReprogramCheckOut.has(formatLocalDate(date))}
+                          minDate={reprogramCheckIn ? new Date(reprogramCheckIn + 'T12:00:00') : new Date()}
+                        />
+                      </Form.Group>
+                    </Col>
+                  </Row>
+                  {reprogramCheckIn && reprogramCheckOut && (
+                    <Alert variant="info" className="mt-2 text-center mb-0 py-2">
+                      <strong>{calcularNoches(reprogramCheckIn, reprogramCheckOut)}</strong>{' '}
+                      noche{calcularNoches(reprogramCheckIn, reprogramCheckOut) !== 1 ? 's' : ''}
+                    </Alert>
+                  )}
+                  <div className="d-flex gap-2 mt-3">
+                    <Button
+                      variant="success"
+                      size="sm"
+                      onClick={handleReprogramar}
+                      disabled={!reprogramCheckIn || !reprogramCheckOut || guardandoReprogramacion}
+                    >
+                      {guardandoReprogramacion
+                        ? <Spinner size="sm" animation="border" />
+                        : 'Confirmar reprogramación'}
+                    </Button>
+                    <Button
+                      variant="outline-secondary"
+                      size="sm"
+                      onClick={() => {
+                        setReprogramando(false);
+                        setReprogramCheckIn('');
+                        setReprogramCheckOut('');
+                        setErrorReprogramacion(null);
+                      }}
+                    >
+                      Cancelar
+                    </Button>
+                  </div>
+                </>
+              )}
+
               {/* Datos de Facturación */}
               {reservaDetalle.requiereFacturacion && reservaDetalle.billingInfo && (
                 <>
@@ -2118,7 +2307,7 @@ export function HosteleriaReservas({
             </Modal.Body>
             <Modal.Footer>
               {reservaDetalle.isActive && !reservaDetalle.isCancelled && (
-                <div className="d-flex gap-2 w-100">
+                <div className="d-flex gap-2 w-100 flex-wrap">
                   {reservaDetalle.payment.remainingAmount > 0 && (
                     <Button
                       variant="success"
@@ -2140,6 +2329,18 @@ export function HosteleriaReservas({
                     }}
                   >
                     Check-out
+                  </Button>
+                  <Button
+                    variant={reprogramando ? 'warning' : 'outline-warning'}
+                    size="sm"
+                    onClick={() => {
+                      setReprogramando((v) => !v);
+                      setReprogramCheckIn('');
+                      setReprogramCheckOut('');
+                      setErrorReprogramacion(null);
+                    }}
+                  >
+                    {reprogramando ? 'Ocultar calendario' : 'Reprogramar'}
                   </Button>
                   <Button
                     variant="outline-danger"
