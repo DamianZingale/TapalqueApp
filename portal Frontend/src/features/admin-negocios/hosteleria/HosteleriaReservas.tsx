@@ -191,6 +191,19 @@ export function HosteleriaReservas({
     }
   }, [businessId]);
 
+  const cargarReservas = useCallback(async () => {
+    try {
+      setLoading(true);
+      const data = await fetchReservasByHotel(businessId);
+      setReservas(data);
+    } catch (error) {
+      console.error('Error cargando reservas:', error);
+      setMensaje({ tipo: 'danger', texto: 'Error al cargar las reservas' });
+    } finally {
+      setLoading(false);
+    }
+  }, [businessId]);
+
   const handleTogglePolitica = async (campo: 'reservasHabilitadas' | 'politicaFdsActiva') => {
     if (!politica) return;
     setGuardandoPolitica(true);
@@ -221,7 +234,7 @@ export function HosteleriaReservas({
     // Registra el tópico en el contexto global para mantener la conexión
     // activa aunque el admin navegue a otra sección
     registerAdminTopic(businessId, 'HOSPEDAJE');
-  }, [businessId, cargarHospedaje]);
+  }, [businessId, cargarHospedaje, cargarReservas, registerAdminTopic]);
 
   useEffect(() => {
     if (lastMessage) {
@@ -288,19 +301,6 @@ export function HosteleriaReservas({
       audio.play().catch(() => {});
     } catch {
       console.log('No se pudo reproducir sonido');
-    }
-  };
-
-  const cargarReservas = async () => {
-    try {
-      setLoading(true);
-      const data = await fetchReservasByHotel(businessId);
-      setReservas(data);
-    } catch (error) {
-      console.error('Error cargando reservas:', error);
-      setMensaje({ tipo: 'danger', texto: 'Error al cargar las reservas' });
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -450,11 +450,12 @@ export function HosteleriaReservas({
     setGuardandoReprogramacion(true);
     setErrorReprogramacion(null);
     try {
+      // El backend espera LocalDateTime: check-in 14:00, check-out 11:00
       const reservaActualizada: Reserva = {
         ...reservaDetalle,
         stayPeriod: {
-          checkInDate: reprogramCheckIn,
-          checkOutDate: reprogramCheckOut,
+          checkInDate: `${reprogramCheckIn}T14:00:00`,
+          checkOutDate: `${reprogramCheckOut}T11:00:00`,
         },
       };
       const resultado = await actualizarReserva(reservaActualizada);
