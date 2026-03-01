@@ -64,6 +64,9 @@ public class Hospedaje {
     @Column(name = "tipo_iva")
     private TipoIVA tipoIva = TipoIVA.NO_APLICA;
 
+    @Column(name = "activo", nullable = false, columnDefinition = "boolean default true")
+    private Boolean activo = true;
+
     // --- Constructores ---
     public Hospedaje() {
     }
@@ -198,6 +201,14 @@ public class Hospedaje {
 
     public void setTipoIva(TipoIVA tipoIva) {
         this.tipoIva = tipoIva;
+    }
+
+    public Boolean getActivo() {
+        return activo != null ? activo : true;
+    }
+
+    public void setActivo(Boolean activo) {
+        this.activo = activo != null ? activo : true;
     }
 
 }

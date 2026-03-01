@@ -28,6 +28,7 @@ public class RestaurantDTO {
     private String imageUrl;
     private java.time.LocalDateTime lastCloseDate;
     private Boolean esHeladeria;
+    private Boolean activo;
 
     // 🔹 Constructor vacío
     public RestaurantDTO() {}
@@ -47,6 +48,7 @@ public class RestaurantDTO {
     Double deliveryPrice,
     Integer estimatedWaitTime,
     Boolean esHeladeria,
+    Boolean activo,
     String imageUrl
 ) {
     this.id = idRestaurant;
@@ -62,6 +64,7 @@ public class RestaurantDTO {
     this.deliveryPrice = deliveryPrice;
     this.estimatedWaitTime = estimatedWaitTime;
     this.esHeladeria = (esHeladeria != null) ? esHeladeria : false;
+    this.activo = (activo != null) ? activo : true;
     this.imageUrl = imageUrl;
 }
 
@@ -78,6 +81,7 @@ public class RestaurantDTO {
     this.estimatedWaitTime = entity.getEstimatedWaitTime();
     this.lastCloseDate = entity.getLastCloseDate();
     this.esHeladeria = entity.getEsHeladeria();
+    this.activo = entity.getActivo();
     // Imagen: tomar la primera imagen del restaurante
     if (entity.getImages() != null && !entity.getImages().isEmpty()) {
         this.imageUrl = entity.getImages().get(0).getImageUrl();
@@ -189,6 +193,7 @@ entity.setSchedules(scheduleList);
 }
     entity.setDelivery(delivery);
     entity.setEsHeladeria(this.esHeladeria != null ? this.esHeladeria : false);
+    entity.setActivo(this.activo != null ? this.activo : true);
 
     return entity;
 }
@@ -313,6 +318,14 @@ entity.setSchedules(scheduleList);
 
     public void setEsHeladeria(Boolean esHeladeria) {
         this.esHeladeria = esHeladeria;
+    }
+
+    public Boolean getActivo() {
+        return activo != null ? activo : true;
+    }
+
+    public void setActivo(Boolean activo) {
+        this.activo = activo != null ? activo : true;
     }
 
 }

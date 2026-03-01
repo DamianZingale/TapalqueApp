@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import {
   Alert,
+  Badge,
   Button,
   Col,
   Form,
@@ -26,6 +27,7 @@ interface Hospedaje {
   imagenes?: { imagenUrl: string }[];
   userId?: number;
   permiteMascotas?: boolean;
+  activo?: boolean;
 }
 
 interface Usuario {
@@ -47,6 +49,7 @@ const emptyItem: Partial<Hospedaje> = {
   imagenes: [],
   userId: undefined,
   permiteMascotas: undefined,
+  activo: true,
 };
 
 export function HospedajesSection() {
@@ -57,6 +60,7 @@ export function HospedajesSection() {
   const [isNew, setIsNew] = useState(false);
   const [formData, setFormData] = useState<Partial<Hospedaje>>(emptyItem);
   const [saving, setSaving] = useState(false);
+  const [togglingActivo, setTogglingActivo] = useState(false);
   const [mensaje, setMensaje] = useState<{
     tipo: 'success' | 'danger';
     texto: string;
@@ -73,9 +77,8 @@ export function HospedajesSection() {
   const cargarDatos = async () => {
     try {
       setLoading(true);
-      const res = await api.get('/hospedajes');
+      const res = await api.get('/hospedajes/admin');
       setItems(res.data || []);
-      console.log('Hospedajes cargados desde API:', res.data);
     } catch (err) {
       console.error('Error cargando hospedajes:', err);
       setItems([]);
@@ -247,6 +250,27 @@ export function HospedajesSection() {
     }
   };
 
+  const handleToggleActivo = async () => {
+    if (!selected) return;
+    setTogglingActivo(true);
+    try {
+      const nuevoEstado = !selected.activo;
+      await api.patch(`/hospedajes/${selected.id}/activo`, { activo: nuevoEstado });
+      setMensaje({
+        tipo: 'success',
+        texto: nuevoEstado ? 'Hospedaje activado' : 'Hospedaje desactivado',
+      });
+      setSelected((prev) => prev ? { ...prev, activo: nuevoEstado } : prev);
+      setFormData((prev) => ({ ...prev, activo: nuevoEstado }));
+      cargarDatos();
+    } catch {
+      setMensaje({ tipo: 'danger', texto: 'Error al cambiar estado' });
+    } finally {
+      setTogglingActivo(false);
+      setTimeout(() => setMensaje(null), 3000);
+    }
+  };
+
   const handleDelete = async () => {
     if (!selected) return;
     try {
@@ -299,7 +323,12 @@ export function HospedajesSection() {
               onClick={() => handleSelect(item)}
               className="py-2"
             >
-              <div className="fw-bold small">{item.titulo}</div>
+              <div className="fw-bold small d-flex align-items-center gap-2">
+                {item.titulo}
+                {item.activo === false && (
+                  <Badge bg="secondary" style={{ fontSize: '0.65rem' }}>INACTIVO</Badge>
+                )}
+              </div>
               <small className="text-muted">
                 {item.tipoHospedaje} - {item.ubicacion}
               </small>
@@ -484,7 +513,7 @@ export function HospedajesSection() {
               }
             />
 
-            <div className="d-flex gap-2 mt-3">
+            <div className="d-flex gap-2 mt-3 flex-wrap">
               <Button
                 size="sm"
                 variant="primary"
@@ -493,6 +522,22 @@ export function HospedajesSection() {
               >
                 {saving ? <Spinner size="sm" /> : isNew ? 'Crear' : 'Guardar'}
               </Button>
+              {!isNew && selected && (
+                <Button
+                  size="sm"
+                  variant={selected.activo === false ? 'outline-success' : 'outline-warning'}
+                  onClick={handleToggleActivo}
+                  disabled={togglingActivo}
+                >
+                  {togglingActivo ? (
+                    <Spinner size="sm" />
+                  ) : selected.activo === false ? (
+                    'Activar'
+                  ) : (
+                    'Desactivar'
+                  )}
+                </Button>
+              )}
               {!isNew && selected && (
                 <Button
                   size="sm"

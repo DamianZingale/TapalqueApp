@@ -18,6 +18,7 @@ export interface Hospedaje {
     tipoIva?: 'INCLUIDO' | 'ADICIONAL' | 'NO_APLICA';
     emailNotificacion?: string;
     permiteMascotas?: boolean;
+    activo?: boolean;
 }
 
 export async function fetchHospedajes(): Promise<Hospedaje[]> {
@@ -68,6 +69,28 @@ export async function actualizarConfiguracionFacturacion(
         return true;
     } catch (error) {
         console.error("Error en actualizarConfiguracionFacturacion:", error);
+        return false;
+    }
+}
+
+export async function fetchHospedajesAdmin(): Promise<Hospedaje[]> {
+    try {
+        return await apiRequest<Hospedaje[]>('/hospedajes/admin', { method: 'GET' });
+    } catch (error) {
+        console.error("Error en fetchHospedajesAdmin:", error);
+        return [];
+    }
+}
+
+export async function toggleHospedajeActivo(id: number, activo: boolean): Promise<boolean> {
+    try {
+        await apiRequest(`/hospedajes/${id}/activo`, {
+            method: 'PATCH',
+            body: JSON.stringify({ activo }),
+        });
+        return true;
+    } catch (error) {
+        console.error("Error en toggleHospedajeActivo:", error);
         return false;
     }
 }

@@ -38,6 +38,11 @@ public class HospedajeController {
         return hospedajeService.obtenerTodos();
     }
 
+    @GetMapping("/admin")
+    public List<HospedajeDTO> listarHospedajesAdmin() {
+        return hospedajeService.obtenerTodosAdmin();
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<HospedajeDTO> obtenerPorId(@PathVariable Long id) {
         return hospedajeService.obtenerPorId(id);
@@ -106,6 +111,21 @@ public class HospedajeController {
                 return ResponseEntity.badRequest().build();
             }
 
+            return ResponseEntity.ok(updated);
+        } catch (jakarta.persistence.EntityNotFoundException ex) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PatchMapping("/{id}/activo")
+    public ResponseEntity<HospedajeDTO> toggleActivo(@PathVariable Long id,
+            @RequestBody java.util.Map<String, Boolean> body) {
+        try {
+            Boolean activo = body.get("activo");
+            if (activo == null) {
+                return ResponseEntity.badRequest().build();
+            }
+            HospedajeDTO updated = hospedajeService.toggleActivo(id, activo);
             return ResponseEntity.ok(updated);
         } catch (jakarta.persistence.EntityNotFoundException ex) {
             return ResponseEntity.notFound().build();

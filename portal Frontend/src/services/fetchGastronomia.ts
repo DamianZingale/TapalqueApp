@@ -47,6 +47,7 @@ export interface Restaurant {
   schedule?: string;
   imageUrl?: string;
   esHeladeria?: boolean;
+  activo?: boolean;
 }
 
 export async function fetchRestaurants(): Promise<Restaurant[]> {
@@ -109,6 +110,28 @@ export async function fetchRestaurantByIdAuth(id: string | number): Promise<Rest
   } catch (error) {
     console.error('Error en fetchRestaurantByIdAuth:', error);
     return null;
+  }
+}
+
+export async function fetchRestaurantsAdmin(): Promise<Restaurant[]> {
+  try {
+    return await apiRequest<Restaurant[]>('/gastronomia/admin/restaurants', { method: 'GET' });
+  } catch (error) {
+    console.error('Error en fetchRestaurantsAdmin:', error);
+    return [];
+  }
+}
+
+export async function toggleRestaurantActivo(id: number, activo: boolean): Promise<boolean> {
+  try {
+    await apiRequest(`/gastronomia/${id}/activo`, {
+      method: 'PATCH',
+      body: JSON.stringify({ activo }),
+    });
+    return true;
+  } catch (error) {
+    console.error('Error en toggleRestaurantActivo:', error);
+    return false;
   }
 }
 

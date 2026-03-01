@@ -35,9 +35,17 @@ public class LocalGastronomicoController {
     @GetMapping("/findAll")
     public ResponseEntity<List<RestaurantDTO>> findAllLocalController() {
     List<RestaurantDTO> restaurants = localGastronomicoService.getAllLocalGastronomicos();
-    return restaurants.isEmpty() 
-        ? ResponseEntity.noContent().build() 
+    return restaurants.isEmpty()
+        ? ResponseEntity.noContent().build()
         : ResponseEntity.ok(restaurants);
+    }
+
+    @GetMapping("/findAllAdmin")
+    public ResponseEntity<List<RestaurantDTO>> findAllAdminController() {
+        List<RestaurantDTO> restaurants = localGastronomicoService.getAllLocalGastronomicosAdmin();
+        return restaurants.isEmpty()
+            ? ResponseEntity.noContent().build()
+            : ResponseEntity.ok(restaurants);
     }
     
    @GetMapping("/findById/{id}")
@@ -104,6 +112,21 @@ public class LocalGastronomicoController {
                 return ResponseEntity.badRequest().build();
             }
 
+            return ResponseEntity.ok(updated);
+        } catch (EntityNotFoundException ex) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PatchMapping("/{id}/activo")
+    public ResponseEntity<RestaurantDTO> toggleActivo(@PathVariable Long id,
+            @RequestBody java.util.Map<String, Boolean> body) {
+        try {
+            Boolean activo = body.get("activo");
+            if (activo == null) {
+                return ResponseEntity.badRequest().build();
+            }
+            RestaurantDTO updated = localGastronomicoService.toggleActivo(id, activo);
             return ResponseEntity.ok(updated);
         } catch (EntityNotFoundException ex) {
             return ResponseEntity.notFound().build();

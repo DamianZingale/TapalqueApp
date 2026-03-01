@@ -60,6 +60,9 @@ public class Restaurant {
     @Column(name = "es_heladeria", nullable = false, columnDefinition = "boolean default false")
     private Boolean esHeladeria = false;
 
+    @Column(name = "activo", nullable = false, columnDefinition = "boolean default true")
+    private Boolean activo = true;
+
 
     @Min(value = -90, message = "La latitud debe estar entre -90 y 90")
     @Max(value = 90, message = "La latitud debe estar entre -90 y 90")
@@ -257,6 +260,14 @@ public class Restaurant {
 
     public void setEsHeladeria(Boolean esHeladeria) {
         this.esHeladeria = esHeladeria != null ? esHeladeria : false;
+    }
+
+    public Boolean getActivo() {
+        return activo != null ? activo : true;
+    }
+
+    public void setActivo(Boolean activo) {
+        this.activo = activo != null ? activo : true;
     }
 
 }

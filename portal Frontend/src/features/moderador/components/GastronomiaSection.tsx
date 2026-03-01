@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import {
   Alert,
+  Badge,
   Button,
   Col,
   Form,
@@ -26,6 +27,7 @@ interface Restaurant {
   esHeladeria?: boolean;
   imagenes?: { imagenUrl: string }[];
   userId?: number;
+  activo?: boolean;
 }
 
 interface Usuario {
@@ -49,6 +51,7 @@ const emptyItem: Partial<Restaurant> = {
   esHeladeria: false,
   imagenes: [],
   userId: undefined,
+  activo: true,
 };
 
 export function GastronomiaSection() {
@@ -59,6 +62,7 @@ export function GastronomiaSection() {
   const [isNew, setIsNew] = useState(false);
   const [formData, setFormData] = useState<Partial<Restaurant>>(emptyItem);
   const [saving, setSaving] = useState(false);
+  const [togglingActivo, setTogglingActivo] = useState(false);
   const [mensaje, setMensaje] = useState<{
     tipo: 'success' | 'danger';
     texto: string;
@@ -76,7 +80,7 @@ export function GastronomiaSection() {
   const cargarDatos = async () => {
     try {
       setLoading(true);
-      const res = await api.get('/gastronomia/restaurants');
+      const res = await api.get('/gastronomia/admin/restaurants');
       setItems(res.data || []);
     } catch (err) {
       console.error('Error:', err);
@@ -253,6 +257,27 @@ export function GastronomiaSection() {
     }
   };
 
+  const handleToggleActivo = async () => {
+    if (!selected) return;
+    setTogglingActivo(true);
+    try {
+      const nuevoEstado = !selected.activo;
+      await api.patch(`/gastronomia/${selected.id}/activo`, { activo: nuevoEstado });
+      setMensaje({
+        tipo: 'success',
+        texto: nuevoEstado ? 'Restaurante activado' : 'Restaurante desactivado',
+      });
+      setSelected((prev) => prev ? { ...prev, activo: nuevoEstado } : prev);
+      setFormData((prev) => ({ ...prev, activo: nuevoEstado }));
+      cargarDatos();
+    } catch {
+      setMensaje({ tipo: 'danger', texto: 'Error al cambiar estado' });
+    } finally {
+      setTogglingActivo(false);
+      setTimeout(() => setMensaje(null), 3000);
+    }
+  };
+
   const handleDelete = async () => {
     if (!selected) return;
     try {
@@ -300,7 +325,12 @@ export function GastronomiaSection() {
               onClick={() => handleSelect(item)}
               className="py-2"
             >
-              <div className="fw-bold small">{item.name}</div>
+              <div className="fw-bold small d-flex align-items-center gap-2">
+                {item.name}
+                {item.activo === false && (
+                  <Badge bg="secondary" style={{ fontSize: '0.65rem' }}>INACTIVO</Badge>
+                )}
+              </div>
               <small className="text-muted">
                 {item.address || item.categories}
               </small>
@@ -490,7 +520,7 @@ export function GastronomiaSection() {
                 setPendingFiles((prev) => prev.filter((_, i) => i !== index))
               }
             />
-            <div className="d-flex gap-2 mt-3">
+            <div className="d-flex gap-2 mt-3 flex-wrap">
               <Button
                 size="sm"
                 variant="primary"
@@ -499,6 +529,22 @@ export function GastronomiaSection() {
               >
                 {saving ? <Spinner size="sm" /> : isNew ? 'Crear' : 'Guardar'}
               </Button>
+              {!isNew && selected && (
+                <Button
+                  size="sm"
+                  variant={selected.activo === false ? 'outline-success' : 'outline-warning'}
+                  onClick={handleToggleActivo}
+                  disabled={togglingActivo}
+                >
+                  {togglingActivo ? (
+                    <Spinner size="sm" />
+                  ) : selected.activo === false ? (
+                    'Activar'
+                  ) : (
+                    'Desactivar'
+                  )}
+                </Button>
+              )}
               {!isNew && selected && (
                 <Button
                   size="sm"

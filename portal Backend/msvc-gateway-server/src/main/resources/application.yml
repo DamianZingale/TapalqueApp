@@ -130,6 +130,16 @@ spring:
           filters:
             - RewritePath=/api/hospedajes, /hospedajes
 
+        # Admin: lista todos los hospedajes (activos e inactivos) - ANTES del detail para que /admin no matchee como {id}
+        - id: msvc-hosteleria-list-admin
+          uri: lb://msvc-hosteleria
+          predicates:
+            - Path=/api/hospedajes/admin
+            - Method=GET
+          filters:
+            - RewritePath=/api/hospedajes/admin, /hospedajes/admin
+            - JwtAuth
+
         - id: msvc-hosteleria-detail-public
           uri: lb://msvc-hosteleria
           predicates:
@@ -165,7 +175,7 @@ spring:
             - RewritePath=/api/habitaciones/hospedajes/(?<id>[0-9]+), /habitaciones/hospedajes/${id}
 
         # Gastronomía
-        #findAll
+        #findAll (público - solo activos)
         - id: msvc-gastronomia-list-public
           uri: lb://msvc-gastronomia
           predicates:
@@ -173,6 +183,16 @@ spring:
             - Method=GET
           filters:
             - RewritePath=/api/gastronomia/restaurants, /restaurante/findAll
+
+        # Admin: lista todos los restaurantes (activos e inactivos)
+        - id: msvc-gastronomia-list-admin
+          uri: lb://msvc-gastronomia
+          predicates:
+            - Path=/api/gastronomia/admin/restaurants
+            - Method=GET
+          filters:
+            - RewritePath=/api/gastronomia/admin/restaurants, /restaurante/findAllAdmin
+            - JwtAuth
           #findById
         - id: msvc-gastronomia-detail-public
           uri: lb://msvc-gastronomia
@@ -437,6 +457,16 @@ spring:
             - RewritePath=/api/hospedajes/(?<id>[0-9]+), /hospedajes/${id}
             - JwtAuth
 
+        # Toggle activo/inactivo hospedaje (moderador)
+        - id: msvc-hosteleria-toggle-activo
+          uri: lb://msvc-hosteleria
+          predicates:
+            - Path=/api/hospedajes/{id}/activo
+            - Method=PATCH
+          filters:
+            - RewritePath=/api/hospedajes/(?<id>[0-9]+)/activo, /hospedajes/${id}/activo
+            - JwtAuth
+
         # Habitación - Subir imagen
         - id: msvc-hosteleria-habitacion-imagen-upload
           uri: lb://msvc-hosteleria
@@ -516,6 +546,16 @@ spring:
             - Method=PATCH
           filters:
             - RewritePath=/api/gastronomia/restaurants/(?<id>[0-9]+), /restaurante/updateDeliveryPrice/${id}
+            - JwtAuth
+
+        # Toggle activo/inactivo restaurante (moderador)
+        - id: msvc-gastronomia-toggle-activo
+          uri: lb://msvc-gastronomia
+          predicates:
+            - Path=/api/gastronomia/{id}/activo
+            - Method=PATCH
+          filters:
+            - RewritePath=/api/gastronomia/(?<id>[0-9]+)/activo, /restaurante/${id}/activo
             - JwtAuth
 
         - id: msvc-gastronomia-delete

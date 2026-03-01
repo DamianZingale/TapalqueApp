@@ -48,12 +48,17 @@ public class RestaurantService implements I_RestaurantService {
     }
 }
     @Cacheable(value = "restaurantes")
-    @Override // Implementación del método para obtener todos los locales gastronómicos
+    @Override
     public List<RestaurantDTO> getAllLocalGastronomicos() {
         return localGastronomicoRepository.selectAllRestaurant();
-        
     }
-   @CacheEvict(value = "restaurantes", allEntries = true)
+
+    @Cacheable(value = "restaurantesAdmin")
+    @Override
+    public List<RestaurantDTO> getAllLocalGastronomicosAdmin() {
+        return localGastronomicoRepository.selectAllRestaurantAdmin();
+    }
+   @Caching(evict = {@CacheEvict(value = "restaurantes", allEntries = true), @CacheEvict(value = "restaurantesAdmin", allEntries = true)})
    @Transactional
    @Override //implementacion: busca las categorias en BD y setea los id_category para guardar. Mismo con phone y schedule
 public RestaurantDTO addRestaurant(RestaurantDTO dto) {
@@ -100,7 +105,7 @@ public RestaurantDTO addRestaurant(RestaurantDTO dto) {
     }
 }
 
-    @Caching(evict = {@CacheEvict(value = "restaurantes", allEntries = true), @CacheEvict(value = "restaurante", allEntries = true)})
+    @Caching(evict = {@CacheEvict(value = "restaurantes", allEntries = true), @CacheEvict(value = "restaurante", allEntries = true), @CacheEvict(value = "restaurantesAdmin", allEntries = true)})
     @Transactional
     @Override
     public void updateRestaurant(Restaurant restaurant) {
@@ -181,7 +186,7 @@ public RestaurantDTO addRestaurant(RestaurantDTO dto) {
         }
     }
 
-    @Caching(evict = {@CacheEvict(value = "restaurantes", allEntries = true), @CacheEvict(value = "restaurante", allEntries = true)})
+    @Caching(evict = {@CacheEvict(value = "restaurantes", allEntries = true), @CacheEvict(value = "restaurante", allEntries = true), @CacheEvict(value = "restaurantesAdmin", allEntries = true)})
     @Transactional
     @Override
     public RestaurantDTO updateDeliveryPrice(Long id, Double deliveryPrice) {
@@ -192,7 +197,7 @@ public RestaurantDTO addRestaurant(RestaurantDTO dto) {
         return new RestaurantDTO(existing);
     }
 
-    @Caching(evict = {@CacheEvict(value = "restaurantes", allEntries = true), @CacheEvict(value = "restaurante", allEntries = true)})
+    @Caching(evict = {@CacheEvict(value = "restaurantes", allEntries = true), @CacheEvict(value = "restaurante", allEntries = true), @CacheEvict(value = "restaurantesAdmin", allEntries = true)})
     @Transactional
     @Override
     public RestaurantDTO updateLastCloseDate(Long id, java.time.LocalDateTime lastCloseDate) {
@@ -203,7 +208,7 @@ public RestaurantDTO addRestaurant(RestaurantDTO dto) {
         return new RestaurantDTO(existing);
     }
 
-    @Caching(evict = {@CacheEvict(value = "restaurantes", allEntries = true), @CacheEvict(value = "restaurante", allEntries = true)})
+    @Caching(evict = {@CacheEvict(value = "restaurantes", allEntries = true), @CacheEvict(value = "restaurante", allEntries = true), @CacheEvict(value = "restaurantesAdmin", allEntries = true)})
     @Transactional
     @Override
     public RestaurantDTO updateEstimatedWaitTime(Long id, Integer estimatedWaitTime) {
@@ -215,7 +220,18 @@ public RestaurantDTO addRestaurant(RestaurantDTO dto) {
     }
 
 
-    @Caching(evict = {@CacheEvict(value = "restaurantes", allEntries = true), @CacheEvict(value = "restaurante", allEntries = true)})
+    @Caching(evict = {@CacheEvict(value = "restaurantes", allEntries = true), @CacheEvict(value = "restaurante", allEntries = true), @CacheEvict(value = "restaurantesAdmin", allEntries = true)})
+    @Transactional
+    @Override
+    public RestaurantDTO toggleActivo(Long id, Boolean activo) {
+        Restaurant existing = localGastronomicoRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("No existe el restaurant con id " + id));
+        existing.setActivo(activo);
+        localGastronomicoRepository.save(existing);
+        return new RestaurantDTO(existing);
+    }
+
+    @Caching(evict = {@CacheEvict(value = "restaurantes", allEntries = true), @CacheEvict(value = "restaurante", allEntries = true), @CacheEvict(value = "restaurantesAdmin", allEntries = true)})
     @Transactional
     @Override
     public void deleteRestaurant(Long id) {

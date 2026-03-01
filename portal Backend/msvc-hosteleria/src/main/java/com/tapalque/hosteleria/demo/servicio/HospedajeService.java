@@ -39,6 +39,13 @@ public class HospedajeService {
 
     @Cacheable(value = "hospedajes")
     public List<HospedajeDTO> obtenerTodos() {
+        return hospedajeRepository.findAllByActivoTrue().stream()
+                .map(HospedajeDTO::new)
+                .collect(Collectors.toList());
+    }
+
+    @Cacheable(value = "hospedajesAdmin")
+    public List<HospedajeDTO> obtenerTodosAdmin() {
         return hospedajeRepository.findAll().stream()
                 .map(HospedajeDTO::new)
                 .collect(Collectors.toList());
@@ -57,7 +64,7 @@ public class HospedajeService {
         }
     }
 
-    @CacheEvict(value = "hospedajes", allEntries = true)
+    @Caching(evict = {@CacheEvict(value = "hospedajes", allEntries = true), @CacheEvict(value = "hospedajesAdmin", allEntries = true)})
     @Transactional
     public HospedajeDTO guardar(HospedajeRequestDTO dto) {
         Hospedaje hospedaje = mapToEntity(dto);
@@ -65,7 +72,7 @@ public class HospedajeService {
         return new HospedajeDTO(hospedajeRepository.save(hospedaje));
     }
 
-    @CacheEvict(value = "hospedajes", allEntries = true)
+    @Caching(evict = {@CacheEvict(value = "hospedajes", allEntries = true), @CacheEvict(value = "hospedajesAdmin", allEntries = true)})
     @Transactional
     public ResponseEntity<Void> eliminarPorId(Long id) {
         Optional<Hospedaje> existente = hospedajeRepository.findById(id);
@@ -90,7 +97,7 @@ public class HospedajeService {
         return ResponseEntity.noContent().build(); // 204
     }
 
-    @CacheEvict(value = "hospedajes", allEntries = true)
+    @Caching(evict = {@CacheEvict(value = "hospedajes", allEntries = true), @CacheEvict(value = "hospedajesAdmin", allEntries = true)})
     @Transactional
     public ResponseEntity<HospedajeDTO> actualizarHospedaje(Long id, HospedajeRequestDTO dto)
     {
@@ -124,7 +131,7 @@ public class HospedajeService {
         return ResponseEntity.ok(new HospedajeDTO(actualizado));
     }
 
-    @CacheEvict(value = "hospedajes", allEntries = true)
+    @Caching(evict = {@CacheEvict(value = "hospedajes", allEntries = true), @CacheEvict(value = "hospedajesAdmin", allEntries = true)})
     @Transactional
     public HospedajeDTO updateLastCloseDate(Long id, java.time.LocalDateTime lastCloseDate) {
         Hospedaje hospedaje = hospedajeRepository.findById(id)
@@ -134,7 +141,7 @@ public class HospedajeService {
         return new HospedajeDTO(hospedaje);
     }
 
-    @CacheEvict(value = "hospedajes", allEntries = true)
+    @Caching(evict = {@CacheEvict(value = "hospedajes", allEntries = true), @CacheEvict(value = "hospedajesAdmin", allEntries = true)})
     @Transactional
     public HospedajeDTO updateFechaLimiteReservas(Long id, java.time.LocalDate fechaLimiteReservas) {
         Hospedaje hospedaje = hospedajeRepository.findById(id)
@@ -144,7 +151,7 @@ public class HospedajeService {
         return new HospedajeDTO(hospedaje);
     }
 
-    @CacheEvict(value = "hospedajes", allEntries = true)
+    @Caching(evict = {@CacheEvict(value = "hospedajes", allEntries = true), @CacheEvict(value = "hospedajesAdmin", allEntries = true)})
     @Transactional
     public HospedajeDTO updateConfiguracionFacturacion(Long id, Boolean permiteFacturacion, String tipoIva) {
         Hospedaje hospedaje = hospedajeRepository.findById(id)
@@ -169,12 +176,22 @@ public class HospedajeService {
     }
 
     // Método para mapear de DTORequest a Entidad
-    @CacheEvict(value = "hospedajes", allEntries = true)
+    @Caching(evict = {@CacheEvict(value = "hospedajes", allEntries = true), @CacheEvict(value = "hospedajesAdmin", allEntries = true)})
     @Transactional
     public HospedajeDTO updateEmailNotificacion(Long id, String email) {
         Hospedaje hospedaje = hospedajeRepository.findById(id)
                 .orElseThrow(() -> new jakarta.persistence.EntityNotFoundException("No existe el hospedaje con id " + id));
         hospedaje.setEmailNotificacion(email);
+        hospedajeRepository.save(hospedaje);
+        return new HospedajeDTO(hospedaje);
+    }
+
+    @Caching(evict = {@CacheEvict(value = "hospedajes", allEntries = true), @CacheEvict(value = "hospedajesAdmin", allEntries = true)})
+    @Transactional
+    public HospedajeDTO toggleActivo(Long id, Boolean activo) {
+        Hospedaje hospedaje = hospedajeRepository.findById(id)
+                .orElseThrow(() -> new jakarta.persistence.EntityNotFoundException("No existe el hospedaje con id " + id));
+        hospedaje.setActivo(activo);
         hospedajeRepository.save(hospedaje);
         return new HospedajeDTO(hospedaje);
     }
