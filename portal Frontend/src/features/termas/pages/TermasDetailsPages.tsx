@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { fetchTermaById, Terma } from '../../../services/fetchTermas';
 import { Carrusel } from '../../../shared/components/Carrusel';
 import { WhatsAppButton } from '../../../shared/components/WhatsAppButton';
-import { FaFacebook, FaInstagram, FaGlobe, FaMapMarkerAlt } from 'react-icons/fa';
+import { FaFacebook, FaInstagram, FaGlobe, FaMapMarkerAlt, FaTicketAlt } from 'react-icons/fa';
 
 export default function TermasDetailPage({
   idDefault,
@@ -83,6 +83,16 @@ export default function TermasDetailPage({
         >
           <FaGlobe size={32} color="#4CAF50" />
           <span style={{ color: "#4CAF50" }}>Ver web oficial</span>
+        </a>
+        <a
+          href="https://termastapalque.damfasys.com/reservasWeb/web/reservas.html?_gl=1*11gehsl*_gcl_au*MTM2MzY5ODc1MS4xNzY4NDk2OTE5"
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Conseguir entradas"
+          className="d-flex align-items-center gap-2 text-decoration-none"
+        >
+          <FaTicketAlt size={32} color="#FF9800" />
+          <span style={{ color: "#FF9800" }}>Conseguir entradas</span>
         </a>
       </div>
 
